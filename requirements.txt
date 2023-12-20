@@ -1,0 +1,6 @@
+pip install pandas
+pip install selenium
+pip install webdriver_manager
+pip install httplib2
+pip install scipy
+pip install sympy
