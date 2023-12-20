@@ -148,7 +148,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
         
         # first loop thru all regular season games, then thru subset of games such as home/away
         # or just append to subset array predefined such as all_home_pts = []
-        next_game_date_obj = datetime.today() # need to see if back to back games 1 day apart
+        next_game_date_obj = todays_games_date_obj # need to see if back to back games 1 day apart
 
         # do 1 loop for reg season and 1 loop for post season
         # default full season
@@ -330,9 +330,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     # already defined or passed todays_games_date_obj
                     # todays_games_date_obj = datetime.strptime(todays_games_date, '%m/%d/%y')
                     # print("todays_games_date_obj: " + str(todays_games_date_obj))
-                    current_year = datetime.today().year
-                    current_mth = datetime.today().month
-                    if int(current_mth) in range(10,13):
+                    current_year = todays_games_date_obj.year
+                    current_mth = todays_games_date_obj.month
+                    if int(current_mth) > 9:
                         current_year += 1
                     if season_year == current_year: # current year
                         # change to get from team schedule page
@@ -4231,11 +4231,19 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[]):
 # we need game teams to know opponents
 # so we can get conditional stats
 # and only read game page once
-def generate_players_outcomes(settings={}, players_names=[], game_teams=[], teams_current_rosters={}, todays_games_date_obj=datetime.today()):
-
-    print('\n===Generate Players Outcomes===\n')
-    print('players_names: ' + str(players_names))
-    print('teams_current_rosters: ' + str(teams_current_rosters))
+# all players props includes all combos
+def generate_all_players_props(settings={}, players_names=[], game_teams=[], teams_current_rosters={}, todays_games_date_obj=datetime.today()):
+    print('\n===Generate All Players Props===\n')
+    print('input players_names: ' + str(players_names))
+    print('input game_teams: ' + str(game_teams))
+    print('input teams_current_rosters: ' + str(teams_current_rosters))
+    
+    # settings depend on context and type of test undergoing
+    # since this is the main fcn called from the main file
+    # we prefer to input user variables from main file bc it is short and easy to use and will eventually be UI page
+    print('settings: find/read new data, read certain seasons and time periods, irregular play time and other vars')
+    print('input: default = all players in upcoming games today')
+    print('output: all_players_props = [{{strategy x:{{player:p1,...}},...}},...]')
 
     # init output
     players_outcomes = {}
@@ -4249,7 +4257,7 @@ def generate_players_outcomes(settings={}, players_names=[], game_teams=[], team
     # get info about current todays date
     todays_games_date_obj = datetime.today() # by default assume todays game is actually today and we are not analyzing in advance
 
-    current_year_str = determiner.determine_current_season_year()
+    current_year_str = determiner.determine_current_season_year(todays_games_date_obj)
     todays_date = todays_games_date_obj.strftime('%m-%d-%y')
 
     season_year = current_year_str #determiner.determine_current_season_year() # based on mth, changed to default or current season year, which is yr season ends

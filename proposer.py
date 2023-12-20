@@ -71,6 +71,6 @@ players_names = ['chris paul'] # use for testing
 
 # if we get rosters instead of player names then read all players on rosters
 # if we get no player names or rosters then read all games today
-players_outcomes = generator.generate_players_outcomes(settings, players_names, game_teams, teams_current_rosters)
+all_players_props = generator.generate_all_players_props(settings, players_names, game_teams, teams_current_rosters)
 
-#writer.display_players_outcomes(players_outcomes)
+#writer.display_all_players_props(all_players_props)

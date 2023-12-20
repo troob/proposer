@@ -1388,10 +1388,10 @@ def determine_player_game_location(player, game_teams, player_team):
     return player_current_location
 
 # use current month to tell season yr
-def determine_current_season_year():
+def determine_current_season_year(todays_date_obj=datetime.today()):
     cur_season_yr = 0
-    cur_month = datetime.today().month
-    cur_yr = datetime.today().year
+    cur_month = todays_date_obj.month
+    cur_yr = todays_date_obj.year
     if cur_month < 10:
         cur_season_yr = cur_yr
     else:

@@ -1251,18 +1251,20 @@ def read_all_players_positions(player_espn_ids_dict, season_year=2024):
 # return team abbrev lowercase bc used as key
 # if we are reading team from internet then we know read new teams is set true?
 # yes if we initially read all years, not just input seasons yrs
-def read_team_from_internet(player_name, player_id, read_new_teams=False):
+def read_team_from_internet(player_name, player_id, read_new_teams=False, cur_yr=''):
 	print("\n===Read Team from Internet: " + player_name.title() + "===\n")
 
 	team = ''
 
 	# get team from internet
 	# this method only works for current team bc format of page
-	season_year = datetime.today().year
+	if cur_yr == '':
+		cur_yr = determiner.determine_current_season_year()
+		#season_year = datetime.today().year
 
 	#try:
 		
-	site = 'https://www.espn.com/nba/player/gamelog/_/id/' + player_id + '/type/nba/year/' + str(season_year)
+	site = 'https://www.espn.com/nba/player/gamelog/_/id/' + player_id + '/type/nba/year/' + cur_yr
 
 	soup = read_website(site, timeout=10, max_retries=3)
 
@@ -1315,13 +1317,13 @@ def read_team_from_internet(player_name, player_id, read_new_teams=False):
 # the difference is read new teams will always read new teams even if team already saved locally and unchanged
 # user will set input var after trades or aquisitions
 # later program will get news and decide off that instead of requiring user input
-def read_player_team(player_name, player_id, existing_player_teams_dict={}, read_new_teams=False, season_year=''):
+def read_player_team(player_name, player_id, existing_player_teams_dict={}, read_new_teams=False, cur_yr=''):
 	print("\n===Read Player Team: " + player_name.title() + "===\n")
 	team = '' # team abbrev lowercase bc used as key
 
 	# read_new_teams can be determined by date bc date of trade deadline, start of season and check if any other trade deadlines
-	if season_year == '':
-		season_year = determiner.determine_current_season_year()
+	if cur_yr == '':
+		cur_yr = determiner.determine_current_season_year()
 
 	# if not given exisiting teams see if local file saved
 	if len(existing_player_teams_dict.keys()) == 0:
@@ -1349,12 +1351,12 @@ def read_player_team(player_name, player_id, existing_player_teams_dict={}, read
 	# if read new teams, then read from internet for all
 	# if not read new teams, still read teams from internet for players not saved
 	if read_new_teams:
-		team = read_team_from_internet(player_name, player_id, read_new_teams)
+		team = read_team_from_internet(player_name, player_id, read_new_teams, cur_yr)
 	else:
 		if player_name in existing_player_teams_dict.keys():
-			team = list(existing_player_teams_dict[player_name][season_year].keys())[-1]
+			team = list(existing_player_teams_dict[player_name][cur_yr].keys())[-1]
 		else:
-			team = read_team_from_internet(player_name, player_id)
+			team = read_team_from_internet(player_name, player_id, read_new_teams, cur_yr)
 
 	
 	print("final team: " + team)
@@ -1484,7 +1486,7 @@ def read_all_players_teams(player_espn_ids_dict, read_new_teams=False):
 # for all given players, read their teams
 # players_teams_dict = {player:team, ...}
 # read current team from player page
-def read_all_players_current_teams(player_espn_ids_dict, read_new_teams=True):
+def read_all_players_current_teams(player_espn_ids_dict, read_new_teams=True, cur_yr='', todays_date=datetime.today().strftime('%m/%d/%y') ):
 	print("\n===Read All Players Current Teams===\n")
 	players_teams_dict = {}
 
@@ -1497,7 +1499,7 @@ def read_all_players_current_teams(player_espn_ids_dict, read_new_teams=True):
 		data_type = 'player teams'
 		# if we are creating new file get todays date to format filename 
 		# player teams - m/d/y.csv
-		input_type = datetime.today().strftime('%m/%d/%y') 
+		input_type = todays_date
 		player_teams = extract_data(data_type, header=True)
 		
 		for row in player_teams:
@@ -1509,7 +1511,7 @@ def read_all_players_current_teams(player_espn_ids_dict, read_new_teams=True):
 		#print('existing_player_teams_dict: ' + str(existing_player_teams_dict))
 
 	for name, id in player_espn_ids_dict.items():
-		team = read_player_team(name, id, existing_player_teams_dict, read_new_teams)
+		team = read_player_team(name, id, existing_player_teams_dict, read_new_teams, cur_yr)
 		players_teams_dict[name] = team
 
 	# if read new teams for all players then we can overwrite the file completely removing all old teams bc we cannot assume any player is on the same team as they were before
