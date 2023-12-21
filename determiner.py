@@ -415,36 +415,31 @@ def determine_prev_game_date(player_game_log, season_year):
 # bc default should assume current season? no bc if we are looking them up they are probably in current season and it is more likely they did not play past season
 # player_teams = {year:team:gp}
 def determine_played_season(player_url, player_name='', season_year=0, all_game_logs={}, player_game_logs={}, player_teams={}):
-    print('\n===Determine if player ' + player_name.title() + ' played season ' + str(season_year) + '===\n')
+    #print('\n===Determine if player ' + player_name.title() + ' played season ' + str(season_year) + '===\n')
     played_season = False
 
-    print('player_teams: ' + str(player_teams))
-    print('player_game_logs: ' + str(player_game_logs))
+    #print('player_teams: ' + str(player_teams))
+    #print('player_game_logs: ' + str(player_game_logs))
 
     if len(player_teams.keys()) > 0:
-        print('found player teams')
-        print('season year: ' + str(season_year))
+        #print('found player teams')
+        #print('season year: ' + str(season_year))
         if str(season_year) in player_teams.keys():
-            print('player season team found in player TEAMS')
+            #print('player season team found in player TEAMS')
             played_season = True
     else: # player teams not given
         # all game logs too big as one var so consider replacing next version with player game logs
         if player_name in all_game_logs.keys() and str(season_year) in all_game_logs[player_name].keys():
-            print('player season game log found in ALL game logs')
+            #print('player season game log found in ALL game logs')
             played_season = True
 
         # if using separate player logs, 1 per player for all seasons they played
         elif str(season_year) in player_game_logs.keys():
-            print('player season game log found in PLAYER game logs')
+            #print('player season game log found in PLAYER game logs')
             played_season = True
 
         else:
-            print('player season game log not saved')
-
-            # response = requests.get(player_url)
-            # if response.status_code == 200:
-            #     played_season = True
-            #     print('played season')
+            #print('player season game log not saved')
 
             try:
 
@@ -460,35 +455,7 @@ def determine_played_season(player_url, player_name='', season_year=0, all_game_
                             played_season = True
                             break
 
-                # h = httplib2.Http()
-                # resp = h.request(player_url, 'HEAD')
-                # status_code = resp[0]['status']
                 
-                # if int(status_code) < 400:
-                #     # some websites will simply not have the webpage but espn still has the webpage for all years prior to playing with blank game logs
-                #     #if len(game_log) > 0:
-
-                #     try:
-
-                #         html_results = pd.read_html(player_url)
-                #         #print("html_results: " + str(html_results))
-
-                #         len_html_results = len(html_results) # each element is a dataframe/table so we loop thru each table
-
-                #         for order in range(len_html_results):
-                #             #print("order: " + str(order))
-
-                #             if len(html_results[order].columns.tolist()) == 17:
-
-                #                 played_season = True
-                #                 break
-
-                #     except Exception as e:
-                #         print('page exists but no tables: ', e)
-                    
-                # else:
-                #     print('\nstatus_code: ' + str(status_code))
-
             except Exception as e:
                 print('Page exists but no tables: ', e)
                 #print('Exception could not get url: ' + e)
@@ -517,19 +484,6 @@ def determine_regular_season_games(player_game_log):
         
     else:
         print('Warning: Type key not in game log when determining season part games!')
-
-    #reg_season_games_df = pd.DataFrame()
-    # reg_season_games = []
-
-    # for game_idx, row in player_game_log.iterrows():
-    #     if re.search('\\*',player_game_log.loc[game_idx, 'OPP']): # all star stats not included in regular season stats
-    #         #print("game excluded")
-    #         continue
-        
-    #     if player_game_log.loc[game_idx, 'Type'] == 'Regular':
-    #         reg_season_games.append(row)
-
-    # reg_season_games_df = pd.concat(reg_season_games)
 
     #print("final reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
     return reg_season_games_df
@@ -1387,18 +1341,7 @@ def determine_player_game_location(player, game_teams, player_team):
     #print('player_current_location: ' + str(player_current_location))
     return player_current_location
 
-# use current month to tell season yr
-def determine_current_season_year(todays_date_obj=datetime.today()):
-    cur_season_yr = 0
-    cur_month = todays_date_obj.month
-    cur_yr = todays_date_obj.year
-    if cur_month < 10:
-        cur_season_yr = cur_yr
-    else:
-        cur_season_yr = cur_yr + 1
 
-    # prefer string bc used as key in dict
-    return str(cur_season_yr)
 
 def determine_game_year(game_mth, season_year):
     game_year = season_year
@@ -1633,11 +1576,11 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
     # else: # need to get current team from internet
     #     cur_team = reader.read_player_current_team()
 
-    if cur_team == '':
-        print('Warning: Player cur team blank! ' + player.title())
-        print('player_teams: ' + str(player_teams))
-        print('cur_yr: ' + str(cur_yr))
-        print('rosters: ' + str(rosters))
+    # if cur_team == '':
+    #     print('\n===Warning: Player cur team blank! ' + player.title() + '===')
+    #     print('player_teams: ' + str(player_teams))
+    #     print('cur_yr: ' + str(cur_yr))
+    #     print('rosters: ' + str(rosters))
 
     #print('cur_team: ' + cur_team)
     return cur_team
@@ -1647,14 +1590,15 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
 # game_teams = [('mil','mia'),...]
 # player_teams = {'2018': {'mia': 69}, '2019...
 # player_teams = {year:{team:gp,...},...
-def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}):
+def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
     #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
     #print('player_teams: ' + str(player_teams))
     #print('game_teams: ' + str(game_teams))
     
     opp_team = ''
 
-    player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
+    if player_team == '':
+        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
 
     # look for player team in games
     # game = ('mil','mia')
@@ -2055,3 +1999,19 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
             break
 
     return highest
+
+
+
+
+# use current month to tell season yr
+def determine_current_season_year(todays_date_obj=datetime.today()):
+    cur_season_yr = 0
+    cur_month = todays_date_obj.month
+    cur_yr = todays_date_obj.year
+    if cur_month < 10:
+        cur_season_yr = cur_yr
+    else:
+        cur_season_yr = cur_yr + 1
+
+    # prefer string bc used as key in dict
+    return str(cur_season_yr)

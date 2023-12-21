@@ -19,7 +19,7 @@ import pandas as pd # write spreadsheets from lists to dataframes
 from datetime import datetime # add date to filename
 
 def display_game_data(all_valid_streaks_list):
-    print("\n===Game Data===\n")
+    #print("\n===Game Data===\n")
     # all_player_pre_dicts = [{'prediction':val,'overall record':[],..},{},..]
     # get headers
     # header_row = ['Prediction']
@@ -63,7 +63,7 @@ def display_game_data(all_valid_streaks_list):
 
     #print(tabulate(game_data))
 
-    print("Export")
+    #print("Export")
     print(header_string)
     for game_data in game_data_strings:
         print(game_data)
@@ -71,7 +71,7 @@ def display_game_data(all_valid_streaks_list):
 
 
 def display_stat_plot(all_valid_streaks_list, all_players_stats_dicts, stat_of_interest, player_of_interest, season_year=2024):
-    print('\n===Plot Stats===\n')
+    #print('\n===Plot Stats===\n')
     #Three lines to make our compiler able to draw:
     import matplotlib.pyplot as plt
 
@@ -84,27 +84,27 @@ def display_stat_plot(all_valid_streaks_list, all_players_stats_dicts, stat_of_i
         
         if re.search(stat_of_interest, valid_streak['prediction'].lower()) and re.search(player_of_interest, valid_streak['prediction'].lower()):
 
-            print('valid_streak: ' + str(valid_streak))
+            #print('valid_streak: ' + str(valid_streak))
             player_name = ' '.join(valid_streak['prediction'].split()[:-2]).lower() # anthony davis 12+ pts
-            print("player_name from prediction: " + player_name)
+            #print("player_name from prediction: " + player_name)
 
             stat_name = valid_streak['prediction'].split()[-1].lower()
             condition = 'all'
             #season_year = 2023
             stat_vals_dict = all_players_stats_dicts[player_name][season_year][stat_name][condition]
-            print('stat_vals_dict: ' + str(stat_vals_dict))
+            #print('stat_vals_dict: ' + str(stat_vals_dict))
 
             game_nums = list(stat_vals_dict.keys())
             #print('game_nums: ' + str(game_nums))
             stat_vals = list(stat_vals_dict.values())
             stat_vals.reverse()
-            print('stat_vals: ' + str(stat_vals))
+            #print('stat_vals: ' + str(stat_vals))
 
             stat_line = int(valid_streak['prediction'].split()[-2][:-1])
-            print('stat_line: ' + str(stat_line))
+            #print('stat_line: ' + str(stat_line))
 
             plot_stat_line = [stat_line] * len(game_nums)
-            print('plot_stat_line: ' + str(plot_stat_line))
+            #print('plot_stat_line: ' + str(plot_stat_line))
 
             # x = np.array(game_nums)
             # y = np.array(stat_vals)
@@ -183,20 +183,20 @@ def display_stat_plot(all_valid_streaks_list, all_players_stats_dicts, stat_of_i
 
 
 def display_all_players_records_dicts(all_players_records_dicts, all_player_season_logs_dict):
-    print('\n===Display All Players Records Dicts===\n')
+    #print('\n===Display All Players Records Dicts===\n')
 
     # player_stat_dict = { year: .. }
     for player_name, player_stat_dict in all_players_stats_dicts.items():
     #for player_idx in range(len(all_player_game_logs)):
 
-        print('\n===' + player_name.title() + '===\n')
+        #print('\n===' + player_name.title() + '===\n')
 
         #season_year = 2023
 
         # player_season_stat_dict = { stat name: .. }
         for season_year, player_season_stat_dict in player_stat_dict.items():
 
-            print("\n===Year " + str(season_year) + "===\n")
+            #print("\n===Year " + str(season_year) + "===\n")
             #player_game_log = player_season_logs[0] #start with current season. all_player_game_logs[player_idx]
             #player_name = player_names[player_idx] # player names must be aligned with player game logs
 
@@ -224,7 +224,7 @@ def display_all_players_records_dicts(all_players_records_dicts, all_player_seas
 
                 # at this point we have added all keys to dict eg all_pts_dict = {'1of2':[],'2of2':[]}
                 #print("all_pts_dict: " + str(all_pts_dict))
-                print("all_pts_dicts: " + str(all_pts_dicts))
+                #print("all_pts_dicts: " + str(all_pts_dicts))
                 # all_pts_dicts = {'all':{1:20}}
                 # key=condition, val={idx:stat}
 
@@ -382,7 +382,7 @@ def display_all_players_records_dicts(all_players_records_dicts, all_player_seas
 
                     #prob_row = [over_line, probability_over_line]
 
-                    print("\n===" + player_name.title() + " Probabilities===\n")
+                    #print("\n===" + player_name.title() + " Probabilities===\n")
 
                     game_num_table = [game_num_row, game_day_row, game_date_row]
                     print(tabulate(game_num_table))
@@ -412,8 +412,7 @@ def display_all_players_records_dicts(all_players_records_dicts, all_player_seas
 
 # players_outcomes = {player: stat name: outcome dict}
 def display_players_outcomes(players_outcomes):
-
-    print("\n===Player Outcomes===\n")
+    #print("\n===Player Outcomes===\n")
     #print('players_outcomes: ' + str(players_outcomes))
 
     # sort so we see all instances of teammates out grouped together instead of game order bc we are interested to see by type of condition not by game at this point
@@ -460,7 +459,7 @@ def display_players_outcomes(players_outcomes):
 
     #print(tabulate(game_data))
 
-    print("Export")
+    #print("Export")
     print(header_string)
     for game_data in game_data_strings:
         print(game_data)
@@ -471,8 +470,7 @@ def display_players_outcomes(players_outcomes):
 # we have saved lessons from experience and logic that must be accounted for when deciding so display prominently and constantly reference
 # lessons = [outcome, lesson]
 def display_lessons(lessons):
-
-    print("\n===Display Lessons===\n")
+    #print("\n===Display Lessons===\n")
 
     header_string = 'Outcome;Lesson'
 
@@ -486,15 +484,14 @@ def display_lessons(lessons):
     for lesson in lesson_strings:
         print(lesson)
 
-    print("\n===End Lessons===\n")
+    #print("\n===End Lessons===\n")
 
 
 # data = [[name,id],..]
 # for espn id we only want to append new ids bc they do not change
 # write_param = create (error if exists), overwrite, or append
 def write_data_to_file(data, filepath, write_param, extension='csv'):
-
-    print('\n===Write Data to File: ' + filepath + '===\n')
+    #print('\n===Write Data to File: ' + filepath + '===\n')
 
     if extension == 'csv':
 
@@ -511,7 +508,7 @@ def write_data_to_file(data, filepath, write_param, extension='csv'):
         print('Warning: Unknown file extension! ')
     
 def write_json_to_file(dict, filepath, write_param):
-    print('\n===Write JSON to File: ' + filepath + '===\n')
+    #print('\n===Write JSON to File: ' + filepath + '===\n')
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?
     with open(filepath, write_param) as outfile:
@@ -528,190 +525,21 @@ def write_json_to_file(dict, filepath, write_param):
 # desired format 1/1,..
 # remove brackets and quotes
 def convert_list_to_string(init_list):
-    print('init_list: ' + str(init_list))
+    #print('init_list: ' + str(init_list))
 
     final_string = re.sub('[\\[\\]\']','',str(init_list))
 
-    print('final_string: ' + final_string)
+    #print('final_string: ' + final_string)
     return final_string
+
 
 # moved to generator
 # all_player_consistent_stats = {} same format as stat records, 
-# condition, year, stat name
-# def display_consistent_stats(all_player_consistent_stats, all_player_stat_records):
-#     print("\n===Display Consistent Stats===\n")
-#     print('all_player_consistent_stats: ' + str(all_player_consistent_stats))
-#     print('all_player_stat_records: ' + str(all_player_stat_records))
 
-#     player_consistent_stat_data_headers = ['Player', 'S Name', 'Stat', 'Prob', '2nd Stat', '2nd Prob', 'PS', 'PP', '2nd PS', '2nd PP', 'OK Val', 'OK P', 'OK PP']
-#     final_consistent_stats = [player_consistent_stat_data_headers] # player name, stat name, consistent stat, consistent stat prob
-
-#     # so we can sort from high to low prob
-#     all_consistent_stat_dicts = [] 
-#     consistent_stat_dict = {}
-
-#     for player_name, player_consistent_stats in all_player_consistent_stats.items():
-#         #print(player_name)
-        
-
-#         # for now, show only conditon=all
-#         # give option to set condition and sort by condition
-#         conditions_of_interest = ['all']
-#         for condition, condition_consistent_stats in player_consistent_stats.items():
-#             #print(condition)
-
-#             if condition in conditions_of_interest:
-
-#                 years_of_interest = [2023]
-#                 for year, year_consistent_stats in condition_consistent_stats.items():
-#                     #print(year)
-
-#                     if year in years_of_interest:
-
-#                         # for season_part, season_part_consistent_stats in year_consistent_stats.items():
-#                         #     print(season_part)
-
-#                         #     player_season_consistent_stat_data = []
-
-#                         # first look at full season, then postseason
-#                         season_part_consistent_stats = year_consistent_stats['full'] 
-
-#                         for stat_name in season_part_consistent_stats.keys():
-#                             #print(stat_name)
-
-#                             # use consistent_stat_dict to sort
-#                             consistent_stat_dict = {'player name':player_name, 'stat name':stat_name}
-                            
-
-#                             #player_consistent_stat_data = [player_name, stat_name]
-
-#                             prob_stat_dict = year_consistent_stats['full'][stat_name]
-#                             print('prob_stat_dict: ' + str(prob_stat_dict))
-
-#                             full_consistent_stat = prob_stat_dict['prob val']
-#                             full_consistent_stat_prob = prob_stat_dict['prob']
-
-#                             full_second_consistent_stat = prob_stat_dict['second prob val']
-#                             full_second_consistent_stat_prob = prob_stat_dict['second prob']
-
-#                             consistent_stat_dict['prob val'] = full_consistent_stat
-#                             consistent_stat_dict['prob'] = full_consistent_stat_prob
-#                             consistent_stat_dict['second prob val'] = full_second_consistent_stat
-#                             consistent_stat_dict['second prob'] = full_second_consistent_stat_prob
-
-#                             # add postseason stat probs separately
-#                             post_consistent_stat = 0
-#                             post_consistent_stat_prob = 0
-
-#                             post_second_consistent_stat = 0
-#                             post_second_consistent_stat_prob = 0
-
-#                             if 'postseason' in year_consistent_stats.keys():
-#                                 prob_stat_dict = year_consistent_stats['postseason'][stat_name]
-#                                 print('prob_stat_dict: ' + str(prob_stat_dict))
-
-#                                 post_consistent_stat = prob_stat_dict['prob val']
-#                                 post_consistent_stat_prob = prob_stat_dict['prob']
-
-#                                 post_second_consistent_stat = prob_stat_dict['second prob val']
-#                                 post_second_consistent_stat_prob = prob_stat_dict['second prob']
-
-#                                 consistent_stat_dict['post prob val'] = post_consistent_stat
-#                                 consistent_stat_dict['post prob'] = post_consistent_stat_prob
-#                                 consistent_stat_dict['post second prob val'] = post_second_consistent_stat
-#                                 consistent_stat_dict['post second prob'] = post_second_consistent_stat_prob
-
-#                             # add another column to classify if postseason stat < regseason stat so we can group those together
-
-#                             # player name, stat name, consistent stat, consistent stat prob
-#                             player_consistent_stat_data = [player_name, stat_name, full_consistent_stat, full_consistent_stat_prob, full_second_consistent_stat, full_second_consistent_stat_prob, post_consistent_stat, post_consistent_stat_prob, post_second_consistent_stat, post_second_consistent_stat_prob]
-#                             #consistent_stat_dict = {'player name':player_name, 'stat name':stat_name, 'prob val': full_consistent_stat, 'prob': full_consistent_stat_prob, 'second prob val':full_second_consistent_stat, 'second prob':full_second_consistent_stat_prob}
-
-#                             #player_season_consistent_stat_data = player_season_consistent_stat_data + player_consistent_stat_data
-
-#                             final_consistent_stats.append(player_consistent_stat_data)
-
-#                             all_consistent_stat_dicts.append(consistent_stat_dict)
-                            
-
-
-#     print('all_consistent_stat_dicts: ' + str(all_consistent_stat_dicts))
-
-#     # determine which keys in dict to sort dicts by
-#     sort_key1 = 'ok val post prob' # default
-#     sort_key2 = 'ok val prob' # default
-
-#     # check if regseason stat is available
-#     ok_stat_vals = [2,5,8,10,12,15,18,20] #standard for dk
-#     #year_of_interest = 2023
-#     #regseason_stats = consistent_stat_vals['all'][year_of_interest]['regular']
-#     for stat_dict in all_consistent_stat_dicts:
-
-#         player_stat_records = all_player_stat_records[stat_dict['player name']]
-
-#         stat_name = stat_dict['stat name']
-#         season_part = 'postseason' # we want to see postseason prob of regseason stat
-
-#         reg_season_stat_val = stat_dict['prob val']
-#         reg_season_second_stat_val = stat_dict['second prob val']
-#         reg_season_stat_prob = stat_dict['prob']
-#         reg_season_second_stat_prob = stat_dict['second prob']
-
-#         post_season_stat_val = stat_dict['post prob val']
-#         post_season_stat_prob = stat_dict['post prob']
-
-#         if reg_season_stat_val in ok_stat_vals: #is available (ie in ok stat vals list)
-#             stat_dict['ok val'] = reg_season_stat_val # default, ok=available
-#             stat_dict['ok val prob'] = reg_season_stat_prob 
-#             # determine which key has the same stat val in post as reg, bc we earlier made sure there would be one
-#             # can be generalized to fcn called determine matching key
-#             stat_dict['ok val post prob'] = determiner.determine_ok_val_prob(stat_dict, stat_dict['ok val'], player_stat_records, season_part, stat_name) #post_season_stat_prob 
-#             # post_season_stat_val_key = determiner.determine_matching_key(stat_dict, stat_dict['ok val']) #'post prob val'
-#             # # for key, val in stat_dict.items():
-#             # #     if key != 'ok val':
-#             # #         if val == stat_dict['ok val'] and not re.search('prob',key):
-#             # #             post_season_stat_val_key = key
-
-#             # post_season_stat_prob_key = re.sub('val','',post_season_stat_val_key)
-#             # post_season_stat_prob = stat_dict[post_season_stat_prob_key]
-#             # stat_dict['ok val post prob'] = post_season_stat_prob 
-
-#             # if reg_season_stat_val != post_season_stat_val:
-#             #     stat_dict['ok val post prob'] = post_season_stat_val_prob 
-
-#         # if default reg season stat na,
-#         # first check next lowest val, called second val
-#         else:
-#             stat_dict['ok val'] = reg_season_second_stat_val # ok=available
-#             stat_dict['ok val prob'] = reg_season_second_stat_prob 
-#             stat_dict['ok val post prob'] = determiner.determine_ok_val_prob(stat_dict, stat_dict['ok val'], player_stat_records, season_part, stat_name) #post_season_stat_prob 
-
-
-#     # determine final available stat val out of possible consistent stat vals
-#     # eg if horford reb in playoffs higher than regseason, use regseason stat val's prob in postseason
-#     # bc that will show highest prob
-#     #available_stat_val
-
-
-#     sort_keys = [sort_key1, sort_key2]
-#     sorted_consistent_stat_dicts = sorter.sort_dicts_by_keys(all_consistent_stat_dicts, sort_keys)
-#     # desired_order = ['player name','stat name','ok val','ok pp','ok p']
-#     sorted_consistent_stats = converter.convert_dicts_to_lists(sorted_consistent_stat_dicts)
-
-#     print('sorted_consistent_stats')
-#     print(tabulate(player_consistent_stat_data_headers + sorted_consistent_stats))
-
-#     # export
-#     for row in sorted_consistent_stats:
-#         export_row = ''
-#         for cell in row:
-#             export_row += str(cell) + ';'
-
-#         print(export_row)
 
 #desired_order=list  headers
 def list_dicts(dicts, desired_order=[], separator=',', output=''):
-    print('\n===List Dicts===\n')
+    #print('\n===List Dicts===\n')
 
     # desired_order = ['player name','stat name','ok val','ok pp','ok p']
     dict_list = converter.convert_dicts_to_lists(dicts, desired_order)
@@ -761,28 +589,26 @@ def list_dicts(dicts, desired_order=[], separator=',', output=''):
 # all_player_stat_probs = {condition:year:part:stat:val} = {'all': {2023: {'regular': {'pts': {'0': { 'prob over': po, 'prob under': pu },...
 # stat_probs_by_stat = {stat:val:condition:year:part} = {'pts':{'0':{'all':{2023:{'regular':{po,pu}}
 def write_all_stat_probs_by_stat(all_player_stat_probs):
-    print('\n===Write All Player Stat Probs by Stat===\n')
-
-    
+    #print('\n===Write All Player Stat Probs by Stat===\n')
 
     for player, player_stat_probs in all_player_stat_probs.items():
         stat_probs_by_stat = {} # this must be in player loop or it will show max val for all players when we only need max for current players here bc separate sheets. this would be outside loop for all players when we want all players in same sheet
-        print('player: ' + str(player))
+        #print('player: ' + str(player))
         if len(player_stat_probs.keys()) > 0:
             data_key = 'stat probs' # folder and data type
             organized_by = 'stat' # input key desired by user
             book_name = 'data/' + data_key + '/' + player + ' ' + data_key + ' - ' + organized_by + '.xlsx'
-            print('book_name: ' + str(book_name))
+            #print('book_name: ' + str(book_name))
             writer = pd.ExcelWriter(book_name)
 
             headers = ['val']
             all_conditions = []
             for condition, condition_stat_probs in player_stat_probs.items():
-                print('condition: ' + str(condition))
+                #print('condition: ' + str(condition))
                 for year, year_stat_probs in condition_stat_probs.items():
-                    print('year: ' + str(year))
+                    #print('year: ' + str(year))
                     for part, part_stat_probs in year_stat_probs.items():
-                        print('part: ' + str(part))
+                        #print('part: ' + str(part))
                         conditions = condition + ' ' + str(year) + ' ' + part + ' prob'
                         all_conditions.append(conditions)
                         headers.extend([conditions + ' over', conditions + ' under'])
@@ -843,7 +669,7 @@ def write_all_stat_probs_by_stat(all_player_stat_probs):
 # switch stat,val to val,stat to get
 # player_stat_probs_dict: {0: {'pts': {'prob over': 1.0, 'prob under': 0.0}, 'reb': {
 def write_all_player_stat_probs(all_player_stat_probs):
-    print('\n===Write All Player Stat Probs===\n')
+    #print('\n===Write All Player Stat Probs===\n')
 
     headers = ['val', 'pts prob over', 'pts prob under', 'reb prob over', 'reb prob under', 'ast prob over', 'ast prob under', '3pm prob over', '3pm prob under']
 
@@ -866,24 +692,24 @@ def write_all_player_stat_probs(all_player_stat_probs):
     # each player gets its own book
     
     for player, player_stat_probs in all_player_stat_probs.items():
-        print('player: ' + str(player))
+        #print('player: ' + str(player))
         #print('player_stat_probs: ' + str(player_stat_probs))
         if len(player_stat_probs.keys()) > 0:
             data_key = 'stat probs' # folder and data type
 
             organized_by = 'condition' # input key desired by user
             book_name = 'data/' + data_key + '/' + player + ' ' + data_key + ' - ' + organized_by + '.xlsx'
-            print('book_name: ' + str(book_name))
+            #print('book_name: ' + str(book_name))
             writer = pd.ExcelWriter(book_name)
             #stat_probs_table = []
             for condition, condition_stat_probs in player_stat_probs.items():
-                print('condition: ' + str(condition))
+                #print('condition: ' + str(condition))
                 for year, year_stat_probs in condition_stat_probs.items():
-                    print('year: ' + str(year))
+                    #print('year: ' + str(year))
                     for part, part_stat_probs in year_stat_probs.items():
-                        print('part: ' + str(part))
+                        #print('part: ' + str(part))
                         sheet_name = condition + ' ' + str(year) + ' ' + part
-                        print('sheet_name: ' + str(sheet_name))
+                        #print('sheet_name: ' + str(sheet_name))
 
                         # rearrange all_player_stat_probs in desired order of columns (x,y)
                         # here we have x,y=stat,val
@@ -990,8 +816,8 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, todays_date=dateti
 # bc prev stays same while cur changes each new game
 # need cur_yr bc only cur yr changes
 def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subject_name=''):
-    print('\n===Write Cur and Prev===\n')
-    print('cur_yr: ' + str(cur_yr))
+    # print('\n===Write Cur and Prev===\n')
+    # print('cur_yr: ' + str(cur_yr))
 
     if cur_yr == '':
         cur_yr = determiner.determine_current_season_year()
@@ -1040,10 +866,10 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subje
     #print('init_prev_dict: ' + str(init_prev_dict))
     #print('final_prev_dict: ' + str(final_prev_dict))
     if not init_cur_dict == final_cur_dict:
-        print(subject_name + ' CURRENT year data changed so write to file')
+        #print(subject_name + ' CURRENT year data changed so write to file')
         write_json_to_file(final_cur_dict, cur_file, 'w')
     if not init_prev_dict == final_prev_dict:
-        print(subject_name + ' PREVIOUS year data changed so write to file')
+        #print(subject_name + ' PREVIOUS year data changed so write to file')
         write_json_to_file(final_prev_dict, prev_file, 'w')
 
 

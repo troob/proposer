@@ -45,7 +45,7 @@ find_players = True # if true, read all players in game box scores to see prob w
 # === READ ODDS ===
 # set false to save time if observing all probs
 # make list of sources with different odds 
-read_odds = False # set false to test other features
+read_odds = True # set false to test other features
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -61,12 +61,12 @@ settings = {'find matchups': find_matchups,
 # gen list of player names given teams so we dont have to type all names
 # if no date given, and if past 10pm then assume getting data for next day
 # https://www.espn.com/nba/schedule 
-game_teams = [('bos','gsw')]#, ('nop','lal')
+game_teams = [('nyk','bkn')]#, ('den','tor'), ('lal','chi'), ('atl','hou'), ('lac','dal'), ('bos','sac')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_rosters(game_teams, read_new_teams) # {team:roster,...}
-#players_names = reader.read_players_from_rosters(teams_current_rosters)#reader.read_teams_players(game_teams, read_new_teams) #generator.generate_players_names(teams) # generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['chris paul'] # use for testing
+#players_names = reader.read_players_from_rosters(teams_current_rosters)# generate is wrong term bc we are not computing anything only reading players on each team
+players_names = ['jalen brunson'] # use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

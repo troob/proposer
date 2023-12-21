@@ -152,8 +152,8 @@ def convert_team_abbrev_to_name(team_abbrev):
 
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
-def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_players_in_games_dict, season_years=[], cur_yr=''):
-    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_box_scores, season_years=[], cur_yr=''):
+    #print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
     #print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
@@ -171,7 +171,7 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
             if cur_yr in all_players_teams.keys() and game_player in all_players_teams[cur_yr].keys():
                 # out_player_teams = all_players_teams[cur_yr][out_player]
                 # out_player_team = determiner.determine_player_current_team(out_player, out_player_teams, cur_yr, rosters)
-                game_player_abbrev = reader.read_player_abbrev(game_player, all_players_teams, cur_yr, all_players_in_games_dict)
+                game_player_abbrev = reader.read_player_abbrev(game_player, all_players_teams, cur_yr, all_box_scores)
             else:
                 print('Warning: Game player not in all players current teams! ' + game_player)
     else:
@@ -183,14 +183,14 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
                 game_player_abbrev = year_players_abbrevs[game_player] #converter.convert_player_name_to_abbrev(out_player)
             else:
                 if year in all_players_teams.keys() and game_player in all_players_teams[year].keys():
-                    game_player_abbrev = reader.read_player_abbrev(game_player, all_players_teams, year, all_players_in_games_dict)
+                    game_player_abbrev = reader.read_player_abbrev(game_player, all_players_teams, year, all_box_scores)
                 else:
                     print('Warning: Game player not in all players teams! ' + game_player + ', ' + str(year))
 
             if game_player_abbrev != '':
                 break
 
-    print('game_player_abbrev: ' + str(game_player_abbrev))
+    #print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
 # convert cond dict to list
@@ -199,9 +199,9 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
 # list = away, 'p1 out', 'p2 out', ...
 # need to expand list values
 # conditions_list = ['m fultz pg out', 'w carter c out', 'm fultz pg, w carter c out', 'away', ...]
-def convert_conditions_dict_to_list(conditions_dict, all_players_abbrevs, all_players_teams, all_players_in_games_dict, player='', season_years=[], cur_yr=''):
-    print('\n===Convert Conditions Dict to List: ' + player.title() + '===\n')
-    print('all_players_abbrevs: ' + str(all_players_abbrevs))
+def convert_conditions_dict_to_list(conditions_dict, all_players_abbrevs, all_players_teams, all_box_scores, player='', season_years=[], cur_yr=''):
+    # print('\n===Convert Conditions Dict to List: ' + player.title() + '===\n')
+    # print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     conditions_list = []
 
@@ -213,11 +213,11 @@ def convert_conditions_dict_to_list(conditions_dict, all_players_abbrevs, all_pl
             game_players_str = ''
             for game_player_idx in range(len(cond_val)):
                 game_player = cond_val[game_player_idx]
-                print('\ngame_player: ' + str(game_player))
+                #print('\ngame_player: ' + str(game_player))
                 # need to convert player full name to abbrev with position to compare to condition titles
                 # at this point we have determined full names from abbrevs so we can refer to that list
                 # NEXT: save player abbrevs for everyone played with
-                game_player_abbrev = convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_players_in_games_dict, season_years, cur_yr)
+                game_player_abbrev = convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_box_scores, season_years, cur_yr)
                 
                 # for single player change starters to starter or starting so it can be plural or singular
                 # D Green PF out
@@ -228,7 +228,7 @@ def convert_conditions_dict_to_list(conditions_dict, all_players_abbrevs, all_pl
                 #         final_cond_key = cond_key.rstrip('s')
                 # D Green PF out, S Curry PG starters
                 final_cond_val = game_player_abbrev + ' ' + cond_key 
-                print('final_cond_val: ' + str(final_cond_val))
+                #print('final_cond_val: ' + str(final_cond_val))
                 
                 conditions_list.append(final_cond_val)
 
@@ -240,27 +240,27 @@ def convert_conditions_dict_to_list(conditions_dict, all_players_abbrevs, all_pl
 
             #game_players_str += ' ' + cond_key
             final_cond_val = game_players_str + ' ' + cond_key 
-            print('final_cond_val: ' + str(final_cond_val))
+            #print('final_cond_val: ' + str(final_cond_val))
             conditions_list.append(final_cond_val)
 
         else:
             conditions_list.append(cond_val)
 
     # conditions_list: ['home', 'L Nance Jr PF out', 'M Ryan F out', 'L Nance Jr PF, M Ryan F out', 'C McCollum SG starters', 'B Ingram SF starters', 'H Jones SF starters', 'Z Williamson PF starters', 'J Valanciunas C starters', 'C McCollum SG, B Ingram SF, H Jones SF, Z Williamson PF, J Valanciunas C starters', 'bench']
-    print('conditions_list: ' + str(conditions_list))
+    #print('conditions_list: ' + str(conditions_list))
     return conditions_list
 
 # all_conditions_dicts = {p1:{out:[m fultz pg], loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # all_conditions_lists = {p1:[m fultz pg out, away, ...],...
-def convert_all_conditions_dicts_to_lists(all_conditions_dicts, all_players_abbrevs, all_players_teams, all_players_in_games_dict, season_years=[], cur_yr=''):
+def convert_all_conditions_dicts_to_lists(all_conditions_dicts, all_players_abbrevs, all_players_teams, all_box_scores, season_years=[], cur_yr=''):
     print('\n===Convert All Conditions Dicts to Lists===\n')
-    print('all_players_abbrevs: ' + str(all_players_abbrevs))
+    #print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     all_conditions_lists = {}
 
     for player, cond_dict in all_conditions_dicts.items():
-        cond_list = convert_conditions_dict_to_list(cond_dict, all_players_abbrevs, all_players_teams, all_players_in_games_dict, player, season_years, cur_yr)
+        cond_list = convert_conditions_dict_to_list(cond_dict, all_players_abbrevs, all_players_teams, all_box_scores, player, season_years, cur_yr)
         all_conditions_lists[player] = cond_list
 
-    print('all_conditions_lists: ' + str(all_conditions_lists))
+    #print('all_conditions_lists: ' + str(all_conditions_lists))
     return all_conditions_lists
