@@ -182,7 +182,7 @@ def display_stat_plot(all_valid_streaks_list, all_players_stats_dicts, stat_of_i
             # sys.stdout.flush()
 
 
-def display_all_players_records_dicts(all_players_records_dicts, all_player_season_logs_dict):
+def display_all_players_records_dicts(all_players_records_dicts, all_players_season_logs):
     #print('\n===Display All Players Records Dicts===\n')
 
     # player_stat_dict = { year: .. }
@@ -507,7 +507,7 @@ def write_data_to_file(data, filepath, write_param, extension='csv'):
     else:
         print('Warning: Unknown file extension! ')
     
-def write_json_to_file(dict, filepath, write_param):
+def write_json_to_file(dict, filepath, write_param='w'):
     #print('\n===Write JSON to File: ' + filepath + '===\n')
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?

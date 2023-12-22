@@ -458,7 +458,7 @@ def determine_played_season(player_url, player_name='', season_year=0, all_game_
                 
             except Exception as e:
                 print('Page exists but no tables: ', e)
-                #print('Exception could not get url: ' + e)
+                #print('Exception could not get url: ', e)
 
     if not played_season:
         print('\nWarning: ' + player_name.title() + ' did NOT play season ' + str(season_year) + '!\n')
@@ -466,67 +466,7 @@ def determine_played_season(player_url, player_name='', season_year=0, all_game_
     return played_season
 
 
-def determine_regular_season_games(player_game_log):
 
-    #print('\n===Determine Regular Season Games for Player===\n')
-    #print('player_game_log:\n' + str(player_game_log))
-
-    reg_season_games_df = pd.DataFrame()
-
-    # select reg season games by type
-    if 'Type' in player_game_log.keys():
-        # remove all star and exception games with *
-        reg_season_games_df = reg_season_games_df[~reg_season_games_df['OPP'].str.endswith('*')].reset_index(drop=True)
-        reg_season_games_df.index = reg_season_games_df.index.map(str)
-        
-        reg_season_games_df = reg_season_games_df[reg_season_games_df['Type'].str.startswith('Regular')]
-        #print("partial reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
-        
-    else:
-        print('Warning: Type key not in game log when determining season part games!')
-
-    #print("final reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
-    return reg_season_games_df
-
-def determine_season_part_games(player_game_log, season_part='regular'):
-
-    #print('\n===Determine Season Games for Player: ' + season_part + '===\n')
-    #print('player_game_log:\n' + str(player_game_log))
-
-    season_part_games_df = pd.DataFrame()
-
-    if 'Type' in player_game_log.keys():
-        # remove all star and exception games with *
-        # always separate special games
-        # reset index first so games line up with teams
-        season_part_games_df = player_game_log[~player_game_log['OPP'].str.endswith('*')].reset_index(drop=True)
-        if season_part != 'tournament':
-            season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Tournament')].reset_index(drop=True)
-        season_part_games_df.index = season_part_games_df.index.map(str)
-        #print('season_part_games_df:\n' + str(season_part_games_df))
-
-        #season_part_games_df = player_game_log[~player_game_log['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log
-        # dont need to reset index after removing preseason bc those games are at end of log idx
-        season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log
-
-        # cannot make default all game log bc we want to exclude preseason
-        # select season part games by type
-        # so we need to have accurate types set in read season log
-        
-        if season_part != 'full': # bc full does not have game type bc it takes all types
-            season_part_games_df = season_part_games_df[season_part_games_df['Type'].str.startswith(season_part.title())]
-            #print("partial reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
-        #elif season_part == 'full':
-            #season_part_games_df = player_game_log[~player_game_log['Type'].str.startswith('Preseason')]
-        
-        
-    
-    else:
-        print('Warning: Type key not in game log when determining season part games!')
-
-
-    #print("final season_part_games_df:\n" + str(season_part_games_df) + '\n')
-    return season_part_games_df
 
 # is it an over or under? above 7/10 or 4/5 or 3/3, or below 3/10 and not 2/2 bc maybe teammate injury so more playing time?
 def determine_streak_direction(streak):
@@ -1481,47 +1421,7 @@ def determine_player_team_each_game(player, season_part_game_log, teams, games_p
     #print('player_team: ' + str(player_team))
     return player_team
 
-# if reg season, game idx starts before playoffs
-# if post or full season, game idx starts at 0
-def determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played):
-    #print('\n===Determine Player Team Idx: ' + player.title() + '===\n')
 
-    # if type == postseason, then player team idx always =0
-    # game type = season part
-    game_type = row['Type']
-    #print('game_type: ' + str(game_type))
-
-    # if postseason then after trade deadline so last team this yr
-    # postseason maybe playin listed after reg season
-    if game_type == 'Postseason' or game_type == 'Playoff' or game_type == 'Playin': # if postseason, player_team_idx = 0 # recent/last team this yr
-        player_team_idx = 0
-    # tournament for now assume not traded day before or after 
-    # for tourney game check if also greater than next teams gp
-    # elif game_type == 'Tournament':
-    #     player_team_idx = 0 # need to reset bc tournament games are independent out of order but we have idx order
-    #     total_gp = 0
-    #     for gp in games_played:
-    #         total_gp += gp
-    #         if int(game_idx) < total_gp:
-    #             break
-    #         player_team_idx += 1
-    #     # tourney game not counted in games played
-    #     # AND need game log to tell which team they were on at the time
-    #     # by seeing if they are past GP when they reach it in the log order
-    #     # so when we see tourney game add 1 to gp before switching teams
-    #     # if they happen to get traded before or after this game
-    #     # then how to tell which team they were on at the time? need date
-    #     teams_reg_and_playoff_games_played += 1
-    else:
-        if int(game_idx) >= teams_reg_and_playoff_games_played: # > or >= make > bc we only need to go to next team if more games
-            #if len(teams) > player_team_idx+1:            
-            if len(games_played) > player_team_idx+1:
-                player_team_idx += 1
-                teams_reg_and_playoff_games_played += games_played[player_team_idx]                
-
-
-    #print('player_team_idx: ' + str(player_team_idx))
-    return player_team_idx
 
 # we need to add date of first game on team to player teams dict
 # player_teams = {team:date,...}
@@ -1711,9 +1611,9 @@ def determine_player_season_teams(player, game_key, player_teams):
 # what about v williams compared to vince williams jr?
 # we know same bc team only has 1 v williams
 def determine_player_abbrev_match(main_player, compare_player):
-    #print('\n===Determine Player Abbrev Match===\n')
-    #print('main_player: ' + str(main_player))
-    #print('compare_player: ' + str(compare_player))
+    print('\n===Determine Player Abbrev Match===\n')
+    print('main_player: ' + str(main_player))
+    print('compare_player: ' + str(compare_player))
 
     match = True
 
@@ -1722,6 +1622,9 @@ def determine_player_abbrev_match(main_player, compare_player):
     # but not impossible so ideally use teams to see only 1 matching in team
     main_player = re.sub('(jr|sr|i+)$','',main_player).strip()
     compare_player = re.sub('(jr|sr|i+)$','',compare_player).strip()
+    print('main_player: ' + str(main_player))
+    print('compare_player: ' + str(compare_player))
+
 
     main_player_names = main_player.split()
     compare_player_names = compare_player.split()
@@ -1736,6 +1639,9 @@ def determine_player_abbrev_match(main_player, compare_player):
             num_letters = len(main_name)
             # jalen        
             compare_name = compare_player_names[name_idx]
+            print('main_name: ' + str(main_name))
+            print('compare_name: ' + str(compare_name))
+            print('compare_letters: ' + str(compare_name[:num_letters]))
             if not main_name == compare_name[:num_letters]:
                 match = False
                 break 
@@ -1752,8 +1658,8 @@ def determine_player_abbrev_match(main_player, compare_player):
 # use game_key to get player team at game time
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
-def determine_player_full_name(player, team, all_players_teams, game_key='', cur_yr='', rosters={}):
-    # print('\n===Determine Player Full Name: ' + player.title() + '===\n')
+def determine_player_full_name(init_player, team, all_players_teams, game_key='', cur_yr='', rosters={}):
+    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
     # print('team: ' + str(team))
     #print('all_players_teams: ' + str(all_players_teams))
 
@@ -1772,7 +1678,7 @@ def determine_player_full_name(player, team, all_players_teams, game_key='', cur
     # player = Draymond Green -> draymond green
     # player = D Green PF -> d green
     # V. Williams -> v williams
-    init_player = player
+    player = init_player
 
     player = re.sub('\.','',player).lower()
     player = re.sub('-',' ',player)
@@ -1781,20 +1687,24 @@ def determine_player_full_name(player, team, all_players_teams, game_key='', cur
     # if already using only first initial or abbrev?
     # we need to remove position at end of name before comparing
     #if len(game_key) > 0:
-    player_names = player.split()
+    #player_names = player.split()
     # if dot then comes from lineup page so no position at end
     # we do not know how many letters are in first word of abbrev
     # so how to tell if in format Jal Williams F
     # if cant tell letter case then look for specific letters as last letters (f, g, c)
     #if len(player_names[0]) == 1 and not re.search('\.',init_player):
-    if len(player_names) > 2 and re.search('[fgc]$',player):
-        player = re.sub('\s[a-z]+$', '', player)#.strip() # D Green PF -> d green
+    # need to keep original uppercase to know abbrev format bc irreg formats like Baldwin F
+    #if len(player_names) > 2 and re.search('[fgc]$',player):
+    if init_player[-1].isupper():
+        player = re.sub('\s+[a-z]+$', '', player)#.strip() # D Green PF -> d green
 
         
     #print('player: \'' + str(player) + '\'')
     if player in all_players_teams.keys(): # if already given full name
         full_name = player
     else: # could use all players teams or rosters
+        # if cur yr look in roster
+        # else look in player teams
         # player_teams = {yr:team:gp} = {'2024':{}}
         for player_name, player_teams in all_players_teams.items():
             # print('\nplayer_name: ' + str(player_name))
@@ -1858,7 +1768,7 @@ def determine_player_full_name(player, team, all_players_teams, game_key='', cur
                         full_name = player_name
                         break # found player name
 
-    #print('full_name: ' + full_name)
+    print('full_name: ' + full_name)
     return full_name
 
 # given main prop and fields, find vals in those fields
@@ -2002,6 +1912,121 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+# if reg season, game idx starts before playoffs
+# if post or full season, game idx starts at 0
+def determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played):
+    #print('\n===Determine Player Team Idx: ' + player.title() + '===\n')
+
+    # if type == postseason, then player team idx always =0
+    # game type = season part
+    game_type = row['Type']
+    #print('game_type: ' + str(game_type))
+
+    # if postseason then after trade deadline so last team this yr
+    # postseason maybe playin listed after reg season
+    if game_type == 'Postseason' or game_type == 'Playoff' or game_type == 'Playin': # if postseason, player_team_idx = 0 # recent/last team this yr
+        player_team_idx = 0
+    else:
+        if int(game_idx) >= teams_reg_and_playoff_games_played: # > or >= make > bc we only need to go to next team if more games
+            #if len(teams) > player_team_idx+1:            
+            if len(games_played) > player_team_idx+1:
+                player_team_idx += 1
+                teams_reg_and_playoff_games_played += games_played[player_team_idx]                
+
+
+    #print('player_team_idx: ' + str(player_team_idx))
+    return player_team_idx
+
+def determine_regular_season_games(player_game_log):
+
+    #print('\n===Determine Regular Season Games for Player===\n')
+    #print('player_game_log:\n' + str(player_game_log))
+
+    reg_season_games_df = pd.DataFrame()
+
+    # select reg season games by type
+    if 'Type' in player_game_log.keys():
+        # remove all star and exception games with *
+        reg_season_games_df = reg_season_games_df[~reg_season_games_df['OPP'].str.endswith('*')].reset_index(drop=True)
+        reg_season_games_df.index = reg_season_games_df.index.map(str)
+        
+        reg_season_games_df = reg_season_games_df[reg_season_games_df['Type'].str.startswith('Regular')]
+        #print("partial reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
+        
+    else:
+        print('Warning: Type key not in game log when determining season part games!')
+
+    #print("final reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
+    return reg_season_games_df
+
+def determine_season_part_games(player_game_log, season_part='regular'):
+
+    # print('\n===Determine Season Games for Player: ' + season_part + '===\n')
+    # print('player_game_log:\n' + str(player_game_log))
+
+    season_part_games_df = pd.DataFrame()
+
+    if 'Type' in player_game_log.keys():
+        # remove all star and exception games with *
+        # always separate special games
+        # reset index first so games line up with teams
+        season_part_games_df = player_game_log[~player_game_log['OPP'].str.endswith('*')].reset_index(drop=True)
+        if season_part != 'tournament':
+            season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Tournament')].reset_index(drop=True)
+        season_part_games_df.index = season_part_games_df.index.map(str)
+        #print('season_part_games_df:\n' + str(season_part_games_df))
+
+        #season_part_games_df = player_game_log[~player_game_log['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log
+        # dont need to reset index after removing preseason bc those games are at end of log idx
+        season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log
+
+        # cannot make default all game log bc we want to exclude preseason
+        # select season part games by type
+        # so we need to have accurate types set in read season log
+        
+        if season_part != 'full': # bc full does not have game type bc it takes all types
+            season_part_games_df = season_part_games_df[season_part_games_df['Type'].str.startswith(season_part.title())]
+            #print("partial reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
+        #elif season_part == 'full':
+            #season_part_games_df = player_game_log[~player_game_log['Type'].str.startswith('Preseason')]
+        
+        
+    
+    else:
+        print('\n===Warning: Type key not in game log when determining season part games!===\n')
+
+
+    #print("final season_part_games_df:\n" + str(season_part_games_df) + '\n')
+    return season_part_games_df
+
+def determine_current_season_part(todays_games_date_obj=datetime.today()):
+    #print('\n===Determine Current Season Part===\n')
+    
+    cur_part = 'regular'
+
+    cur_mth = todays_games_date_obj.month
+    cur_day = todays_games_date_obj.day
+    # if cur_mth > 9 or cur_mth < 4:
+    #     cur_part = 'regular'
+    if cur_mth > 4 and cur_mth < 10:
+        cur_part = 'postseason'
+    elif cur_mth == 4 and cur_day > 14:
+        cur_part = 'postseason'
+
+    #print('cur_part: ' + cur_part)
+    return cur_part
 
 # use current month to tell season yr
 def determine_current_season_year(todays_date_obj=datetime.today()):
