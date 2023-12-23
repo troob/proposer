@@ -1535,19 +1535,25 @@ def determine_player_abbrev(player_name):
     # then using first initial in format j brown sg
     # so remove last word to get abbrev
     #player_abbrev = player_initital + last_name
-    player_names = player_name.split()
-    player_abbrev = re.sub('\.','',player_names[0][0])
-    if len(player_names[0]) == 1:
-        # remove position from end of name abbrev
-        for name in player_names[1:-1]:
-            player_abbrev += ' ' + name
-    
-    else:
-        #last_name = ''
-        for name in player_names[1:]:
-            player_abbrev += ' ' + name
+    if player_name != '':
+        player_name = re.sub('\.', '', player_name).lower()
+        player_name = re.sub('-', ' ', player_name)
+        player_names = player_name.split()
+        player_abbrev = re.sub('\.','',player_names[0][0])
+        if len(player_names[0]) == 1:
+            # remove position from end of name abbrev
+            for name in player_names[1:-1]:
+                player_abbrev += ' ' + name
+        
+        else:
+            #last_name = ''
+            for name in player_names[1:]:
+                player_abbrev += ' ' + name
 
-    player_abbrev = player_abbrev.lower()
+        player_abbrev = player_abbrev.lower()
+    else:
+        print('Warning: Blank player name while determining player abbrev!')
+    
     #print('player_abbrev: ' + player_abbrev)
     return player_abbrev
 
@@ -1611,9 +1617,9 @@ def determine_player_season_teams(player, game_key, player_teams):
 # what about v williams compared to vince williams jr?
 # we know same bc team only has 1 v williams
 def determine_player_abbrev_match(main_player, compare_player):
-    print('\n===Determine Player Abbrev Match===\n')
-    print('main_player: ' + str(main_player))
-    print('compare_player: ' + str(compare_player))
+   # print('\n===Determine Player Abbrev Match===\n')
+    #print('main_player: ' + str(main_player))
+    #print('compare_player: ' + str(compare_player))
 
     match = True
 
@@ -1622,8 +1628,8 @@ def determine_player_abbrev_match(main_player, compare_player):
     # but not impossible so ideally use teams to see only 1 matching in team
     main_player = re.sub('(jr|sr|i+)$','',main_player).strip()
     compare_player = re.sub('(jr|sr|i+)$','',compare_player).strip()
-    print('main_player: ' + str(main_player))
-    print('compare_player: ' + str(compare_player))
+    #print('main_player: ' + str(main_player))
+    #print('compare_player: ' + str(compare_player))
 
 
     main_player_names = main_player.split()
@@ -1639,9 +1645,9 @@ def determine_player_abbrev_match(main_player, compare_player):
             num_letters = len(main_name)
             # jalen        
             compare_name = compare_player_names[name_idx]
-            print('main_name: ' + str(main_name))
-            print('compare_name: ' + str(compare_name))
-            print('compare_letters: ' + str(compare_name[:num_letters]))
+            #print('main_name: ' + str(main_name))
+            #print('compare_name: ' + str(compare_name))
+            #print('compare_letters: ' + str(compare_name[:num_letters]))
             if not main_name == compare_name[:num_letters]:
                 match = False
                 break 
@@ -1658,8 +1664,15 @@ def determine_player_abbrev_match(main_player, compare_player):
 # use game_key to get player team at game time
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
-def determine_player_full_name(init_player, team, all_players_teams, game_key='', cur_yr='', rosters={}):
-    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
+def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
+    # print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
+    # print('Input: team of player of interest in game of interest')
+    # print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
+    # print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
+    # print('Input: game_key = away home date = nyk det 12/22/2023')
+    # print('Input: Current Year to tell current team')
+    # print('\nOutput: player_full_name = jalen brunson\n')
+    
     # print('team: ' + str(team))
     #print('all_players_teams: ' + str(all_players_teams))
 
@@ -1706,7 +1719,7 @@ def determine_player_full_name(init_player, team, all_players_teams, game_key=''
         # if cur yr look in roster
         # else look in player teams
         # player_teams = {yr:team:gp} = {'2024':{}}
-        for player_name, player_teams in all_players_teams.items():
+        for compare_player_name, compare_player_teams in all_players_teams.items():
             # print('\nplayer_name: ' + str(player_name))
             # print('player_teams: ' + str(player_teams))
             # look at current team bc we are comparing to current lineup
@@ -1717,14 +1730,14 @@ def determine_player_full_name(init_player, team, all_players_teams, game_key=''
             # cannot simplify like this if given any abbrevs with more than 1 letter in first name bc same abbrevs on same team need unique abbrevs
             # player = Jal Williams 
             # player_name = jalen williams
-            player_abbrev = determine_player_abbrev(player_name)
+            player_abbrev = determine_player_abbrev(compare_player_name)
 
-            cur_team = determine_player_current_team(player_name, player_teams, cur_yr, rosters)
+            cur_team = determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
             season_teams = []
             if len(game_key) > 0:
                 # for now get list of teams this season and use either or
                 # pass in the compare player name
-                season_teams = determine_player_season_teams(player_name, game_key, player_teams)
+                season_teams = determine_player_season_teams(compare_player_name, game_key, compare_player_teams)
                 #game_team = determine_player_team_by_game(game_key, player_teams)
             
 
@@ -1745,16 +1758,16 @@ def determine_player_full_name(init_player, team, all_players_teams, game_key=''
             # player_abbrev = j williams. do we need?
             # determine match if first word and second word match
             # cannot compare whole words bc irregular abbrevs
-            if determine_player_abbrev_match(player, player_name):
+            if determine_player_abbrev_match(player, compare_player_name):
             #if re.search(player,player_abbrev) or re.search(player,player_name):
                 # print('team: ' + str(team))
                 # print('cur_team: ' + cur_team)
                 if len(season_teams) > 0:
                     if team in season_teams:
-                        full_name = player_name
+                        full_name = compare_player_name
                         break # found player name
                 elif team == cur_team:
-                    full_name = player_name
+                    full_name = compare_player_name
                     break # found player name
             elif len(player_abbrev_names) > 2: # 3 word name like k anthony towns
                 normal_abbrev = player_abbrev_names[0] + ' ' + player_abbrev_names[2] # k towns, remove middle name
@@ -1762,13 +1775,13 @@ def determine_player_full_name(init_player, team, all_players_teams, game_key=''
                 if re.search(player,normal_abbrev):# and team == game_team:
                     if len(season_teams) > 0:
                         if team in season_teams:
-                            full_name = player_name
+                            full_name = compare_player_name
                             break # found player name
                     elif team == cur_team:
-                        full_name = player_name
+                        full_name = compare_player_name
                         break # found player name
 
-    print('full_name: ' + full_name)
+    #print('full_name: ' + full_name)
     return full_name
 
 # given main prop and fields, find vals in those fields

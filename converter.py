@@ -116,6 +116,10 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 def convert_team_abbrev_to_name(team_abbrev):
+    print('\n===Convert Team Abbrev to Name: ' + team_abbrev + '===\n')
+    
+    name = ''
+
     team_names = {'atl':'atlanta hawks', 
                     'bos':'boston celtics', 
                     'bkn':'brooklyn nets', 
@@ -147,8 +151,11 @@ def convert_team_abbrev_to_name(team_abbrev):
                     'uta':'utah jazz',
                     'wsh':'washington wizards'} # could get from fantasy pros table but simpler to make once bc only 30 immutable vals
 
-
-    return team_names[team_abbrev]
+    if team_abbrev in team_names.keys():
+        name = team_names[team_abbrev]
+        
+    print('name: ' + name)
+    return name
 
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?

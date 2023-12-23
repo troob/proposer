@@ -139,7 +139,7 @@ def isolate_keys_in_dict(regex, dict):
 
 
 def isolate_high_prob_props(prop_dicts):
-    print('\n===Isolate High Prob Props===\n')
+    #print('\n===Isolate High Prob Props===\n')
 
     high_prob_props = []
 
@@ -154,7 +154,7 @@ def isolate_high_prob_props(prop_dicts):
     return high_prob_props
 
 def isolate_plus_ev_props(prop_dicts):
-    print('\n===Isolate +EV Props===\n')
+    #print('\n===Isolate +EV Props===\n')
 
     plus_ev_props = []
 
@@ -166,7 +166,7 @@ def isolate_plus_ev_props(prop_dicts):
     return plus_ev_props
 
 def isolate_duplicate_dicts(main_dict, keys, dict_list):
-    print('\n===Isolate Duplicate Dicts===\n')
+    #print('\n===Isolate Duplicate Dicts===\n')
 
     duplicate_dicts = []
 
