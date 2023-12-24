@@ -1985,6 +1985,67 @@ def read_stat_odds(stat_dict, all_players_odds={}):
 	print('odds: ' + odds)
 	return odds
 
+def read_player_stat_dict(player_name, current_year_str, todays_date):
+	#print('\n===Read Player Stat Dict: ' + player_name.title() + '===\n')
+
+	player_cur_stat_dict_filename = 'data/stat dicts/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
+	player_prev_stat_dicts_filename = 'data/stat dicts/' + player_name + ' prev stat dicts.json'
+	init_player_stat_dict = read_cur_and_prev_json(player_cur_stat_dict_filename,player_prev_stat_dicts_filename)
+
+	#print('init_player_stat_dict: ' + str(init_player_stat_dict))
+	return init_player_stat_dict
+
+# init_player_stat_dicts = {player: {"2023": {"regular": {"pts": {"all": {"0": 14,...
+def read_all_players_stat_dicts(players_names, current_year_str, todays_date):
+	print('\n===Read All Players Stat Dicts===\n')
+
+	init_player_stat_dicts = {}
+	for player_name in players_names:
+		player_cur_stat_dict_filename = 'data/stat dicts/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
+		player_prev_stat_dicts_filename = 'data/stat dicts/' + player_name + ' prev stat dicts.json'
+		init_player_stat_dicts[player_name] = read_cur_and_prev_json(player_cur_stat_dict_filename,player_prev_stat_dicts_filename)
+
+	#print('init_player_stat_dicts: ' + str(init_player_stat_dicts))
+	return init_player_stat_dicts
+
+# use when we want all players 
+# AND team does not matter
+# rosters = {team:[players],...}
+def read_players_from_rosters(rosters):
+	players = []
+
+	for roster in rosters.values():
+		for player in roster:
+			players.append(player)
+
+	return players
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 # read lineups from internet
 # https://www.rotowire.com/basketball/nba-lineups.php
 # given starters from internet rotowire
@@ -2184,58 +2245,6 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	#print('all_lineups: ' + str(all_lineups))
 	return all_lineups
 
-def read_player_stat_dict(player_name, current_year_str, todays_date):
-	#print('\n===Read Player Stat Dict: ' + player_name.title() + '===\n')
-
-	player_cur_stat_dict_filename = 'data/stat dicts/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
-	player_prev_stat_dicts_filename = 'data/stat dicts/' + player_name + ' prev stat dicts.json'
-	init_player_stat_dict = read_cur_and_prev_json(player_cur_stat_dict_filename,player_prev_stat_dicts_filename)
-
-	#print('init_player_stat_dict: ' + str(init_player_stat_dict))
-	return init_player_stat_dict
-
-# init_player_stat_dicts = {player: {"2023": {"regular": {"pts": {"all": {"0": 14,...
-def read_all_players_stat_dicts(players_names, current_year_str, todays_date):
-	print('\n===Read All Players Stat Dicts===\n')
-
-	init_player_stat_dicts = {}
-	for player_name in players_names:
-		player_cur_stat_dict_filename = 'data/stat dicts/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
-		player_prev_stat_dicts_filename = 'data/stat dicts/' + player_name + ' prev stat dicts.json'
-		init_player_stat_dicts[player_name] = read_cur_and_prev_json(player_cur_stat_dict_filename,player_prev_stat_dicts_filename)
-
-	#print('init_player_stat_dicts: ' + str(init_player_stat_dicts))
-	return init_player_stat_dicts
-
-# use when we want all players 
-# AND team does not matter
-# rosters = {team:[players],...}
-def read_players_from_rosters(rosters):
-	players = []
-
-	for roster in rosters.values():
-		for player in roster:
-			players.append(player)
-
-	return players
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
-
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 # need all_players_teams to determine player full name
 # bc we get abbrev in box score players in games
@@ -2296,9 +2305,9 @@ def read_team_players(team, year_players_in_games_dict, all_players_teams, all_p
 # season_teams_players = {team:[players],...}
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 def read_season_teams_players(year, year_box_scores, init_all_teams_players, teams, all_players_teams, all_players_abbrevs, cur_yr='', rosters={}):
-	#print('\n===Read Season Teams Players: ' + str(year) + '===\n')
-	#print('year_players_in_games_dict: ' + str(year_players_in_games_dict))
-	#print('init_all_teams_players: ' + str(init_all_teams_players))
+	print('\n===Read Season Teams Players: ' + str(year) + '===\n')
+	print('Input: init_all_teams_players = {year:{team:[players],...},... = ')
+	print('\nOutput: all_teams_players = {year:{team:[players],...},... = \n')
 
 	season_teams_players = {}
 	# if year, teams, and all players are added already then we can copy from file
@@ -2352,11 +2361,11 @@ def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_playe
 	print('Input: Current Year to get current team to get full name')
 	print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...\n')
 	print('Input: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
-	print('\nOutput: all_teams_players = {year:{team:[players],...},... = ')
+	print('\nOutput: all_teams_players = {year:{team:[players], ... = {\'2024\': {\'wsh\': [\'kyle kuzma\', ...\n')
 
 	teams = list(rosters.keys())
 
-	all_teams_players_file = 'data/all teams rosters.json'
+	all_teams_players_file = 'data/all teams players.json'
 
 	init_all_teams_players = read_json(all_teams_players_file)
 	#print("init_all_teams_players: " + str(init_all_teams_players))
@@ -2557,7 +2566,7 @@ def read_all_players_abbrevs(all_box_scores, all_players_teams, rosters, cur_yr,
 	print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
 	print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
 	print('Input: Current Year bc only accurate roster.')
-	print('\nOutput: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
+	print('\nOutput: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...\n')
 
 	# go to first game in player game log and see which abbrev fits their name?
 	# No bc we need every player abbrev, not just player of interest
@@ -2603,7 +2612,7 @@ def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, 
 	print('\n===Read All Players Teammates===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-	print('\nOutput: all_players_teammates = {player:{year:[teammates],... = {\'jalen brunson\': {\'2024\': [\'J Randle PF\', ...')
+	print('\nOutput: all_players_teammates = {player:{year:[teammates],... = {\'jalen brunson\': {\'2024\': [\'J Randle PF\', ...\n')
 
 	all_players_teammates_file = 'data/all players teammates.json'
 
