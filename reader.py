@@ -2074,6 +2074,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	probable_key = 'probable'
 	question_key = 'question'
 	doubt_key = 'doubt'
+	in_key = 'in'
 
 	if soup is not None:
 		#print('soup: ' + str(soup))
@@ -2208,6 +2209,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 			team_current_players = all_teams_current_players[team]
 			#print('team_current_players: ' + str(team_current_players))
 			bench = []
+			in_players = []
 			# current players shows players in past box scores this season
 			# while roster shows current players including practice players who dont play
 			# and new teammates havent played before, 
@@ -2223,9 +2225,13 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 				if player not in starters and player not in out and player not in doubtful:
 					if player in team_roster:
 						bench.append(player)
+
+				if player not in out and player not in doubtful:
+					in_players.append(player)
 			
 			#print('bench: ' + str(bench))
 			lineup[bench_key] = bench
+			lineup[in_key] = in_players
 
 
 	# standardize format to unique player id
@@ -3893,17 +3899,18 @@ def read_all_players_season_logs(players_names, all_players_espn_ids={}, all_pla
 
 	for player_name in players_names:
 		# {player:season:log}
-		player_teams = all_players_teams[player_name]
-		player_espn_id = all_players_espn_ids[player_name]
-		players_season_logs = read_player_season_logs(player_name, player_espn_id, read_x_seasons, all_players_espn_ids, season_year, all_players_season_logs, current_year_str=cur_yr, player_teams=player_teams)
-		
-		all_players_season_logs[player_name] = players_season_logs
+		if player_name in all_players_teams.keys():
+			player_teams = all_players_teams[player_name]
+			player_espn_id = all_players_espn_ids[player_name]
+			players_season_logs = read_player_season_logs(player_name, player_espn_id, read_x_seasons, all_players_espn_ids, season_year, all_players_season_logs, current_year_str=cur_yr, player_teams=player_teams)
+			
+			all_players_season_logs[player_name] = players_season_logs
 
-		# if log is already in file no need to overwrite but the output will be the same as all game logs so it makes no difference
-		#all_game_logs[player_name] = players_season_logs # {player:season:log}
+			# if log is already in file no need to overwrite but the output will be the same as all game logs so it makes no difference
+			#all_game_logs[player_name] = players_season_logs # {player:season:log}
 
-		# write for each player is if error interrupts it can resume where it left off
-		# if all game logs unchanged then no need to write to file
+			# write for each player is if error interrupts it can resume where it left off
+			# if all game logs unchanged then no need to write to file
 	
 	#init_all_game_logs: {'bruce brown': {'2023': {'Player': {'0': 
 	#final_all_game_logs: {'bruce brown': {2023: {'Player': {'0': 'br

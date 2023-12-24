@@ -228,6 +228,19 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
+def convert_to_game_players_str(game_part_players):
+    game_players_str = ''
+    game_part_players = sorted(game_part_players)
+    for game_player_idx in range(len(game_part_players)):
+        game_player_abbrev = game_part_players[game_player_idx]
+        # add condition for all game players in combo
+        if game_player_idx == 0:
+            game_players_str = game_player_abbrev
+        else:
+            game_players_str += ', ' + game_player_abbrev
+
+    return game_players_str
+
 # convert cond dict to list
 #all_current_conditions: {'cole anthony': {'loc': 'away', 'out': ['wendell carter jr', 'markelle fultz'], 'start...
 # all_current_conditions = {p1:{out:[m fultz pg], loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
@@ -247,13 +260,16 @@ def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_team
 
     game_players_cond_keys = ['out', 'starters', 'bench']
 
+    game_players = []
     for cond_key, cond_val in conditions.items():
         # print('cond_key: ' + str(cond_key))
         # print('cond_val: ' + str(cond_val))
         
         if cond_key in game_players_cond_keys:#== 'out':
             #print('game player condition')
-            game_players_str = ''
+            #game_players_str = ''
+            game_part_players = []
+            
             for game_player_idx in range(len(cond_val)):
                 game_player = cond_val[game_player_idx]
                 #print('\ngame_player: ' + str(game_player))
@@ -277,19 +293,37 @@ def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_team
                 
                 conditions_dict[final_cond_val] = cond_key
 
-                # add condition for all game players in combo
-                if game_player_idx == 0:
-                    game_players_str = game_player_abbrev
-                else:
-                    game_players_str += ', ' + game_player_abbrev
+                # if condition is multiplayer then we need to sort alphabetically
+                #if re.search(',',conditions):
+                game_part_players.append(game_player_abbrev)
+                if cond_key != 'out':
+                    game_players.append(game_player_abbrev)
+                    cond_key = 'in'
+                    final_cond_val = game_player_abbrev + ' ' + cond_key 
+                    #print('final_cond_val: ' + str(final_cond_val))
+                    
+                    conditions_dict[final_cond_val] = cond_key
 
+            game_players_str = convert_to_game_players_str(game_part_players)
+            
             #game_players_str += ' ' + cond_key
             final_cond_val = game_players_str + ' ' + cond_key 
-            #print('final_cond_val: ' + str(final_cond_val))
+            print('final_cond_val: ' + str(final_cond_val))
             conditions_dict[final_cond_val] = cond_key
+
 
         else:
             conditions_dict[cond_val] = cond_key
+
+    # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
+    # we do not want to show in condition due to clutter but still account for it
+    if len(game_players) > 0:
+        game_players_str = convert_to_game_players_str(game_part_players)
+            
+        cond_key = 'in'
+        final_cond_val = game_players_str + ' ' + cond_key
+        print('final_cond_val: ' + str(final_cond_val))
+        conditions_dict[final_cond_val] = cond_key
 
     # conditions_list: ['home', 'L Nance Jr PF out', 'M Ryan F out', 'L Nance Jr PF, M Ryan F out', 'C McCollum SG starters', 'B Ingram SF starters', 'H Jones SF starters', 'Z Williamson PF starters', 'J Valanciunas C starters', 'C McCollum SG, B Ingram SF, H Jones SF, Z Williamson PF, J Valanciunas C starters', 'bench']
     #print('conditions_dict: ' + str(conditions_dict))

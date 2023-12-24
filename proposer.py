@@ -63,7 +63,7 @@ settings = {'find matchups': find_matchups,
 # gen list of player names given teams so we dont have to type all names
 # if no date given, and if past 10pm then assume getting data for next day
 # https://www.espn.com/nba/schedule 
-game_teams = [('den','cha')]#, ('orl','ind'), ('hou','nop'), ('mem','atl'), ('det','bkn'), ('uta','tor'), ('cle','chi'), ('lal','okc'), ('sas','dal'), ('por','gsw'), ('min','sac')]#, ('nop','lal')
+game_teams = [('den','dal')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_all_teams_rosters(game_teams, read_new_teams) # {team:roster,...}
