@@ -246,106 +246,116 @@ def convert_to_game_players_str(game_part_players):
 # all_current_conditions = {p1:{out:[m fultz pg], loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # list = away, 'p1 out', 'p2 out', ...
 # need to expand list values
-# conditions_list = ['m fultz pg out', 'w carter c out', 'm fultz pg, w carter c out', 'away', ...]
+# OLD: conditions_list = ['m fultz pg out', 'w carter c out', 'm fultz pg, w carter c out', 'away', ...]
+# conditions_list = ['m fultz pg, w carter c out', 'away', ...]
+# for player conditions only show list of players together but later will account for sub weights of single player conditions
 def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_teams, all_box_scores, player='', season_years=[], cur_yr=''):
     # print('\n===Convert Conditions Dict to List: ' + player.title() + '===\n')
     # print('Input: Player of Interest')
-    # print('Input: conditions_dict = {starters:[s1,...], loc:l1, city:c1, dow:d1, tod:t1,...}, ... = {\'loc\': \'away\', \'out\': [\'vlatko cancar\',...], ...')
-    # print('Input: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
-    # print('\nOutput: conditions_dict = {\'p1, p2 out\':out, \'p1 out\':out, \'p2 out\':out, \'away\':loc, ...],...\n')
+    # print('Input: conditions = {starters:[s1,...], loc:l1, city:c1, dow:d1, tod:t1,...}, ... = {\'loc\': \'away\', \'out\': [\'vlatko cancar\',...], ...')
+    # print('Input: all_players_abbrevs = {year:{abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
+    # print('\nOutput: conditions_dict = {loc:away, start:start, prev:5, ... = ')
+    # print('Output: gp_conds_dict = {teammates: {starters:[],...}, opp: {...}}, ... = \n')
 
     #print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     conditions_dict = {}
 
+    teammates_key = 'teammates'
+    opp_key = 'opp'
+    gp_conds_dict = {teammates_key:{}, opp_key:{}}
+
     game_players_cond_keys = ['out', 'starters', 'bench']
 
     game_players = []
+    in_key = 'in'
+    
     for cond_key, cond_val in conditions.items():
         # print('cond_key: ' + str(cond_key))
         # print('cond_val: ' + str(cond_val))
         
         if cond_key in game_players_cond_keys:#== 'out':
             #print('game player condition')
-            #game_players_str = ''
-            game_part_players = []
             
-            for game_player_idx in range(len(cond_val)):
-                game_player = cond_val[game_player_idx]
-                #print('\ngame_player: ' + str(game_player))
-                # need to convert player full name to abbrev with position to compare to condition titles
-                # at this point we have determined full names from abbrevs so we can refer to that list
-                # done: save player abbrevs for everyone played with
-                # NEXT: enable multiple irregular abbrevs like X Tillman and Tillman Sr for xavier tillman
-                # pass in list of players with multiple abbrevs so we dont have to check every player
-                game_player_abbrev = convert_player_name_to_abbrev(game_player, all_players_abbrevs)
+            gp_conds_dict[teammates_key][cond_key] = cond_val
 
-                # for single player change starters to starter or starting so it can be plural or singular
-                # D Green PF out
-                # remove s from starters for single player
-                # final_cond_key = cond_key
-                # if cond_key == 'starters':
-                #     if not re.search(',',cond_key):
-                #         final_cond_key = cond_key.rstrip('s')
-                # D Green PF out, S Curry PG starters
-                final_cond_val = game_player_abbrev + ' ' + cond_key 
-                #print('final_cond_val: ' + str(final_cond_val))
+            # game_part_players = []
+            
+            # for game_player_idx in range(len(cond_val)):
+            #     game_player = cond_val[game_player_idx]
+            #     print('\ngame_player: ' + str(game_player))
+            #     # need to convert player full name to abbrev with position to compare to condition titles
+            #     # at this point we have determined full names from abbrevs so we can refer to that list
+            #     # done: save player abbrevs for everyone played with
+            #     # NEXT: enable multiple irregular abbrevs like X Tillman and Tillman Sr for xavier tillman
+            #     # pass in list of players with multiple abbrevs so we dont have to check every player
+            #     game_player_abbrev = convert_player_name_to_abbrev(game_player, all_players_abbrevs)
+            #     # if blank abbrev, then practice player bc we got all abbrevs of players in games
+            #     if game_player_abbrev != '':
+        
+            #         # if condition is multiplayer then we need to sort alphabetically
+            #         #if re.search(',',conditions):
+            #         game_part_players.append(game_player_abbrev)
+            #         if cond_key != 'out': # player in game
+            #             game_players.append(game_player_abbrev)
+                        
+                        # final_cond_val = game_player_abbrev + ' ' + in_key 
+                        # #print('final_cond_val: ' + str(final_cond_val))
+                        
+                        # conditions_dict[final_cond_val] = in_key
+
+            # cond val is list of players in part
+            # if len(cond_val) > 0:
+            #     game_part_players_str = convert_to_game_players_str(game_part_players)
                 
-                conditions_dict[final_cond_val] = cond_key
-
-                # if condition is multiplayer then we need to sort alphabetically
-                #if re.search(',',conditions):
-                game_part_players.append(game_player_abbrev)
-                if cond_key != 'out':
-                    game_players.append(game_player_abbrev)
-                    cond_key = 'in'
-                    final_cond_val = game_player_abbrev + ' ' + cond_key 
-                    #print('final_cond_val: ' + str(final_cond_val))
-                    
-                    conditions_dict[final_cond_val] = cond_key
-
-            game_players_str = convert_to_game_players_str(game_part_players)
-            
-            #game_players_str += ' ' + cond_key
-            final_cond_val = game_players_str + ' ' + cond_key 
-            print('final_cond_val: ' + str(final_cond_val))
-            conditions_dict[final_cond_val] = cond_key
+            #     # game part players, where part = starters or bench or out
+            #     #game_players_str += ' ' + cond_key
+            #     game_part_players_cond_val = game_part_players_str + ' ' + cond_key 
+            #     #print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
+            #     conditions_dict[game_part_players_cond_val] = cond_key
 
 
         else:
-            conditions_dict[cond_val] = cond_key
+            conditions_dict[cond_key] = cond_val
 
     # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
     # we do not want to show in condition due to clutter but still account for it
-    if len(game_players) > 0:
-        game_players_str = convert_to_game_players_str(game_part_players)
+    # if len(game_players) > 0: # all players in game
+    #     game_players_str = convert_to_game_players_str(game_part_players)
             
-        cond_key = 'in'
-        final_cond_val = game_players_str + ' ' + cond_key
-        print('final_cond_val: ' + str(final_cond_val))
-        conditions_dict[final_cond_val] = cond_key
+    #     game_players_cond_val = game_players_str + ' ' + in_key
+    #     #print('game_players_cond_val: ' + str(game_players_cond_val))
+    #     conditions_dict[game_players_cond_val] = in_key
 
     # conditions_list: ['home', 'L Nance Jr PF out', 'M Ryan F out', 'L Nance Jr PF, M Ryan F out', 'C McCollum SG starters', 'B Ingram SF starters', 'H Jones SF starters', 'Z Williamson PF starters', 'J Valanciunas C starters', 'C McCollum SG, B Ingram SF, H Jones SF, Z Williamson PF, J Valanciunas C starters', 'bench']
     #print('conditions_dict: ' + str(conditions_dict))
-    return conditions_dict
+    return (conditions_dict, gp_conds_dict)
 
 # all_conditions_dicts = {p1:{out:[m fultz pg], loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # all_conditions_lists = {p1:[m fultz pg out, away, ...],...
+# seaprate groups of conditions with diff structs, eg game player conds
 def convert_all_conditions_to_dicts(all_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years=[], cur_yr=''):
     print('\n===Convert All Conditions Dicts to Lists===\n')
-    print('Input: all_conditions = {p1:{starters:[s1,...], loc:l1, city:c1, dow:d1, tod:t1,...}, ... = {\'nikola jokic\': {\'loc\': \'away\', \'out\': [\'vlatko cancar\',...], ...')
-    print('Input: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
+    print('Input: all_conditions = {p1:{starters:[s1,...], opp starters:[s1,...], loc:l1, city:c1, dow:d1, tod:t1,...}, ... = {\'nikola jokic\': {\'loc\': \'away\', \'out\': [\'vlatko cancar\',...], ...')# = ' + str(all_conditions))
+    print('Input: all_players_abbrevs = {year:{abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
     # print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...\n')
     # print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
     # print('Input: Season Years of Interest')
-    print('\nOutput: all_conditions_dicts = {p1:{\'p1, p2 out\':\'out\', \'p1 out\':\'out\', \'p2 out\':\'out\', \'away\':\'loc\', ...},... = {\'nikola jokic\': [\'away\', \'V Cancar SF, J Murray PG,... out\', ...\n')
-
+    print('\nOutput: all_conditions_dicts = {p1:{loc:away, start:start, prev:5, ...} = {\'nikola jokic\': {loc:\'away\', ...')
+    print('Output: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = \n')
 
     all_conditions_dicts = {}
+    all_game_player_cur_conds = {}
 
     for player, cond in all_conditions.items():
-        cond_dict = convert_conditions_to_dict(cond, all_players_abbrevs, all_players_teams, all_box_scores, player, season_years, cur_yr)
-        all_conditions_dicts[player] = cond_dict
+        cond_data = convert_conditions_to_dict(cond, all_players_abbrevs, all_players_teams, all_box_scores, player, season_years, cur_yr)
+        
+        cond_dict = cond_data[0]
+        gp_cond_dict = cond_data[1]
 
-    #print('all_conditions_lists: ' + str(all_conditions_lists))
-    return all_conditions_dicts
+        all_conditions_dicts[player] = cond_dict
+        all_game_player_cur_conds[player] = gp_cond_dict
+
+    # print('all_conditions_dicts: ' + str(all_conditions_dicts))
+    # print('all_game_player_cur_conds: ' + str(all_game_player_cur_conds))
+    return (all_conditions_dicts, all_game_player_cur_conds)

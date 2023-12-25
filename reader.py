@@ -2011,12 +2011,21 @@ def read_all_players_stat_dicts(players_names, current_year_str, todays_date):
 # use when we want all players 
 # AND team does not matter
 # rosters = {team:[players],...}
-def read_players_from_rosters(rosters):
+def read_players_from_rosters(rosters, game_teams=[]):
 	players = []
 
-	for roster in rosters.values():
-		for player in roster:
-			players.append(player)
+	teams = []
+	for game in game_teams:
+		for team in game:
+			teams.append(team)
+
+	for team, roster in rosters.items():
+		if len(game_teams) == 0: # add all players from all rosters
+			for player in roster:
+				players.append(player)
+		elif team in teams:
+			for player in roster:
+				players.append(player)
 
 	return players
 
@@ -2059,7 +2068,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	#print('all_teams_players: ' + str(all_teams_players))
 
 	# could add 'stars' as condition as well as level above starters
-	all_lineups = {}#{'den':{'starters':['reggie jackson'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}, 'mia':{'starters':['tyler herro', 'jimmy butler'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}}
+	all_lineups = {'den':{'starters':['jamal murray', 'nikola jokic', 'aaron gordon', 'michael porter jr', 'kentavious caldwell pope'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}, 'mia':{'starters':['tyler herro', 'jimmy butler', 'bam adebayo', 'caleb martin', 'kyle lowry'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}}
 
 	# read all lineups from source website
 	# do we need to save local? yes and make setting to force new lineups
@@ -2248,7 +2257,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	# 			# check which player in all players teams list with this team has this abbrev
 	# 			player = determiner.determine_player_full_name(player, team, all_players_teams)
 
-	#print('all_lineups: ' + str(all_lineups))
+	print('all_lineups: ' + str(all_lineups))
 	return all_lineups
 
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
@@ -3874,7 +3883,7 @@ def read_player_season_logs(player_name, player_espn_id='', read_x_seasons=1, al
 def read_all_players_season_logs(players_names, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024, cur_yr=''):
 	print('\n===Read All Players Season Logs===\n')
 	print('Settings: read x seasons prev, init year of interest')
-	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')
+	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')# + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...\n')
 	print('\nOutput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')

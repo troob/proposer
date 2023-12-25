@@ -1168,23 +1168,7 @@ def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
 
     return sample_size
 
-# all yrs for single condition
-# player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
-def determine_condition_sample_size(player_stat_dict, condition, part):
-    #print('\n===Determine Condition Sample Size: ' + condition + '===\n')
 
-    sample_size = 0
-
-    for year_stat_dicts in player_stat_dict.values():
-        if part in year_stat_dicts.keys():
-            # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
-            full_stat_dict = list(year_stat_dicts[part].values())[0]
-            if condition in full_stat_dict.keys():
-                stat_dict = full_stat_dict[condition]
-                sample_size += len(stat_dict.keys())
-
-    #print('sample_size: ' + str(sample_size))
-    return sample_size
 
 
 def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, season_years=[], irreg_play_time={}):
@@ -1934,6 +1918,42 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+
+
+
+
+# all yrs for single condition
+# player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
+# this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
+def determine_condition_sample_size(player_stat_dict, condition, part):
+    #print('\n===Determine Condition Sample Size: ' + condition + '===\n')
+
+    sample_size = 0
+
+    for year_stat_dicts in player_stat_dict.values():
+        if part in year_stat_dicts.keys():
+            # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
+            full_stat_dict = list(year_stat_dicts[part].values())[0]
+            if condition in full_stat_dict.keys():
+                stat_dict = full_stat_dict[condition]
+                sample_size += len(stat_dict.keys())
+
+    #print('sample_size: ' + str(sample_size))
+    return sample_size
+
+# given a list of conds, sum their sample sizes
+# eg for game player conds where we add combo conds with single conds
+def determine_combined_conditions_sample_size(player_stat_dict, conditions, part):
+
+    combined_sample_size = 0
+    for condition in conditions:
+        sample_size = determine_condition_sample_size(player_stat_dict, condition, part)
+        combined_sample_size += sample_size
+
+    return combined_sample_size
 
 
 
