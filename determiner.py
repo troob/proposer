@@ -1929,7 +1929,7 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
 def determine_condition_sample_size(player_stat_dict, condition, part):
-    #print('\n===Determine Condition Sample Size: ' + condition + '===\n')
+    print('\n===Determine Condition Sample Size: ' + condition + '===\n')
 
     sample_size = 0
 
@@ -1941,18 +1941,20 @@ def determine_condition_sample_size(player_stat_dict, condition, part):
                 stat_dict = full_stat_dict[condition]
                 sample_size += len(stat_dict.keys())
 
-    #print('sample_size: ' + str(sample_size))
+    print('sample_size: ' + str(sample_size))
     return sample_size
 
 # given a list of conds, sum their sample sizes
 # eg for game player conds where we add combo conds with single conds
 def determine_combined_conditions_sample_size(player_stat_dict, conditions, part):
+    print('\n===Determine Combined Conditions Sample Size===\n')
 
     combined_sample_size = 0
     for condition in conditions:
         sample_size = determine_condition_sample_size(player_stat_dict, condition, part)
         combined_sample_size += sample_size
 
+    print('combined_sample_size: ' + str(combined_sample_size))
     return combined_sample_size
 
 

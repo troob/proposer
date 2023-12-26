@@ -24,8 +24,7 @@ irreg_play_time = {'craig porter': 25, 'reggie jackson': 35}
 
 # settings
 find_matchups = False
-# read new teams after trades and acquisitions new players
-read_new_teams = False
+
 # read all seasons to compare and see trend
 read_x_seasons = 2 # set 0 or high number to read all seasons
 read_season_year = 2024 # user can choose year. read x seasons previous
@@ -37,6 +36,12 @@ read_new_odds = True
 read_new_stats = False # set true when we add new feature to stats dict so we want to manually overwrite old dict rather than usual behavior of trusting prev stat dicts
 read_new_lineups = True # even if we saved lineups today they may have changed but we may not want to get new lineups yet if we are testing something else
 
+
+# === NEW TEAMS ===
+# read new teams after trades and acquisitions new players
+read_new_teams = False
+
+# === GAME IDs === 
 # if error 429 too many requests then we need to stop reading new game ids for 1hr
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
 read_new_game_ids = True
@@ -63,7 +68,7 @@ settings = {'find matchups': find_matchups,
 # gen list of player names given teams so we dont have to type all names
 # if no date given, and if past 10pm then assume getting data for next day
 # https://www.espn.com/nba/schedule 
-game_teams = [('den','mia')]#, ('nop','lal')
+game_teams = [('den','phx')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_all_teams_rosters(game_teams, read_new_teams) # {team:roster,...}

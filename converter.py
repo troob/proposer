@@ -173,7 +173,7 @@ def convert_team_abbrev_to_name(team_abbrev):
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    #print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
     #print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
@@ -225,7 +225,7 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #         if game_player_abbrev != '':
     #             break
 
-    #print('game_player_abbrev: ' + str(game_player_abbrev))
+    print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
 def convert_to_game_players_str(game_part_players):
@@ -321,7 +321,7 @@ def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_team
     # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
     # we do not want to show in condition due to clutter but still account for it
     # if len(game_players) > 0: # all players in game
-    #     game_players_str = convert_to_game_players_str(game_part_players)
+    #     game_players_str = convert_to_game_players_str(game_players)
             
     #     game_players_cond_val = game_players_str + ' ' + in_key
     #     #print('game_players_cond_val: ' + str(game_players_cond_val))
