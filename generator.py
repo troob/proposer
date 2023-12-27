@@ -2338,7 +2338,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
 def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_cur_conds_dicts={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr=''):
     print('\n===Generate All True Prob Dicts===\n')
     print('Input: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...')
-    print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: all_cur_conds_dicts = {p1:{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = {\'nikola jokic\': [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
@@ -3010,7 +3010,7 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
     print('\nInput: all_stat_probs_dict = {player: {stat name: {stat val: {\'condition year part\': prob, ... = {\'kyle kuzma\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_abbrevs = {year:{player:abbrev, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
-    print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
     print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, prev:5, ...},... = {\'christian braun\': {\'loc\': \'away\', \'start\': \'bench\', ...')
@@ -3170,7 +3170,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     print('Settings: Find Players')
     print('\nInput: Players of Interest')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
-    print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('Input: Current Year to get current team if not in rosters')
     print('Input: all_teams_players = {year:{team:[players], ... = {\'2024\': {\'wsh\': [\'kyle kuzma\', ...')
@@ -3812,15 +3812,19 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
         # determine player team for game at idx
         player_team_idx = 0
         # player_teams = {player:{year:{team:gp,...},...}}
-        team_gp_dict = {}
+        team_stats_dict = {}
         if season_year in player_teams.keys():
-            team_gp_dict = player_teams[season_year]
+            team_stats_dict = player_teams[season_year]
         # team_date_dict = {}
         # if season_year in all_players_teams[player_name].keys():
         #     team_date_dict = all_players_teams[player_name][season_year]
         # reverse team gp dict so same order as game idx recent to distant
-        teams = list(reversed(team_gp_dict.keys()))
-        games_played = list(reversed(team_gp_dict.values()))
+        teams = list(reversed(team_stats_dict.keys()))
+        all_teams_stats = list(reversed(team_stats_dict.values()))
+        games_played = []
+        for team_stats in all_teams_stats:
+            games_played.append(team_stats['GP'])
+
         # add postseason games to num games played so it lines up for full season
         # final games played not used if season part = post
         # bc we do not care games played to get team
@@ -4290,7 +4294,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
     print('\nInput: Player of Interest')
     print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-    print('Input: players_teams = {year:{team:gp,... = {\'2018\': {\'mia\': 69}, ...\n')
+    print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
     print('Input: init_player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = \n')
     print('Input: player_position = \'position\' = \'pg\'')
@@ -4457,6 +4461,53 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
     print('player_stat_dict: ' + str(player_stat_dict))
     return player_stat_dict
 
+def generate_all_box_scores(all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, cur_yr):
+    print('\n===Generate All Box Scores===\n')
+    print('Input: Current Year to get current teams')
+    print('Input: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
+    print('Input: all_teams_players = {year:{team:[players], ... = {\'2024\': {\'wsh\': [\'kyle kuzma\', ...')
+    print('Input: teams_current_rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: all_players_abbrevs = {year:{abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
+    print('\nOutput: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...\n')
+    
+    # if player avg min > 10 and they did not play game, then consider them out
+    # if player avg min < 10 and they did not play game, then consider them bench
+    # {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}}
+    for year, year_box_scores in all_box_scores.items():
+        # {away:{starters:{player:play time,...},bench:{...}},home:{...}}
+        for game_key, game_players in year_box_scores.items():
+            # {starters:{player:play time,...},bench:{...}}
+            for team_loc, game_team_players in game_players.items():
+                # go thru full roster to see which players not in box score
+                team = determiner.determine_team_from_game_key(game_key, team_loc)
+                all_team_players = all_teams_players[year][team]
+                if year == cur_yr:
+                    all_team_players = teams_current_rosters[team]
+                # {player:play time,...}
+                starters = game_team_players['starters']
+                bench = game_team_players['bench']
+                dnp = {}
+                out = {}
+                # add practice players to bench
+                # what if we do not know abbrev bc they have not played yet?
+                # use lowercase full name so we can differentiate it in process
+                for player in all_team_players:
+                    if player not in starters.keys() and player not in bench.keys():
+                        # if not in all players teams then has not played in reg season at all
+                        if player in all_players_teams.keys():
+                            player_mean_minutes = all_players_teams[player][year][team]['MIN']
+                            for abbrev, name in all_players_abbrevs.items():
+                                if player == name:
+                                    player = abbrev
+                                    break
+                            if player_mean_minutes > 10:
+                                out[player] = 0
+                            else:
+                                dnp[player] = 0
+
+    print('all_box_scores: ' + str(all_box_scores))
+    return all_box_scores
 # we need to know how each player plays under certain conditions
 # to propose likely outcomes
 # show regular season avgs
@@ -4588,16 +4639,15 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # if we devise a specific test needing both parts then can change code to input list of season parts
         # all box scores of interest, not including old box scores saved
         all_box_scores = reader.read_all_box_scores(all_players_season_logs, all_players_teams, season_part, read_new_game_ids)[1]#, season_year) # go thru players in all_players_season_logs to get game ids
-
-        all_players_in_box_scores = all_box_scores['player']
-
-        # read all players teammates from season logs and all players in games
-        all_players_teammates = reader.read_all_players_teammates(all_players_season_logs, all_box_scores, current_year_str, todays_date)
+        #all_players_in_box_scores = all_box_scores['player']
 
         all_players_abbrevs_data = reader.read_all_players_abbrevs(all_box_scores, all_players_teams, teams_current_rosters, current_year_str, all_players_espn_ids)
         all_players_abbrevs = all_players_abbrevs_data[0]
         all_players_espn_ids = all_players_abbrevs_data[1]
-        
+        # now that we have new ids, get those players teams
+        # only needed for prev yrs bc current ids found from rosters
+        all_players_teams = all_players_abbrevs_data[2]#reader.read_all_players_teams(all_players_espn_ids)
+
         # read all teams players so we can find bench by process of elimination
         # not as simple as reading roster online bc shows inactive players
         # so need box scores to show active players
@@ -4605,6 +4655,27 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # do not include practice players in all teams players
         all_teams_players = reader.read_all_teams_players(all_box_scores, teams_current_rosters, all_players_teams, all_players_abbrevs, current_year_str)
         #all_practice_players = 
+
+        # now that we have all teams players and abbrevs, 
+        # we can see which practice players were on the bench in games they did not play
+        # vs active players who were out
+        all_box_scores = generate_all_box_scores(all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, current_year_str)
+
+        # for each team, practice players avg <10min per game
+        # if player on roster not in box score, determine injury or practice player by avg play time
+        # if practice player played a certain game it will be counted as a bench player (if came off the bench) just like if he didnt play at all but was available on the bench
+        # get players teams for players in box score bc contains avg minutes data
+        #all_players_teams = reader.read_all_players_teams()
+        # already got all players teams from id list bc set find players=true gets every single players teams exactly for this reason!
+        #all_practice_players = determiner.determine_practice_players(all_players_teams, all_teams_players, teams_current_rosters)
+
+
+        # read all players teammates from season logs and all players in games
+        all_players_teammates = reader.read_all_players_teammates(all_players_season_logs, all_box_scores, current_year_str, todays_date)
+
+
+
+
 
         # add players teams of players in box scores to relate to player of interest
         # makes it easier to get abbrevs?

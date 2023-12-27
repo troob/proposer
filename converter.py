@@ -115,8 +115,77 @@ def convert_american_to_decimal_odds(american_odds):
     return float(decimal_odds)
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# all_box_scores = {game:{away:{starters:{},bench:{}},home:{starters:[],bench:[]}}
+# we will convert away home to teammates opponents given current player of interest
+# game_box_scores_dict = {away:df, home:df}
+# get the game box score page using the game id
+# get the box score from the page in a df
+# game_box_scores_dict = {away:df, home:df}
+# currently returns empty dict if results already saved
+def convert_box_score_to_dict(box_score_df):
+    print('\n===Convert Box Score to Dict===\n')
+
+    box_score_dict = {'starters':{},'bench':{}}
+
+    players = box_score_df[0].drop(0).to_list()
+    #print('players:' + str(players))
+    play_times = box_score_df[1].drop(0).to_list()
+    
+    final_players = []
+    for player in players:
+        player = re.sub('\.','',player)#.lower() # easier to read if titled but ust match comparisons with all teammates. all teammates comes from all players in games so they auto match format
+        final_players.append(player)
+
+    bench_idx = 5 # bc always 5 starters
+    # starters = final_players[:bench_idx]
+	# bench = final_players[bench_idx+1:]
+    #for team_part, team_part_box_score_dict in box_score_dict.items():
+
+    # ignore players played <10min
+    # arbitrary portion of game deemed consequential
+    for player_idx in range(len(players)):
+        # ignore mid header row repeated for bench
+        if player_idx == bench_idx:
+            continue
+
+        team_part = 'bench'
+        if player_idx < bench_idx:
+            team_part = 'starters'
+
+        player = final_players[player_idx]
+        play_time = play_times[player_idx]
+
+        # better to keep all players in box score, even dnp and out
+        # bc easier to match with current conditions than leaving unknowns
+        #if int(play_time) > 10:
+        box_score_dict[team_part][player] = play_time
+
+    print('box_score_dict: ' + str(box_score_dict))
+    return box_score_dict
+
 def convert_team_abbrev_to_name(team_abbrev):
-    print('\n===Convert Team Abbrev to Name: ' + team_abbrev + '===\n')
+    #print('\n===Convert Team Abbrev to Name: ' + team_abbrev + '===\n')
     
     name = ''
 
@@ -154,21 +223,8 @@ def convert_team_abbrev_to_name(team_abbrev):
     if team_abbrev in team_names.keys():
         name = team_names[team_abbrev]
 
-    print('name: ' + name)
+    #print('name: ' + name)
     return name
-
-
-
-
-
-
-
-
-
-
-
-
-
 
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?

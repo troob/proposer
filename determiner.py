@@ -410,60 +410,7 @@ def determine_prev_game_date(player_game_log, season_year):
     return prev_game_date_obj
 
 
-# gather game logs by season and do not pull webpage if it does not exist
-# season_year=0 so hard fail if no season given but then why not make required var?
-# bc default should assume current season? no bc if we are looking them up they are probably in current season and it is more likely they did not play past season
-# player_teams = {year:team:gp}
-def determine_played_season(player_url, player_name='', season_year=0, all_game_logs={}, player_game_logs={}, player_teams={}):
-    #print('\n===Determine if player ' + player_name.title() + ' played season ' + str(season_year) + '===\n')
-    played_season = False
 
-    #print('player_teams: ' + str(player_teams))
-    #print('player_game_logs: ' + str(player_game_logs))
-
-    if len(player_teams.keys()) > 0:
-        #print('found player teams')
-        #print('season year: ' + str(season_year))
-        if str(season_year) in player_teams.keys():
-            #print('player season team found in player TEAMS')
-            played_season = True
-    else: # player teams not given
-        # all game logs too big as one var so consider replacing next version with player game logs
-        if player_name in all_game_logs.keys() and str(season_year) in all_game_logs[player_name].keys():
-            #print('player season game log found in ALL game logs')
-            played_season = True
-
-        # if using separate player logs, 1 per player for all seasons they played
-        elif str(season_year) in player_game_logs.keys():
-            #print('player season game log found in PLAYER game logs')
-            played_season = True
-
-        else:
-            #print('player season game log not saved')
-
-            try:
-
-                html_results = reader.read_web_data(player_url)
-                if html_results is not None:
-                    len_html_results = len(html_results) # each element is a dataframe/table so we loop thru each table
-
-                    for order in range(len_html_results):
-                        #print("order: " + str(order))
-
-                        if len(html_results[order].columns.tolist()) == 17:
-
-                            played_season = True
-                            break
-
-                
-            except Exception as e:
-                print('Page exists but no tables: ', e)
-                #print('Exception could not get url: ', e)
-
-    if not played_season:
-        print('\nWarning: ' + player_name.title() + ' did NOT play season ' + str(season_year) + '!\n')
-
-    return played_season
 
 
 
@@ -1426,120 +1373,11 @@ def determine_player_team_by_date(player, player_teams, row):
 
     return team
 
-#list(player_teams[player][cur_yr].keys())[-1] # current team
-# can we take first year in teams list instead of cur yr?
-# player_teams = {year:{team:gp,...},...
-# do we always want to return the team, even if they are only practice players?
-# that may lead to wrong results if we only want to consider game players
-def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
-    #print('\n===Determine Player Current Team: ' + player.title() + '===\n')
 
-    cur_team = ''
 
-    if cur_yr == '':
-        cur_yr = determine_current_season_year()
 
-    # more reliable to take from rosters 
-    # bc player teams will only show if they actually played this season
-    if len(rosters.keys()) > 0:
-        for team, roster in rosters.items():
-            if player in roster:
-                cur_team = team
-                break
 
-    if cur_team == '': # could not find player in rosters so maybe not player of interest but maybe player of comparison
-        if len(player_teams.keys()) > 0:
-            if cur_yr in player_teams.keys():
-                cur_team = list(player_teams[cur_yr].keys())[-1]
-            # {team:gp,...}
-            else:
-                recent_yr_teams = list(player_teams.values())[-1] # most recent yr
-                if len(recent_yr_teams.keys()) > 0:
-                    cur_team = list(recent_yr_teams.keys())[-1] # most recent team
-    # should always have player teams bc all lineups are same players as input
-    # else: # need to get current team from internet
-    #     cur_team = reader.read_player_current_team()
 
-    # if cur_team == '':
-    #     print('\n===Warning: Player cur team blank! ' + player.title() + '===')
-    #     print('player_teams: ' + str(player_teams))
-    #     print('cur_yr: ' + str(cur_yr))
-    #     print('rosters: ' + str(rosters))
-
-    #print('cur_team: ' + cur_team)
-    return cur_team
-
-# given todays game matchups
-# output opponent team
-# game_teams = [('mil','mia'),...]
-# player_teams = {'2018': {'mia': 69}, '2019...
-# player_teams = {year:{team:gp,...},...
-def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
-    #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
-    #print('player_teams: ' + str(player_teams))
-    #print('game_teams: ' + str(game_teams))
-    
-    opp_team = ''
-
-    if player_team == '':
-        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
-
-    # look for player team in games
-    # game = ('mil','mia')
-    for game in game_teams:
-        for team_idx in range(len(game)):
-            # team = 'mil'
-            team = game[team_idx]
-            if player_team == team: # found game in list of games
-                opp_team_idx = 0
-                if team_idx == 0:
-                    opp_team_idx = 1
-                                
-                opp_team = game[opp_team_idx]
-                break
-
-        if opp_team != '':
-            break
-        
-    #print('opp_team: ' + opp_team)
-    return opp_team
-
-# jaylen brown -> j brown
-# trey murphy iii -> t murphy iii
-# Jayson Tatum -> j tatum
-# j tatum sf -> j tatum
-# use to see if started or bench
-# bc lineups shows player abbrev
-def determine_player_abbrev(player_name):
-    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
-    #print('player_name: ' + str(player_name))
-    #player_abbrev = ''
-
-    # if already 1 letter in first name
-    # then using first initial in format j brown sg
-    # so remove last word to get abbrev
-    #player_abbrev = player_initital + last_name
-    if player_name != '':
-        player_name = re.sub('\.', '', player_name).lower()
-        player_name = re.sub('-', ' ', player_name)
-        player_names = player_name.split()
-        player_abbrev = re.sub('\.','',player_names[0][0])
-        if len(player_names[0]) == 1:
-            # remove position from end of name abbrev
-            for name in player_names[1:-1]:
-                player_abbrev += ' ' + name
-        
-        else:
-            #last_name = ''
-            for name in player_names[1:]:
-                player_abbrev += ' ' + name
-
-        player_abbrev = player_abbrev.lower()
-    else:
-        print('Warning: Blank player name while determining player abbrev!')
-    
-    #print('player_abbrev: ' + player_abbrev)
-    return player_abbrev
 
 # def determine_player_abbrev(player_name):
 
@@ -1576,22 +1414,53 @@ def determine_player_team_by_game(player, game_key, player_teams):
     #print('team: ' + team)
     return team
 
-# player_teams = {year:{team:gp,...},...}}
-def determine_player_season_teams(player, game_key, player_teams):
-    #print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
-
-    teams = []
 
 
-    if len(game_key) > 0:
-        game_date = game_key.split()[-1]
-        season_yr = determine_season_year(game_date)
-        if season_yr in player_teams.keys():
-            for team in player_teams[season_yr].keys():
-                teams.append(team)
 
-    #print('teams: ' + str(teams))
-    return teams
+
+
+
+
+
+
+
+
+
+
+# given todays game matchups
+# output opponent team
+# game_teams = [('mil','mia'),...]
+# player_teams = {'2018': {'mia': 69}, '2019...
+# player_teams = {year:{team:gp,...},...
+def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
+    #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
+    #print('player_teams: ' + str(player_teams))
+    #print('game_teams: ' + str(game_teams))
+    
+    opp_team = ''
+
+    if player_team == '':
+        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
+
+    # look for player team in games
+    # game = ('mil','mia')
+    for game in game_teams:
+        for team_idx in range(len(game)):
+            # team = 'mil'
+            team = game[team_idx]
+            if player_team == team: # found game in list of games
+                opp_team_idx = 0
+                if team_idx == 0:
+                    opp_team_idx = 1
+                                
+                opp_team = game[opp_team_idx]
+                break
+
+        if opp_team != '':
+            break
+        
+    #print('opp_team: ' + opp_team)
+    return opp_team
 
 # player = Jal Williams 
 # player_name = jalen williams
@@ -1638,6 +1507,105 @@ def determine_player_abbrev_match(main_player, compare_player):
 
     return match
 
+# player_teams = {year:{team:gp,...},...}}
+def determine_player_season_teams(player, game_key, player_teams):
+    #print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
+    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+
+    teams = []
+
+
+    if len(game_key) > 0:
+        game_date = game_key.split()[-1]
+        season_yr = determine_season_year(game_date)
+        if season_yr in player_teams.keys():
+            for team in player_teams[season_yr].keys():
+                teams.append(team)
+
+    #print('teams: ' + str(teams))
+    return teams
+
+#list(player_teams[player][cur_yr].keys())[-1] # current team
+# can we take first year in teams list instead of cur yr?
+# player_teams = {year:{team:gp,...},...
+# do we always want to return the team, even if they are only practice players?
+# that may lead to wrong results if we only want to consider game players
+def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
+    #print('\n===Determine Player Current Team: ' + player.title() + '===\n')
+    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+
+    cur_team = ''
+
+    if cur_yr == '':
+        cur_yr = determine_current_season_year()
+
+    # more reliable to take from rosters 
+    # bc player teams will only show if they actually played this season
+    if len(rosters.keys()) > 0:
+        for team, roster in rosters.items():
+            if player in roster:
+                cur_team = team
+                break
+
+    if cur_team == '': # could not find player in rosters so maybe not player of interest but maybe player of comparison
+        if len(player_teams.keys()) > 0:
+            if cur_yr in player_teams.keys():
+                cur_team = list(player_teams[cur_yr].keys())[-1]
+            # {team:gp,...}
+            else:
+                recent_yr_teams = list(player_teams.values())[-1] # most recent yr
+                if len(recent_yr_teams.keys()) > 0:
+                    cur_team = list(recent_yr_teams.keys())[-1] # most recent team
+    # should always have player teams bc all lineups are same players as input
+    # else: # need to get current team from internet
+    #     cur_team = reader.read_player_current_team()
+
+    # if cur_team == '':
+    #     print('\n===Warning: Player cur team blank! ' + player.title() + '===')
+    #     print('player_teams: ' + str(player_teams))
+    #     print('cur_yr: ' + str(cur_yr))
+    #     print('rosters: ' + str(rosters))
+
+    #print('cur_team: ' + cur_team)
+    return cur_team
+
+# jaylen brown -> j brown
+# trey murphy iii -> t murphy iii
+# Jayson Tatum -> j tatum
+# j tatum sf -> j tatum
+# use to see if started or bench
+# bc lineups shows player abbrev
+def determine_player_abbrev(player_name):
+    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
+    #print('player_name: ' + str(player_name))
+    #player_abbrev = ''
+
+    # if already 1 letter in first name
+    # then using first initial in format j brown sg
+    # so remove last word to get abbrev
+    #player_abbrev = player_initital + last_name
+    if player_name != '':
+        player_name = re.sub('\.', '', player_name).lower()
+        player_name = re.sub('-', ' ', player_name)
+        player_names = player_name.split()
+        player_abbrev = re.sub('\.','',player_names[0][0])
+        if len(player_names[0]) == 1:
+            # remove position from end of name abbrev
+            for name in player_names[1:-1]:
+                player_abbrev += ' ' + name
+        
+        else:
+            #last_name = ''
+            for name in player_names[1:]:
+                player_abbrev += ' ' + name
+
+        player_abbrev = player_abbrev.lower()
+    else:
+        print('Warning: Blank player name while determining player abbrev!')
+    
+    #print('player_abbrev: ' + player_abbrev)
+    return player_abbrev
+
 # if given abbrev like D. Green need to know team or position to get full name
 # already given team so use that
 # check which player in all players teams list with this team has this abbrev
@@ -1651,7 +1619,7 @@ def determine_player_abbrev_match(main_player, compare_player):
 def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
     # print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
     # print('Input: team of player of interest in game of interest')
-    # print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...')
+    # print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     # print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
     # print('Input: game_key = away home date = nyk det 12/22/2023')
     # print('Input: Current Year to tell current team')
@@ -1922,8 +1890,20 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+# use whenever we know game key and team loc but not the team name
+def determine_team_from_game_key(game_key, team_loc):
+    
+    team = ''
 
+    game_data = game_key.split()
+    if len(game_data) > 2:
+        away_team = game_data[0]
+        home_team = game_data[1]
+        team = away_team
+        if team_loc == 'home':
+            team = home_team
 
+    return team
 
 # all yrs for single condition
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
@@ -1963,7 +1943,7 @@ def determine_combined_conditions_sample_size(player_stat_dict, conditions, part
 # if post or full season, game idx starts at 0
 def determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played):
     #print('\n===Determine Player Team Idx: ' + player.title() + '===\n')
-
+    
     # if type == postseason, then player team idx always =0
     # game type = season part
     game_type = row['Type']
@@ -1983,6 +1963,54 @@ def determine_player_team_idx(player, player_team_idx, game_idx, row, games_play
 
     #print('player_team_idx: ' + str(player_team_idx))
     return player_team_idx
+
+
+
+def determine_teams_reg_and_playoff_games_played(all_players_teams, player_season_log, season_part, year, player):
+    # read all box scores if postseason to get more samples and compare to reg season
+    if season_part == 'postseason':
+        season_part = 'full'
+
+    player_season_log_df = pd.DataFrame(player_season_log)
+    season_part_game_log = determine_season_part_games(player_season_log_df, season_part)
+
+    num_playoff_games = 0 # reg season idx
+    if season_part == 'regular':
+        if len(season_part_game_log.index) > 0:
+            num_playoff_games = int(season_part_game_log.index[0]) # num playoff games not counting playin bc playn listed after 
+    else: # full
+        regseason_game_log = determine_season_part_games(player_season_log_df)
+        if len(regseason_game_log.index) > 0:
+            num_playoff_games = int(regseason_game_log.index[0])
+    #print('num_playoff_games: ' + str(num_playoff_games))
+    
+    # determine player team for game at idx
+    player_team_idx = 0 # bc recent games first
+    # player_teams = {player:{year:{team:{GP:gp, MIN:min},...},...}}
+    # team_stats_dict = {team:{GP:gp, MIN:min}}
+    team_stats_dict = {}
+    #team_gp_dict = {}
+    if year in all_players_teams[player].keys():
+        team_stats_dict = all_players_teams[player][year]
+    # reverse team gp dict so same order as game idx recent to distant
+    teams = list(reversed(team_stats_dict.keys()))
+    all_teams_stats = list(reversed(team_stats_dict.values()))
+    games_played = []#list(reversed(team_gp_dict.values()))
+    for team_stats in all_teams_stats:
+        games_played.append(team_stats['GP'])
+    # add postseason games to num games played so it lines up for full season
+    # final games played not used if season part = post
+    # bc we do not care games played to get team
+    # so it does not need to include playin games
+    num_recent_reg_games = 0
+    if len(games_played) > 0:
+        num_recent_reg_games = games_played[0] # num reg games with most recent team
+    #print('num_recent_reg_games: ' + str(num_recent_reg_games))
+    reg_and_playoff_games_played = [num_recent_reg_games + num_playoff_games] + games_played[1:]
+    teams_reg_and_playoff_games_played = int(reg_and_playoff_games_played[player_team_idx])
+    #print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+
+    return (teams_reg_and_playoff_games_played, season_part_game_log, teams, games_played)
 
 def determine_regular_season_games(player_game_log):
 
@@ -2045,6 +2073,61 @@ def determine_season_part_games(player_game_log, season_part='regular'):
 
     #print("final season_part_games_df:\n" + str(season_part_games_df) + '\n')
     return season_part_games_df
+
+# gather game logs by season and do not pull webpage if it does not exist
+# season_year=0 so hard fail if no season given but then why not make required var?
+# bc default should assume current season? no bc if we are looking them up they are probably in current season and it is more likely they did not play past season
+# player_teams = {year:team:gp}
+def determine_played_season(player_url, player_name='', season_year=0, all_game_logs={}, player_game_logs={}, player_teams={}):
+    #print('\n===Determine if player ' + player_name.title() + ' played season ' + str(season_year) + '===\n')
+    played_season = False
+
+    #print('player_teams: ' + str(player_teams))
+    #print('player_game_logs: ' + str(player_game_logs))
+
+    if len(player_teams.keys()) > 0:
+        #print('found player teams')
+        #print('season year: ' + str(season_year))
+        if str(season_year) in player_teams.keys():
+            #print('player season team found in player TEAMS')
+            played_season = True
+    else: # player teams not given
+        # all game logs too big as one var so consider replacing next version with player game logs
+        if player_name in all_game_logs.keys() and str(season_year) in all_game_logs[player_name].keys():
+            #print('player season game log found in ALL game logs')
+            played_season = True
+
+        # if using separate player logs, 1 per player for all seasons they played
+        elif str(season_year) in player_game_logs.keys():
+            #print('player season game log found in PLAYER game logs')
+            played_season = True
+
+        else:
+            #print('player season game log not saved')
+
+            try:
+
+                html_results = reader.read_web_data(player_url)
+                if html_results is not None:
+                    len_html_results = len(html_results) # each element is a dataframe/table so we loop thru each table
+
+                    for order in range(len_html_results):
+                        #print("order: " + str(order))
+
+                        if len(html_results[order].columns.tolist()) == 17:
+
+                            played_season = True
+                            break
+
+                
+            except Exception as e:
+                print('Page exists but no tables: ', e)
+                #print('Exception could not get url: ', e)
+
+    if not played_season:
+        print('\nWarning: ' + player_name.title() + ' did NOT play season ' + str(season_year) + '!\n')
+
+    return played_season
 
 def determine_current_season_part(todays_games_date_obj=datetime.today()):
     #print('\n===Determine Current Season Part===\n')
