@@ -1531,8 +1531,9 @@ def determine_player_season_teams(player, game_key, player_teams):
 # do we always want to return the team, even if they are only practice players?
 # that may lead to wrong results if we only want to consider game players
 def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
-    #print('\n===Determine Player Current Team: ' + player.title() + '===\n')
-    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('\n===Determine Player Current Team: ' + player.title() + '===\n')
+    print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('\nOutput: player_current_team = \'cha\'\n')
 
     cur_team = ''
 
@@ -1566,7 +1567,7 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
     #     print('cur_yr: ' + str(cur_yr))
     #     print('rosters: ' + str(rosters))
 
-    #print('cur_team: ' + cur_team)
+    print('cur_team: ' + cur_team)
     return cur_team
 
 # jaylen brown -> j brown
@@ -1576,7 +1577,7 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
 # use to see if started or bench
 # bc lineups shows player abbrev
 def determine_player_abbrev(player_name):
-    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
+    print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
     #print('player_name: ' + str(player_name))
     #player_abbrev = ''
 
@@ -1603,7 +1604,7 @@ def determine_player_abbrev(player_name):
     else:
         print('Warning: Blank player name while determining player abbrev!')
     
-    #print('player_abbrev: ' + player_abbrev)
+    print('player_abbrev: ' + player_abbrev)
     return player_abbrev
 
 # if given abbrev like D. Green need to know team or position to get full name
@@ -1617,13 +1618,13 @@ def determine_player_abbrev(player_name):
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
 def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
-    # print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
-    # print('Input: team of player of interest in game of interest')
-    # print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    # print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
-    # print('Input: game_key = away home date = nyk det 12/22/2023')
-    # print('Input: Current Year to tell current team')
-    # print('\nOutput: player_full_name = jalen brunson\n')
+    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
+    print('Input: team of player of interest in game of interest')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
+    print('Input: game_key = away home date = nyk det 12/22/2023')
+    print('Input: Current Year to tell current team')
+    print('\nOutput: player_full_name = jalen brunson\n')
     
     # print('team: ' + str(team))
     #print('all_players_teams: ' + str(all_players_teams))
@@ -1733,7 +1734,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
                         full_name = compare_player_name
                         break # found player name
 
-    #print('full_name: ' + full_name)
+    print('full_name: ' + full_name)
     return full_name
 
 # given main prop and fields, find vals in those fields

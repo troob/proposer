@@ -4461,53 +4461,92 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
     print('player_stat_dict: ' + str(player_stat_dict))
     return player_stat_dict
 
-def generate_all_box_scores(all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, cur_yr):
+# -first take dnp players (avg <10min) off current conditions bench
+# -then take dnp players off games they played <10min (keep in games they  played >10min bc bench wont match anyway!)
+def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, cur_yr):
     print('\n===Generate All Box Scores===\n')
     print('Input: Current Year to get current teams')
-    print('Input: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
+    print('Input: init_all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
     print('Input: all_teams_players = {year:{team:[players], ... = {\'2024\': {\'wsh\': [\'kyle kuzma\', ...')
     print('Input: teams_current_rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: all_players_abbrevs = {year:{abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
-    print('\nOutput: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...\n')
+    print('\nOutput: final_all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...},dnp:{...},out:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...\n')
     
+    final_all_box_scores = {}
+
     # if player avg min > 10 and they did not play game, then consider them out
     # if player avg min < 10 and they did not play game, then consider them bench
     # {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}}
-    for year, year_box_scores in all_box_scores.items():
+    for year, year_box_scores in init_all_box_scores.items():
+        final_all_box_scores[year] = {}
         # {away:{starters:{player:play time,...},bench:{...}},home:{...}}
         for game_key, game_players in year_box_scores.items():
+            final_all_box_scores[year][game_key] = {}
             # {starters:{player:play time,...},bench:{...}}
             for team_loc, game_team_players in game_players.items():
+                final_all_box_scores[year][game_key][team_loc] = {}
+                final_team_players = final_all_box_scores[year][game_key][team_loc]
                 # go thru full roster to see which players not in box score
                 team = determiner.determine_team_from_game_key(game_key, team_loc)
                 all_team_players = all_teams_players[year][team]
                 if year == cur_yr:
                     all_team_players = teams_current_rosters[team]
                 # {player:play time,...}
-                starters = game_team_players['starters']
-                bench = game_team_players['bench']
-                dnp = {}
-                out = {}
+                starters_key = 'starters'
+                starters = game_team_players[starters_key]
+                final_team_players[starters_key] = starters
+
+                bench_key = 'bench'
+                init_bench = game_team_players[bench_key]
+                final_team_players[bench_key] = {}
+                final_bench = final_team_players[bench_key]
+
+                dnp_key = 'dnp'
+                out_key = 'out'
+                final_team_players[dnp_key] = {}
+                dnp = final_team_players[dnp_key]
+                final_team_players[out_key] = {}
+                out = final_team_players[out_key]
                 # add practice players to bench
                 # what if we do not know abbrev bc they have not played yet?
                 # use lowercase full name so we can differentiate it in process
                 for player in all_team_players:
-                    if player not in starters.keys() and player not in bench.keys():
-                        # if not in all players teams then has not played in reg season at all
-                        if player in all_players_teams.keys():
-                            player_mean_minutes = all_players_teams[player][year][team]['MIN']
-                            for abbrev, name in all_players_abbrevs.items():
-                                if player == name:
-                                    player = abbrev
-                                    break
-                            if player_mean_minutes > 10:
-                                out[player] = 0
-                            else:
-                                dnp[player] = 0
+                    # if not in all players teams then has not played in reg season at all
+                    print('\nPlayer: ' + player.title())
+                    player_mean_minutes = 0
+                    if player in all_players_teams.keys():
+                        player_mean_minutes = all_players_teams[player][year][team]['MIN']
+                        for abbrev, name in all_players_abbrevs.items():
+                            if player == name:
+                                player = abbrev
+                                break
+                    else: # maybe in cur roster but not played yet
+                        dnp[player] = 0
+                        continue
 
-    print('all_box_scores: ' + str(all_box_scores))
-    return all_box_scores
+                    # if on bench but <10min avg time and cur play time, move to dnp
+                    if player in init_bench.keys():
+                        play_time = init_bench[player]
+                        if play_time > 10:
+                            final_bench[player] = play_time
+                        else:
+                            if player_mean_minutes > 10:
+                                final_bench[player] = play_time
+                            else:
+                                dnp[player] = play_time
+
+                    if player not in starters.keys() and player not in init_bench.keys():
+                        if player_mean_minutes > 10:
+                            out[player] = 0
+                        else:
+                            dnp[player] = 0
+
+                # game_team_players[dnp_key] = dnp
+                # game_team_players[out_key] = out
+
+    print('final_all_box_scores: ' + str(final_all_box_scores))
+    return final_all_box_scores
 # we need to know how each player plays under certain conditions
 # to propose likely outcomes
 # show regular season avgs

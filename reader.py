@@ -2470,7 +2470,7 @@ def read_player_name(player_abbrev, player_id, all_players_ids_file=''):
 				#'B Key F, C Braun G, C Gillespie G, D Jordan C, H Tyson F, J Huff C, J Pickett G, J Strawther G, P Watson F, Z Nnaji PF bench'
 
 # player stat dict: 'B Key F, C Braun G, C Gillespie G, D Jordan C, H Tyson F, J Pickett G, J Strawther G, R Jackson PG, Z Nnaji PF bench': {'12': 32}, 
-def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_year_players_abbrevs, rosters, cur_yr, all_players_espn_ids):
+def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all_players_abbrevs, rosters, cur_yr, all_players_espn_ids):
 	print('\n===Read Year Players Abbrevs: ' + year + '===\n')
 	print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
@@ -2481,9 +2481,12 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_yea
 
 	#print('init all_players_espn_ids: ' + str(all_players_espn_ids))
 
-	year_players_abbrevs = init_year_players_abbrevs
+	# we pass all players abbrevs in here in case we cant find search results for prev yrs for dnp player who has search results for current yr
+	year_players_abbrevs = init_all_players_abbrevs[year]#init_year_players_abbrevs
+	cur_yr_players_abbrevs = init_all_players_abbrevs[cur_yr]
 
 	all_players_ids_file = 'data/all players ids.csv' # need to get names
+	all_players_teams_file = 'data/all players teams.json' # need to get teams
 
 	for game_key, game_players in year_box_scores.items():
 		print('\ngame_key: ' + str(game_key))
@@ -2529,31 +2532,37 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_yea
 									# continue to next team
 									break
 								
-								player_id = read_player_espn_id(player_abbrev, all_players_espn_ids, game_player_team_name)
+								player_id = read_player_espn_id(player_abbrev, all_players_espn_ids, game_player_team_name, year=year)
 								print('player_id: ' + player_id)
+								# if player id comes back blank then maybe searching for dnp player who only has game log search results for current yr even though they played past yrs as dnp players
+								# so look for same abbrev in cur yr abbrevs
 								# python find value in dictionary
 								player_name = ''#list(all_players_espn_ids.keys())[list(all_players_espn_ids.values()).index(player_id)]
-								for name, id in all_players_espn_ids.items():
-									if player_id == id:
-										player_name = name.lower()
-										break
+								if player_id != '':
+									for name, id in all_players_espn_ids.items():
+										if player_id == id:
+											player_name = name.lower()
+											break
 
-								print('player_name: ' + player_name)
+									print('player_name: ' + player_name)
 
-								if player_name == '': # id not saved either
-									print('id not saved either ' + player_abbrev)
-									player_name = read_player_name(player_abbrev, player_id, all_players_ids_file)
-									# saved new id to file in read player name fcn
-									# so add to all players espn ids dict
-									all_players_espn_ids[player_name] = player_id
-									
-									# we know find_players=True bc we are reading players abbrevs in this fcn which we only need to find players
-									# and we know we need all players teams including those in box scores
-									# so get new player's teams and append to all players teams dict
-									player_teams = read_player_teams(player_name, player_id)
-									all_players_teams[player_name] = player_teams
-									writer.write_json_to_file(all_players_teams, all_players_teams_file, 'a')
-
+									if player_name == '': # id not saved either
+										print('id not saved either ' + player_abbrev)
+										player_name = read_player_name(player_abbrev, player_id, all_players_ids_file)
+										# saved new id to file in read player name fcn
+										# so add to all players espn ids dict
+										all_players_espn_ids[player_name] = player_id
+										
+										# we know find_players=True bc we are reading players abbrevs in this fcn which we only need to find players
+										# and we know we need all players teams including those in box scores
+										# so get new player's teams and append to all players teams dict
+										player_teams = read_player_teams(player_name, player_id)
+										all_players_teams[player_name] = player_teams
+										writer.write_json_to_file(all_players_teams, all_players_teams_file, 'a')
+								
+								elif player_abbrev in cur_yr_players_abbrevs: # id blank bc no search results bc dnp player
+									player_name = cur_yr_players_abbrevs[player_abbrev]
+							
 							if player_name != '':
 								year_players_abbrevs[player_abbrev] = player_name
 							else:
@@ -2917,7 +2926,7 @@ def read_players_in_box_score(game_box_scores_dict, roster={}):
 # need to save as home away so we only need to read once per game and not once per player
 # for each player knowing their team we can tell which is opponents
 def read_game_box_scores(game_key, game_id='', existing_game_ids_dict={}, init_box_scores={}, game_url='', read_new_game_ids=True, player_name=''):
-	print("\n===Read Game Box Scores: " + game_key.upper() + ", " + player_name.title() + "===\n")
+	#print("\n===Read Game Box Scores: " + game_key.upper() + ", " + player_name.title() + "===\n")
 	#print('read_new_game_ids: ' + str(read_new_game_ids))
 
 	# display player game box scores in readable format
@@ -3074,12 +3083,12 @@ def read_game_box_scores(game_key, game_id='', existing_game_ids_dict={}, init_b
 
 	
 	# game_box_scores_dict = {away:df, home:df}
-	print("game_box_scores_dict: " + str(game_box_scores_dict))
+	#print("game_box_scores_dict: " + str(game_box_scores_dict))
 	return game_box_scores_dict # can return this df directly or first arrange into list but seems simpler and more intuitive to keep df so we can access elements by keyword
 
 # assemble components of game key into string for search
 def read_game_key(game_idx, player_reg_season_log, season_year, team_abbrev, row):
-	print('\n===Read Game Key===\n')
+	#print('\n===Read Game Key===\n')
 
 	init_game_date_string = row['Date'].lower().split()[1]#player_reg_season_log.loc[game_idx, 'Date'].lower().split()[1] # 'wed 2/15'[1]='2/15'
 	game_mth = init_game_date_string.split('/')[0]
@@ -3110,7 +3119,7 @@ def read_game_key(game_idx, player_reg_season_log, season_year, team_abbrev, row
 		#player_loc = 'away'
 		
 	game_key = away_abbrev + ' ' + home_abbrev + ' ' + date
-	print('game_key: ' + game_key)
+	#print('game_key: ' + game_key)
 	return game_key
 
 
@@ -4041,8 +4050,8 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Tru
 # bc we can search abbrev to get id and connect to full name
 # but we dont want to save abbrev with id? we could but then it is not uniform
 # could make players abbrevs file with id instead of name bc id is unique but name maybe same for 2 players
-def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_team='', filepath='data/all players ids.csv'):
-	#print('\n===Read Player ESPN ID: ' + init_player_name.title() + '===\n')
+def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_team='', filepath='data/all players ids.csv', year=''):
+	print('\n===Read Player ESPN ID: ' + init_player_name.title() + '===\n')
 
 	espn_id = ''
 
@@ -4071,10 +4080,10 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 		#player_search_term = player_name
 		# if player_name.lower() == 'nikola jovic': # confused with nikola jokic
 		# 	player_search_term += ' miami heat'
+		year_span = converter.convert_year_to_span(year) # 2023 -> 2022-23
 
-
-		player_search_term = player_name + ' ' + player_team + ' ' + position
-		#print('player_search_term: ' + player_search_term)
+		player_search_term = player_name + ' ' + player_team + ' ' + position + ' ' + year_span
+		print('player_search_term: ' + player_search_term)
 		site = 'https://www.google.com/search?q=' + re.sub('\s+', '+', player_search_term) + '+nba+espn+gamelog'
 		# https://www.google.com/search?q=john+collins+game+log
 		#site = 'https://www.google.com/search?q=help'
@@ -4093,22 +4102,32 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 
 			links_with_id_text = [x for x in links_with_text if 'id/' in x]
 
-			espn_id_link = links_with_id_text[0] # string starting with player id
+			# if no links returned then practice player may not have game log search results
+			# so see if there is a player with the same abbrev in current season abbrevs
+			# case of moses brown only shows current yr game log in search results
+			# we know it is same person bc if there was another play that yr then there would be a game log in search results
+			if len(links_with_id_text) > 0:
+				espn_id_link = links_with_id_text[0] # string starting with player id
 
-			espn_id = re.findall(r'\d+', espn_id_link)[0]
+				espn_id = re.findall(r'\d+', espn_id_link)[0]
 
-			#print('Success', espn_id, player_name.title())
+				#print('Success', espn_id, player_name.title())
 
+				# need to check the link we get back has player
+				# with first name same initial as input initial in case given abbrev
+				# it should be a specific enough search that it returns no results but it could easily return wrong results which would cause errors
 
-			# only write to file if given full name
-			# we know not full name if len>2 and ends with f|c|g
-			# irregular case Baldwin F so use uppercase to show abbrev
-			#if len(player_names) < 3 or not re.search('[cfg]$',player_name):
-			if not init_player_name[-1].isupper():
-				data = [[player_name, espn_id]]
-				#filepath = 'data/Player Ids.csv'
-				write_param = 'a' # append ids to file
-				writer.write_data_to_file(data, filepath, write_param) # write to file so we can check if data already exists to determine how we want to read the data and if we need to request from internet
+				# only write to file if given full name
+				# we know not full name if len>2 and ends with f|c|g
+				# irregular case Baldwin F so use uppercase to show abbrev
+				#if len(player_names) < 3 or not re.search('[cfg]$',player_name):
+				if not init_player_name[-1].isupper():
+					data = [[player_name, espn_id]]
+					#filepath = 'data/Player Ids.csv'
+					write_param = 'a' # append ids to file
+					writer.write_data_to_file(data, filepath, write_param) # write to file so we can check if data already exists to determine how we want to read the data and if we need to request from internet
+			else:
+				print('Warning: Search returned no results! ' + player_search_term)
 
 		#except Exception as e:
 			#print('Error', espn_id, player_name.title(), e)

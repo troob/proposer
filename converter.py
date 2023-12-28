@@ -136,6 +136,20 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 
+
+
+
+
+def convert_year_to_span(year):
+
+    # year is season end
+    year_start = str(int(year) - 1)
+    abbrev_yr_end = year[2:]
+
+    span = year_start + '-' + abbrev_yr_end
+
+    return span
+
 # all_box_scores = {game:{away:{starters:{},bench:{}},home:{starters:[],bench:[]}}
 # we will convert away home to teammates opponents given current player of interest
 # game_box_scores_dict = {away:df, home:df}
@@ -144,7 +158,9 @@ def convert_american_to_decimal_odds(american_odds):
 # game_box_scores_dict = {away:df, home:df}
 # currently returns empty dict if results already saved
 def convert_box_score_to_dict(box_score_df):
-    print('\n===Convert Box Score to Dict===\n')
+    # print('\n===Convert Box Score to Dict===\n')
+    # print('Input: box_score_df = dataframe')
+    # print('\nOutput: box_score_dict = {team part: {player abbrev:play time, ...= {\'starters\': {\'A Gordon PF\': \'32\', ...\n')
 
     box_score_dict = {'starters':{},'bench':{}}
 
@@ -181,7 +197,7 @@ def convert_box_score_to_dict(box_score_df):
         #if int(play_time) > 10:
         box_score_dict[team_part][player] = play_time
 
-    print('box_score_dict: ' + str(box_score_dict))
+    #print('box_score_dict: ' + str(box_score_dict))
     return box_score_dict
 
 def convert_team_abbrev_to_name(team_abbrev):
