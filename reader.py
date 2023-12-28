@@ -2482,8 +2482,12 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 	#print('init all_players_espn_ids: ' + str(all_players_espn_ids))
 
 	# we pass all players abbrevs in here in case we cant find search results for prev yrs for dnp player who has search results for current yr
-	year_players_abbrevs = init_all_players_abbrevs[year]#init_year_players_abbrevs
-	cur_yr_players_abbrevs = init_all_players_abbrevs[cur_yr]
+	year_players_abbrevs = {}
+	if year in init_all_players_abbrevs.keys():
+		year_players_abbrevs = init_all_players_abbrevs[year]#init_year_players_abbrevs
+	cur_yr_players_abbrevs = {}
+	if cur_yr in init_all_players_abbrevs.keys():
+		cur_yr_players_abbrevs = init_all_players_abbrevs[cur_yr]
 
 	all_players_ids_file = 'data/all players ids.csv' # need to get names
 	all_players_teams_file = 'data/all players teams.json' # need to get teams
@@ -2558,7 +2562,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 										# so get new player's teams and append to all players teams dict
 										player_teams = read_player_teams(player_name, player_id)
 										all_players_teams[player_name] = player_teams
-										writer.write_json_to_file(all_players_teams, all_players_teams_file, 'a')
+										writer.write_json_to_file(all_players_teams, all_players_teams_file)
 								
 								elif player_abbrev in cur_yr_players_abbrevs: # id blank bc no search results bc dnp player
 									player_name = cur_yr_players_abbrevs[player_abbrev]
@@ -2615,11 +2619,13 @@ def read_all_players_abbrevs(all_box_scores, init_all_players_teams, rosters, cu
 	for year, year_box_scores in all_box_scores.items():
 		#print('\nyear: ' + str(year))
 		
-		init_year_players_abbrevs = {}
-		if year in init_all_players_abbrevs.keys():
-			init_year_players_abbrevs = init_all_players_abbrevs[year]
+		# pass all abbrevs in case cant find player on google by just abbrev for prev yrs in case of dnp players
+		# see moses brown
+		# init_year_players_abbrevs = {}
+		# if year in init_all_players_abbrevs.keys():
+		# 	init_year_players_abbrevs = init_all_players_abbrevs[year]
 		
-		year_players_abbrevs_data = read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_year_players_abbrevs, rosters, cur_yr, all_players_espn_ids) # name: abbrev,...
+		year_players_abbrevs_data = read_year_players_abbrevs(year, year_box_scores, all_players_teams, all_players_abbrevs, rosters, cur_yr, all_players_espn_ids) # name: abbrev,...
 		year_players_abbrevs = year_players_abbrevs_data[0]
 		all_players_espn_ids = year_players_abbrevs_data[1]
 		all_players_teams = year_players_abbrevs_data[2]
@@ -4052,6 +4058,7 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Tru
 # could make players abbrevs file with id instead of name bc id is unique but name maybe same for 2 players
 def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_team='', filepath='data/all players ids.csv', year=''):
 	print('\n===Read Player ESPN ID: ' + init_player_name.title() + '===\n')
+	print('init_player_name: ' + init_player_name)
 
 	espn_id = ''
 
@@ -4067,8 +4074,16 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 		position = ''
 		if init_player_name[-1].isupper():
 			position = 'center'
-			if re.search('F$', init_player_name):
+			if re.search('SF$', init_player_name):
+				position = 'small forward'
+			elif re.search('PF$', init_player_name):
+				position = 'power forward'
+			elif re.search('F$', init_player_name):
 				position = 'forward'
+			elif re.search('PG$', init_player_name):
+				position = 'point guard'
+			elif re.search('SG$', init_player_name):
+				position = 'shooting guard'
 			elif re.search('G$', init_player_name):
 				position = 'guard'
 
@@ -4082,9 +4097,11 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 		# 	player_search_term += ' miami heat'
 		year_span = converter.convert_year_to_span(year) # 2023 -> 2022-23
 
-		player_search_term = player_name + ' ' + player_team + ' ' + position + ' ' + year_span
+		# player team may cause more mismatches bc google focuses on team stats for dnp players
+		# seems like more accurate results with 'nba game log espn' over ' stats per game-nba'
+		player_search_term = player_name.title() + ' ' + position + ' ' + year_span +  ' nba game log espn' #player_team + ' ' + position + ' ' + year_span
 		print('player_search_term: ' + player_search_term)
-		site = 'https://www.google.com/search?q=' + re.sub('\s+', '+', player_search_term) + '+nba+espn+gamelog'
+		site = 'https://www.google.com/search?q=' + re.sub('\s+', '+', player_search_term) #+ 'stats+per+game-nba'#'+nba+espn+gamelog'
 		# https://www.google.com/search?q=john+collins+game+log
 		#site = 'https://www.google.com/search?q=help'
 		#print('site: ' + site)
@@ -4116,6 +4133,8 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 				# need to check the link we get back has player
 				# with first name same initial as input initial in case given abbrev
 				# it should be a specific enough search that it returns no results but it could easily return wrong results which would cause errors
+				# for example sterling brown results show when you remove the team from the search
+				# so first search with team and if no id returned or link title name mismatch search without it?
 
 				# only write to file if given full name
 				# we know not full name if len>2 and ends with f|c|g
