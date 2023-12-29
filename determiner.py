@@ -1422,321 +1422,6 @@ def determine_player_team_by_game(player, game_key, player_teams):
 
 
 
-
-
-
-
-
-# given todays game matchups
-# output opponent team
-# game_teams = [('mil','mia'),...]
-# player_teams = {'2018': {'mia': 69}, '2019...
-# player_teams = {year:{team:gp,...},...
-def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
-    #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
-    #print('player_teams: ' + str(player_teams))
-    #print('game_teams: ' + str(game_teams))
-    
-    opp_team = ''
-
-    if player_team == '':
-        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
-
-    # look for player team in games
-    # game = ('mil','mia')
-    for game in game_teams:
-        for team_idx in range(len(game)):
-            # team = 'mil'
-            team = game[team_idx]
-            if player_team == team: # found game in list of games
-                opp_team_idx = 0
-                if team_idx == 0:
-                    opp_team_idx = 1
-                                
-                opp_team = game[opp_team_idx]
-                break
-
-        if opp_team != '':
-            break
-        
-    #print('opp_team: ' + opp_team)
-    return opp_team
-
-# player = Jal Williams 
-# player_name = jalen williams
-# player_abbrev = j williams. do we need?
-# determine match if first word and second word match
-# cannot compare whole words bc irregular abbrevs
-# what about v williams compared to vince williams jr?
-# we know same bc team only has 1 v williams
-def determine_player_abbrev_match(main_player, compare_player):
-   # print('\n===Determine Player Abbrev Match===\n')
-    #print('main_player: ' + str(main_player))
-    #print('compare_player: ' + str(compare_player))
-
-    match = True
-
-    # remove suffixes before comparing bc some sources dont use
-    # and rare 2 players on same team with suffix only difference in name
-    # but not impossible so ideally use teams to see only 1 matching in team
-    main_player = re.sub('(jr|sr|i+)$','',main_player).strip()
-    compare_player = re.sub('(jr|sr|i+)$','',compare_player).strip()
-    #print('main_player: ' + str(main_player))
-    #print('compare_player: ' + str(compare_player))
-
-
-    main_player_names = main_player.split()
-    compare_player_names = compare_player.split()
-    # if they have different number of words in name then diff player?
-    # no bc 1 source might exclude jr or sr but still same player
-    if len(main_player_names) != len(compare_player_names):
-        match = False
-    else:
-        for name_idx in range(len(main_player_names)):
-            # jal
-            main_name = main_player_names[name_idx]
-            num_letters = len(main_name)
-            # jalen        
-            compare_name = compare_player_names[name_idx]
-            #print('main_name: ' + str(main_name))
-            #print('compare_name: ' + str(compare_name))
-            #print('compare_letters: ' + str(compare_name[:num_letters]))
-            if not main_name == compare_name[:num_letters]:
-                match = False
-                break 
-
-    return match
-
-# player_teams = {year:{team:gp,...},...}}
-def determine_player_season_teams(player, game_key, player_teams):
-    #print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
-    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-
-    teams = []
-
-
-    if len(game_key) > 0:
-        game_date = game_key.split()[-1]
-        season_yr = determine_season_year(game_date)
-        if season_yr in player_teams.keys():
-            for team in player_teams[season_yr].keys():
-                teams.append(team)
-
-    #print('teams: ' + str(teams))
-    return teams
-
-#list(player_teams[player][cur_yr].keys())[-1] # current team
-# can we take first year in teams list instead of cur yr?
-# player_teams = {year:{team:gp,...},...
-# do we always want to return the team, even if they are only practice players?
-# that may lead to wrong results if we only want to consider game players
-def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
-    print('\n===Determine Player Current Team: ' + player.title() + '===\n')
-    print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    print('\nOutput: player_current_team = \'cha\'\n')
-
-    cur_team = ''
-
-    if cur_yr == '':
-        cur_yr = determine_current_season_year()
-
-    # more reliable to take from rosters 
-    # bc player teams will only show if they actually played this season
-    if len(rosters.keys()) > 0:
-        for team, roster in rosters.items():
-            if player in roster:
-                cur_team = team
-                break
-
-    if cur_team == '': # could not find player in rosters so maybe not player of interest but maybe player of comparison
-        if len(player_teams.keys()) > 0:
-            if cur_yr in player_teams.keys():
-                cur_team = list(player_teams[cur_yr].keys())[-1]
-            # {team:gp,...}
-            else:
-                recent_yr_teams = list(player_teams.values())[-1] # most recent yr
-                if len(recent_yr_teams.keys()) > 0:
-                    cur_team = list(recent_yr_teams.keys())[-1] # most recent team
-    # should always have player teams bc all lineups are same players as input
-    # else: # need to get current team from internet
-    #     cur_team = reader.read_player_current_team()
-
-    # if cur_team == '':
-    #     print('\n===Warning: Player cur team blank! ' + player.title() + '===')
-    #     print('player_teams: ' + str(player_teams))
-    #     print('cur_yr: ' + str(cur_yr))
-    #     print('rosters: ' + str(rosters))
-
-    print('cur_team: ' + cur_team)
-    return cur_team
-
-# jaylen brown -> j brown
-# trey murphy iii -> t murphy iii
-# Jayson Tatum -> j tatum
-# j tatum sf -> j tatum
-# use to see if started or bench
-# bc lineups shows player abbrev
-def determine_player_abbrev(player_name):
-    print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
-    #print('player_name: ' + str(player_name))
-    #player_abbrev = ''
-
-    # if already 1 letter in first name
-    # then using first initial in format j brown sg
-    # so remove last word to get abbrev
-    #player_abbrev = player_initital + last_name
-    if player_name != '':
-        player_name = re.sub('\.', '', player_name).lower()
-        player_name = re.sub('-', ' ', player_name)
-        player_names = player_name.split()
-        player_abbrev = re.sub('\.','',player_names[0][0])
-        if len(player_names[0]) == 1:
-            # remove position from end of name abbrev
-            for name in player_names[1:-1]:
-                player_abbrev += ' ' + name
-        
-        else:
-            #last_name = ''
-            for name in player_names[1:]:
-                player_abbrev += ' ' + name
-
-        player_abbrev = player_abbrev.lower()
-    else:
-        print('Warning: Blank player name while determining player abbrev!')
-    
-    print('player_abbrev: ' + player_abbrev)
-    return player_abbrev
-
-# if given abbrev like D. Green need to know team or position to get full name
-# already given team so use that
-# check which player in all players teams list with this team has this abbrev
-# all_players_teams = {player:{year:{team:gp,...},...}}
-# player = D. Green or Draymond Green
-# player = K. Towns to karl anthony towns
-# player = K Towns PF to karl anthony towns
-# use game_key to get player team at game time
-# the team passed here is the team of the player at game time 
-# but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
-def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
-    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
-    print('Input: team of player of interest in game of interest')
-    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
-    print('Input: game_key = away home date = nyk det 12/22/2023')
-    print('Input: Current Year to tell current team')
-    print('\nOutput: player_full_name = jalen brunson\n')
-    
-    # print('team: ' + str(team))
-    #print('all_players_teams: ' + str(all_players_teams))
-
-    full_name = ''
-
-    # if player gone from the league 
-    # AND we did not get their espn id
-    # they do not show up in all players teams
-    # so should we get data for gone players?
-    #if player not in all_players_teams:
-        # get player teams
-    # problem is we cant see if player is in all players teams bc we dont have full name but we have last name
-    # but last name might match wrong player
-
-    # player = D. Green -> d green
-    # player = Draymond Green -> draymond green
-    # player = D Green PF -> d green
-    # V. Williams -> v williams
-    player = init_player
-
-    player = re.sub('\.','',player).lower()
-    player = re.sub('-',' ',player)
-    
-
-    # if already using only first initial or abbrev?
-    # we need to remove position at end of name before comparing
-    #if len(game_key) > 0:
-    #player_names = player.split()
-    # if dot then comes from lineup page so no position at end
-    # we do not know how many letters are in first word of abbrev
-    # so how to tell if in format Jal Williams F
-    # if cant tell letter case then look for specific letters as last letters (f, g, c)
-    #if len(player_names[0]) == 1 and not re.search('\.',init_player):
-    # need to keep original uppercase to know abbrev format bc irreg formats like Baldwin F
-    #if len(player_names) > 2 and re.search('[fgc]$',player):
-    if init_player[-1].isupper():
-        player = re.sub('\s+[a-z]+$', '', player)#.strip() # D Green PF -> d green
-
-        
-    #print('player: \'' + str(player) + '\'')
-    if player in all_players_teams.keys(): # if already given full name
-        full_name = player
-    else: # could use all players teams or rosters
-        # if cur yr look in roster
-        # else look in player teams
-        # player_teams = {yr:team:gp} = {'2024':{}}
-        for compare_player_name, compare_player_teams in all_players_teams.items():
-            # print('\nplayer_name: ' + str(player_name))
-            # print('player_teams: ' + str(player_teams))
-            # look at current team bc we are comparing to current lineup
-            # if player just traded then has no log with this team
-            # compare name: 
-            # player_name = draymond green, always full bc already standardized in all players teams from team rosters
-            # player abbrev = d green
-            # cannot simplify like this if given any abbrevs with more than 1 letter in first name bc same abbrevs on same team need unique abbrevs
-            # player = Jal Williams 
-            # player_name = jalen williams
-            player_abbrev = determine_player_abbrev(compare_player_name)
-
-            cur_team = determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
-            season_teams = []
-            if len(game_key) > 0:
-                # for now get list of teams this season and use either or
-                # pass in the compare player name
-                season_teams = determine_player_season_teams(compare_player_name, game_key, compare_player_teams)
-                #game_team = determine_player_team_by_game(game_key, player_teams)
-            
-
-            # if given lineup player name not in all players teams dict
-            # then it is usually an abbrev but not always
-            # sometimes all players teams dict has jr or sr but lineups does not
-            #print('player: ' + str(player))
-            #print('player_abbrev: ' + str(player_abbrev))
-            # if we find matching player name or abbrev, check if teams match
-            # player_abbrev = k anthony towns
-            # player abbrev = j williams
-            player_abbrev_names = player_abbrev.split()
-            # print('player: \'' + player + '\'')
-            # print('player_abbrev: \'' + player_abbrev + '\'')
-            # print('player_name: ' + player_name)
-            # player = Jal Williams
-            # player_name = jalen williams
-            # player_abbrev = j williams. do we need?
-            # determine match if first word and second word match
-            # cannot compare whole words bc irregular abbrevs
-            if determine_player_abbrev_match(player, compare_player_name):
-            #if re.search(player,player_abbrev) or re.search(player,player_name):
-                # print('team: ' + str(team))
-                # print('cur_team: ' + cur_team)
-                if len(season_teams) > 0:
-                    if team in season_teams:
-                        full_name = compare_player_name
-                        break # found player name
-                elif team == cur_team:
-                    full_name = compare_player_name
-                    break # found player name
-            elif len(player_abbrev_names) > 2: # 3 word name like k anthony towns
-                normal_abbrev = player_abbrev_names[0] + ' ' + player_abbrev_names[2] # k towns, remove middle name
-                #print('normal_abbrev: ' + str(normal_abbrev))
-                if re.search(player,normal_abbrev):# and team == game_team:
-                    if len(season_teams) > 0:
-                        if team in season_teams:
-                            full_name = compare_player_name
-                            break # found player name
-                    elif team == cur_team:
-                        full_name = compare_player_name
-                        break # found player name
-
-    print('full_name: ' + full_name)
-    return full_name
-
 # given main prop and fields, find vals in those fields
 # keys = fields = ['player', 'stat']
 # allowed player same stat but one over other under!
@@ -1891,9 +1576,349 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# use in gen all box scores to get abbrev from list of abbrevs before concluding if in team part
+def determine_abbrev_in_game(player_abbrevs, team_part_players):
+    print('\n===Determine Abbrev in Game===\n')
+    print('Input: player_abbrevs = [abbrevs] = [X Tillman F, Tillman Sr F]')
+    print('Input: team_part_players = {player:play time,...')
+    abbrev_in_game = ''
+    for abbrev in player_abbrevs:
+        if abbrev in team_part_players:
+            # found abbrev in game so move on
+            abbrev_in_game = abbrev
+            break
+        
+    return abbrev_in_game
+
+# given todays game matchups
+# output opponent team
+# game_teams = [('mil','mia'),...]
+# player_teams = {'2018': {'mia': 69}, '2019...
+# player_teams = {year:{team:gp,...},...
+def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
+    #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
+    #print('player_teams: ' + str(player_teams))
+    #print('game_teams: ' + str(game_teams))
+    
+    opp_team = ''
+
+    if player_team == '':
+        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
+
+    # look for player team in games
+    # game = ('mil','mia')
+    for game in game_teams:
+        for team_idx in range(len(game)):
+            # team = 'mil'
+            team = game[team_idx]
+            if player_team == team: # found game in list of games
+                opp_team_idx = 0
+                if team_idx == 0:
+                    opp_team_idx = 1
+                                
+                opp_team = game[opp_team_idx]
+                break
+
+        if opp_team != '':
+            break
+        
+    #print('opp_team: ' + opp_team)
+    return opp_team
+
+# player = Jal Williams 
+# player_name = jalen williams
+# player_abbrev = j williams. do we need?
+# determine match if first word and second word match
+# cannot compare whole words bc irregular abbrevs
+# what about v williams compared to vince williams jr?
+# we know same bc team only has 1 v williams
+def determine_player_abbrev_match(main_player, compare_player):
+   # print('\n===Determine Player Abbrev Match===\n')
+    #print('main_player: ' + str(main_player))
+    #print('compare_player: ' + str(compare_player))
+
+    match = True
+
+    # remove suffixes before comparing bc some sources dont use
+    # and rare 2 players on same team with suffix only difference in name
+    # but not impossible so ideally use teams to see only 1 matching in team
+    main_player = re.sub('(jr|sr|i+)$','',main_player).strip()
+    compare_player = re.sub('(jr|sr|i+)$','',compare_player).strip()
+    #print('main_player: ' + str(main_player))
+    #print('compare_player: ' + str(compare_player))
+
+
+    main_player_names = main_player.split()
+    compare_player_names = compare_player.split()
+    # if they have different number of words in name then diff player?
+    # no bc 1 source might exclude jr or sr but still same player
+    if len(main_player_names) != len(compare_player_names):
+        match = False
+    else:
+        for name_idx in range(len(main_player_names)):
+            # jal
+            main_name = main_player_names[name_idx]
+            num_letters = len(main_name)
+            # jalen        
+            compare_name = compare_player_names[name_idx]
+            #print('main_name: ' + str(main_name))
+            #print('compare_name: ' + str(compare_name))
+            #print('compare_letters: ' + str(compare_name[:num_letters]))
+            if not main_name == compare_name[:num_letters]:
+                match = False
+                break 
+
+    return match
+
+# player_teams = {year:{team:gp,...},...}}
+def determine_player_season_teams(player, game_key, player_teams):
+    #print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
+    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+
+    teams = []
+
+
+    if len(game_key) > 0:
+        game_date = game_key.split()[-1]
+        season_yr = determine_season_year(game_date)
+        if season_yr in player_teams.keys():
+            for team in player_teams[season_yr].keys():
+                teams.append(team)
+
+    #print('teams: ' + str(teams))
+    return teams
+
+#list(player_teams[player][cur_yr].keys())[-1] # current team
+# can we take first year in teams list instead of cur yr?
+# player_teams = {year:{team:gp,...},...
+# do we always want to return the team, even if they are only practice players?
+# that may lead to wrong results if we only want to consider game players
+def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
+    # print('\n===Determine Player Current Team: ' + player.title() + '===\n')
+    # print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    # print('\nOutput: player_current_team = \'cha\'\n')
+
+    cur_team = ''
+
+    if cur_yr == '':
+        cur_yr = determine_current_season_year()
+
+    # more reliable to take from rosters 
+    # bc player teams will only show if they actually played this season
+    if len(rosters.keys()) > 0:
+        for team, roster in rosters.items():
+            if player in roster:
+                cur_team = team
+                break
+
+    if cur_team == '': # could not find player in rosters so maybe not player of interest but maybe player of comparison
+        if len(player_teams.keys()) > 0:
+            if cur_yr in player_teams.keys():
+                cur_team = list(player_teams[cur_yr].keys())[-1]
+            # {team:gp,...}
+            else:
+                recent_yr_teams = list(player_teams.values())[-1] # most recent yr
+                if len(recent_yr_teams.keys()) > 0:
+                    cur_team = list(recent_yr_teams.keys())[-1] # most recent team
+    # should always have player teams bc all lineups are same players as input
+    # else: # need to get current team from internet
+    #     cur_team = reader.read_player_current_team()
+
+    # if cur_team == '':
+    #     print('\n===Warning: Player cur team blank! ' + player.title() + '===')
+    #     print('player_teams: ' + str(player_teams))
+    #     print('cur_yr: ' + str(cur_yr))
+    #     print('rosters: ' + str(rosters))
+
+    #print('cur_team: ' + cur_team)
+    return cur_team
+
+# jaylen brown -> j brown
+# trey murphy iii -> t murphy iii
+# Jayson Tatum -> j tatum
+# j tatum sf -> j tatum
+# use to see if started or bench
+# bc lineups shows player abbrev
+# this abbrev does not include position bc it is used to compare to full name
+def determine_player_abbrev(player_name):
+    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
+    #print('player_name: ' + str(player_name))
+    
+    player_abbrev = ''
+
+    # if already 1 letter in first name
+    # then using first initial in format j brown sg
+    # so remove last word to get abbrev
+    #player_abbrev = player_initital + last_name
+    if player_name != '':
+        player_name = re.sub('\.', '', player_name).lower()
+        player_name = re.sub('-', ' ', player_name)
+        player_names = player_name.split()
+        player_abbrev = player_names[0][0] #re.sub('\.','',player_names[0][0])
+        if len(player_names[0]) == 1:
+            # remove position from end of name abbrev
+            for name in player_names[1:-1]:
+                player_abbrev += ' ' + name
+        
+        else:
+            #last_name = ''
+            for name in player_names[1:]:
+                player_abbrev += ' ' + name
+
+        player_abbrev = player_abbrev.lower()
+    else:
+        print('Warning: Blank player name while determining player abbrev!')
+    
+    #print('player_abbrev: ' + player_abbrev)
+    return player_abbrev
+
+# if given abbrev like D. Green need to know team or position to get full name
+# already given team so use that
+# check which player in all players teams list with this team has this abbrev
+# all_players_teams = {player:{year:{team:gp,...},...}}
+# player = D. Green or Draymond Green
+# player = K. Towns to karl anthony towns
+# player = K Towns PF to karl anthony towns
+# use game_key to get player team at game time
+# the team passed here is the team of the player at game time 
+# but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
+def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
+    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
+    print('Input: team of player of interest in game of interest')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
+    print('Input: game_key = away home date = nyk det 12/22/2023')
+    print('Input: Current Year to tell current team')
+    print('\nOutput: player_full_name = jalen brunson\n')
+    
+    # print('team: ' + str(team))
+    #print('all_players_teams: ' + str(all_players_teams))
+
+    full_name = ''
+
+    # if player gone from the league 
+    # AND we did not get their espn id
+    # they do not show up in all players teams
+    # so should we get data for gone players?
+    #if player not in all_players_teams:
+        # get player teams
+    # problem is we cant see if player is in all players teams bc we dont have full name but we have last name
+    # but last name might match wrong player
+
+    # player = D. Green -> d green
+    # player = Draymond Green -> draymond green
+    # player = D Green PF -> d green
+    # V. Williams -> v williams
+    player = init_player
+
+    player = re.sub('\.','',player).lower()
+    player = re.sub('-',' ',player)
+    
+
+    # if already using only first initial or abbrev?
+    # we need to remove position at end of name before comparing
+    #if len(game_key) > 0:
+    #player_names = player.split()
+    # if dot then comes from lineup page so no position at end
+    # we do not know how many letters are in first word of abbrev
+    # so how to tell if in format Jal Williams F
+    # if cant tell letter case then look for specific letters as last letters (f, g, c)
+    #if len(player_names[0]) == 1 and not re.search('\.',init_player):
+    # need to keep original uppercase to know abbrev format bc irreg formats like Baldwin F
+    #if len(player_names) > 2 and re.search('[fgc]$',player):
+    if init_player[-1].isupper():
+        player = re.sub('\s+[a-z]+$', '', player)#.strip() # D Green PF -> d green
+
+        
+    #print('player: \'' + str(player) + '\'')
+    if player in all_players_teams.keys(): # if already given full name
+        full_name = player
+    else: # could use all players teams or rosters
+        # if cur yr look in roster
+        # else look in player teams
+        # player_teams = {yr:team:gp} = {'2024':{}}
+        for compare_player_name, compare_player_teams in all_players_teams.items():
+            #print('\ncompare_player_name: ' + str(compare_player_name))
+            #print('compare_player_teams: ' + str(compare_player_teams))
+            # look at current team bc we are comparing to current lineup
+            # if player just traded then has no log with this team
+            # compare name: 
+            # player_name = draymond green, always full bc already standardized in all players teams from team rosters
+            # player abbrev = d green
+            # cannot simplify like this if given any abbrevs with more than 1 letter in first name bc same abbrevs on same team need unique abbrevs
+            # player = Jal Williams 
+            # player_name = jalen williams
+            player_abbrev = determine_player_abbrev(compare_player_name)
+
+            cur_team = determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
+            season_teams = []
+            if len(game_key) > 0:
+                # for now get list of teams this season and use either or
+                # pass in the compare player name
+                season_teams = determine_player_season_teams(compare_player_name, game_key, compare_player_teams)
+                #game_team = determine_player_team_by_game(game_key, player_teams)
+            
+
+            # if given lineup player name not in all players teams dict
+            # then it is usually an abbrev but not always
+            # sometimes all players teams dict has jr or sr but lineups does not
+            #print('player: ' + str(player))
+            #print('player_abbrev: ' + str(player_abbrev))
+            # if we find matching player name or abbrev, check if teams match
+            # player_abbrev = k anthony towns
+            # player abbrev = j williams
+            player_abbrev_names = player_abbrev.split()
+            # print('player: \'' + player + '\'')
+            # print('player_abbrev: \'' + player_abbrev + '\'')
+            # print('player_name: ' + player_name)
+            # player = Jal Williams
+            # player_name = jalen williams
+            # player_abbrev = j williams. do we need?
+            # determine match if first word and second word match
+            # cannot compare whole words bc irregular abbrevs
+            if determine_player_abbrev_match(player, compare_player_name):
+            #if re.search(player,player_abbrev) or re.search(player,player_name):
+                # print('team: ' + str(team))
+                # print('cur_team: ' + cur_team)
+                if len(season_teams) > 0:
+                    if team in season_teams:
+                        full_name = compare_player_name
+                        break # found player name
+                elif team == cur_team:
+                    full_name = compare_player_name
+                    break # found player name
+            elif len(player_abbrev_names) > 2: # 3 word name like k anthony towns
+                normal_abbrev = player_abbrev_names[0] + ' ' + player_abbrev_names[2] # k towns, remove middle name
+                #print('normal_abbrev: ' + str(normal_abbrev))
+                if re.search(player,normal_abbrev):# and team == game_team:
+                    if len(season_teams) > 0:
+                        if team in season_teams:
+                            full_name = compare_player_name
+                            break # found player name
+                    elif team == cur_team:
+                        full_name = compare_player_name
+                        break # found player name
+
+    print('full_name: ' + full_name)
+    return full_name
+
 # use whenever we know game key and team loc but not the team name
 def determine_team_from_game_key(game_key, team_loc):
-    
+    #print('\n===Determine Team from Game Key===\n')
     team = ''
 
     game_data = game_key.split()
@@ -1904,6 +1929,7 @@ def determine_team_from_game_key(game_key, team_loc):
         if team_loc == 'home':
             team = home_team
 
+    #print('team: ' + team)
     return team
 
 # all yrs for single condition

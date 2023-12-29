@@ -54,6 +54,10 @@ find_players = True # if true, read all players in game box scores to see prob w
 # make list of sources with different odds 
 read_odds = False # set false to test other features
 
+# === PLAYER IDs ===
+# need all players ids but halt if error too many requests
+read_new_player_ids = False
+
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
             'read new teams': read_new_teams, 
@@ -62,22 +66,23 @@ settings = {'find matchups': find_matchups,
             'read new odds': read_new_odds, 
             'read odds': read_odds, 
             'irreg play time': irreg_play_time, 
-            'read new game ids': read_new_game_ids}
+            'read new game ids': read_new_game_ids, 
+            'read new player ids': read_new_player_ids}
 
-
+all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
 # if no date given, and if past 10pm then assume getting data for next day
 # https://www.espn.com/nba/schedule 
-game_teams = [('den','phx')]#, ('nop','lal')
+game_teams = [('wsh','dal')]#[('bos','bkn'), ('nyk','phi'), ('tor','chi'), ('cle','det'), ('ind','mil'), ('den','min'), ('okc','por'), ('uta','gsw'), ('lac','lal'), ('phx','sac'), ('atl','cha'), ('mia','orl'), ('wsh','dal'), ('hou','mem'), ('nop','sas')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
-teams_current_rosters = reader.read_all_teams_rosters(game_teams, read_new_teams) # {team:roster,...}
-#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['nikola jokic'] # use for testing
+teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams) # {team:roster,...}
+players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+#players_names = ['nikola jokic'] # use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
 # if we get no player names or rosters then read all games today
-all_players_props = generator.generate_all_players_props(settings, players_names, game_teams, teams_current_rosters)
+all_players_props = generator.generate_all_players_props(settings, players_names, game_teams, teams_current_rosters, all_teams)
 
 #writer.display_all_players_props(all_players_props)

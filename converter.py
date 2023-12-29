@@ -244,6 +244,38 @@ def convert_team_abbrev_to_name(team_abbrev):
 
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
+# determine player abbrev take first inital and last names simply
+# where this fcn gets list of saved player abbrevs
+# how to tell if different players have same name so are actually meant to have separate abbrevs?
+# will they be on team different teams?
+# what if players have same name on same team? then it would incorrectly take both players abbrevs as 1 players abbrevs
+# i think odds are low enough to treat main case and flag when 2 players on same team have same namw
+def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
+    print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
+    #print('all_players_abbrevs: ' + str(all_players_abbrevs))
+
+    game_player_abbrevs = []
+
+
+    for year_players_abbrev in all_players_abbrevs.values():
+        for abbrev_key, name in year_players_abbrev.items():
+            abbrev_data = abbrev_key.split('-')
+            abbrev = abbrev_data[0]
+            team = abbrev_data[1]
+            if name == game_player and team == game_player_team:
+                game_player_abbrevs.append(abbrev)
+
+        # we only add abbrevs from year of interest?
+        # keep yrs separate
+        # but if abbrev not available in cur yr then maybe in prev yr bc player played last yr but not this yr
+        if len(game_player_abbrevs) > 0:
+            break
+
+    print('game_player_abbrevs: ' + str(game_player_abbrevs))
+    return game_player_abbrevs
+
+# Convert Player Name to Abbrev: damion lee
+# what is the diff bt this and determine player abbrev?
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
     print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
     #print('all_players_abbrevs: ' + str(all_players_abbrevs))
@@ -252,7 +284,10 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
 
 
     for year_players_abbrev in all_players_abbrevs.values():
-        for abbrev, name in year_players_abbrev.items():
+        for abbrev_key, name in year_players_abbrev.items():
+            abbrev_data = abbrev_key.split('-')
+            abbrev = abbrev_data[0]
+
             if name == game_player:
                 game_player_abbrev = abbrev#all_players_abbrevs[game_player]#convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_box_scores, season_years, cur_yr)
                 break
@@ -409,7 +444,7 @@ def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_team
 def convert_all_conditions_to_dicts(all_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years=[], cur_yr=''):
     print('\n===Convert All Conditions Dicts to Lists===\n')
     print('Input: all_conditions = {p1:{starters:[s1,...], opp starters:[s1,...], loc:l1, city:c1, dow:d1, tod:t1,...}, ... = {\'nikola jokic\': {\'loc\': \'away\', \'out\': [\'vlatko cancar\',...], ...')# = ' + str(all_conditions))
-    print('Input: all_players_abbrevs = {year:{abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF\': \'jaren jackson jr\',...')
+    #print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
     # print('Input: all_players_teams = {player:{year:{team:gp,... = {\'bam adebayo\': {\'2018\': {\'mia\': 69}, ...\n')
     # print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
     # print('Input: Season Years of Interest')
