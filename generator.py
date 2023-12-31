@@ -2705,11 +2705,50 @@ def generate_true_prob(val_probs_dict, game_player_cur_conds, player_current_con
     return true_prob 
 
 
+# given players in lineup, lineup team, and all abbrevs
+# make combos of all abbrevs
+def generate_combos_of_abbrevs(game_players):#, lineup, lineup_team, all_players_abbrevs):
+    print('\n===Generate Combos of Abbrevs===\n')
+    print('Input: game_players = {name:[abbrevs], ...} = {patrick baldwin:[P Baldwin F, Baldwin Jr F], aaron gordon:[A Gordon PF], ...}')
+    print('\nOutput: combos = [\'P Baldwin F, A Gordon PF,...\', \'Baldwin Jr F, A Gordon PF,...\', ...]\n')
 
+    game_players = {'patrick baldwin':['P Baldwin F', 'Baldwin Jr F'], 'aaron gordon':['A Gordon PF']}
+
+    combos = []
+
+    # make list of abbrevs allowing only 1 per player
+
+    combo = ''
+    combo_num = 1
+    # first get all the combos relative to each player
+    player_combo = ''
+    player_idx = 0
+    player_num = 1
+    #for player_idx in range(len(game_players)):
+    for main_player, main_player_abbrevs in game_players.keys():
+        print('\nmain_player: ' + main_player)
+        #main_player = list(game_players.keys())[player_idx]
+        for mp_abbrev in main_player_abbrevs:
+            combo = mp_abbrev
+
+            for game_player, game_player_abbrevs in game_players.items():
+                print('game_player: ' + game_player)
+                # each loop adds to the prev one
+                
+                if main_player != game_player:
+                    for abbrev in game_player_abbrevs:
+                        print('abbrev: ' + abbrev)
+                        # each abbrev gets added to a different string
+                        combo 
+
+
+    return combos
 
 def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lineup_team=''):
     print('\n===Generate Game Players Conditions: ' + player.title() + '===\n')
+    print('Input: lineup_team = team abbrev = ' + lineup_team)
     print('Input: lineup = cond_val = {starters: [players],...}, opps: {...} = {\'starters\': [\'jamal murray\',...], ...')# = ' + str(lineup))
+    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
     print('\nOutput: game_players_conditions = {condition:cond type,... = {\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ...\n')
     
     game_players_conditions = {}
@@ -2721,31 +2760,42 @@ def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lin
 
     # first get all players abbrevs
     # and then run lineups with both/all versions of player abbrevs
+    all_game_players_abbrevs = []#generate_all_game_players_abbrevs(lineup, lineup_team, all_players_abbrevs) # need all abbrevs for all players in this lineup so we can run all combos of abbrevs
 
     # remember to only take unique samples to get sample size
     # or all bench players would add up to hundreds of extra samples
     for team_part, team_part_players in lineup.items():
+
         game_part_players = {} # {abbrev:player}
         for game_player in team_part_players:
             game_player_abbrevs = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, lineup_team)
+            all_game_players_abbrevs[game_player] = game_player_abbrevs
+
+            game_part_players[game_player] = game_player_abbrevs
+            if team_part != 'out':
+                game_players[game_player] = game_player_abbrevs
+
             if len(game_player_abbrevs) > 0:
                 for game_player_abbrev in game_player_abbrevs:
-                    game_part_players[game_player_abbrev] = game_player
                     condition = game_player_abbrev + ' ' + team_part
                     game_players_conditions[condition] = team_part
                 
                     if team_part != 'out':
-                        game_players[game_player_abbrev] = game_player
                         condition = game_player_abbrev + ' ' + in_key
                         game_players_conditions[condition] = in_key
 
         if len(game_part_players.keys()) > 1:
-            game_part_players_str = converter.convert_to_game_players_str(game_part_players)
-            # game part players, where part = starters or bench or out
-            #game_players_str += ' ' + cond_key
-            game_part_players_cond_val = game_part_players_str + ' ' + team_part 
-            #print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
-            game_players_conditions[game_part_players_cond_val] = team_part
+            # convert to list of game_part_players_strings with all combos of abbrevs
+            combos_of_abbrevs = generate_combos_of_abbrevs(game_part_players, all_game_players_abbrevs)
+            
+            # need a string for each combo
+            for abbrev_combo in combos_of_abbrevs:
+                game_part_players_str = converter.convert_to_game_players_str(abbrev_combo)
+                # game part players, where part = starters or bench or out
+                #game_players_str += ' ' + cond_key
+                game_part_players_cond_val = game_part_players_str + ' ' + team_part 
+                #print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
+                game_players_conditions[game_part_players_cond_val] = team_part
 
     # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
     # we do not want to show in condition due to clutter but still account for it

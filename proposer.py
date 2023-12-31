@@ -56,7 +56,7 @@ read_odds = False # set false to test other features
 
 # === PLAYER IDs ===
 # need all players ids but halt if error too many requests
-read_new_player_ids = False
+read_new_player_ids = True
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 

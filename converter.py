@@ -271,6 +271,9 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
         if len(game_player_abbrevs) > 0:
             break
 
+        # look for all abbrevs in all yrs so we can find current player in past yrs with different abbrevs
+
+
     print('game_player_abbrevs: ' + str(game_player_abbrevs))
     return game_player_abbrevs
 
@@ -335,11 +338,38 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
-def convert_to_game_players_str(game_part_players):
+# combine all names into single string condition, alphabet order
+# generic function, convert list to string (alphabetized)
+def convert_list_to_str(list, order='alphabet'):
+    print('\n===Convert List to String===\n')
+    print('Input: game_players = [player abbrev, ...] = [A Gordon PF, ...]')
+    print('\nOutput: game_players_str = \'player abbrev, ...\' = \'A Gordon PF, ...\'\n')
+
+    string = ''
+    if order == 'alphabet':
+        list = sorted(list)
+
+    for idx in range(len(list)):
+        item = list[idx]
+        # add condition for all game players in combo
+        if idx == 0:
+            string = item
+        else:
+            string += ', ' + item
+
+    return string
+
+# combine all names into single string condition, alphabet order
+# generic function, convert list to string (alphabetized)
+def convert_to_game_players_str(game_players):
+    print('\n===Convert to Game Players String===\n')
+    print('Input: game_players = [player abbrev, ...] = [A Gordon PF, ...]')
+    print('\nOutput: game_players_str = \'player abbrev, ...\' = \'A Gordon PF, ...\'\n')
+
     game_players_str = ''
-    game_part_players = sorted(game_part_players)
-    for game_player_idx in range(len(game_part_players)):
-        game_player_abbrev = game_part_players[game_player_idx]
+    game_players = sorted(game_players)
+    for game_player_idx in range(len(game_players)):
+        game_player_abbrev = game_players[game_player_idx]
         # add condition for all game players in combo
         if game_player_idx == 0:
             game_players_str = game_player_abbrev
