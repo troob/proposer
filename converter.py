@@ -171,6 +171,7 @@ def convert_box_score_to_dict(box_score_df):
     final_players = []
     for player in players:
         player = re.sub('\.','',player)#.lower() # easier to read if titled but ust match comparisons with all teammates. all teammates comes from all players in games so they auto match format
+        player = re.sub('-',' ',player)
         final_players.append(player)
 
     bench_idx = 5 # bc always 5 starters

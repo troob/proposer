@@ -1592,16 +1592,20 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 # use in gen all box scores to get abbrev from list of abbrevs before concluding if in team part
 def determine_abbrev_in_game(player_abbrevs, team_part_players):
-    print('\n===Determine Abbrev in Game===\n')
-    print('Input: player_abbrevs = [abbrevs] = [X Tillman F, Tillman Sr F]')
-    print('Input: team_part_players = {player:play time,...')
+    # print('\n===Determine Abbrev in Game===\n')
+    # print('Input: player_abbrevs = [abbrevs] = [X Tillman F, Tillman Sr F] = ' + str(player_abbrevs))
+    # print('Input: team_part_players = {player:play time,... = ' + str(team_part_players))
+    
     abbrev_in_game = ''
     for abbrev in player_abbrevs:
         if abbrev in team_part_players:
             # found abbrev in game so move on
             abbrev_in_game = abbrev
             break
-        
+
+    # if abbrev_in_game:
+    #     print('found abbrev in game')
+
     return abbrev_in_game
 
 # given todays game matchups
@@ -1647,9 +1651,9 @@ def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters
 # what about v williams compared to vince williams jr?
 # we know same bc team only has 1 v williams
 def determine_player_abbrev_match(main_player, compare_player):
-   # print('\n===Determine Player Abbrev Match===\n')
-    #print('main_player: ' + str(main_player))
-    #print('compare_player: ' + str(compare_player))
+    # print('\n===Determine Player Abbrev Match===\n')
+    # print('main_player: ' + str(main_player))
+    # print('compare_player: ' + str(compare_player))
 
     match = True
 
@@ -1658,8 +1662,8 @@ def determine_player_abbrev_match(main_player, compare_player):
     # but not impossible so ideally use teams to see only 1 matching in team
     main_player = re.sub('(jr|sr|i+)$','',main_player).strip()
     compare_player = re.sub('(jr|sr|i+)$','',compare_player).strip()
-    #print('main_player: ' + str(main_player))
-    #print('compare_player: ' + str(compare_player))
+    # print('formatted main_player: ' + str(main_player))
+    # print('formatted compare_player: ' + str(compare_player))
 
 
     main_player_names = main_player.split()
@@ -1675,9 +1679,9 @@ def determine_player_abbrev_match(main_player, compare_player):
             num_letters = len(main_name)
             # jalen        
             compare_name = compare_player_names[name_idx]
-            #print('main_name: ' + str(main_name))
-            #print('compare_name: ' + str(compare_name))
-            #print('compare_letters: ' + str(compare_name[:num_letters]))
+            # print('main_name: ' + str(main_name))
+            # print('compare_name: ' + str(compare_name))
+            # print('compare_letters: ' + str(compare_name[:num_letters]))
             if not main_name == compare_name[:num_letters]:
                 match = False
                 break 
@@ -1685,12 +1689,14 @@ def determine_player_abbrev_match(main_player, compare_player):
     return match
 
 # player_teams = {year:{team:gp,...},...}}
+# CHANGE to get team at time of game
+# add date of first game with team from game log to player teams dict
 def determine_player_season_teams(player, game_key, player_teams):
-    #print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
-    #print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    # print('\n===Determine Player ' + player.title() + ' Season Teams: ' + game_key.upper() + '===\n')
+    # print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    # print('\nOutput: player_season_teams = [teams]')
 
     teams = []
-
 
     if len(game_key) > 0:
         game_date = game_key.split()[-1]
@@ -1797,11 +1803,11 @@ def determine_player_abbrev(player_name):
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
 def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
-    print('\n===Determine Player Full Name: ' + init_player.title() + '===\n')
-    print('Input: team of player of interest in game of interest')
+    print('\n===Determine Player Full Name: ' + init_player + '===\n')
+    print('Input: team of player of interest in game of interest = ' + team)
+    print('Input: game_key = away home date = ' + game_key)
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
-    print('Input: game_key = away home date = nyk det 12/22/2023')
     print('Input: Current Year to tell current team')
     print('\nOutput: player_full_name = jalen brunson\n')
     
@@ -1844,7 +1850,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         player = re.sub('\s+[a-z]+$', '', player)#.strip() # D Green PF -> d green
 
         
-    #print('player: \'' + str(player) + '\'')
+    print('formatted player: \'' + str(player) + '\'') # d green
     if player in all_players_teams.keys(): # if already given full name
         full_name = player
     else: # could use all players teams or rosters
@@ -1852,8 +1858,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         # else look in player teams
         # player_teams = {yr:team:gp} = {'2024':{}}
         for compare_player_name, compare_player_teams in all_players_teams.items():
-            #print('\ncompare_player_name: ' + str(compare_player_name))
-            #print('compare_player_teams: ' + str(compare_player_teams))
+            # print('\ncompare_player_name: ' + str(compare_player_name))
+            # print('compare_player_teams: ' + str(compare_player_teams))
             # look at current team bc we are comparing to current lineup
             # if player just traded then has no log with this team
             # compare name: 
@@ -1864,14 +1870,19 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
             # player_name = jalen williams
             player_abbrev = determine_player_abbrev(compare_player_name)
 
-            cur_team = determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
+            # why do we need the cur team if we are finding the players team at the time of the input game?
+            # we need team at time of game by adding date to all players teams
+            # but most cases are covered by adding team to abbrev key
+            # only special case is if 2 people with same abbrev are traded for each other same yr (rare but important like t jones pg)
+            cur_team = ''#determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
             season_teams = []
             if len(game_key) > 0:
                 # for now get list of teams this season and use either or
                 # pass in the compare player name
                 season_teams = determine_player_season_teams(compare_player_name, game_key, compare_player_teams)
                 #game_team = determine_player_team_by_game(game_key, player_teams)
-            
+            else:
+                cur_team = determine_player_current_team(compare_player_name, compare_player_teams, cur_yr, rosters)
 
             # if given lineup player name not in all players teams dict
             # then it is usually an abbrev but not always
@@ -1894,6 +1905,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
             #if re.search(player,player_abbrev) or re.search(player,player_name):
                 # print('team: ' + str(team))
                 # print('cur_team: ' + cur_team)
+                # print('season_teams: ' + str(season_teams))
                 if len(season_teams) > 0:
                     if team in season_teams:
                         full_name = compare_player_name

@@ -28,7 +28,7 @@ import copy # need to compare init saved data to final data bc only overwrite sa
 
 import converter # convert am to dec odds so we can get joint odds
 
-
+import itertools # get combos of player abbrevs
 
 # we use all_players_stats_dicts = {player name:{stat name:{}}}
 # to reference stats 
@@ -2710,39 +2710,61 @@ def generate_true_prob(val_probs_dict, game_player_cur_conds, player_current_con
 def generate_combos_of_abbrevs(game_players):#, lineup, lineup_team, all_players_abbrevs):
     print('\n===Generate Combos of Abbrevs===\n')
     print('Input: game_players = {name:[abbrevs], ...} = {patrick baldwin:[P Baldwin F, Baldwin Jr F], aaron gordon:[A Gordon PF], ...}')
-    print('\nOutput: combos = [\'P Baldwin F, A Gordon PF,...\', \'Baldwin Jr F, A Gordon PF,...\', ...]\n')
+    print('\nOutput: combos = [[P Baldwin F, A Gordon PF,...], [Baldwin Jr F, A Gordon PF,...], ...]\n')
 
     game_players = {'patrick baldwin':['P Baldwin F', 'Baldwin Jr F'], 'aaron gordon':['A Gordon PF']}
-
-    combos = []
+    
+    all_game_players_abbrevs = list(game_players.values())
+    
+    all_combos = list(itertools.product(*all_game_players_abbrevs))
 
     # make list of abbrevs allowing only 1 per player
+    # len of combo = len of players bc 1 per player per combo
+    # imagine each player only had 1 abbrev, then len(combos)=1
+    #combo = []
+    # list idxs to use for each abbrev for each player
+    # first run abbrev_idxs = [1,1,1,...]
+    # last = []
+    # for player_name, player_abbrevs in game_players.items():
+        
+    #     abbrev_idx = 0
+    #     player_abbrev = player_abbrevs[abbrev_idx]
+        
+    #     if player_abbrev not in combo: # does not work if 2 players with same abbrev
+    #         combo.append(player_abbrev)
 
-    combo = ''
-    combo_num = 1
-    # first get all the combos relative to each player
-    player_combo = ''
-    player_idx = 0
-    player_num = 1
-    #for player_idx in range(len(game_players)):
-    for main_player, main_player_abbrevs in game_players.keys():
-        print('\nmain_player: ' + main_player)
-        #main_player = list(game_players.keys())[player_idx]
-        for mp_abbrev in main_player_abbrevs:
-            combo = mp_abbrev
 
-            for game_player, game_player_abbrevs in game_players.items():
-                print('game_player: ' + game_player)
-                # each loop adds to the prev one
+    # print('combo: ' + str(combo))
+    
+    # all_combos.append(combo)
+
+
+
+    # combo = ''
+    # combo_num = 1
+    # # first get all the combos relative to each player
+    # player_combo = ''
+    # player_idx = 0
+    # player_num = 1
+    # #for player_idx in range(len(game_players)):
+    # for main_player, main_player_abbrevs in game_players.keys():
+    #     print('\nmain_player: ' + main_player)
+    #     #main_player = list(game_players.keys())[player_idx]
+    #     for mp_abbrev in main_player_abbrevs:
+    #         combo = mp_abbrev # same player never in same combo so reset for each one of the main player's abbrevs
+
+    #         for game_player, game_player_abbrevs in game_players.items():
+    #             print('game_player: ' + game_player)
+    #             # each loop adds to the prev one
                 
-                if main_player != game_player:
-                    for abbrev in game_player_abbrevs:
-                        print('abbrev: ' + abbrev)
-                        # each abbrev gets added to a different string
-                        combo 
+    #             if main_player != game_player:
+    #                 for abbrev in game_player_abbrevs:
+    #                     print('abbrev: ' + abbrev)
+    #                     # each abbrev gets added to a different string
+    #                     combo 
 
-
-    return combos
+    print('all_combos: ' + str(all_combos))
+    return all_combos
 
 def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lineup_team=''):
     print('\n===Generate Game Players Conditions: ' + player.title() + '===\n')
@@ -2881,10 +2903,10 @@ def generate_game_players_cond_sample_weight(player_stat_dict, team_condition, l
 # combine condition weight and sample weight to get adjusted weight
 def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part, player=''):
     print('\n===Generate Condition Sample Weight: ' + player.title() + '===\n')
-    print('Settings: Season Part')
+    print('Setting: Season Part = ' + part)
+    print('Setting: Condition Key = loc = ' + cond_key)
+    print('Setting: Condition Value = away = ' + str(cond_val))
     print('\nInput: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    print('Input: Condition Key = loc = ' + cond_key)
-    print('Input: Condition Value = away = ' + str(cond_val))
     print('\nOutput: condition_sample_weight = w = cond_weight * sample_weight\n')
 
     condition_sample_weight = 0 # if sample size 0 then weight 0
@@ -2962,13 +2984,15 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
         # bc we want the condition weights to control the outcome with slight adjustments to account for sample size
         # bc some conditions have tons of samples of same val while only small number of samples of other val but the condition itself should hold about the same weight
         sample_weight = round(math.log10(s_n),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+        print('sample_weight = log(sample_size) ' + str(sample_weight))
         #print('condition_sample_weight = ' + str(cond_weights[cond_key]) + ' * ' + str(sample_weight))
         
         cond_weight = cond_weights[cond_key]
+        print('cond_weight: ' + str(cond_weight))
 
         condition_sample_weight = round(float(cond_weight) * sample_weight, 2)
     
-    print('condition_sample_weight: ' + str(condition_sample_weight))
+    print('condition_sample_weight = cond_weight * sample_weight: ' + str(condition_sample_weight))
     return condition_sample_weight
 
 # player_current_conditions = {'loc':'away','out':[p1,...],...}
@@ -3073,8 +3097,8 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-    print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, prev:5, ...},... = {\'christian braun\': {\'loc\': \'away\', \'start\': \'bench\', ...')
-    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = {\'christian braun\': {\'teammates\': {\'out\': [...], \'starters\': [\'jamal murray\',...], ...')
+    print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, prev:5, ...},... = {\'christian braun\': {\'loc\': \'away\', \'start\': \'bench\', ... = ' + str(all_cur_conds_dicts))
+    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = {\'christian braun\': {\'teammates\': {\'out\': [...], \'starters\': [\'jamal murray\',...], ... = ' + str(all_game_player_cur_conds))
     print('\nOutput: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...\n')
 
     # before we get true prob we must know per unit probs
@@ -3475,6 +3499,7 @@ def generate_player_unit_stat_probs(player_stat_dict, player_name, player_season
 
     player_unit_stat_records = generate_player_unit_stat_records(player_name, player_stat_dict, player_season_logs)
 
+    # here we gen stat probs again, but this time for unit stat records
     # player_stat_probs = {'all': {2023: {'regular': {'pts': {'0': num reached / num played,...
     player_unit_stat_probs = generate_player_stat_probs(player_unit_stat_records, player_name)
 
@@ -4532,33 +4557,48 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
     print('Input: teams_current_rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
-    print('\nOutput: final_all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...},dnp:{...},out:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...\n')
+    print('\nOutput: gen_all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...},dnp:{...},out:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...\n')
     
-    final_all_box_scores = {}
+    gen_all_box_scores = {}
+    init_gen_box_scores = {}
+
+    season_years = list(all_players_abbrevs.keys())
+    for year in season_years:
+        box_scores_file = 'data/box scores - ' + year + '.json'
+        init_year_box_scores = reader.read_json(box_scores_file)
+        init_gen_box_scores[year] = init_year_box_scores
+
+    gen_all_box_scores = copy.deepcopy(init_gen_box_scores)
 
     # if player avg min > 10 and they did not play game, then consider them out
     # if player avg min < 10 and they did not play game, then consider them bench
     # {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}}
     for year, year_box_scores in init_all_box_scores.items():
-        final_all_box_scores[year] = {}
+        if year not in gen_all_box_scores.keys():
+            gen_all_box_scores[year] = {}
+
         # {away:{starters:{player:play time,...},bench:{...}},home:{...}}
         for game_key, game_players in year_box_scores.items():
-            print('game_key: ' + str(game_key))
-            final_all_box_scores[year][game_key] = {}
+            #print('game_key: ' + str(game_key))
+
+            if game_key in gen_all_box_scores[year].keys():
+                continue # already saved game
+
+            gen_all_box_scores[year][game_key] = {}
             # {starters:{player:play time,...},bench:{...}}
             for team_loc, game_team_players in game_players.items():
-                print('team_loc: ' + str(team_loc))
-                print('game_team_players: ' + str(game_team_players))
-                final_all_box_scores[year][game_key][team_loc] = {}
-                final_team_players = final_all_box_scores[year][game_key][team_loc]
+                # print('team_loc: ' + str(team_loc))
+                # print('game_team_players: ' + str(game_team_players))
+                gen_all_box_scores[year][game_key][team_loc] = {}
+                final_team_players = gen_all_box_scores[year][game_key][team_loc]
                 # go thru full roster to see which players not in box score
                 team = determiner.determine_team_from_game_key(game_key, team_loc)
-                print('team: ' + str(team))
+                #print('team: ' + str(team))
                 if team in all_teams_players[year].keys():
                     all_team_players = all_teams_players[year][team]
                     if year == cur_yr:
                         all_team_players = teams_current_rosters[team]
-                    print('all_team_players: ' + str(all_team_players))
+                    #print('all_team_players: ' + str(all_team_players))
                     # {player:play time,...}
                     starters_key = 'starters'
                     starters = game_team_players[starters_key]
@@ -4566,7 +4606,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
 
                     bench_key = 'bench'
                     init_bench = game_team_players[bench_key]
-                    print('init_bench: ' + str(init_bench))
+                    #print('init_bench: ' + str(init_bench))
                     final_team_players[bench_key] = {}
                     final_bench = final_team_players[bench_key]
 
@@ -4581,7 +4621,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                     # use lowercase full name so we can differentiate it in process
                     for player in all_team_players:
                         # if not in all players teams then has not played in reg season at all
-                        print('\nPlayer: ' + player)
+                        #print('\nPlayer: ' + player)
                         
                         # if not in all players teams then never played bc no stats table at all
                         if player in all_players_teams.keys():
@@ -4601,62 +4641,100 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                             player_abbrevs = []#isolator.isolate_player_abbrevs(player, team, all_players_abbrevs[year])
                             for abbrev_key, name in all_players_abbrevs[year].items():
                                 if player == name:
-                                    print('found name ' + name)
+                                    #print('found name ' + name)
                                     abbrev_data = abbrev_key.split('-')
                                     abbrev = abbrev_data[0]
                                     player_team = abbrev_data[1].lower()
                                     if team == player_team:
-                                        print('found team ' + team)
+                                        #print('found team ' + team)
                                         #player_abbrev = abbrev
                                         player_abbrevs.append(abbrev)
                                         #break
                             
                             # print('player_abbrev: ' + player_abbrev)
                             # if player_abbrev != player: 
-                            print('player_abbrevs: ' + player_abbrevs)
+                            #print('player_abbrevs: ' + str(player_abbrevs))
+                            player_keys = [player]
                             if len(player_abbrevs) > 0:
-                                print('found player abbrevs ' + player)
+                                #print('found player abbrevs ' + player)
+                                player_keys = player_abbrevs
+                            # else: # abbrev not found
+                            #     print('Caution: Abbrev not found! ' + player)
+
+                            #print('player_keys: ' + str(player_keys))
+                            if len(player_keys) > 0:
                                 #for player_abbrev in player_abbrevs:
                                 # how can we tell if abbrev not in game bc out or wrong abbrev
                                 # we cant so check both before concluding
-                                player_abbrev = determiner.determine_abbrev_in_game(player_abbrevs, starters)
+                                
+                                player_abbrev = determiner.determine_abbrev_in_game(player_keys, starters)
+                                #print('player_abbrev after starters: ' + player_abbrev)
                                 #if player_abbrev not in starters.keys(): # starters stay
                                 if player_abbrev == '': # not in starters
+                                    
                                     # if on bench but <10min avg time and cur play time, move to dnp
                                     #if player_abbrev in init_bench.keys():
-                                    player_abbrev = determiner.determine_abbrev_in_game(player_abbrevs, init_bench)
+                                    player_abbrev = determiner.determine_abbrev_in_game(player_keys, init_bench)
+                                    #print('player_abbrev after bench: ' + player_abbrev)
+                                    
                                     if player_abbrev != '': # in bench
                                         play_time = init_bench[player_abbrev]
-                                        print('play_time: ' + str(play_time))
+                                        #print('play_time: ' + str(play_time))
                                         # irregular case
                                         if play_time == '-':
                                             play_time = '0'
                                         if int(play_time) > 10:
+                                            #print('found bench')
                                             final_bench[player_abbrev] = play_time
                                         else:
                                             if player_mean_minutes > 10:
+                                                #print('found bench')
                                                 final_bench[player_abbrev] = play_time
                                             else:
+                                                #print('found dnp')
                                                 dnp[player_abbrev] = play_time
 
-                                    else:
+                                    else: # player abbrev == '' blank bc not in bench nor starters
+                                        # abbrev saved but not in box score so which version of abbrev to use?
+                                        # we can save full name here and then when checking if this game matches current conds,
+                                        # we can consider this as matching any/all of the player's abbrevs
+                                        # but we can simply take 1st abbrev bc when we take samples we can consider all with any version of abbrev
+                                        if len(player_abbrevs) > 0:
+                                            player_abbrev = player_abbrevs[0] # need only 1 to compare to all for this player
+                                        else: # abbrev not saved
+                                            player_abbrev = player # show player name so we know which abbrev is missing
+                                        #print('player_abbrev out or dnp: ' + player_abbrev)
+
                                         if player_mean_minutes > 10:
+                                            #print('found out')
                                             out[player_abbrev] = 0
                                         else:
+                                            #print('found dnp')
                                             dnp[player_abbrev] = 0
+
                             else: # irregular abbrev not found
-                                print('Warning: Irregular abbrev not found! ' + player)
+                                print('Warning: Forgot to set player key! ' + player)
                         else: # maybe in cur roster but not played yet
-                            dnp[player] = 0                    
+                            #print('found dnp')
+                            dnp[player] = 0  
+
+                        #print('gen_all_box_scores after ' + player + ':\n' + str(gen_all_box_scores))                  
                 else:
                     print('Warning: Unknown team in Game Key! ' + game_key)
 
                 # game_team_players[dnp_key] = dnp
                 # game_team_players[out_key] = out
-                print('final_all_box_scores: ' + str(final_all_box_scores))
+                #print('gen_all_box_scores: ' + str(gen_all_box_scores))
 
-    print('final_all_box_scores: ' + str(final_all_box_scores))
-    return final_all_box_scores
+    if not init_gen_box_scores == gen_all_box_scores:
+        for year in season_years:
+            year_box_scores = gen_all_box_scores[year]
+            box_scores_file = 'data/box scores - ' + year + '.json'
+            writer.write_json_to_file(year_box_scores, box_scores_file)
+
+
+    print('gen_all_box_scores: ' + str(gen_all_box_scores))
+    return gen_all_box_scores
 # we need to know how each player plays under certain conditions
 # to propose likely outcomes
 # show regular season avgs
@@ -4725,10 +4803,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # also to get abbrevs/full names to get lineup parts
     # if we dont need to find relations to other players then just read for input players
 
-    read_names = players_names
-    if find_players:
-        read_names = [] # read all ids
-    all_players_teams = reader.read_all_players_teams(read_names, all_players_espn_ids, read_new_teams) # only read team from internet if not saved
+    all_players_teams = reader.read_all_players_teams(players_names, all_players_espn_ids, read_new_teams, find_players) # only read team from internet if not saved
 
     # if we gave player lines, then format them in dict
     # projected_lines_dict = {}
@@ -4791,10 +4866,13 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # we only care about single season part bc if reg then take only reg box scores, and if post then take all full box scores
         # we may need to run both parts in comparison but that strategy would be based on current season part
         # if we devise a specific test needing both parts then can change code to input list of season parts
-        # all box scores of interest, not including old box scores saved
-        all_box_scores = reader.read_all_box_scores(all_players_season_logs, all_players_teams, season_part, read_new_game_ids)[1]#, season_year) # go thru players in all_players_season_logs to get game ids
+        all_box_scores_data = reader.read_all_box_scores(all_players_season_logs, all_players_teams, season_part, read_new_game_ids)#, season_year) # go thru players in all_players_season_logs to get game ids
         #all_players_in_box_scores = all_box_scores['player']
+        all_box_scores = all_box_scores_data[0]
+        # all box scores of interest, not including old box scores saved
+        current_box_scores = all_box_scores_data[1]
 
+        # pass all box scores to get all abbrevs bc we may be facing player who has been out and so matches out abbrev condition
         all_players_abbrevs_data = reader.read_all_players_abbrevs(all_box_scores, all_players_teams, all_teams_current_rosters, current_year_str, all_players_espn_ids, read_new_player_ids)
         all_players_abbrevs = all_players_abbrevs_data[0]
         all_players_espn_ids = all_players_abbrevs_data[1]
