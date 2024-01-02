@@ -252,30 +252,47 @@ def convert_team_abbrev_to_name(team_abbrev):
 # what if players have same name on same team? then it would incorrectly take both players abbrevs as 1 players abbrevs
 # i think odds are low enough to treat main case and flag when 2 players on same team have same namw
 def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
-    #print('all_players_abbrevs: ' + str(all_players_abbrevs))
+    # print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
+    # print('Input: game_player_team = ' + game_player_team)
+    # print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# + str(all_players_abbrevs))
 
     game_player_abbrevs = []
 
 
-    for year_players_abbrev in all_players_abbrevs.values():
+    # we need dict of player teams to get team at time of game
+    # we need all matching player abbrevs but in this case we are comparing to teammates 
+    # so should it be restricted to only current team?
+
+    # go thru all abbrevs to find given players abbrevs by matching name and team
+    for year, year_players_abbrev in all_players_abbrevs.items():
+        #print('\nyear: ' + year)
         for abbrev_key, name in year_players_abbrev.items():
+            #print('\nabbrev_key: ' + abbrev_key)
             abbrev_data = abbrev_key.split('-')
             abbrev = abbrev_data[0]
+            #print('abbrev: ' + str(abbrev))
             team = abbrev_data[1]
+
+            # print('name: ' + str(name))
+            # print('game_player: ' + str(game_player))
+            # print('team: ' + str(team))
+            # print('game_player_team: ' + str(game_player_team))
             if name == game_player and team == game_player_team:
+                #print('found abbrev')
                 game_player_abbrevs.append(abbrev)
+                #print('game_player_abbrevs: ' + str(game_player_abbrevs))
 
         # we only add abbrevs from year of interest?
         # keep yrs separate
         # but if abbrev not available in cur yr then maybe in prev yr bc player played last yr but not this yr
         if len(game_player_abbrevs) > 0:
+            #print('found abbrev for ' + game_player)
             break
 
         # look for all abbrevs in all yrs so we can find current player in past yrs with different abbrevs
 
 
-    print('game_player_abbrevs: ' + str(game_player_abbrevs))
+    #print('game_player_abbrevs: ' + str(game_player_abbrevs))
     return game_player_abbrevs
 
 # Convert Player Name to Abbrev: damion lee
@@ -363,9 +380,9 @@ def convert_list_to_str(list, order='alphabet'):
 # combine all names into single string condition, alphabet order
 # generic function, convert list to string (alphabetized)
 def convert_to_game_players_str(game_players):
-    print('\n===Convert to Game Players String===\n')
-    print('Input: game_players = [player abbrev, ...] = [A Gordon PF, ...]')
-    print('\nOutput: game_players_str = \'player abbrev, ...\' = \'A Gordon PF, ...\'\n')
+    # print('\n===Convert to Game Players String===\n')
+    # print('Input: game_players = [player abbrev, ...] = [A Gordon PF, ...] = ' + str(game_players))
+    # print('\nOutput: game_players_str = \'player abbrev, ...\' = \'A Gordon PF, ...\'\n')
 
     game_players_str = ''
     game_players = sorted(game_players)
@@ -377,6 +394,7 @@ def convert_to_game_players_str(game_players):
         else:
             game_players_str += ', ' + game_player_abbrev
 
+    #print('game_players_str: ' + str(game_players_str))
     return game_players_str
 
 # convert cond dict to list

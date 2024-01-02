@@ -2709,10 +2709,10 @@ def generate_true_prob(val_probs_dict, game_player_cur_conds, player_current_con
 # make combos of all abbrevs
 def generate_combos_of_abbrevs(game_players):#, lineup, lineup_team, all_players_abbrevs):
     print('\n===Generate Combos of Abbrevs===\n')
-    print('Input: game_players = {name:[abbrevs], ...} = {patrick baldwin:[P Baldwin F, Baldwin Jr F], aaron gordon:[A Gordon PF], ...}')
+    print('Input: game_players = {name:[abbrevs], ...} = {patrick baldwin:[P Baldwin F, Baldwin Jr F], aaron gordon:[A Gordon PF], ...} = ' + str(game_players))
     print('\nOutput: combos = [[P Baldwin F, A Gordon PF,...], [Baldwin Jr F, A Gordon PF,...], ...]\n')
 
-    game_players = {'patrick baldwin':['P Baldwin F', 'Baldwin Jr F'], 'aaron gordon':['A Gordon PF']}
+    #game_players = {'patrick baldwin':['P Baldwin F', 'Baldwin Jr F'], 'aaron gordon':['A Gordon PF']}
     
     all_game_players_abbrevs = list(game_players.values())
     
@@ -2766,11 +2766,16 @@ def generate_combos_of_abbrevs(game_players):#, lineup, lineup_team, all_players
     print('all_combos: ' + str(all_combos))
     return all_combos
 
-def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lineup_team=''):
+# special condition sample size with all separate player conds inside combo player cond
+# these conds go to tell all player conds sample size
+# so we only consider unique samples/games
+# so if 2+ players are out same game it only counts as 1 sample
+# even tho there are multiple subconditions with players together and each player separate
+def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player=''):
     print('\n===Generate Game Players Conditions: ' + player.title() + '===\n')
-    print('Input: lineup_team = team abbrev = ' + lineup_team)
-    print('Input: lineup = cond_val = {starters: [players],...}, opps: {...} = {\'starters\': [\'jamal murray\',...], ...')# = ' + str(lineup))
-    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
+    print('Input: lineup = cond_val = {starters: [players],...}, opps: {...} = {\'starters\': [\'jamal murray\',...], ... = \'' + str(lineup) + '\'')
+    print('Input: lineup_team = team abbrev = \'' + lineup_team + '\'')
+    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
     print('\nOutput: game_players_conditions = {condition:cond type,... = {\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ...\n')
     
     game_players_conditions = {}
@@ -2782,22 +2787,28 @@ def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lin
 
     # first get all players abbrevs
     # and then run lineups with both/all versions of player abbrevs
-    all_game_players_abbrevs = []#generate_all_game_players_abbrevs(lineup, lineup_team, all_players_abbrevs) # need all abbrevs for all players in this lineup so we can run all combos of abbrevs
+    all_game_players_abbrevs = {}#generate_all_game_players_abbrevs(lineup, lineup_team, all_players_abbrevs) # need all abbrevs for all players in this lineup so we can run all combos of abbrevs
 
+    # for each player in lineup, assign condition and add to group conds
     # remember to only take unique samples to get sample size
     # or all bench players would add up to hundreds of extra samples
     for team_part, team_part_players in lineup.items():
-
+        print('\nteam_part: ' + str(team_part))
         game_part_players = {} # {abbrev:player}
         for game_player in team_part_players:
+            print('\ngame_player: ' + str(game_player))
+            # lineup team = game_player_team in lineup
             game_player_abbrevs = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, lineup_team)
             all_game_players_abbrevs[game_player] = game_player_abbrevs
 
+            # add game player to group cond
             game_part_players[game_player] = game_player_abbrevs
             if team_part != 'out':
                 game_players[game_player] = game_player_abbrevs
 
-            if len(game_player_abbrevs) > 0:
+            # assign game player cond: starters/bench and in?
+            # do not include current player or interest in single player conditions (but still add to group conditions)
+            if game_player != player and len(game_player_abbrevs) > 0:
                 for game_player_abbrev in game_player_abbrevs:
                     condition = game_player_abbrev + ' ' + team_part
                     game_players_conditions[condition] = team_part
@@ -2808,10 +2819,12 @@ def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lin
 
         if len(game_part_players.keys()) > 1:
             # convert to list of game_part_players_strings with all combos of abbrevs
-            combos_of_abbrevs = generate_combos_of_abbrevs(game_part_players, all_game_players_abbrevs)
+            combos_of_abbrevs = generate_combos_of_abbrevs(game_part_players)#, all_game_players_abbrevs)
             
             # need a string for each combo
             for abbrev_combo in combos_of_abbrevs:
+                print('abbrev_combo: ' + str(abbrev_combo))
+
                 game_part_players_str = converter.convert_to_game_players_str(abbrev_combo)
                 # game part players, where part = starters or bench or out
                 #game_players_str += ' ' + cond_key
@@ -2822,11 +2835,17 @@ def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lin
     # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
     # we do not want to show in condition due to clutter but still account for it
     if len(game_players.keys()) > 0: # all players in game
-        game_players_str = converter.convert_to_game_players_str(game_players)
-            
-        game_players_cond_val = game_players_str + ' ' + in_key
-        #print('game_players_cond_val: ' + str(game_players_cond_val))
-        game_players_conditions[game_players_cond_val] = in_key
+        # convert to list of game_part_players_strings with all combos of abbrevs
+        combos_of_abbrevs = generate_combos_of_abbrevs(game_players)
+        # need a string for each combo
+        for abbrev_combo in combos_of_abbrevs:
+            print('abbrev_combo: ' + str(abbrev_combo))
+    
+            game_players_str = converter.convert_to_game_players_str(abbrev_combo)
+                
+            game_players_cond_val = game_players_str + ' ' + in_key
+            #print('game_players_cond_val: ' + str(game_players_cond_val))
+            game_players_conditions[game_players_cond_val] = in_key
 
     print('game_players_conditions: ' + str(game_players_conditions))
     return game_players_conditions
@@ -2838,14 +2857,15 @@ def generate_game_players_conditions(lineup, all_players_abbrevs, player='', lin
 # conditions related to players in game
 # same as gen cond sample weight except add samples for each separate condition making up overall cond
 # eg p1, p2, ... out also has p1 out and p2 out conds which are considered separate samples even though they overlap
-def generate_game_players_cond_sample_weight(player_stat_dict, team_condition, lineup, part, all_players_abbrevs, player='', lineup_team=''):
-    print('\n===Generate Game Players Condition Sample Weights: ' + player.title() + '===\n')
+def generate_game_players_cond_sample_weight(player_stat_dict, team_condition, lineup, lineup_team, part, all_players_abbrevs, player=''):
+    print('\n===Generate Game Players Condition Sample Weight: ' + player.title() + '===\n')
     print('Settings: Season Years, Season Part, Player')
-    print('\nInput: team_condition = \'teammates\' or \'opp\' = cond_key = ' + team_condition)
+    print('\nInput: team_condition = \'teammates\' or \'opp\' = cond_key = \'' + team_condition + '\'')
     print('Input: lineup = {starters: [players],...}, opps: {...} = cond_val = ' + str(lineup))
+    print('Input: lineup_team = ' + lineup_team)
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     
-    print('\nOutput: game_players_cond_weight = x = \n')
+    print('\nOutput: game_players_cond_weight = x\n')
 
     game_players_cond_weight = 0 #() # (teammates, opps)
 
@@ -2856,29 +2876,20 @@ def generate_game_players_cond_sample_weight(player_stat_dict, team_condition, l
                     'opp':5}
 
     # special condition sample size with all separate player conds inside combo player cond
-    conditions = generate_game_players_conditions(lineup, all_players_abbrevs, player, lineup_team)
+    conditions = generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player)
     s_n = determiner.determine_combined_conditions_sample_size(player_stat_dict, conditions, part) # for all yrs
-
-
-
-
-
-
-
     
     player_cond_weights = {'starters': 10, 
                             'bench': 4, 
                             'out': 2, 
                             'in': 2 }
     
-    
-
     gp_cond_weights = {}
     
     for team_part, team_part_players in lineup.items():
         # get dict of each cond weight:sample weight pair
         # eg player out, players out
-        gp_cond_sample_weight = generate_condition_sample_weight(player_stat_dict, team_part, team_part_players, part, player_cond_weights)
+        gp_cond_sample_weight = generate_condition_sample_weight(player_stat_dict, team_part, team_part_players, part, player, player_cond_weights)
         gp_cond_weights[team_part] = gp_cond_sample_weight
 
         # increase weight for multiplayer
@@ -2887,21 +2898,20 @@ def generate_game_players_cond_sample_weight(player_stat_dict, team_condition, l
         #     cond_weight += num_players
 
         # get a weighted prob only accounting for player conds
-        player_conds_true_prob = generate_true_prob()
-
+        game_players_true_prob = generate_true_prob() # player_conds_true_prob
 
         # sum(weight*samples) / sum(samples)
 
 
     
     print('game_players_cond_weight: ' + str(game_players_cond_weight))
-    return game_players_cond_weight
+    return game_players_cond_weight, game_players_true_prob
 
 
 # for all cond, cond key = cond val = all
 # cond key = loc, cond val = 'home' or 'D Green PF out', etc
 # combine condition weight and sample weight to get adjusted weight
-def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part, player=''):
+def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part, player='', cond_weights={}):
     print('\n===Generate Condition Sample Weight: ' + player.title() + '===\n')
     print('Setting: Season Part = ' + part)
     print('Setting: Condition Key = loc = ' + cond_key)
@@ -2932,18 +2942,19 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
     #                         'out': 2, 
     #                         'in': 2 }
     
-    cond_weights = {'all': 1, 
-                    'loc':3, 
-                    'city':2,
-                    'start':6, 
-                    'teammates': 10, 
-                    'opp':5, 
-                    'dow':1, 
-                    'tod':2, 
-                    'prev':5,
-                    'coverage':2,
-                    'time before':2, 
-                    'time after':3 } 
+    if len(cond_weights) == 0:
+        cond_weights = {'all': 1, 
+                        'loc':3, 
+                        'city':2,
+                        'start':6, 
+                        'teammates': 10, 
+                        'opp':5, 
+                        'dow':1, 
+                        'tod':2, 
+                        'prev':5,
+                        'coverage':2,
+                        'time before':2, 
+                        'time after':3 } 
     
     # get mean probs and weights for player conds
     # if re.search('opp', cond_key):
@@ -2992,7 +3003,7 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
 
         condition_sample_weight = round(float(cond_weight) * sample_weight, 2)
     
-    print('condition_sample_weight = cond_weight * sample_weight: ' + str(condition_sample_weight))
+    print('condition_sample_weight = cond_weight*sample_weight: ' + str(condition_sample_weight))
     return condition_sample_weight
 
 # player_current_conditions = {'loc':'away','out':[p1,...],...}
@@ -3001,10 +3012,11 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
 def generate_all_conditions_weights(game_player_cur_conds, player_current_conditions, player_stat_dict, all_players_abbrevs, part, player='', player_team=''):
     print('\n===Generate All Conditions Weights: ' + player.title() + '===\n')
     print('Settings: Season Part, Player')
-    print('\nInput: game_player_cur_conds = {teammates: {starters: [],...}, opps: {...} =')
-    print('Input: player_current_conditions = {loc:away, start:start, prev:5, ...')#{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ...')
+    print('Setting: Player Team to match player abbrevs in all years = \'' + player_team + '\'') # only cur team allowed?
+    print('\nInput: game_player_cur_conds = {teammates: {starters: [],...}, opps: {...} = ' + str(game_player_cur_conds))
+    print('Input: player_current_conditions = {loc:away, start:start, prev:5, ... = ' + str(player_current_conditions))#{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ...')
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
+    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
     print('\nOutput: all_conditions_weights = {cond_key: w1, ... = {teammates: 15, opp:10, loc:2, ... \n')
 
     all_conditions_weights = {} # adjusted for sample size
@@ -3027,15 +3039,24 @@ def generate_all_conditions_weights(game_player_cur_conds, player_current_condit
         condition_sample_weight = generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part, player)
         all_conditions_weights[cond_key] = condition_sample_weight
 
+    #all_conditions_weights = generate_all_game_players_cond_sample_weights()
+    print('\n===Generate Game Players Condition Sample Weights===\n')
     # get cond sample weight for all teammates samples! outer layer
+    # this outer layer always has 2 conditions: teammates and opps
+    # so get all connected samples but only unique games so dont count as another sample if from same game
+    # all samples in same game count as 1 sample bc 1 game
     for team_condition, lineup in game_player_cur_conds.items():
+        print('team_condition: ' + team_condition)
+        print('lineup: ' + str(lineup))
         # need lineup team to match player abbrev key
         # to find multiple abbrevs
+        # we are looking at the current player and lineup so get player current team
         lineup_team = player_team
         if team_condition == 'opps':
             lineup_team = player_current_conditions['opp']
+        print('lineup_team: ' + str(lineup_team))
         # generate player condition mean weights before passing to generate condition sample weight
-        game_players_cond_weight = generate_game_players_cond_sample_weight(player_stat_dict, team_condition, lineup, part, all_players_abbrevs, player, lineup_team)
+        game_players_cond_weight = generate_game_players_cond_sample_weight(player_stat_dict, team_condition, lineup, lineup_team, part, all_players_abbrevs, player)
         all_conditions_weights[team_condition] = game_players_cond_weight
 
     # game_players_cond_keys = ['out', 'starters', 'bench']
@@ -3088,17 +3109,17 @@ def generate_all_conditions_weights(game_player_cur_conds, player_current_condit
 # all_stat_probs_dict has both orig and per unit stats so no need for all_per_unit_stat_probs_dict
 # instead made per unit stat records
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...}
-def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs={}, all_players_teams={}, rosters={}, all_box_scores={}, all_cur_conds_dicts={}, all_game_player_cur_conds={}, all_current_conditions={}, season_years=[]):
+def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs={}, all_players_teams={}, rosters={}, all_box_scores={}, all_cur_conds_dicts={}, all_game_player_cur_conds={}, all_current_conditions={}, season_years=[], cur_yr=''):
     print('\n===Generate All True Probs Dict===\n')
-    print('Settings: Season Years')
+    print('Settings: Season Years, Current Year to get cur team')
     print('\nInput: all_stat_probs_dict = {player: {stat name: {stat val: {\'condition year part\': prob, ... = {\'kyle kuzma\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-    print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, prev:5, ...},... = {\'christian braun\': {\'loc\': \'away\', \'start\': \'bench\', ... = ' + str(all_cur_conds_dicts))
-    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = {\'christian braun\': {\'teammates\': {\'out\': [...], \'starters\': [\'jamal murray\',...], ... = ' + str(all_game_player_cur_conds))
+    print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, prev:5, ...},... = {christian braun: {loc: away, start: bench, ... = ' + str(all_cur_conds_dicts))
+    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = {christian braun: {teammates: {out: [...], starters: [jamal murray,...], ... = ' + str(all_game_player_cur_conds))
     print('\nOutput: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...\n')
 
     # before we get true prob we must know per unit probs
@@ -3128,6 +3149,9 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
         # yes although less efficient bc has to convert twice
         player_current_conditions = all_cur_conds_dicts[player]
         game_player_cur_conds = all_game_player_cur_conds[player]
+        # need cur team to match abbrevs to get game player conds bc players on same lineup as cur player
+        player_teams = all_players_teams[player]
+        player_cur_team = determiner.determine_player_current_team(player, player_teams, cur_yr, rosters)
         #print('init_player_current_conditions: ' + str(player_current_conditions))
         # for cond_key, cond_val in init_player_current_conditions.items():
         #     print('\ncond_key: ' + str(cond_key))
@@ -3152,7 +3176,7 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
         # combine cond weights and sample size to get normalized cond weights
         # or can we ignore sample size bc the cond weights reflect sample size? no we must say a cond with less samples has less weight
         # we can pass all conditions weights to gen true probs bc same for all stats bc condition and sample size same for all stats
-        all_conditions_weights = generate_all_conditions_weights(game_player_cur_conds, player_current_conditions, player_stat_dict, all_players_abbrevs, part, player)
+        all_conditions_weights = generate_all_conditions_weights(game_player_cur_conds, player_current_conditions, player_stat_dict, all_players_abbrevs, part, player, player_cur_team)
 
         for stat, stat_probs_dict in player_probs_dict.items():
             #print('\nstat: ' + str(stat))
@@ -4136,12 +4160,12 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     # if game key not in dict then we dont have info about it
                     # but if we have dict but missing this game then it is error bc we already read all players in games
                     if game_key in all_box_scores[season_year].keys():
+                        # no stats needed bc no game recorded? no we still go thru each stat for other conds
 
                         game_players = all_box_scores[season_year][game_key] # {away:{starters:[],bench:[]},home:{starters:[],bench:[]}}
                         print('game_players: ' + str(game_players))
 
                         
-
                         # condition: game teammates
                         # {starters:[],bench:[]}
                         # also add game opps bc depends on actual opp players out as well
@@ -4158,7 +4182,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         for teammates in game_teammates.values():
                             for teammate in teammates:
                                 game_teammates_list.append(teammate)
-                        #print('game_teammates_list: ' + str(game_teammates_list))
+                        print('game_teammates_list: ' + str(game_teammates_list))
 
                         #print('game_teammates: ' + str(game_teammates))
                         starters_key = 'starters'
@@ -4216,12 +4240,13 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             stat_dict[game_teammates_str] = {}
                         stat_dict[game_teammates_str][game_idx] = stat
 
-                        # condition: teammate
+                        # condition: teammate, add at same time as starters and bench bc inclusive
                         for teammate in game_teammates_list:
-                            teammate_str = teammate + ' ' + in_key
-                            if not teammate_str in stat_dict.keys():
-                                stat_dict[teammate_str] = {}
-                            stat_dict[teammate_str][game_idx] = stat
+                            if teammate in starters or teammate in bench:
+                                teammate_str = teammate + ' ' + in_key
+                                if not teammate_str in stat_dict.keys():
+                                    stat_dict[teammate_str] = {}
+                                stat_dict[teammate_str][game_idx] = stat
 
                         # condition: game starters
                         if not starters_str in stat_dict.keys():
@@ -4236,6 +4261,11 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             if not starter_str in stat_dict.keys():
                                 stat_dict[starter_str] = {}
                             stat_dict[starter_str][game_idx] = stat
+
+                            # in_str = starter + ' ' + in_key
+                            # if not starter_str in stat_dict.keys():
+                            #     stat_dict[starter_str] = {}
+                            # stat_dict[starter_str][game_idx] = stat
 
                         # condition: game bench
                         if not bench_str in stat_dict.keys():
@@ -4256,6 +4286,14 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         
 
                         # condition: teammate out
+                        out_key = 'out'
+                        out = game_teammates[out_key]
+                        for out_player in out:
+                            out_str = out_player + ' ' + out_key
+                            if not out_str in stat_dict.keys():
+                                stat_dict[out_str] = {}
+                            stat_dict[out_str][game_idx] = stat
+
                         # should we check all yrs bc sometimes player played last yr but not yet played this yr?
                         # yes bc we want to consider this a condition marked as NA not blank
                         # only if they actually played prev yrs and are still on roster
@@ -4274,31 +4312,33 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         # measured prob is not a relevant current condition so NA?
                         # we only care about current teammates but cannot loop thru cur teammates bc then would consider them all out prev seasons
                         # instead only add from prev seas if they are also cur teammate
-                        for teammate in player_teammates[season_year]:
-                            #print('teammate: ' + teammate)
-                            #print('game_teammates_list: ' + str(game_teammates_list))
-                            # we only care about current teammates but cannot loop thru cur teammates bc then would consider them all out prev seasons
-                            # instead only add from prev seas if they are also cur teammate
-                            # check cur roster not just active teammates bc player is out if not played yet this season
-                            # but played with this player in prev seasons
-                            # actually as long as it does not use as cur cond then it is ok to show that player played with them last yr
-                            # it is like showing a cond that does not apply to all players in table of all props 
-                            # where not all conditions match all players but we want to view it in single table
-                            if teammate not in game_teammates_list:# and teammate in rosters[cur_team]:#player_teammates[cur_yr]: # teammate out
-                                # if played with teammate last yr but not this yr, 
-                                # no longer teammate, so consider NA
-                                #if season_year != current_year and teammate not in rosters[cur_team]:
-                                #print('teammate out')
-                                teammate_out_key = teammate + ' out'
+                        # OLD way used process of elim
+                        # but now we have out section in game players dict bc generated box scores before
+                        # for teammate in player_teammates[season_year]:
+                        #     #print('teammate: ' + teammate)
+                        #     #print('game_teammates_list: ' + str(game_teammates_list))
+                        #     # we only care about current teammates but cannot loop thru cur teammates bc then would consider them all out prev seasons
+                        #     # instead only add from prev seas if they are also cur teammate
+                        #     # check cur roster not just active teammates bc player is out if not played yet this season
+                        #     # but played with this player in prev seasons
+                        #     # actually as long as it does not use as cur cond then it is ok to show that player played with them last yr
+                        #     # it is like showing a cond that does not apply to all players in table of all props 
+                        #     # where not all conditions match all players but we want to view it in single table
+                        #     if teammate not in game_teammates_list:# and teammate in rosters[cur_team]:#player_teammates[cur_yr]: # teammate out
+                        #         # if played with teammate last yr but not this yr, 
+                        #         # no longer teammate, so consider NA
+                        #         #if season_year != current_year and teammate not in rosters[cur_team]:
+                        #         #print('teammate out')
+                        #         teammate_out_key = teammate + ' out'
 
-                                if not teammate_out_key in stat_dict.keys():
-                                    stat_dict[teammate_out_key] = {}
-                                stat_dict[teammate_out_key][game_idx] = stat
+                        #         if not teammate_out_key in stat_dict.keys():
+                        #             stat_dict[teammate_out_key] = {}
+                        #         stat_dict[teammate_out_key][game_idx] = stat
 
                         #print("stat_dict: " + str(stat_dict))
 
-                    # else:
-                    #     print('Warning: Game key not in players in games dict so box score not available! ' + game_key)
+                        # else:
+                        #     print('Warning: Game key not in players in games dict so box score not available! ' + game_key)
 
 
 
@@ -4383,8 +4423,8 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
     print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
     print('Input: init_player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = \n')
-    print('Input: player_position = \'position\' = \'pg\'')
-    print('Input: player_teammates = {year:[teammates],... = {\'2024\': [\'J Randle PF\', ...')
+    print('Input: player_position = \'position\' = ' + player_position)
+    print('Input: player_teammates = {year:[teammates],... = {2024: [J Randle PF, ... = ' + str(player_teammates))
     print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
     print('\nOutput: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...\n')
 
@@ -4570,8 +4610,8 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
 
     gen_all_box_scores = copy.deepcopy(init_gen_box_scores)
 
-    # if player avg min > 10 and they did not play game, then consider them out
-    # if player avg min < 10 and they did not play game, then consider them bench
+    # if player avg min > 12 and they did not play game, then consider them out
+    # if player avg min < 13 and they did not play game, then consider them bench
     # {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}}
     for year, year_box_scores in init_all_box_scores.items():
         if year not in gen_all_box_scores.keys():
@@ -4683,11 +4723,11 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                         # irregular case
                                         if play_time == '-':
                                             play_time = '0'
-                                        if int(play_time) > 10:
+                                        if int(play_time) > 12:
                                             #print('found bench')
                                             final_bench[player_abbrev] = play_time
                                         else:
-                                            if player_mean_minutes > 10:
+                                            if player_mean_minutes > 12:
                                                 #print('found bench')
                                                 final_bench[player_abbrev] = play_time
                                             else:
@@ -4705,7 +4745,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                             player_abbrev = player # show player name so we know which abbrev is missing
                                         #print('player_abbrev out or dnp: ' + player_abbrev)
 
-                                        if player_mean_minutes > 10:
+                                        if player_mean_minutes > 12:
                                             #print('found out')
                                             out[player_abbrev] = 0
                                         else:
@@ -4793,6 +4833,11 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # what if we want to read previous season?
     if 'read new teams' in settings.keys():
         read_new_teams = settings['read new teams']
+    # read teams rosters
+    read_new_rosters = False # saves time during testing other parts if we read existing teams saved locally
+    # what if we want to read previous season?
+    if 'read new rosters' in settings.keys():
+        read_new_rosters = settings['read new rosters']
     
     find_players = False
     if 'find players' in settings.keys():
@@ -4859,7 +4904,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
             read_new_player_ids = settings['read new player ids']
         #print('read_new_game_ids: ' + str(read_new_game_ids))
             
-        all_teams_current_rosters = reader.read_all_teams_rosters(all_teams, read_new_teams)
+        all_teams_current_rosters = reader.read_all_teams_rosters(all_teams, read_new_teams, read_new_rosters)
 
         # if we already have saved prev seasons then will only return this season games
         # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
@@ -4884,7 +4929,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # not as simple as reading roster online bc shows inactive players
         # so need box scores to show active players
         # all_teams_players = {year:{team:[players],...},...}
-        # do not include practice players in all teams players
+        # do not include practice players in all teams players???
+        # OR we still consider practice players as part of team bc we are able to see their minutes to filter them out later???
         all_teams_players = reader.read_all_teams_players(all_box_scores, all_teams_current_rosters, all_players_teams, all_players_abbrevs, current_year_str, read_new_teams, all_teams)
         #all_practice_players = 
 
@@ -5080,7 +5126,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_cur_conds_data = converter.convert_all_conditions_to_dicts(all_current_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years, current_year_str)
     all_cur_conds_dicts = all_cur_conds_data[0]
     all_game_player_cur_conds = all_cur_conds_data[1]
-    all_true_probs_dict = generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs, all_players_teams, teams_current_rosters, all_box_scores, all_cur_conds_dicts, all_game_player_cur_conds, all_current_conditions, season_years)
+    all_true_probs_dict = generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs, all_players_teams, teams_current_rosters, all_box_scores, all_cur_conds_dicts, all_game_player_cur_conds, all_current_conditions, season_years, current_year_str)
     
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]

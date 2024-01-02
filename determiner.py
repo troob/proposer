@@ -1948,30 +1948,82 @@ def determine_team_from_game_key(game_key, team_loc):
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
 def determine_condition_sample_size(player_stat_dict, condition, part):
-    print('\n===Determine Condition Sample Size: ' + condition + '===\n')
+    print('\n===Determine Condition Sample Size: ' + condition + ', ' + part + '===\n')
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+    print('\nOutput: sample_size = x\n')
 
     sample_size = 0
 
-    for year_stat_dicts in player_stat_dict.values():
+    for year, year_stat_dicts in player_stat_dict.items():
+        #print('\nyear: ' + year)
         if part in year_stat_dicts.keys():
             # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
             full_stat_dict = list(year_stat_dicts[part].values())[0]
+            #print('full_stat_dict: ' + str(full_stat_dict))
             if condition in full_stat_dict.keys():
+                #print('found condition ' + condition)
                 stat_dict = full_stat_dict[condition]
+                #print('stat_dict: ' + str(stat_dict))
                 sample_size += len(stat_dict.keys())
 
     print('sample_size: ' + str(sample_size))
     return sample_size
 
+# get game idxs for each condition to see overlap
+def determine_condition_sample_indexes(player_stat_dict, condition, part):
+    # print('\n===Determine Condition Sample Indexes: ' + condition + ', ' + part + '===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+    # print('\nOutput: sample_indexes = {year:[game idx,...],...\n')
+
+    sample_indexes = {}
+
+    for year, year_stat_dicts in player_stat_dict.items():
+        #print('\nyear: ' + year)
+        # sample_indexes[year] = []
+        # year_sample_idxs = sample_indexes[year]
+        if part in year_stat_dicts.keys():
+            # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
+            full_stat_dict = list(year_stat_dicts[part].values())[0]
+            #print('full_stat_dict: ' + str(full_stat_dict))
+            if condition in full_stat_dict.keys():
+                #print('found condition ' + condition)
+                stat_dict = full_stat_dict[condition]
+                #print('stat_dict: ' + str(stat_dict))
+                sample_indexes[year] = list(stat_dict.keys())
+
+    #print('sample_indexes: ' + str(sample_indexes))
+    return sample_indexes
+
 # given a list of conds, sum their sample sizes
 # eg for game player conds where we add combo conds with single conds
-def determine_combined_conditions_sample_size(player_stat_dict, conditions, part):
+# would it just be all samples since it is samples of players in every game?
+# not necessarily if current conds dont match samples
+# for exmple if none of the current game teammates were in any of the given players games
+# is that possible? i think not bc at least 1 player? no bc if new team then no matching conds
+# many cases all samples will have at least 1 player from cur conds, if played on team 2 seasons
+def determine_combined_conditions_sample_size(player_stat_dict, conditions, season_part):
     print('\n===Determine Combined Conditions Sample Size===\n')
+    print('Setting: Season Part')
+    print('Setting: Conditions = {condition: cond type, ... = ' + str(conditions))
+    print('\nInput: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ... = ' + str(player_stat_dict))
+    print('\nOutput: combined_sample_size = x\n')
 
     combined_sample_size = 0
+    all_unique_sample_idxs = {}
+    
     for condition in conditions:
-        sample_size = determine_condition_sample_size(player_stat_dict, condition, part)
-        combined_sample_size += sample_size
+        cond_sample_idxs = determine_condition_sample_indexes(player_stat_dict, condition, season_part)
+        for year, year_sample_idxs in cond_sample_idxs.items():
+            if year not in all_unique_sample_idxs.keys():
+                all_unique_sample_idxs[year] = []
+            unique_sample_idxs = all_unique_sample_idxs[year] # no repeats per yr
+            for sample_idx in year_sample_idxs:
+                if sample_idx not in unique_sample_idxs:
+                    unique_sample_idxs.append(sample_idx)
+                    #print('unique_sample_idxs: ' + str(unique_sample_idxs))
+                    combined_sample_size += 1
+
+    #print('all_unique_sample_idxs: ' + str(all_unique_sample_idxs))
 
     print('combined_sample_size: ' + str(combined_sample_size))
     return combined_sample_size
