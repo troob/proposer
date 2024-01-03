@@ -1936,7 +1936,7 @@ def determine_team_from_game_key(game_key, team_loc):
     game_data = game_key.split()
     if len(game_data) > 2:
         away_team = game_data[0]
-        home_team = game_data[1]
+        home_team = game_data[1] 
         team = away_team
         if team_loc == 'home':
             team = home_team
@@ -1948,7 +1948,7 @@ def determine_team_from_game_key(game_key, team_loc):
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
 def determine_condition_sample_size(player_stat_dict, condition, part):
-    print('\n===Determine Condition Sample Size: ' + condition + ', ' + part + '===\n')
+    print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
     print('\nOutput: sample_size = x\n')
 
@@ -2003,9 +2003,9 @@ def determine_condition_sample_indexes(player_stat_dict, condition, part):
 # many cases all samples will have at least 1 player from cur conds, if played on team 2 seasons
 def determine_combined_conditions_sample_size(player_stat_dict, conditions, season_part):
     print('\n===Determine Combined Conditions Sample Size===\n')
-    print('Setting: Season Part')
-    print('Setting: Conditions = {condition: cond type, ... = ' + str(conditions))
-    print('\nInput: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ... = ' + str(player_stat_dict))
+    print('Setting: Season Part = ' + season_part)
+    print('\nInput: Conditions = {condition: cond type, ... = ' + str(conditions))
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
     print('\nOutput: combined_sample_size = x\n')
 
     combined_sample_size = 0

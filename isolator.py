@@ -210,3 +210,46 @@ def isolate_highest_ev_prop(sg_props):
     highest_prop = sorter.sort_dicts_by_key(sg_props, 'ev', reverse=True)[0]
     #print('highest_prop: ' + str(highest_prop))
     return highest_prop
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def isolate_team_part_conds(team_part, team_gp_conds):
+    print('\n===Isolate Team Part Conditions===\n')
+    print('Input: team_part = ' + team_part)
+    print('Input: team_gp_conds = {gp condition:cond type,... = {\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ...}, opp:{...} = ' + str(team_gp_conds))
+    print('\nOutput: team_part_conds = [condition,...]\n')
+    
+    team_part_conds = []
+
+    for gp_cond, cond_type in team_gp_conds.items():
+        if cond_type == team_part:
+            team_part_conds.append(gp_cond)
+
+    print('team_part_conds: ' + str(team_part_conds))
+    return team_part_conds
