@@ -298,7 +298,7 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    #print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
     #print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
@@ -353,8 +353,16 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #         if game_player_abbrev != '':
     #             break
 
-    print('game_player_abbrev: ' + str(game_player_abbrev))
+    #print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
+
+def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
+    abbrevs = []
+    for player in players:
+        abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
+        abbrevs.append(abbrev)
+
+    return abbrevs
 
 # combine all names into single string condition, alphabet order
 # generic function, convert list to string (alphabetized)
@@ -434,6 +442,10 @@ def convert_conditions_to_dict(conditions, all_players_abbrevs, all_players_team
             #print('game player condition')
             
             gp_conds_dict[teammates_key][cond_key] = cond_val
+        
+        elif re.search(opp_key, cond_key) and cond_key != 'opp team':
+            cond_key = re.sub('opp ','',cond_key) # opp shown in top level so dont repeat?
+            gp_conds_dict[opp_key][cond_key] = cond_val
 
             # game_part_players = []
             

@@ -138,14 +138,14 @@ def read_website(url, timeout=10, max_retries=3):
                 # If the error is different than a timeout, raise it
 				#raise
 				# if too many requests, do not retry
-				if str(e) != 'HTTP Error 429: Too Many Requests':
-					retries += 1
-					print(f"URLError error occurred. Retrying {retries}/{max_retries}...", e)#, e.getheaders(), e.gettext(), e.getcode())
-					time.sleep(10)
-				else:
-					print(f"URLError, HTTP Error 429 occurred: ", e)
-					#retries=4
+				if str(e) == 'HTTP Error 404: Not Found' or str(e) == 'HTTP Error 429: Too Many Requests':
+					print(f"URLError, " + str(e) + ', ' + url)
 					return str(e)
+				else:
+					retries += 1
+					print(f"URLError error occurred. Retrying {retries}/{max_retries}...", e, url)#, e.getheaders(), e.gettext(), e.getcode())
+					time.sleep(10)
+				
 			
 		except Exception as e:
             # If any other exception occurs, raise it
@@ -2065,7 +2065,7 @@ def read_players_from_rosters(rosters, game_teams=[]):
 # all_teams_players = {year:{team:[players],...},...}
 def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur_yr):
 	print('\n===Read All Lineups===\n')
-	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_lineups = {\'cle\': {\'starters\': [\'donovan mitchell\', ...\n')
 	#print('all_teams_players: ' + str(all_teams_players))
 
@@ -2156,27 +2156,37 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 								#print('starter')
 								starters.append(player_name)
 							else:
-								# determine out status
-								# if out
-								# title="Very Unlikely To Play"
-								if re.search('Very Unlikely',str(player_element)):
-									#print('out')
-									out.append(player_name)
-								# if doubtful
-								# title="Unlikely To Play"
-								elif re.search('Unlikely',str(player_element)):
-									#print('doubtful')
-									doubtful.append(player_name)
-								# if questionable
-								# title="Toss Up To Play"
-								elif re.search('Toss Up',str(player_element)):
-									#print('questionable')
-									questionable.append(player_name)
-								# if probable
-								# title="Likely To Play"
-								elif re.search('Likely',str(player_element)):
-									#print('probable')
-									probable.append(player_name)
+								# if not dnp status
+								# 1st see if played this yr
+								# then get avg play time this yr from player teams
+								if player_name in all_players_teams.keys():
+									player_teams = all_players_teams[player_name]
+									if cur_yr in player_teams.keys() and lineup_team in player_teams[cur_yr].keys():
+										#cur_team_dict = player_teams[cur_yr][lineup_team]
+										avg_play_time = player_teams[cur_yr][lineup_team]['MIN']
+										if avg_play_time > 11.5: # 48/4 = 12 +/- 0.5
+											# if cur_yr in player_teams.keys():
+											# determine out status
+											# if out
+											# title="Very Unlikely To Play"
+											if re.search('Very Unlikely',str(player_element)):
+												#print('out')
+												out.append(player_name)
+											# if doubtful
+											# title="Unlikely To Play"
+											elif re.search('Unlikely',str(player_element)):
+												#print('doubtful')
+												doubtful.append(player_name)
+											# if questionable
+											# title="Toss Up To Play"
+											elif re.search('Toss Up',str(player_element)):
+												#print('questionable')
+												questionable.append(player_name)
+											# if probable
+											# title="Likely To Play"
+											elif re.search('Likely',str(player_element)):
+												#print('probable')
+												probable.append(player_name)
 
 							player_num += 1
 
@@ -2248,7 +2258,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 						cur_team_dict = list(cur_yr_player_teams.values())[-1]#determiner.determine_player_current_team()
 						avg_play_time = cur_team_dict['MIN']
 
-				if int(avg_play_time) < 13:
+				if avg_play_time <= 11.5:
 					dnp.append(player)
 			print('dnp: ' + str(dnp))
 
@@ -2487,31 +2497,34 @@ def read_player_name(player_abbrev, player_id, all_players_ids_file=''):
 	soup = read_website(site)
 
 	if soup is not None:
-		# find last element of ul with class PlayerHeader__Team_Info
-		names = list(soup.find("h1", {"class": "PlayerHeader__Name"}).descendants)
-		#print('names: ' + str(names))
-		first_name = names[1]
-		last_names = names[3]
-		player_name = first_name + ' ' + last_names
-		# player_name = str(names[0].decode_contents())
-		# print('player_name: ' + player_name)
-		# for name in names[1:]:
-		# 	print('name: ' + name)
-		# 	text = str(name.decode_contents())
-		# 	player_name += ' ' + text
-		# 	print('player_name: ' + player_name)
-		player_name = re.sub('-',' ',player_name).lower()
-		player_name = re.sub('\.','',player_name)
+		if re.search('HTTP Error', str(soup)):
+			print('Warning: HTTP Error! ' + soup + ', ' + site)
+		else:
+			# find last element of ul with class PlayerHeader__Team_Info
+			names = list(soup.find("h1", {"class": "PlayerHeader__Name"}).descendants)
+			#print('names: ' + str(names))
+			first_name = names[1]
+			last_names = names[3]
+			player_name = first_name + ' ' + last_names
+			# player_name = str(names[0].decode_contents())
+			# print('player_name: ' + player_name)
+			# for name in names[1:]:
+			# 	print('name: ' + name)
+			# 	text = str(name.decode_contents())
+			# 	player_name += ' ' + text
+			# 	print('player_name: ' + player_name)
+			player_name = re.sub('-',' ',player_name).lower()
+			player_name = re.sub('\.','',player_name)
 
-		print('Success', player_name.title(), player_abbrev)
+			print('Success', player_name.title(), player_abbrev)
 
-		if player_name != '':
-			# save new id
-			if all_players_ids_file == '':
-				all_players_ids_file = 'data/all players ids.csv' # need to get names
-			data = [[player_name, player_id]]
-			write_param = 'a' # append ids to file
-			writer.write_data_to_file(data, all_players_ids_file, write_param) # write to file so we can check if data already exists to determine how we want to read the data and if we need to request from internet
+			if player_name != '':
+				# save new id
+				if all_players_ids_file == '':
+					all_players_ids_file = 'data/all players ids.csv' # need to get names
+				data = [[player_name, player_id]]
+				write_param = 'a' # append ids to file
+				writer.write_data_to_file(data, all_players_ids_file, write_param) # write to file so we can check if data already exists to determine how we want to read the data and if we need to request from internet
 	else:
 		print('Warning: website has no soup!')
 
@@ -2552,6 +2565,14 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 
 		game_data = game_key.split()
 		if len(game_data) > 2:
+
+			# ensure date after preseason bc preseason not counted in players teams dict
+			# cannot use hard date bc changes each yr
+			# date = re.sub('/\d+$','',game_data[2])
+			# date_obj = datetime.strptime(date, '%m/%d')
+			# preseason_end_date_obj = datetime.strptime('10/20', '%m/%d')
+			# if date_obj > reg_season_start_date_obj
+			
 			away_team = game_data[0]
 			print('away_team: ' + str(away_team))
 			home_team = game_data[1]
@@ -2563,6 +2584,8 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 				game_player_team_abbrev = home_team
 				if loc == 'away':
 					game_player_team_abbrev = away_team
+					
+				
 				game_player_team_name = game_player_team_abbrev # will be set blank for irreg team and then used to break loop to next team
 				print('game_team_players: ' + str(game_team_players))
 				for team_part, team_part_players in game_team_players.items():
@@ -2572,6 +2595,11 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 					for player_abbrev in team_part_players:
 						print('\nplayer_abbrev: ' + str(player_abbrev))
 
+						# if we already stored player abbrev and team, 
+						# then check to make sure this box score is correct
+						# bc sometimes wrong search will give wrong box score
+						#if game_player_team_abbrev == player_team:
+
 						# if abbrev already in year_players_abbrevs
 						# no need to run again
 						# if player name blank bc not on current, then it will waste time trying to determine full name
@@ -2579,6 +2607,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 						
 						# need to add team abbrev to player abbrev bc tre jones and tyus jones have the same abbrev t jones pg
 						player_abbrev_key = player_abbrev + '-' + game_player_team_abbrev
+						print('player_abbrev_key: ' + str(player_abbrev_key))
 
 						if player_abbrev_key not in year_players_abbrevs.keys() and player_abbrev_key not in unknown_names:
 
@@ -2606,7 +2635,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 												player_name = name.lower()
 												break
 
-										print('player_name: ' + player_name)
+										print('player_name from id file: ' + player_name)
 
 										if player_name == '': # id not saved either
 											print('id not saved either ' + player_abbrev)
@@ -2625,10 +2654,12 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 									elif player_abbrev_key in cur_yr_players_abbrevs: # id blank bc no search results bc dnp player
 										player_name = cur_yr_players_abbrevs[player_abbrev_key]
 							
+							print('final player_name: ' + player_name)
 							if player_name != '':
 								year_players_abbrevs[player_abbrev_key] = player_name
 							else:
-								unknown_names.append(player_abbrev)
+								if player_abbrev_key not in unknown_names:
+									unknown_names.append(player_abbrev_key)
 								# CAUTION: player name blank bc player not on roster
 								print('\n===Warning: Blank Player Name: ' + player_abbrev + '===\n')
 
@@ -2639,7 +2670,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 					if len(unknown_names) > 0:
 						print('WARNING unknown_names: ' + str(unknown_names))
 								
-	print('year_players_abbrevs: ' + str(year_players_abbrevs))
+	#print('year_players_abbrevs: ' + str(year_players_abbrevs))
 	return (year_players_abbrevs, all_players_espn_ids, all_players_teams)
 
 # for each game in games dict, 
@@ -2824,37 +2855,40 @@ def read_year_teammates(player, season_year, player_season_log, year_box_scores)
 					for game_key, game_players in year_box_scores.items():
 						#print('game_key: ' + str(game_key))
 
-						# first look for matching date
-						game_key_data = game_key.split()
-						date_idx = 2
-						if len(game_key_data) > date_idx:
-							game_key_date = re.sub('/\d+$','',game_key_data[date_idx]) # 11/11/2024 -> 11/11
-							#print('game_key_date: ' + str(game_key_date))
-							# game_key_date = 11/18
-							# game_date: wed 11/18 -> 11/18
-							game_date = re.sub('[a-zA-Z]+','',game_date).strip()
-							#print('game_date: ' + str(game_date))
-							if game_key_date == game_date:
-								# look for matching team
-								# game_key_teams = re.sub('\s\d+.+$','',) #'away home 11/11/2024'
-								# print('game_key_teams: ' + str(game_key_teams))
+						if len(game_players.keys()) > 0:
+							# first look for matching date
+							game_key_data = game_key.split()
+							date_idx = 2
+							if len(game_key_data) > date_idx:
+								game_key_date = re.sub('/\d+$','',game_key_data[date_idx]) # 11/11/2024 -> 11/11
+								#print('game_key_date: ' + str(game_key_date))
+								# game_key_date = 11/18
+								# game_date: wed 11/18 -> 11/18
+								game_date = re.sub('[a-zA-Z]+','',game_date).strip()
+								#print('game_date: ' + str(game_date))
+								if game_key_date == game_date:
+									# look for matching team
+									# game_key_teams = re.sub('\s\d+.+$','',) #'away home 11/11/2024'
+									# print('game_key_teams: ' + str(game_key_teams))
 
-								# game_opp = vsind
-								game_data = game_key.split() # away,home,date
+									# game_opp = vsind
+									game_data = game_key.split() # away,home,date
 
-								if len(game_data) > 2:
-									away_team = game_data[0]
-									home_team = game_data[1]
+									if len(game_data) > 2:
+										away_team = game_data[0]
+										home_team = game_data[1]
 
-									# find game
-									if re.search(away_team, game_opp):
-										player_team = home_team
-										game_teammates_dict = game_players['home']
-										break
-									elif re.search(home_team, game_opp):
-										player_team = away_team
-										game_teammates_dict = game_players['away']
-										break
+										# find game
+										if re.search(away_team, game_opp):
+											player_team = home_team
+											game_teammates_dict = game_players['home']
+											break
+										elif re.search(home_team, game_opp):
+											player_team = away_team
+											game_teammates_dict = game_players['away']
+											break
+						else:
+							print('Warning: Box score blank! ' + game_key)
 
 					if player_team != '':
 						# print('player_team: ' + str(player_team))
@@ -4072,10 +4106,9 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Tru
 			site = 'https://www.google.com/search?q=' + search_string
 			#print('site: ' + site)
 
-			soup = read_website(site, timeout=10, max_retries=3)
+			soup = read_website(site)
 
-			if soup == 'HTTP Error 429: Too Many Requests':
-			#if re.search('Too Many Requests', soup):
+			if re.search('HTTP Error', str(soup)):# == 'HTTP Error 429: Too Many Requests':
 				return soup
 
 			time.sleep(1) # do we need to sleep bt calls to google to avoid being blocked by error 429 too many requests
@@ -4190,11 +4223,14 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 		soup = read_website(site)
 		#print('soup: ' + str(soup))
 
-		if soup == 'HTTP Error 429: Too Many Requests':
-			print('Warning: Too many requests!')
-		else:
-			if soup is not None:
-
+		# if soup == 'HTTP Error 429: Too Many Requests':
+		# 	print('Warning: Too many requests!')
+		# elif re.search('HTTP Error', soup):# == 'HTTP Error 429: Too Many Requests':
+		# 	print('Warning: HTTP Error! ' + soup)
+		if soup is not None:
+			if re.search('HTTP Error', str(soup)):
+				print('Warning: HTTP Error! ' + soup)
+			else:
 				links_with_text = [] # id is in first link with text
 
 				for a in soup.find_all('a', href=True):
@@ -4565,3 +4601,10 @@ def read_teams_rosters(game_teams, read_new_teams=True):
 		
 	print('teams_rosters: ' + str(teams_rosters))
 	return teams_rosters
+
+# its not just prev yrs we care about bc we may want to see how it performed in prev games this yr
+# so give it a date/game to set as the last game to eval
+def read_game_teams(read_season_year):
+	game_teams = [] # read todays schedule if cur yr
+
+	return game_teams

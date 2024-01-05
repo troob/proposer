@@ -28,6 +28,11 @@ find_matchups = False
 # read all seasons to compare and see trend
 read_x_seasons = 2 # set 0 or high number to read all seasons
 read_season_year = 2024 # user can choose year. read x seasons previous
+
+# if we want to see how it would perform for previous years
+# we need to know the exact game (or even specific prop) that we want to evaluate
+# by default, go through entire year
+
 # read new odds at least once per day if false but set true if we want to update odds more than once per day
 read_new_odds = True 
 # keep in mind, when we add a new feature such as a new condition to the stat dict,
@@ -36,6 +41,10 @@ read_new_odds = True
 read_new_stats = False # set true when we add new feature to stats dict so we want to manually overwrite old dict rather than usual behavior of trusting prev stat dicts
 read_new_lineups = True # even if we saved lineups today they may have changed but we may not want to get new lineups yet if we are testing something else
 
+# === TEST PERFORMANCE === 
+# we eval/test performance to see how it would perform on prev games
+# if true, compare all props to actual outcomes
+test_performance = False
 
 # === NEW TEAMS ===
 # read new teams after trades and acquisitions new players
@@ -50,6 +59,10 @@ read_new_rosters = False
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
 read_new_game_ids = True
 
+# === PLAYER IDs ===
+# need all players ids but halt if error too many requests
+read_new_player_ids = False
+
 # === FIND PLAYERS ===
 find_players = True # if true, read all players in game box scores to see prob with teammates out
 
@@ -58,9 +71,7 @@ find_players = True # if true, read all players in game box scores to see prob w
 # make list of sources with different odds 
 read_odds = False # set false to test other features
 
-# === PLAYER IDs ===
-# need all players ids but halt if error too many requests
-read_new_player_ids = True
+
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -78,12 +89,21 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # gen list of player names given teams so we dont have to type all names
 # if no date given, and if past 10pm then assume getting data for next day
 # https://www.espn.com/nba/schedule 
-game_teams = [('okc','tor')]#[('bos','bkn'), ('nyk','phi'), ('tor','chi'), ('cle','det'), ('ind','mil'), ('den','min'), ('okc','por'), ('uta','gsw'), ('lac','lal'), ('phx','sac'), ('atl','cha'), ('mia','orl'), ('wsh','dal'), ('hou','mem'), ('nop','sas')]#, ('nop','lal')
+# if reading prev seasons to eval, read all games from box scores file
+# if prev yr, game teams blank
+# game key of interest we want to eval how program would perform?
+# more likely to see on full set of yr, including this yr
+# so make setting, test performance
+game_teams = [('den','gsw')]#, ('nop','lal')
+# if not test_performance:
+#     game_teams = reader.read_game_teams(read_season_year)
+# if read_season_year == current_year:
+#     game_teams = []
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters) # {team:roster,...}
 #players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['josh giddey'] # use for testing
+players_names = ['brandin podziemski'] # use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

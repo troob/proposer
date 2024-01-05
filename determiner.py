@@ -16,6 +16,7 @@ import pandas as pd # read html results from webpage to determine if player play
 import numpy as np # mean, median
 
 import generator # gen prob stat reached to determine prob from records
+import converter # convert names to abbrevs while determining conditions order
 
 # if streak resembles pattern we have seen consistently such as 3/3,3/4,4/5,5/6,6/7,6/9,7/10
 def determine_consistent_streak(stat_counts, stat_name=''):
@@ -1134,14 +1135,53 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
     #print('unit_time_period: ' + str(unit_time_period))
     return unit_time_period
 
+def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
+    print('\n===Determine All Current Conditions===\n')
+    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
+    print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
+
+    all_cur_conds = []
+
+    # for game player conditions, we want to show overall 2: teammates and opp
+    # then we also want to show 4 team parts per team
+    # so 10 total: 2 for overall 2 teams per game, plus 8 bc 4 parts per team and 2 teams
+    # all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...
+    for player, gp_cur_conds in all_game_player_cur_conds.items():
+
+        # {teammates: {starters:[],...}, opp: {...}}, ...
+        for team_condition, team_parts in gp_cur_conds.items():
+
+            # add 2 overall gp conds
+            # all_cur_conds = ['all', 'teammates', 'opp']
+            #all_cur_conds.extend(['teammates', 'opp'])
+            if team_condition not in all_cur_conds:
+                all_cur_conds.append(team_condition)
+
+            # 4 team parts per team
+            for team_part, team_part_players in team_parts.items():
+                # remove team name from abbrev for display
+                team_part_players_abbrevs = converter.convert_all_players_name_to_abbrevs(team_part_players, all_players_abbrevs)
+                gp_cond_str = generator.generate_players_string(team_part_players_abbrevs)
+                # add team cond bc diff if teammates or opp
+                # and not directly from sample, instead from avg of subsamples
+                gp_cond_str += ' ' + team_condition + ' ' + team_part
+                if gp_cond_str not in all_cur_conds:
+                    all_cur_conds.append(gp_cond_str)
+
+
+    
+
+    print('all_cur_conds: ' + str(all_cur_conds))
+    return all_cur_conds
+
 # all unique conds for all players so we can display all players in same table with NA for stats that dont have condition
 # all_current_conditions: {'marvin bagley iii': {'loc': 'away', 'start': 'bench'}, 'bojan bogdanovic': {'loc':...
 # input: all_cur_conds_lists = {p1:[m fultz pg out, away, ...],...}
 # output: all_cur_conds: ['all', 'away', 'm fultz pg out', 'bench', 'start', 'home']
-def determine_all_current_conditions(all_current_conditions, all_cur_conds_lists):
-    #print('\n===Determine All Current Conditions===\n')
-    #print('all_current_conditions: ' + str(all_current_conditions))
-    #print('all_cur_conds_lists: ' + str(all_cur_conds_lists))
+def determine_all_current_conditions(all_cur_conds_lists):
+    print('\n===Determine All Current Conditions===\n')
+    print('Input: all_cur_conds_lists = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_lists))
+    print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
 
     all_cur_conds = ['all']
 
@@ -1152,7 +1192,7 @@ def determine_all_current_conditions(all_current_conditions, all_cur_conds_lists
         #print('player_cur_conds: ' + str(player_cur_conds))
         #for cond_key, cond_val in player_cur_conds.items():
             #print('cond_key: ' + str(cond_key))
-        for cond_val in player_cur_conds:
+        for cond_val in player_cur_conds.values():
             #print('cond_val: ' + str(cond_val))
             if cond_val != '':
                 # if cond_key == 'out': # cond_val = []
@@ -1164,7 +1204,34 @@ def determine_all_current_conditions(all_current_conditions, all_cur_conds_lists
             else:
                 print('Warning: Blank cond_val! ' + player.title())
 
-    #print('all_cur_conds: ' + str(all_cur_conds))
+    # for game player conditions, we want to show overall 2: teammates and opp
+    # then we also want to show 4 team parts per team
+    # so 10 total: 2 for overall 2 teams per game, plus 8 bc 4 parts per team and 2 teams
+    # all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...
+    # for player, gp_cur_conds in all_game_player_cur_conds.items():
+
+    #     # {teammates: {starters:[],...}, opp: {...}}, ...
+    #     for team_condition, team_parts in gp_cur_conds.items():
+
+    #         # add 2 overall gp conds
+    #         # all_cur_conds = ['all', 'teammates', 'opp']
+    #         #all_cur_conds.extend(['teammates', 'opp'])
+    #         if team_condition not in all_cur_conds:
+    #             all_cur_conds.append(team_condition)
+
+    #         # 4 team parts per team
+    #         for team_part, team_part_players in team_parts.items():
+    #             gp_cond_str = generator.generate_players_string(team_part_players)
+    #             # add team cond bc diff if teammates or opp
+    #             # and not directly from sample, instead from avg of subsamples
+    #             gp_cond_str += ' ' + team_condition + ' ' + team_part
+    #             if gp_cond_str not in all_cur_conds:
+    #                 all_cur_conds.append(gp_cond_str)
+
+
+    
+
+    print('all_cur_conds: ' + str(all_cur_conds))
     return all_cur_conds
 
 # determine game num so we can sort by game
@@ -1183,6 +1250,14 @@ def determine_game_num(game_teams, player_team):
     return game_num
 
 
+
+
+
+
+def determine_player_game(game_teams, player_team):
+    for game in game_teams:
+        if player_team in game:
+            return game
 
 # determine condition of player current game location
 # based on input game teams
@@ -1761,8 +1836,7 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
 # bc lineups shows player abbrev
 # this abbrev does not include position bc it is used to compare to full name
 def determine_player_abbrev(player_name):
-    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
-    #print('player_name: ' + str(player_name))
+    print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
     
     player_abbrev = ''
 
@@ -1789,7 +1863,7 @@ def determine_player_abbrev(player_name):
     else:
         print('Warning: Blank player name while determining player abbrev!')
     
-    #print('player_abbrev: ' + player_abbrev)
+    print('player_abbrev: ' + player_abbrev)
     return player_abbrev
 
 # if given abbrev like D. Green need to know team or position to get full name
@@ -1850,7 +1924,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         player = re.sub('\s+[a-z]+$', '', player)#.strip() # D Green PF -> d green
 
         
-    print('formatted player: \'' + str(player) + '\'') # d green
+    #print('formatted player: \'' + str(player) + '\'') # d green
     if player in all_players_teams.keys(): # if already given full name
         full_name = player
     else: # could use all players teams or rosters
@@ -1858,7 +1932,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         # else look in player teams
         # player_teams = {yr:team:gp} = {'2024':{}}
         for compare_player_name, compare_player_teams in all_players_teams.items():
-            # print('\ncompare_player_name: ' + str(compare_player_name))
+            print('\ncompare_player_name: ' + str(compare_player_name))
             # print('compare_player_teams: ' + str(compare_player_teams))
             # look at current team bc we are comparing to current lineup
             # if player just traded then has no log with this team
@@ -1903,9 +1977,9 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
             # cannot compare whole words bc irregular abbrevs
             if determine_player_abbrev_match(player, compare_player_name):
             #if re.search(player,player_abbrev) or re.search(player,player_name):
-                # print('team: ' + str(team))
-                # print('cur_team: ' + cur_team)
-                # print('season_teams: ' + str(season_teams))
+                print('team: ' + str(team))
+                print('cur_team: ' + cur_team)
+                print('season_teams: ' + str(season_teams))
                 if len(season_teams) > 0:
                     if team in season_teams:
                         full_name = compare_player_name
