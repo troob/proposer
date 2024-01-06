@@ -2568,11 +2568,13 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
     return all_true_prob_dicts
 
 # overall gp cond is either teammates or opp
+# for a specific player, stat, val
+# so not all vals reached for all samples
 def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, team_gp_conds_weights_dict, val_probs_dict, season_years, part, player_stat_dict):
     print('\n===Generate Game Players Condition Mean Prob: ' + team_condition + '===\n')
     print('Settings: Season Years, Season Part')
     print('\nInput: team_gp_conds = {gp condition:cond type,... = {\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ...}, opp:{...} = ' + str(team_gp_conds))
-    print('Input: team_gp_conds_weights_dict = {cond_key: w1, ... = {starters:10,bench:5,...}, opp:{...}, ... = ' + str(team_gp_conds_weights_dict))
+    print('Input: team_gp_conds_weights_dict = {cond_key: w1, ... = {starters:10,bench:5,... = ' + str(team_gp_conds_weights_dict))
     print('Input: val_probs_dict = {\'condition year part\': prob, ... = {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('\nOutput: gp_condition_mean_prob = x\n')
@@ -2613,34 +2615,38 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
         # since its all 1 team part, the only difference in weight is no. players in combo
         weighted_probs = generate_weighted_probs(team_part_mean_probs, team_part_cond_weights)
 
-        sum_weighted_probs = sum(weighted_probs)
-        sum_weights = sum(team_part_cond_weights)
-        print('team_part_sum_weighted_probs: ' + str(sum_weighted_probs))
-        print('team_part_sum_weights: ' + str(sum_weights))
-        
-        if sum_weights > 0:
-            team_part_true_prob = round(sum_weighted_probs / sum_weights,2)
-        else:
-            print('Warning: denom = sum_weights = 0 bc no samples for condition!')
+        # CHANGE to extrap from prob distrib
+        if len(weighted_probs) > 0:
+            sum_weighted_probs = sum(weighted_probs)
+            sum_weights = sum(team_part_cond_weights)
+            print('team_part_sum_weighted_probs: ' + str(sum_weighted_probs))
+            print('team_part_sum_weights: ' + str(sum_weights))
+            
+            if sum_weights > 0:
+                team_part_true_prob = round(sum_weighted_probs / sum_weights,2)
+            else:
+                print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
-        print('team_part_true_prob = sum_weighted_probs / sum_weights = ' + str(team_part_true_prob))
-        if team_part_true_prob is not None:
-            all_team_parts_true_probs.append(team_part_true_prob)
+            print('team_part_true_prob = sum_weighted_probs / sum_weights = ' + str(team_part_true_prob))
+            if team_part_true_prob is not None:
+                all_team_parts_true_probs.append(team_part_true_prob)
 
     print('all_team_parts_true_probs: ' + str(all_team_parts_true_probs))
 
     team_gp_conds_weights = list(team_gp_conds_weights_dict.values())
     weighted_probs = generate_weighted_probs(all_team_parts_true_probs, team_gp_conds_weights)
 
-    sum_weighted_probs = sum(weighted_probs)
-    sum_weights = sum(team_gp_conds_weights)
-    print('gp_sum_weighted_probs: ' + str(sum_weighted_probs))
-    print('gp_sum_weights: ' + str(sum_weights))
+    # CHANGE to extrap from prob distrib
+    if len(weighted_probs) > 0:
+        sum_weighted_probs = sum(weighted_probs)
+        sum_weights = sum(team_gp_conds_weights)
+        print('gp_sum_weighted_probs: ' + str(sum_weighted_probs))
+        print('gp_sum_weights: ' + str(sum_weights))
 
-    if sum_weights > 0:
-        gp_condition_mean_prob = round(sum_weighted_probs / sum_weights,2)
-    else:
-        print('Warning: denom = sum_weights = 0 bc no samples for condition!')
+        if sum_weights > 0:
+            gp_condition_mean_prob = round(sum_weighted_probs / sum_weights,2)
+        else:
+            print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
     print('gp_condition_mean_prob: ' + str(gp_condition_mean_prob))
     return gp_condition_mean_prob
@@ -2839,7 +2845,8 @@ def generate_true_prob(val_probs_dict, player_current_conditions, all_gp_conds, 
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('\nOutput: true_prob = x\n')
 
-    true_prob = 0
+    # default None bc if no samples then prob unknown but not 0
+    true_prob = None
 
     # p_true = w1p1 + w2p2
     # where w1+w2=1
