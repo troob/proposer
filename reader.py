@@ -2297,6 +2297,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	# 			# check which player in all players teams list with this team has this abbrev
 	# 			player = determiner.determine_player_full_name(player, team, all_players_teams)
 
+	#all_lineups = {'dal': {'out': ['luka doncic', 'dante exum', 'maxi kleber', 'dereck lively ii', 'grant williams'], 'starters': ['jaden hardy', 'kyrie irving', 'josh green', 'derrick jones jr', 'dwight powell'], 'bench': ['seth curry', 'tim hardaway jr']}, 'por': {'out': [], 'starters': ['scoot henderson', 'anfernee simons', 'toumani camara', 'jerami grant', 'duop reath'], 'bench': ['deandre ayton', 'malcolm brogdon', 'skylar mays', 'shaedon sharpe', 'matisse thybulle', 'jabari walker', 'robert williams iii']}}
 	print('all_lineups: ' + str(all_lineups))
 	return all_lineups
 
@@ -2615,7 +2616,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 							player_name = determiner.determine_player_full_name(player_abbrev, game_player_team_abbrev, all_players_teams, rosters, game_key, cur_yr)
 							
 							if player_name == '': # not saved in all players teams or abbrev not matched?
-								print('name not saved ' + player_abbrev)
+								print('name not saved ' + player_abbrev_key)
 								game_player_team_name = converter.convert_team_abbrev_to_name(game_player_team_abbrev)
 								if game_player_team_name == '': # maybe irregular team not considered for exhibition game
 									print('Caution: Blank Player Team. ' + game_player_team_abbrev)
@@ -2655,13 +2656,14 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 										player_name = cur_yr_players_abbrevs[player_abbrev_key]
 							
 							print('final player_name: ' + player_name)
+							print('final player_abbrev_key: ' + player_abbrev_key)
 							if player_name != '':
 								year_players_abbrevs[player_abbrev_key] = player_name
 							else:
 								if player_abbrev_key not in unknown_names:
 									unknown_names.append(player_abbrev_key)
 								# CAUTION: player name blank bc player not on roster
-								print('\n===Warning: Blank Player Name: ' + player_abbrev + '===\n')
+								print('\n===Warning: Blank Player Name: ' + player_abbrev_key + '===\n')
 
 					if game_player_team_name == '':
 						# continue to next team

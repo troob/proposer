@@ -1044,6 +1044,7 @@ def determine_all_conditions(all_stat_probs_dict):
                     if conditions not in all_conditions:
                         all_conditions.append(conditions)
 
+    #print('all_conditions: ' + str(all_conditions))
     return all_conditions
 
 # here we use all stats prob dict so we only have to loop thru condition 1 yr
@@ -1147,10 +1148,10 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
     # so 10 total: 2 for overall 2 teams per game, plus 8 bc 4 parts per team and 2 teams
     # all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...
     for player, gp_cur_conds in all_game_player_cur_conds.items():
-
+        print('\nplayer: ' + player)
         # {teammates: {starters:[],...}, opp: {...}}, ...
         for team_condition, team_parts in gp_cur_conds.items():
-
+            print('\nteam_condition: ' + team_condition)
             # add 2 overall gp conds
             # all_cur_conds = ['all', 'teammates', 'opp']
             #all_cur_conds.extend(['teammates', 'opp'])
@@ -1159,14 +1160,15 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
 
             # 4 team parts per team
             for team_part, team_part_players in team_parts.items():
-                # remove team name from abbrev for display
-                team_part_players_abbrevs = converter.convert_all_players_name_to_abbrevs(team_part_players, all_players_abbrevs)
-                gp_cond_str = generator.generate_players_string(team_part_players_abbrevs)
-                # add team cond bc diff if teammates or opp
-                # and not directly from sample, instead from avg of subsamples
-                gp_cond_str += ' ' + team_condition + ' ' + team_part
-                if gp_cond_str not in all_cur_conds:
-                    all_cur_conds.append(gp_cond_str)
+                if len(team_part_players) > 0:
+                    # remove team name from abbrev for display
+                    team_part_players_abbrevs = converter.convert_all_players_name_to_abbrevs(team_part_players, all_players_abbrevs)
+                    gp_cond_str = generator.generate_players_string(team_part_players_abbrevs)
+                    # add team cond bc diff if teammates or opp
+                    # and not directly from sample, instead from avg of subsamples
+                    gp_cond_str += ' ' + team_condition + ' ' + team_part
+                    if gp_cond_str not in all_cur_conds:
+                        all_cur_conds.append(gp_cond_str)
 
 
     

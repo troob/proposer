@@ -2377,7 +2377,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
 
     # we need to get all conditions for all players
     # so table lines up if players did not all play in same conditions
-    all_conditions = determiner.determine_all_conditions(all_true_probs_dict)
+    #all_conditions = determiner.determine_all_conditions(all_true_probs_dict)
 
     #cur_yr = str(season_years[0])
     #print('cur_yr: ' + str(cur_yr))
@@ -2448,31 +2448,32 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 # if we dont have all conditions for all yrs, 
                 # then we should have standard for all yrs and loop thru each yr
                 # eg players played last yr but not yet this yr although on roster
-                #stat_val_probs_dict[conditions] = 'NA'
-                for conditions in all_conditions:
+                #for conditions in all_conditions:
                     #print('\n===Conditions: ' + str(conditions) + '===\n')
                     #prob = 0
                     #per_unit_prob = 0
                     # if not seen this val under these conditions, then depends why
                     # if never reached this val before, how should we treat it?
                     # how is true prob computed?
-                    if conditions in val_probs_dict.keys(): # and it is cur cond for this player
-                        prob = val_probs_dict[conditions]
-                        # already going thru all conditions which includes per unit conditions
-                        #per_unit_conditions = conditions + ' per unit'
-                        #per_unit_prob = val_probs_dict[per_unit_conditions]
-                        #per_unit_prob = per_unit_probs_dict[player][stat_name][val][conditions] #val_probs_dict[per_unit_conditions]
-                        #print('prob: ' + str(prob))
-                        stat_val_probs_dict[conditions] = round(prob * 100)
-                        #stat_val_probs_dict[per_unit_conditions] = round(per_unit_prob * 100)
-
-                    
-
-                    # if condition not in val probs dict
-                    # then this player did not play in this condition, so show NA
-                    #for conditions in all_conditions:
-                    else: # if we cant find conditions for this val
-                        stat_val_probs_dict[conditions] = 'NA'
+                # show true prob key in row!
+                # before was included with all conditions conveniently but not ideally
+                # ideally handle separately bc all conditions takes too long to load
+                # instead compare conditions in manageable groups unless specifically looking at big picture big data analysis
+                true_prob_key = 'true prob'
+                if true_prob_key in val_probs_dict.keys(): # and it is cur cond for this player
+                    prob = val_probs_dict[true_prob_key]
+                    # already going thru all conditions which includes per unit conditions
+                    #per_unit_conditions = conditions + ' per unit'
+                    #per_unit_prob = val_probs_dict[per_unit_conditions]
+                    #per_unit_prob = per_unit_probs_dict[player][stat_name][val][conditions] #val_probs_dict[per_unit_conditions]
+                    #print('prob: ' + str(prob))
+                    stat_val_probs_dict[true_prob_key] = round(prob * 100)
+                    #stat_val_probs_dict[per_unit_conditions] = round(per_unit_prob * 100)
+                # if condition not in val probs dict
+                # then this player did not play in this condition, so show NA
+                #for conditions in all_conditions:
+                else: # if we cant find conditions for this val
+                    stat_val_probs_dict[true_prob_key] = 'NA'
 
                 # add keys to dict used for ref but not yet to gen true prob
                 # otherwise it will use string value to compute prob
@@ -2518,21 +2519,21 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     val_str = str(under_val) + '-'
                     stat_val_probs_dict = {'player': player, 'team': player_team, 'stat': stat_name, 'val': val_str }
                     #for conditions, prob in val_probs_dict.items():
-                    for conditions in all_conditions:
-                        #prob = 0
-                        #per_unit_prob = 0
-                        if conditions in val_probs_dict.keys():
-                            prob = val_probs_dict[conditions]
-                            #per_unit_conditions = conditions + ' per unit'
-                            #per_unit_prob = val_probs_dict[per_unit_conditions]
-                            #print('over prob: ' + str(prob))
-                            stat_val_probs_dict[conditions] = 100 - round(prob * 100)
-                            #stat_val_probs_dict[per_unit_conditions] = 100 - round(per_unit_prob * 100)
+                    # for conditions in all_conditions:
+                    #     #prob = 0
+                    #     #per_unit_prob = 0
+                    #     if conditions in val_probs_dict.keys():
+                    #         prob = val_probs_dict[conditions]
+                    #         #per_unit_conditions = conditions + ' per unit'
+                    #         #per_unit_prob = val_probs_dict[per_unit_conditions]
+                    #         #print('over prob: ' + str(prob))
+                    #         stat_val_probs_dict[conditions] = 100 - round(prob * 100)
+                    #         #stat_val_probs_dict[per_unit_conditions] = 100 - round(per_unit_prob * 100)
 
-                        # if condition not in val probs dict
-                        # then this player did not play in this condition, so show NA
-                        else:
-                            stat_val_probs_dict[conditions] = 'NA'
+                    #     # if condition not in val probs dict
+                    #     # then this player did not play in this condition, so show NA
+                    #     else:
+                    #         stat_val_probs_dict[conditions] = 'NA'
 
                     # only need to calculate true prob for under here bc true prob for over already computed in val probs dict
                     prob = val_probs_dict['true prob']
@@ -3001,6 +3002,7 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
                         'start':6, 
                         'teammates': 10, 
                         'opp':5, 
+                        'opp team':0, # placed in top level for ref but given no weight bc integrated in opponents group cond
                         'dow':1, 
                         'tod':2, 
                         'prev':5,
@@ -3488,6 +3490,11 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
         player_current_conditions['loc'] = cur_loc
     else:
         print('Warning: cur_loc blank! ' + player.title())
+
+    # condition: prev stat val
+    # diff for each stat
+    # prev_val = 0
+    # player_current_conditions['prev'] = prev_val
     
     # condition: teammates and opps lineups
     # https://www.rotowire.com/basketball/nba-lineups.php
@@ -3965,69 +3972,73 @@ def generate_player_stat_records(player_name, player_stat_dict):
                         all_games_reached = [] # all_stat_counts = []
                         all_probs_stat_reached = []
 
-                        stat_vals = list(player_season_stat_dict[stat_name][condition].values())
-                        #print('stat_vals: ' + str(stat_vals))
-                        num_games_played = len(stat_vals)
-                        #print('num games played ' + condition + ': ' + str(num_games_played))
-                        if num_games_played > 0:
-                            # max(stat_vals)+1 bc we want to include 0 and max stat val
-                            # for 0 we need to compute prob of exactly 0 not over under
-                            for stat_val in range(0,max(stat_vals)+1):
-                                # if stat_val == 0:
-                                #     num_games_hit
-                                num_games_reached = 0 # num games >= stat val, stat count, reset for each check stat val bc new count
-                                # loop through games to get count stat val >= game stat val
-                                for game_idx in range(num_games_played):
-                                    game_stat_val = stat_vals[game_idx]
-                                    if int(stat_val) == 0:
-                                        if game_stat_val == int(stat_val):
-                                            num_games_reached += 1
+                        # for prev stat vals, diff stats have different ranges so not all stat names have all conds
+                        if condition in player_season_stat_dict[stat_name].keys():
+                            stat_vals = list(player_season_stat_dict[stat_name][condition].values())
+                            #print('stat_vals: ' + str(stat_vals))
+                            num_games_played = len(stat_vals)
+                            #print('num games played ' + condition + ': ' + str(num_games_played))
+                            if num_games_played > 0:
+                                # max(stat_vals)+1 bc we want to include 0 and max stat val
+                                # for 0 we need to compute prob of exactly 0 not over under
+                                for stat_val in range(0,max(stat_vals)+1):
+                                    # if stat_val == 0:
+                                    #     num_games_hit
+                                    num_games_reached = 0 # num games >= stat val, stat count, reset for each check stat val bc new count
+                                    # loop through games to get count stat val >= game stat val
+                                    for game_idx in range(num_games_played):
+                                        game_stat_val = stat_vals[game_idx]
+                                        if int(stat_val) == 0:
+                                            if game_stat_val == int(stat_val):
+                                                num_games_reached += 1
+                                        else:
+                                            if game_stat_val >= int(stat_val):
+                                                num_games_reached += 1
+
+                                        all_games_reached.append(num_games_reached) # one count for each game
+
+                                    #print('num_games_reached ' + str(stat_val) + ' ' + stat_name + ' for ' + condition + ' games: ' + str(num_games_reached)) 
+                                    
+
+                                    prob_stat_reached = str(num_games_reached) + '/' + str(num_games_played)
+                                    #print('prob_stat_reached ' + str(stat_val) + ' ' + stat_name + ' for ' + condition + ' games: ' + str(prob_stat_reached)) 
+
+                                    all_probs_stat_reached.append(prob_stat_reached)
+
+
+                            if condition in player_stat_records.keys():
+                                #print("conditions " + conditions + " in streak tables")
+                                player_condition_records_dicts = player_stat_records[condition]
+                                if season_year in player_condition_records_dicts.keys():
+                                    #player_condition_records_dicts[season_year][stat_name] = all_probs_stat_reached
+
+                                    player_season_condition_records_dicts = player_condition_records_dicts[season_year]
+                                    if season_part in player_season_condition_records_dicts.keys():
+                                        player_season_condition_records_dicts[season_part][stat_name] = all_probs_stat_reached
                                     else:
-                                        if game_stat_val >= int(stat_val):
-                                            num_games_reached += 1
-
-                                    all_games_reached.append(num_games_reached) # one count for each game
-
-                                #print('num_games_reached ' + str(stat_val) + ' ' + stat_name + ' for ' + condition + ' games: ' + str(num_games_reached)) 
+                                        player_season_condition_records_dicts[season_part] = { stat_name: all_probs_stat_reached }
                                 
-
-                                prob_stat_reached = str(num_games_reached) + '/' + str(num_games_played)
-                                #print('prob_stat_reached ' + str(stat_val) + ' ' + stat_name + ' for ' + condition + ' games: ' + str(prob_stat_reached)) 
-
-                                all_probs_stat_reached.append(prob_stat_reached)
-
-
-                        if condition in player_stat_records.keys():
-                            #print("conditions " + conditions + " in streak tables")
-                            player_condition_records_dicts = player_stat_records[condition]
-                            if season_year in player_condition_records_dicts.keys():
-                                #player_condition_records_dicts[season_year][stat_name] = all_probs_stat_reached
-
-                                player_season_condition_records_dicts = player_condition_records_dicts[season_year]
-                                if season_part in player_season_condition_records_dicts.keys():
-                                    player_season_condition_records_dicts[season_part][stat_name] = all_probs_stat_reached
                                 else:
+                                    #player_condition_records_dicts[season_year] = { stat_name: all_probs_stat_reached }
+
+                                    player_condition_records_dicts[season_year] = {}
+                                    player_season_condition_records_dicts = player_condition_records_dicts[season_year]
                                     player_season_condition_records_dicts[season_part] = { stat_name: all_probs_stat_reached }
-                            
+
+                                #player_streak_tables[conditions].append(prob_table) # append all stats for given key
                             else:
+                                #print("conditions " + conditions + " not in streak tables")
+                                player_stat_records[condition] = {}
+                                player_condition_records_dicts = player_stat_records[condition]
+
                                 #player_condition_records_dicts[season_year] = { stat_name: all_probs_stat_reached }
 
                                 player_condition_records_dicts[season_year] = {}
                                 player_season_condition_records_dicts = player_condition_records_dicts[season_year]
                                 player_season_condition_records_dicts[season_part] = { stat_name: all_probs_stat_reached }
-
-                            #player_streak_tables[conditions].append(prob_table) # append all stats for given key
-                        else:
-                            #print("conditions " + conditions + " not in streak tables")
-                            player_stat_records[condition] = {}
-                            player_condition_records_dicts = player_stat_records[condition]
-
-                            #player_condition_records_dicts[season_year] = { stat_name: all_probs_stat_reached }
-
-                            player_condition_records_dicts[season_year] = {}
-                            player_season_condition_records_dicts = player_condition_records_dicts[season_year]
-                            player_season_condition_records_dicts[season_part] = { stat_name: all_probs_stat_reached }
-
+                        # else:
+                        #     print('Caution: Condition not in stat dict! ' + stat_name + ', ' + condition)
+    
     #player_stat_records: {'all': {2023: {'regular': {'pts': 
     #print('player_stat_records: ' + str(player_stat_records))
     return player_stat_records
@@ -4044,8 +4055,8 @@ def generate_player_stat_records(player_name, player_stat_dict):
 # but then those positions would be a separate title not needed in teammates title
 # players_list: ['J Green PF', 'Z Nnaji PF', 'P Watson F', 'B Brown SF', 'V Cancar SF', 'D Jordan C', 'I Smith PG', 'R Jackson PG', 'C Braun G']
 def generate_players_string(players_list):
-    #print('\n===Generate Players String===\n')
-    #print('players_list: ' + str(players_list))
+    print('\n===Generate Players String===\n')
+    print('players_list: ' + str(players_list))
 
     # sort players alphabetically so we can compare to current conditions!
     players_list = sorted(players_list)
@@ -4071,7 +4082,7 @@ def generate_players_string(players_list):
     # if we input desired format then it will keep
     #p_string = p_string.title() # or lower? title makes it easier to read and compare. possibly remove period after first initial? yes to save space
     
-    #print('p_string: ' + p_string)
+    print('p_string: ' + p_string)
     return p_string
 
 # jaylen brown -> j brown sg
@@ -4101,7 +4112,7 @@ def generate_player_abbrev(player_name, player_position):
 # need cur_yr for teammates out only care about them if cur teammate
 # but also need to look thru past seasons and not count cur teammates as out last season
 def generate_player_all_stats_dicts(player_name, player_game_log, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, player_teammates, all_seasons_stats_dicts, season_part, player_position, rosters={}, cur_team='', all_teams_players={}):
-    print('\n===Generate Player All Stats Dicts: ' + player_name.title() + '===\n')
+    print('\n===Generate Player All Stats Dicts: ' + player_name.title() + ', ' + str(season_year) + ', ' + season_part + '===\n')
     # print('season_year: ' + str(season_year))
     # print('season_part: ' + str(season_part))
     #print('player_game_log:\n' + str(player_game_log))
@@ -4228,17 +4239,17 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
         #prev_stat_vals = []
         for game_idx, row in season_part_game_log.iterrows():
-
-            #print('\n===Game ' + str(int(game_idx)+1) + '===')
-            #print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
-            #print('row:\n' + str(row))
+            # print('game_idx: ' + game_idx)
+            # print('\n===Game ' + str(int(game_idx)+1) + '===')
+            # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+            # print('row:\n' + str(row))
 
             # determine player team for game
             player_team_idx = determiner.determine_player_team_idx(player_name, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
             player_team = ''
             if len(teams) > player_team_idx:
                 player_team = teams[player_team_idx]
-            print('player_team: ' + player_team)
+            #print('player_team: ' + player_team)
 
             #player_team = determiner.determine_player_team_by_date(player_name, team_date_dict, row)
 
@@ -4414,11 +4425,17 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
 
                 # condition: prev val
+                # print('\n===Condition: Prev Val===\n')
                 # if game_idx != '0': # first game has no prev val
-                #     prev_stat_val = stat_dict['all'][str(int(game_idx)-1)] #prev_stat_vals[stat_idx]
-                #     if not prev_stat_val in stat_dict.keys():
-                #         stat_dict[prev_stat_val] = {}
-                #     stat_dict[prev_stat_val][game_idx] = stat
+                #     prev_game_idx = str(int(game_idx)-1)
+                #     if prev_game_idx in stat_dict['all'].keys():
+                #         prev_stat_val = stat_dict['all'][prev_game_idx] #prev_stat_vals[stat_idx]
+                #         #print('prev_stat_val: ' + str(prev_stat_val))
+                #         prev_stat_val_key = str(prev_stat_val) + ' prev'
+                #         print('prev_stat_val_key: ' + str(prev_stat_val_key))
+                #         if not prev_stat_val_key in stat_dict.keys():
+                #             stat_dict[prev_stat_val_key] = {}
+                #         stat_dict[prev_stat_val_key][game_idx] = stat
 
                 # condition: teammates out
                 # condition: teammates in
@@ -4440,7 +4457,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                 # we need to get the game key so that we can determine the players in this game
                 # we got away/home team from vs|@ in opp field in game log
                 game_key = away_abbrev + ' ' + home_abbrev + ' ' + game_date_string
-                print('game_key: ' + str(game_key))
+                #print('game_key: ' + str(game_key))
                 # if we do not have the game box score bc it does not exist yet then pass to the next game
                 # the order we fill the stats dict depends on the order of games played bc we are going game by game
                 if season_year in all_box_scores.keys() and len(all_box_scores[season_year].keys()) > 0:
@@ -4450,7 +4467,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         # no stats needed bc no game recorded? no we still go thru each stat for other conds
 
                         game_players = all_box_scores[season_year][game_key] # {away:{starters:[],bench:[]},home:{starters:[],bench:[]}}
-                        print('game_players: ' + str(game_players))
+                        #print('game_players: ' + str(game_players))
 
                         
                         # condition: game teammates
@@ -4466,9 +4483,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 player_loc = 'home'
                                 opp_loc = 'away'
                             game_teammates = game_players[player_loc]
-                            print('game_teammates: ' + str(game_teammates))
+                            #print('game_teammates: ' + str(game_teammates))
                             game_opps = game_players[opp_loc]
-                            print('game_opps: ' + str(game_opps))
+                            #print('game_opps: ' + str(game_opps))
                             # get full list of teammates this game without separating start and bench
                             # bc we loop thru all teammates to see who is in and out
                             game_teammates_list = []
@@ -4476,13 +4493,13 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 if team_part != 'dnp': # do not add dnp players to stat dict bc will not match cur conds
                                     for teammate in teammates:
                                         game_teammates_list.append(teammate)
-                            print('game_teammates_list: ' + str(game_teammates_list))
+                            #print('game_teammates_list: ' + str(game_teammates_list))
                             game_opps_list = []
                             for team_part, opps in game_opps.items():
                                 if team_part != 'dnp': # do not add dnp players to stat dict bc will not match cur conds
                                     for opp in opps:
                                         game_opps_list.append(opp)
-                            print('game_opps_list: ' + str(game_opps_list))
+                            #print('game_opps_list: ' + str(game_opps_list))
                             
                             starters_key = 'starters'
                             bench_key = 'bench'
@@ -4502,146 +4519,166 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             # bc we can get more samples which should improve accuracy
                             # still separate starters and bench
                             
-                            # condition: starters/starting
-                            starters = game_teammates[starters_key]
-                            opp_starters = game_opps[starters_key]
-                            # organize alphabetically regardless of position bc we can get more samples 
-                            # where they played together but at different positions they still play like they play?
-                            # get both but first favor sample size
-                            starters_str = generate_players_string(starters) + ' ' + starters_key
-                            opp_starters_str = generate_players_string(opp_starters) + ' ' + opp_key + ' ' + starters_key
-
-                            # condition: bench
-                            bench = game_teammates[bench_key]
-                            bench_str = generate_players_string(bench) + ' ' + bench_key
-                            opp_bench = game_opps[bench_key]
-                            opp_bench_str = generate_players_string(opp_bench) + ' ' + opp_key + ' ' + bench_key
-
-                            # did current player start or come off bench?
-                            # condition: player start or team unit/part (start/bench)
-                            player_start = 'start'
-                            if player_abbrev in bench_str:
-                                player_start = 'bench'
-
-                            # only add key for current teammates bc we dont need to see all teammates here
-                            # if no inactive players given then we can see all previous games with any (even 1) of current teammates
-                            # but what if a prev game has a player that is not playing in current game?
-                            # then that player completely changes the composition of stats
-                            # does the prev game have to have all the current teammates to pass the check?
-                            # or can it be missing a current player? 
-                            # if prev game is missing current player then that will completely change the comp also
-                            # if we are not sure who is playing in current game then show all possible teammates
-                            # once we get current roster, we can narrow it down to those possible players
-                            # then we can narrow it down further when we get inactive players list for the current game
-                            #current_teammates_in_prev_game = determiner.determine_current_teammates_in_game(game_teammates, current_teammates)
-                            #if len(current_teammates_in_prev_game) > 0: # if any of the current teammates are in the prev game of interest, then add to stats dict for review
-                                #print("found same game teammates: " + game_teammates)
-
-                            # conditions related to players in games
-                            # teammates and opps
-                            # starters and bench
-
-                            # condition: game teammates
-                            if not game_teammates_str in stat_dict.keys():
-                                stat_dict[game_teammates_str] = {}
-                            stat_dict[game_teammates_str][game_idx] = stat
-                            # condition: game opps
-                            if not game_opps_str in stat_dict.keys():
-                                stat_dict[game_opps_str] = {}
-                            stat_dict[game_opps_str][game_idx] = stat
-
-                            # condition: teammate, add at same time as starters and bench bc inclusive
-                            for teammate in game_teammates_list:
-                                if teammate in starters or teammate in bench:
-                                    teammate_str = teammate + ' ' + in_key
-                                    if not teammate_str in stat_dict.keys():
-                                        stat_dict[teammate_str] = {}
-                                    stat_dict[teammate_str][game_idx] = stat
-                            # condition: opp player
-                            for opp in game_opps_list:
-                                if opp in opp_starters or opp in opp_bench:
-                                    opp_str = opp + ' ' + opp_key + ' ' + in_key
-                                    if not opp_str in stat_dict.keys():
-                                        stat_dict[opp_str] = {}
-                                    stat_dict[opp_str][game_idx] = stat
-
-                            # condition: game starters
-                            if not starters_str in stat_dict.keys():
-                                stat_dict[starters_str] = {}
-                            stat_dict[starters_str][game_idx] = stat
-
-                            # need a condition for each starter as well as all starters together
-                            # and could even do combos of players but need to see if needed
-                            # for now just do all 5 together and each 1 separate
-                            for starter in starters:
-                                starter_str = starter + ' ' + starters_key
-                                if not starter_str in stat_dict.keys():
-                                    stat_dict[starter_str] = {}
-                                stat_dict[starter_str][game_idx] = stat
-
-                                # in_str = starter + ' ' + in_key
-                                # if not starter_str in stat_dict.keys():
-                                #     stat_dict[starter_str] = {}
-                                # stat_dict[starter_str][game_idx] = stat
-
-                            # condition: opp starters
-                            if not opp_starters_str in stat_dict.keys():
-                                stat_dict[opp_starters_str] = {}
-                            stat_dict[opp_starters_str][game_idx] = stat
-
-                            # need a condition for each starter as well as all starters together
-                            # and could even do combos of players but need to see if needed
-                            # for now just do all 5 together and each 1 separate
-                            for opp_starter in opp_starters:
-                                opp_starter_str = opp_starter + ' ' + opp_key + ' ' + starters_key
-                                if not opp_starter_str in stat_dict.keys():
-                                    stat_dict[opp_starter_str] = {}
-                                stat_dict[opp_starter_str][game_idx] = stat
-
-                            # condition: game bench
-                            if not bench_str in stat_dict.keys():
-                                stat_dict[bench_str] = {}
-                            stat_dict[bench_str][game_idx] = stat
-
-                            for bencher in bench:
-                                bencher_str = bencher + ' ' + bench_key
-                                if not bencher_str in stat_dict.keys():
-                                    stat_dict[bencher_str] = {}
-                                stat_dict[bencher_str][game_idx] = stat
-
-                            # condition: opp bench
-                            if not opp_bench_str in stat_dict.keys():
-                                stat_dict[opp_bench_str] = {}
-                            stat_dict[opp_bench_str][game_idx] = stat
-
-                            for opp_bencher in opp_bench:
-                                opp_bencher_str = opp_bencher + ' ' + opp_key + ' ' + bench_key
-                                if not opp_bencher_str in stat_dict.keys():
-                                    stat_dict[opp_bencher_str] = {}
-                                stat_dict[opp_bencher_str][game_idx] = stat
-
-                            # condition: player start
-                            if not player_start in stat_dict.keys():
-                                stat_dict[player_start] = {}
-                            stat_dict[player_start][game_idx] = stat
-
                             
+                            
+                            # condition: starters/starting
+                            if starters_key in game_teammates.keys():
+                                starters = game_teammates[starters_key]
 
-                            # condition: teammate out
-                            out_key = 'out'
-                            out = game_teammates[out_key]
-                            for out_player in out:
-                                out_str = out_player + ' ' + out_key
-                                if not out_str in stat_dict.keys():
-                                    stat_dict[out_str] = {}
-                                stat_dict[out_str][game_idx] = stat
-                            # condition: opp out
-                            opp_out = game_opps[out_key]
-                            for opp_out_player in opp_out:
-                                opp_out_str = opp_out_player + ' ' + opp_key + ' ' + out_key
-                                if not opp_out_str in stat_dict.keys():
-                                    stat_dict[opp_out_str] = {}
-                                stat_dict[opp_out_str][game_idx] = stat
+                                # organize alphabetically regardless of position bc we can get more samples 
+                                # where they played together but at different positions they still play like they play?
+                                # get both but first favor sample size
+                                starters_str = generate_players_string(starters) + ' ' + starters_key
+                                
+
+                                # condition: bench
+                                bench = game_teammates[bench_key]
+                                bench_str = generate_players_string(bench) + ' ' + bench_key
+                                
+
+                                # condition: player start
+                                # did current player start or come off bench?
+                                # condition: player start or team unit/part (start/bench)
+                                player_start = 'start'
+                                if player_abbrev in bench_str:
+                                    player_start = 'bench'
+                                if not player_start in stat_dict.keys():
+                                    stat_dict[player_start] = {}
+                                stat_dict[player_start][game_idx] = stat
+
+                                # only add key for current teammates bc we dont need to see all teammates here
+                                # if no inactive players given then we can see all previous games with any (even 1) of current teammates
+                                # but what if a prev game has a player that is not playing in current game?
+                                # then that player completely changes the composition of stats
+                                # does the prev game have to have all the current teammates to pass the check?
+                                # or can it be missing a current player? 
+                                # if prev game is missing current player then that will completely change the comp also
+                                # if we are not sure who is playing in current game then show all possible teammates
+                                # once we get current roster, we can narrow it down to those possible players
+                                # then we can narrow it down further when we get inactive players list for the current game
+                                #current_teammates_in_prev_game = determiner.determine_current_teammates_in_game(game_teammates, current_teammates)
+                                #if len(current_teammates_in_prev_game) > 0: # if any of the current teammates are in the prev game of interest, then add to stats dict for review
+                                    #print("found same game teammates: " + game_teammates)
+
+                                # conditions related to players in games
+                                # teammates and opps
+                                # starters and bench
+
+                                # condition: game teammates
+                                if not game_teammates_str in stat_dict.keys():
+                                    stat_dict[game_teammates_str] = {}
+                                stat_dict[game_teammates_str][game_idx] = stat
+                                
+
+                                # condition: teammate, add at same time as starters and bench bc inclusive
+                                for teammate in game_teammates_list:
+                                    if teammate in starters or teammate in bench:
+                                        teammate_str = teammate + ' ' + in_key
+                                        if not teammate_str in stat_dict.keys():
+                                            stat_dict[teammate_str] = {}
+                                        stat_dict[teammate_str][game_idx] = stat
+                                
+
+                                # condition: game starters
+                                if not starters_str in stat_dict.keys():
+                                    stat_dict[starters_str] = {}
+                                stat_dict[starters_str][game_idx] = stat
+
+                                # need a condition for each starter as well as all starters together
+                                # and could even do combos of players but need to see if needed
+                                # for now just do all 5 together and each 1 separate
+                                for starter in starters:
+                                    starter_str = starter + ' ' + starters_key
+                                    if not starter_str in stat_dict.keys():
+                                        stat_dict[starter_str] = {}
+                                    stat_dict[starter_str][game_idx] = stat
+
+                                    # in_str = starter + ' ' + in_key
+                                    # if not starter_str in stat_dict.keys():
+                                    #     stat_dict[starter_str] = {}
+                                    # stat_dict[starter_str][game_idx] = stat
+
+                                
+
+                                # condition: game bench
+                                if not bench_str in stat_dict.keys():
+                                    stat_dict[bench_str] = {}
+                                stat_dict[bench_str][game_idx] = stat
+
+                                for bencher in bench:
+                                    bencher_str = bencher + ' ' + bench_key
+                                    if not bencher_str in stat_dict.keys():
+                                        stat_dict[bencher_str] = {}
+                                    stat_dict[bencher_str][game_idx] = stat
+
+                                
+
+                                # condition: teammate out
+                                out_key = 'out'
+                                out = game_teammates[out_key]
+                                for out_player in out:
+                                    out_str = out_player + ' ' + out_key
+                                    if not out_str in stat_dict.keys():
+                                        stat_dict[out_str] = {}
+                                    stat_dict[out_str][game_idx] = stat
+                            else:
+                                print('Caution: No Game Teammates! ' + game_key)
+
+                            if len(game_opps.keys()) > 0:
+                                opp_starters = game_opps[starters_key]
+                                opp_starters_str = generate_players_string(opp_starters) + ' ' + opp_key + ' ' + starters_key
+                            
+                                opp_bench = game_opps[bench_key]
+                                opp_bench_str = generate_players_string(opp_bench) + ' ' + opp_key + ' ' + bench_key
+                            
+                                # condition: game opps
+                                if not game_opps_str in stat_dict.keys():
+                                    stat_dict[game_opps_str] = {}
+                                stat_dict[game_opps_str][game_idx] = stat
+
+                                # condition: opp player
+                                for opp in game_opps_list:
+                                    if opp in opp_starters or opp in opp_bench:
+                                        opp_str = opp + ' ' + opp_key + ' ' + in_key
+                                        if not opp_str in stat_dict.keys():
+                                            stat_dict[opp_str] = {}
+                                        stat_dict[opp_str][game_idx] = stat
+
+                                # condition: opp starters
+                                if not opp_starters_str in stat_dict.keys():
+                                    stat_dict[opp_starters_str] = {}
+                                stat_dict[opp_starters_str][game_idx] = stat
+
+                                # need a condition for each starter as well as all starters together
+                                # and could even do combos of players but need to see if needed
+                                # for now just do all 5 together and each 1 separate
+                                for opp_starter in opp_starters:
+                                    opp_starter_str = opp_starter + ' ' + opp_key + ' ' + starters_key
+                                    if not opp_starter_str in stat_dict.keys():
+                                        stat_dict[opp_starter_str] = {}
+                                    stat_dict[opp_starter_str][game_idx] = stat
+
+                                # condition: opp bench
+                                if not opp_bench_str in stat_dict.keys():
+                                    stat_dict[opp_bench_str] = {}
+                                stat_dict[opp_bench_str][game_idx] = stat
+
+                                for opp_bencher in opp_bench:
+                                    opp_bencher_str = opp_bencher + ' ' + opp_key + ' ' + bench_key
+                                    if not opp_bencher_str in stat_dict.keys():
+                                        stat_dict[opp_bencher_str] = {}
+                                    stat_dict[opp_bencher_str][game_idx] = stat
+
+                                # condition: opp out
+                                opp_out = game_opps[out_key]
+                                for opp_out_player in opp_out:
+                                    opp_out_str = opp_out_player + ' ' + opp_key + ' ' + out_key
+                                    if not opp_out_str in stat_dict.keys():
+                                        stat_dict[opp_out_str] = {}
+                                    stat_dict[opp_out_str][game_idx] = stat
+
+                            else:
+                                print('Caution: No Game Opponents! ' + game_key)
 
                             # should we check all yrs bc sometimes player played last yr but not yet played this yr?
                             # yes bc we want to consider this a condition marked as NA not blank
@@ -4935,7 +4972,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
         writer.write_cur_and_prev(init_player_stat_dict, player_stat_dict, player_cur_stat_dict_filename, player_prev_stat_dicts_filename, current_year_str, player_name)
 
     # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
-    print('player_stat_dict: ' + str(player_stat_dict))
+    #print('player_stat_dict: ' + str(player_stat_dict))
     return player_stat_dict
 
 # -first take dnp players (avg <10min) off current conditions bench

@@ -357,11 +357,13 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     return game_player_abbrev
 
 def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
+    print('\n===Convert Player Name to Abbrev===\n')
+    print('players: ' + str(players))
     abbrevs = []
     for player in players:
         abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
         abbrevs.append(abbrev)
-
+    print('abbrevs: ' + str(abbrevs))
     return abbrevs
 
 # combine all names into single string condition, alphabet order
