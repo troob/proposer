@@ -279,6 +279,49 @@ def read_cur_and_prev_json(cur_file,prev_file,current_year_str=''):
 
 
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+def read_player_prev_stat_vals(season_log_of_interest):
+
+	prev_stat_vals = {}
+	
+	stats_of_interest = ['pts','ast','reb']
+
+	for stat_name in stats_of_interest:
+	#for stat_name, stat_log in season_log_of_interest.items():
+		prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
+		prev_stat_vals[stat_name] = prev_stat_val
+
+	return prev_stat_vals
+
+def read_all_prev_stat_vals(all_players_season_logs, season_year):
+	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ...\n')
+
+	all_prev_stat_vals = {}
+
+	for player, player_season_logs in all_players_season_logs.items():
+
+		# dict goes from recent to distant so take first 1
+		season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
+
+		player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest)
+		all_prev_stat_vals[player] = player_prev_stat_vals
+
+	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+	return all_prev_stat_vals
+
 # get team season schedule from espn.com
 def read_team_season_schedule(team_name, season_year=2024, team_url='', team_id=''):
 	#print("\n===Read Team " + team_name.title() + ", Season " + str(season_year) + " Schedule===\n")
