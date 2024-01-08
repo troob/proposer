@@ -4,6 +4,8 @@ import re # need to see if negative sign in odds string
 
 import reader # read player abbrevs
 
+import math
+
 def convert_dict_to_list(dict, desired_order=[]):
 
     dict_list = []
@@ -138,7 +140,9 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 
-
+def round_half_up(n, decimals=0):
+    multiplier = 10**decimals
+    return math.floor(n * multiplier + 0.5) / multiplier
 
 def convert_year_to_span(year):
 

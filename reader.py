@@ -313,10 +313,13 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 
 	for player, player_season_logs in all_players_season_logs.items():
 
+		player_prev_stat_vals = {}
 		# dict goes from recent to distant so take first 1
-		season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
+		if len(player_season_logs.keys()) > 0:
+			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
 
-		player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest)
+			player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest)
+			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
 	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
@@ -1119,6 +1122,53 @@ def read_projected_lines(raw_projected_lines, all_player_teams, player_of_intere
 	print("all_player_lines:\n" + tabulate(all_player_lines))
 	return all_player_lines
 
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+def read_player_former_teams(player_name, player_teams):
+	print('\n===Read Player Former Teams: ' + player_name.title() + '===\n')
+	print('Input: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+	print('\nOutput: former_teams = [team,...]\n')
+		
+	former_teams = []
+
+	for year_teams in player_teams.values():
+		for team in year_teams.keys():
+
+			if team not in former_teams:
+				former_teams.append(team)
+
+	return former_teams
+
 # we may be given irregular abbrev or full name
 # so change to uniform regular ream abbrev for comparison
 def read_team_abbrev(team_str):
@@ -1715,7 +1765,7 @@ def read_react_web_data(url):
 # but unusual error may occur
 # .ElementClickInterceptedException: Message: element click intercepted: Element <button role="tab" class="rj-market__group" aria-selected="false" data-testid="button-market-group">...</button> is not clickable at point (763, 135). Other element would receive the click: 
 # return {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-def read_react_website(url):
+def read_react_website(url, timeout=10, max_retries=3):
 	# print('\n===Read React Website===\n')
 	# print('url: ' + url)
 
@@ -1727,190 +1777,200 @@ def read_react_website(url):
 
 	driver.get(url) # Open the URL on a google chrome window
 
+	retries = 0
+
 	# check if no tables found
-	try:
-		#sgp_element = driver.find_element('id','dom_SameGameParlayWeb').get_attribute('outerHTML')	
-		#soup = BeautifulSoup(page, features='lxml')
-	
-		# instead of needing keys input just click each btn until find stat of interest
-		pts_key = 5 # sometimes 4 if missing quick hits section
-		stat_key = pts_key
-		stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
-		#web_dict[key] = read_lazy_elements(key)
-		#for key in data_table_keys:#.keys():
-		for stat_name, relative_key in stats_of_interest.items():
-			print("stat_name: " + stat_name)
-			web_dict[stat_name] = {}
+	while retries < max_retries:
+		try:
+			#sgp_element = driver.find_element('id','dom_SameGameParlayWeb').get_attribute('outerHTML')	
+			#soup = BeautifulSoup(page, features='lxml')
+		
+			# instead of needing keys input just click each btn until find stat of interest
+			pts_key = 5 # sometimes 4 if missing quick hits section
+			stat_key = pts_key
+			stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+			#web_dict[key] = read_lazy_elements(key)
+			#for key in data_table_keys:#.keys():
+			for stat_name, relative_key in stats_of_interest.items():
+				print("stat_name: " + stat_name)
+				web_dict[stat_name] = {}
 
-			# click pts btn
-			epath = 'button[' + str(stat_key+relative_key) + ']'
+				# click pts btn
+				epath = 'button[' + str(stat_key+relative_key) + ']'
 
-			if stat_name == 'reb':
-				# first need to click right arrow to move so ast btn visible
-				side_btn = driver.find_element('class name','side-arrow--right')
-				#print("side_btn: " + side_btn.get_attribute('innerHTML'))
-				try:
-					while True:
-						side_btn.click()
-				except:
-					#web_dict['ast'] = {}
-					# click ast btn
-					stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
-					#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
-					stat_btn.click()
+				if stat_name == 'reb':
+					# first need to click right arrow to move so ast btn visible
+					side_btn = driver.find_element('class name','side-arrow--right')
+					#print("side_btn: " + side_btn.get_attribute('innerHTML'))
+					try:
+						while True:
+							side_btn.click()
+					except:
+						#web_dict['ast'] = {}
+						# click ast btn
+						stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
+						#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
+						stat_btn.click()
 
-			else:
-				stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
-				stat_btn_text = stat_btn.get_attribute('innerHTML')
-				#print("stat_btn: " + stat_btn_text)
-				# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
-				if stat_btn_text == 'Threes': # gone too far
-					stat_key -= 1
-					epath = 'button[' + str(stat_key) + ']'
+				else:
 					stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
 					stat_btn_text = stat_btn.get_attribute('innerHTML')
 					#print("stat_btn: " + stat_btn_text)
-				stat_btn.click()
+					# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
+					if stat_btn_text == 'Threes': # gone too far
+						stat_key -= 1
+						epath = 'button[' + str(stat_key) + ']'
+						stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
+						stat_btn_text = stat_btn.get_attribute('innerHTML')
+						#print("stat_btn: " + stat_btn_text)
+					stat_btn.click()
 
-			# not all dropdowns are open so program must click each one
-			# click player dropdown btn
-			# could use find elements to get number of lazy renders and then loop thru that number
-			# lazy_element = driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render')
-			# print("lazy_element: " + lazy_element.get_attribute('innerHTML'))
+				# not all dropdowns are open so program must click each one
+				# click player dropdown btn
+				# could use find elements to get number of lazy renders and then loop thru that number
+				# lazy_element = driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render')
+				# print("lazy_element: " + lazy_element.get_attribute('innerHTML'))
 
-			# collapsible_element = lazy_element.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
-			# print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
+				# collapsible_element = lazy_element.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
+				# print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
 
-			# player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
-			# print("player_btn: " + player_btn.get_attribute('innerHTML'))
-			# player_btn.click()
+				# player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
+				# print("player_btn: " + player_btn.get_attribute('innerHTML'))
+				# player_btn.click()
 
-			
-			#print('get all lazy elements and loop thru')
-			lazy_elements = driver.find_element('class name','rj-markerboard-markets').find_elements('xpath','sb-lazy-render')
-			for e in lazy_elements:
-				#print("lazy_element: " + e.get_attribute('innerHTML'))
+				
+				#print('get all lazy elements and loop thru')
+				lazy_elements = driver.find_element('class name','rj-markerboard-markets').find_elements('xpath','sb-lazy-render')
+				for e in lazy_elements:
+					#print("lazy_element: " + e.get_attribute('innerHTML'))
 
-				#collapsible_element = e.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
-				#print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
+					#collapsible_element = e.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
+					#print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
 
-				# multiple (3 always?) players in each lazy element
-				player_btns = e.find_elements('class name','rj-market-collapsible__trigger')
-				# print('player_btns: ')
-				# for player_btn in player_btns:
-				# 	print("player_btn: " + player_btn.get_attribute('innerHTML'))
+					# multiple (3 always?) players in each lazy element
+					player_btns = e.find_elements('class name','rj-market-collapsible__trigger')
+					# print('player_btns: ')
+					# for player_btn in player_btns:
+					# 	print("player_btn: " + player_btn.get_attribute('innerHTML'))
 
-				for player_btn in player_btns:
-					#player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
-					#print("player_btn: " + player_btn.get_attribute('innerHTML'))
+					for player_btn in player_btns:
+						#player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
+						#print("player_btn: " + player_btn.get_attribute('innerHTML'))
 
-					# need to know which type of market it is bc there are 2: O/U and over only (OO)
-					# button header: 'Player Name Stat Name', eg 'Bam Adebayo Assists', excluding 'O/U'
-					player_btn_header = player_btn.find_element('xpath','h2').get_attribute('innerHTML')
-					#print('player_btn_header: ' + player_btn_header)
+						# need to know which type of market it is bc there are 2: O/U and over only (OO)
+						# button header: 'Player Name Stat Name', eg 'Bam Adebayo Assists', excluding 'O/U'
+						player_btn_header = player_btn.find_element('xpath','h2').get_attribute('innerHTML')
+						#print('player_btn_header: ' + player_btn_header)
 
-					# ignore quarter stats for now
-					if re.search('Quarter',player_btn_header):
-						break # can break bc list ends with quarter stats
+						# ignore quarter stats for now
+						if re.search('Quarter',player_btn_header):
+							break # can break bc list ends with quarter stats
 
-					# old version: as long as we can click all markets we need to open then we dont need to click o/u btns but we may we need to close o/u btns to see the oo btns
-					# new version we need to click all btns
-					player_btn_arrow = player_btn.find_element('class name','rj-market-collapsible-arrow').get_attribute('innerHTML')
-					#print('player_btn_arrow: ' + player_btn_arrow)
-					# old version: if o/u and open then close dropdown permanently
-					# new version: get odds from all sections so get data 
-					# and then close if already open, or open and then close
-					# if re.search('O/U',player_btn_header) and re.search('up',player_btn_arrow):
-					# 	player_btn.click() # close dropdown
-					# 	print('closed unused market')
-					# 	time.sleep(0.1)
-					# elif not re.search('O/U',player_btn_header):
-					# first section already open so arrow up and no need to open but close after reading data
-					# arrow down means section closed
-					try: # button might be out of window bottom bc long list and we cannot scroll
-						if re.search('down',player_btn_arrow):
-							player_btn.click() # open dropdown
+						# old version: as long as we can click all markets we need to open then we dont need to click o/u btns but we may we need to close o/u btns to see the oo btns
+						# new version we need to click all btns
+						player_btn_arrow = player_btn.find_element('class name','rj-market-collapsible-arrow').get_attribute('innerHTML')
+						#print('player_btn_arrow: ' + player_btn_arrow)
+						# old version: if o/u and open then close dropdown permanently
+						# new version: get odds from all sections so get data 
+						# and then close if already open, or open and then close
+						# if re.search('O/U',player_btn_header) and re.search('up',player_btn_arrow):
+						# 	player_btn.click() # close dropdown
+						# 	print('closed unused market')
+						# 	time.sleep(0.1)
+						# elif not re.search('O/U',player_btn_header):
+						# first section already open so arrow up and no need to open but close after reading data
+						# arrow down means section closed
+						try: # button might be out of window bottom bc long list and we cannot scroll
+							if re.search('down',player_btn_arrow):
+								player_btn.click() # open dropdown
 
-							#print('clicked player btn')
+								#print('clicked player btn')
 
-						# opened data so now collect it and then close it so other data visible
+							# opened data so now collect it and then close it so other data visible
 
-						player_element = player_btn.find_element('xpath','..') 
-						#print("player_element: " + player_element.get_attribute('innerHTML'))
+							player_element = player_btn.find_element('xpath','..') 
+							#print("player_element: " + player_element.get_attribute('innerHTML'))
 
-						player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_btn_header).strip().lower()
-						player_name = re.sub('−|-',' ',player_name)
-						player_name = re.sub('\.','',player_name)
-						#print('player_name: ' + player_name)
+							player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_btn_header).strip().lower()
+							player_name = re.sub('−|-',' ',player_name)
+							player_name = re.sub('\.','',player_name)
+							#print('player_name: ' + player_name)
 
-						if player_name not in web_dict[stat_name].keys():
-							web_dict[stat_name][player_name] = {}
+							if player_name not in web_dict[stat_name].keys():
+								web_dict[stat_name][player_name] = {}
 
-						stat_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-title')
-						odds_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-odds')
+							stat_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-title')
+							odds_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-odds')
 
-						# stat_vals = []
-						# odds_vals = []
-						for idx in range(len(stat_val_elements)):
-							stat_element = stat_val_elements[idx]
-							#print("stat_element: " + stat_element.get_attribute('innerHTML'))
-							odds_element = odds_val_elements[idx]
-							#print("odds_element: " + odds_element.get_attribute('innerHTML'))
+							# stat_vals = []
+							# odds_vals = []
+							for idx in range(len(stat_val_elements)):
+								stat_element = stat_val_elements[idx]
+								#print("stat_element: " + stat_element.get_attribute('innerHTML'))
+								odds_element = odds_val_elements[idx]
+								#print("odds_element: " + odds_element.get_attribute('innerHTML'))
 
-							stat = stat_element.get_attribute('innerHTML')
-							odds = odds_element.get_attribute('innerHTML')
+								stat = stat_element.get_attribute('innerHTML')
+								odds = odds_element.get_attribute('innerHTML')
 
-							# if header is just <stat> without 'alt' and 'o/u'
-							# then format is 'Over 24.5 -120'
-							# Over <stat> <odds>
-							if not re.search('\sAlt\s',player_btn_header):
-								# old: stat = re.sub('\+','',stat)
-								if re.search('Over',stat):
-									stat = re.sub('[a-zA-Z]','',stat).strip()
-									stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
-								else: #under
-									stat = re.sub('[a-zA-Z]','',stat).strip()
-									stat = str(round(float(stat) - 0.5)) + '-'
-							elif re.search('O/U',player_btn_header):
-								# start with over and then take every other value as over
-								if idx % 2 == 0:
-									stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
-								else: #under
-									stat = str(round(float(stat) - 0.5)) + '-'
+								# if header is just <stat> without 'alt' and 'o/u'
+								# then format is 'Over 24.5 -120'
+								# Over <stat> <odds>
+								if not re.search('\sAlt\s',player_btn_header):
+									# old: stat = re.sub('\+','',stat)
+									if re.search('Over',stat):
+										stat = re.sub('[a-zA-Z]','',stat).strip()
+										stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
+									else: #under
+										stat = re.sub('[a-zA-Z]','',stat).strip()
+										stat = str(round(float(stat) - 0.5)) + '-'
+								elif re.search('O/U',player_btn_header):
+									# start with over and then take every other value as over
+									if idx % 2 == 0:
+										stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
+									else: #under
+										stat = str(round(float(stat) - 0.5)) + '-'
 
-							odds = re.sub('−','-',odds) # change abnormal '-' char
-							#odds = re.sub('\+','',odds) # prefer symbol to differentiate odds from probs, prefer no + symbol for +odds bc implied so not to confuse with val over under
+								odds = re.sub('−','-',odds) # change abnormal '-' char
+								#odds = re.sub('\+','',odds) # prefer symbol to differentiate odds from probs, prefer no + symbol for +odds bc implied so not to confuse with val over under
 
-							#stat_vals.append(e.get_attribute('innerHTML'))
+								#stat_vals.append(e.get_attribute('innerHTML'))
 
-							#print('stat: ' + str(stat))
-							#print('odds: ' + str(odds))
-							#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
-							web_dict[stat_name][player_name][stat] = odds # { stat : odds, ... }
-							#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
-						# for e in odds_val_elements:
-						# 	odds_vals.append(e.get_attribute('innerHTML'))
+								#print('stat: ' + str(stat))
+								#print('odds: ' + str(odds))
+								#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
+								web_dict[stat_name][player_name][stat] = odds # { stat : odds, ... }
+								#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
+							# for e in odds_val_elements:
+							# 	odds_vals.append(e.get_attribute('innerHTML'))
 
-						# print('stat_vals: ' + str(stat_vals))
-						# print('odds_vals: ' + str(odds_vals))
+							# print('stat_vals: ' + str(stat_vals))
+							# print('odds_vals: ' + str(odds_vals))
 
-						#print('collected player data')
-						time.sleep(0.2)
-						player_btn.click() # close dropdown
-					except:
-						print('Warning: player btn unclickable!')
+							#print('collected player data')
+							time.sleep(0.2)
+							player_btn.click() # close dropdown
+						except:
+							print('Warning: player btn unclickable!')
 
-				#time.sleep(5)
+					#time.sleep(5)
 
-		print("Request successful.")
+			print("Request successful.")
+			# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
+			#print('final web_dict:\n' + str(web_dict))
+			return web_dict
 
-	except Exception as e:
-		print('Warning: No SGP element! ', e)
+		except Exception as e:
+			print('Warning: No SGP element! ', e)
+			retries += 1
+			print(f"Exception error occurred. Retrying {retries}/{max_retries}...", e)#, e.getheaders(), e.gettext(), e.getcode())
+			time.sleep(10)
 
 	
 	# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 	#print('final web_dict:\n' + str(web_dict))
-	return web_dict
+	print("Maximum retries reached.")
+	return None
 
 #all_players_odds: {'mia': {'pts': {'Bam Adebayo': {'18+': '−650',...
 def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
@@ -2303,7 +2363,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 
 				if avg_play_time <= 11.5:
 					dnp.append(player)
-			print('dnp: ' + str(dnp))
+			#print('dnp: ' + str(dnp))
 
 			# need to add starters and bench to in players separate in case new player on team so cur cond does not match prev conds without player
 			for starter in starters:
@@ -3384,6 +3444,154 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_part,
 	#print('all_box_scores: ' + str(all_box_scores))
 	return (all_box_scores, current_box_scores)
 
+def read_game_info(game_key, game_id='', player=''):
+	print("\n===Read Game Info: " + game_key.upper() + ", " + player.title() + "===\n")
+
+	game_info = {}
+
+	if game_id == '':
+		game_id = read_game_espn_id(game_key)
+
+	if game_id != '':
+		# https://www.espn.com/nba/game/_/gameId/401585115/trail-blazers-mavericks
+		url = 'https://www.espn.com/nba/game/_/gameId/' + game_id # not needed: + '/' + away_team + '-' + home_team
+		soup = read_website(url)
+		if soup is not None:
+			
+			# 8:30 PM, January 5, 2024 -> 8:30
+			meta_game_info = list(soup.find('div', {'class':'GameInfo__Meta'}).findChildren())
+			# [<span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>, '8:00 PM', ' ', ', ', ' ', 'January 5, 2024']
+			print('meta_game_info: ' + str(meta_game_info))
+			# <span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>
+			tod = str(meta_game_info[0])
+			#print('tod: ' + tod)
+			# remove all tags
+			tod = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',tod)
+			#tod = re.sub(r'<!--\s-->','',tod)
+			# remove only end tags
+			#tod = re.sub(r'^<[a-z]+>|</[a-z]+>$','',tod)
+			#print('tod: ' + tod)
+			# 8:30 PM
+			tod = tod.split(',')[0]
+			#print('tod: ' + tod)
+			# always play in PM so remove pm
+			tod = re.sub('\s[A-Z]+$','',tod)
+			print('tod: ' + tod)
+
+			# doesnt matter which channel, just as long as national coverage
+			coverage = 'local'
+			if len(meta_game_info) > 1:
+				coverage = 'national'
+				# coverage = str(meta_game_info[1])
+				# print('coverage: ' + coverage)
+				# coverage = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',coverage)
+			print('coverage: ' + coverage)
+
+			city = str(soup.find('span', {'class':'Location__Text'}))
+			#print('city: ' + city)
+			# remove tags
+			city = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',city).strip()#.lower()
+			print('city: ' + city)
+			
+			# CAPACITY: 19,200 -> 19200
+			audience = str(soup.find('div', {'class':'Attendance__Capacity'}))
+			#print('audience: ' + audience)
+			# remove tags
+			audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
+			#print('audience: ' + audience)
+			audience = audience.split(':')[1].strip()
+			#print('audience: ' + audience)
+			# audience = re.sub(',','',audience)
+			# print('audience: ' + audience)
+			# round to the nearest 1000
+			audience = str(int(converter.round_half_up(int(audience), -3)))
+			print('audience: ' + audience)
+
+			game_info = {'tod':tod, 'coverage':coverage, 'city':city, 'audience':audience}
+	else:
+		print('Warning: Blank game id! ' + game_key)
+
+	#print('game_info: ' + str(game_info))
+	return game_info
+
+def read_all_games_info(all_players_season_logs, all_players_teams, season_part, read_new_game_ids):
+	print("\n===Read All Games Info===\n")
+	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('\nOutput: all_games_info = {year:{game key:{city:c, time of day:tod, audience:a, ...\n')
+
+	#all_games_info = {}
+
+	all_games_info_file = 'data/all games info.json'
+	init_all_games_info = read_json(all_games_info_file)
+	#print("init_all_players_teams: " + str(init_all_players_teams))
+	all_games_info = copy.deepcopy(init_all_games_info)
+
+	# {game key: game id,...}
+	data_type = 'data/all games ids.csv' #'game ids'
+	init_game_ids_dict = extract_dict_from_data(data_type)
+
+	# read all games info or just season part of interest?
+	# more efficient to ignore unused game info
+	#season_part = 'full'
+
+	for player, player_season_logs in all_players_season_logs.items():
+		#print('\nplayer: ' + player)
+		for year, player_season_log in player_season_logs.items():
+			#print('\nyear: ' + year)
+			if year not in all_games_info.keys():
+				all_games_info[year] = {}
+
+			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(all_players_teams, player_season_log, season_part, year, player)
+			teams_reg_and_playoff_games_played = season_games_played_data[0]
+			season_part_game_log = season_games_played_data[1]
+			teams = season_games_played_data[2]
+			games_played = season_games_played_data[3]
+
+			player_team_idx = 0
+
+			# if we add try then it fails quietly and requires searching to see error
+			#try:
+
+			# for reg season, idx starts after first playoff game
+			for game_idx, row in season_part_game_log.iterrows():
+				#player_team = determiner.determine_player_team(row)
+
+				# determine player team for game
+				player_team_idx = determiner.determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
+				team_abbrev = ''
+				if len(teams) > player_team_idx:
+					team_abbrev = teams[player_team_idx]
+				#print('team_abbrev: ' + team_abbrev)
+					
+				game_key = read_game_key(year, team_abbrev, row)
+
+				# if game not saved then read from internet
+				if game_key not in all_games_info[year].keys():
+
+					game_espn_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
+					# if returned no game id, then bc too many requests, so stop reading new ids
+					# no bc could be any reason, so check error
+					# if too many requests error, stop reading new ids
+					if game_espn_id == 'HTTP Error 429: Too Many Requests':
+					#if re.search('too many requests', game_espn_id.lower()): 
+						read_new_game_ids = False
+						continue
+
+					if game_espn_id != '':
+						game_info = read_game_info(game_key, game_espn_id, player)
+						all_games_info[year][game_key] = game_info
+					else:
+						print('Warning: Blank Game ID! ' + game_key.upper())
+
+			# except Exception as e:
+			# 	print('Exception while reading all games info: ', e)
+
+	if not init_all_games_info == all_games_info:
+		writer.write_json_to_file(all_games_info, all_games_info_file)
+
+	#print('all_games_info: ' + str(all_games_info))
+	return all_games_info
+
 # get player position from espn game log page bc we already have urls for each player
 def read_player_position(player_name, player_id, init_all_players_positions={}):
 	#print("\n===Read Player Position: " + player_name.title() + "===\n")
@@ -3728,7 +3936,7 @@ def read_player_season_logs(player_name, player_espn_id='', read_x_seasons=1, al
 	# get prev seasons unchanged
 	# before only if it was matching todays date would it be filled
 	# but now prev logs is unchanged so it will be refilled if ever filled before
-	player_prev_logs_filename = 'data/game logs/' + player_name + ' prev logs.json'
+	player_prev_logs_filename = 'data/game logs/prev/' + player_name + ' prev logs.json'
 	#print('player_prev_logs_filename: ' + player_prev_logs_filename)
 	# # init_player_prev_logs = {'year':{'PTS':[],...},...}
 	# need to copy init game logs bc this run may not have all players but we dont want to remove other players
@@ -3820,7 +4028,7 @@ def read_all_players_season_logs(players_names, all_players_espn_ids={}, all_pla
 	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')# + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('Input: all_players_teams = {player:{year:{team:{gp:gp, min:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-	print('\nOutput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('\nOutput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...\n')
 
 	all_players_season_logs = {}
 
@@ -4100,7 +4308,7 @@ def read_all_players_teams(players_names, all_players_espn_ids, read_new_teams=F
 	# or if that is too inefficient then make sure never hangs
 	# by retrying same player if hit cancel instead of skipping player
 	if not init_all_players_teams == all_players_teams:
-		writer.write_json_to_file(all_players_teams, all_players_teams_file, 'w')
+		writer.write_json_to_file(all_players_teams, all_players_teams_file)
 
 	# all_players_teams = {player:{year:{team:gp,...},...}}
 	#print("all_players_teams: " + str(all_players_teams))
