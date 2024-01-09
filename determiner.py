@@ -1293,7 +1293,7 @@ def determine_player_game_location(player, game_teams, player_team):
 
 def determine_game_year(game_mth, season_year):
     game_year = season_year
-    if game_mth > 9:
+    if int(game_mth) > 9:
         game_year = str(int(season_year) - 1)
 
     return game_year
@@ -1667,6 +1667,94 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+
+
+
+
+# given todays date find next game date
+def determine_next_game_num(schedule_date_dict, cur_yr):
+    # print('\n===Determine Next Game Num===\n')
+    # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
+    # print('\nOutput: next_game_num = x\n')
+
+    next_game_num = 1
+
+    cur_date = datetime.today()
+
+    # game_date = Tue, Oct 24 -> 10/24/2023
+    for game_num, game_date_str in schedule_date_dict.items():
+        # skip first idx always field title
+        if game_date_str == 'DATE':
+            continue
+
+        #print('\ngame_date_str: ' + str(game_date_str))
+
+        # next game always after second header row
+        # BUT we would have to read from internet each run
+        # so quicker to save local and compare dates to find next game?
+        # if game_date_str == 'DATE':
+        #     next_game_num = str(int(game_idx) + 1)
+        #     break
+
+        # Oct 24
+        game_date_str = game_date_str.split(',')[1].strip()
+        #print('game_date_str: ' + game_date_str)
+        game_mth_abbrev = game_date_str.split()[0]
+        #print('game_mth_abbrev: ' + game_mth_abbrev)
+        game_mth = converter.convert_month_abbrev_to_num(game_mth_abbrev)
+        #print('game_mth: ' + str(game_mth))
+        game_yr = determine_game_year(game_mth, cur_yr)
+        game_date_str += ' ' + game_yr
+        #print('game_date_str: ' + game_date_str)
+        # %B[:3] = %b
+        # %b %d %Y
+        # Oct 24 2023 -> 10/24/2023
+        game_date = datetime.strptime(game_date_str, '%b %d %Y')
+        # print('game_date: ' + str(game_date))
+        # print('cur_date: ' + str(cur_date))
+
+        if game_date > cur_date:
+            next_game_num = game_num
+            break
+
+    #print('next_game_num: ' + str(next_game_num))
+    return next_game_num
+
+# given todays date find next game date
+def determine_next_game_date(schedule_date_dict, cur_yr):
+    print('\n===Determine Next Game Date===\n')
+    print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
+    print('\nOutput: next_game_date = mm/dd/yyyy\n')
+
+
+    next_game_num = determine_next_game_num(schedule_date_dict, cur_yr)
+    
+    # mm/dd
+    next_game_date = schedule_date_dict[next_game_num].split(', ')[1] # mar 31
+    next_game_mth = next_game_date.split()[0].lower() # mar
+    #print('next_game_mth: ' + str(next_game_mth))
+    # game_mth = next_game_date.split()[0] # mar
+    # print('game_mth: ' + game_mth)
+    next_game_mth = converter.convert_month_abbrev_to_num(next_game_mth)
+    #print('next_game_mth_num: ' + str(next_game_mth))
+    
+    next_game_yr = determine_game_year(next_game_mth, cur_yr)
+
+    next_game_day = next_game_date.split()[1].lower() # 31
+    #print('next_game_day: ' + str(next_game_day))
+    
+    next_game_date = str(next_game_mth) + '/' + next_game_day + '/' + next_game_yr # mm/dd + /yyyy
+
+    # next_game_date_obj = datetime.strptime(next_game_date, '%b %d %Y')
+    # next_game_date = next_game_date_obj.strftime('%m/%d/%Y')
+    
+    print('next_game_date: ' + next_game_date)
+    return next_game_date
+
+
 # use in gen all box scores to get abbrev from list of abbrevs before concluding if in team part
 def determine_abbrev_in_game(player_abbrevs, team_part_players):
     # print('\n===Determine Abbrev in Game===\n')
@@ -1838,7 +1926,7 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
 # bc lineups shows player abbrev
 # this abbrev does not include position bc it is used to compare to full name
 def determine_player_abbrev(player_name):
-    print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
+    #print('\n===Determine Player Abbrev: ' + player_name.title() + '===\n')
     
     player_abbrev = ''
 
@@ -1865,7 +1953,7 @@ def determine_player_abbrev(player_name):
     else:
         print('Warning: Blank player name while determining player abbrev!')
     
-    print('player_abbrev: ' + player_abbrev)
+    #print('player_abbrev: ' + player_abbrev)
     return player_abbrev
 
 # if given abbrev like D. Green need to know team or position to get full name
@@ -1879,13 +1967,13 @@ def determine_player_abbrev(player_name):
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
 def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
-    print('\n===Determine Player Full Name: ' + init_player + '===\n')
-    print('Input: team of player of interest in game of interest = ' + team)
-    print('Input: game_key = away home date = ' + game_key)
-    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
-    print('Input: Current Year to tell current team')
-    print('\nOutput: player_full_name = jalen brunson\n')
+    # print('\n===Determine Player Full Name: ' + init_player + '===\n')
+    # print('Input: team of player of interest in game of interest = ' + team)
+    # print('Input: game_key = away home date = ' + game_key)
+    # print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    # print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
+    # print('Input: Current Year to tell current team')
+    # print('\nOutput: player_full_name = jalen brunson\n')
     
     # print('team: ' + str(team))
     #print('all_players_teams: ' + str(all_players_teams))
@@ -1934,7 +2022,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         # else look in player teams
         # player_teams = {yr:team:gp} = {'2024':{}}
         for compare_player_name, compare_player_teams in all_players_teams.items():
-            print('\ncompare_player_name: ' + str(compare_player_name))
+            #print('\ncompare_player_name: ' + str(compare_player_name))
             # print('compare_player_teams: ' + str(compare_player_teams))
             # look at current team bc we are comparing to current lineup
             # if player just traded then has no log with this team
@@ -1979,9 +2067,9 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
             # cannot compare whole words bc irregular abbrevs
             if determine_player_abbrev_match(player, compare_player_name):
             #if re.search(player,player_abbrev) or re.search(player,player_name):
-                print('team: ' + str(team))
-                print('cur_team: ' + cur_team)
-                print('season_teams: ' + str(season_teams))
+                # print('team: ' + str(team))
+                # print('cur_team: ' + cur_team)
+                # print('season_teams: ' + str(season_teams))
                 if len(season_teams) > 0:
                     if team in season_teams:
                         full_name = compare_player_name
@@ -2001,7 +2089,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
                         full_name = compare_player_name
                         break # found player name
 
-    print('full_name: ' + full_name)
+    #print('full_name: ' + full_name)
     return full_name
 
 # use whenever we know game key and team loc but not the team name

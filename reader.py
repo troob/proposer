@@ -292,6 +292,69 @@ def read_cur_and_prev_json(cur_file,prev_file,current_year_str=''):
 
 
 
+
+
+
+# https://www.espn.com/nba/team/schedule/_/name/cha/charlotte-hornets
+def read_team_schedule_from_internet(team_abbrev):
+	print('\n===Read Team Schedule from Internet: ' + team_abbrev + '===\n')
+
+	team_schedule = {}
+
+	# display player game box scores in readable format
+	pd.set_option('display.max_columns', None)
+
+	team_name = converter.convert_team_abbrev_to_name(team_abbrev)
+	team_name = re.sub(' ', '-', team_name)
+	schedule_url = 'https://www.espn.com/nba/team/schedule/_/name/' + team_abbrev + '/' + team_name #cha/charlotte-hornets'
+
+	html_results = read_web_data(schedule_url)
+
+	if len(html_results) > 0:
+		schedule_df = html_results[0]
+
+		team_schedule = schedule_df.to_dict()
+
+	print('team_schedule: ' + str(team_schedule))
+	return team_schedule
+
+def read_team_schedule(team, init_all_teams_schedules):
+	print('\n===Read Team Schedule: ' + team + '===\n')
+	print('\nOutput: team_schedule = {field idx:{\'0\':field name, game num:field val, ... = {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
+
+	team_schedule = {}
+
+	if team in init_all_teams_schedules.keys():
+		team_schedule = init_all_teams_schedules[team]
+
+	else:
+		team_schedule = read_team_schedule_from_internet(team)
+
+
+	print('team_schedule: ' + str(team_schedule))
+	return team_schedule
+
+def read_all_teams_schedules(game_teams):
+	print('\n===Read All Teams Schedules===\n')
+	print('\nOutput: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
+
+	all_teams_schedules_file = 'data/all teams schedules.json'
+	init_all_teams_schedules = read_json(all_teams_schedules_file)
+	#print("init_all_teams_schedules: " + str(init_all_teams_schedules))
+	all_teams_schedules = copy.deepcopy(init_all_teams_schedules) # need to init as saved teams so we can see difference at end
+
+	for game in game_teams:
+		for team in game:
+			team_schedule = read_team_schedule(team, all_teams_schedules)
+			all_teams_schedules[team] = team_schedule
+
+	if not init_all_teams_schedules == all_teams_schedules:
+		writer.write_json_to_file(all_teams_schedules, all_teams_schedules_file)
+
+	#print('all_teams_schedules: ' + str(all_teams_schedules))
+	return all_teams_schedules
+
+
 def read_player_prev_stat_vals(season_log_of_interest):
 
 	prev_stat_vals = {}
@@ -305,6 +368,7 @@ def read_player_prev_stat_vals(season_log_of_interest):
 
 	return prev_stat_vals
 
+# read along with current conditions
 def read_all_prev_stat_vals(all_players_season_logs, season_year):
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ...\n')
@@ -3292,11 +3356,11 @@ def read_game_box_scores(game_key, game_id='', existing_game_ids_dict={}, init_b
 
 # assemble components of game key into string for search
 def read_game_key(season_year, team_abbrev, game_row):
-	print('\n===Read Game Key===\n')
-	print('Input: Season Year = ' + season_year)
-	print('Input: Team Abbrev = ' + team_abbrev)
-	print('Input: Game Row in table with game data: Date, Opponent')
-	print('\nOutput: Game Key = away home date\n')
+	# print('\n===Read Game Key===\n')
+	# print('Input: Season Year = ' + season_year)
+	# print('Input: Team Abbrev = ' + team_abbrev)
+	# print('Input: Game Row in table with game data: Date, Opponent')
+	# print('\nOutput: Game Key = away home date\n')
 
 	init_game_date_string = game_row['Date'].lower().split()[1]#player_reg_season_log.loc[game_idx, 'Date'].lower().split()[1] # 'wed 2/15'[1]='2/15'
 	game_mth = init_game_date_string.split('/')[0]
@@ -3328,7 +3392,7 @@ def read_game_key(season_year, team_abbrev, game_row):
 		
 	game_key = away_abbrev + ' ' + home_abbrev + ' ' + date
 	
-	print('game_key: ' + game_key)
+	#print('game_key: ' + game_key)
 	return game_key
 
 
@@ -3444,77 +3508,101 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_part,
 	#print('all_box_scores: ' + str(all_box_scores))
 	return (all_box_scores, current_box_scores)
 
-def read_game_info(game_key, game_id='', player=''):
-	print("\n===Read Game Info: " + game_key.upper() + ", " + player.title() + "===\n")
+def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
+	#print("\n===Read Game Info: " + game_key.upper() + ", " + player.title() + "===\n")
 
 	game_info = {}
 
 	if game_id == '':
-		game_id = read_game_espn_id(game_key)
+		game_id = read_game_espn_id(game_key, init_game_ids_dict)
 
 	if game_id != '':
+		#game_info['id'] = game_id
 		# https://www.espn.com/nba/game/_/gameId/401585115/trail-blazers-mavericks
 		url = 'https://www.espn.com/nba/game/_/gameId/' + game_id # not needed: + '/' + away_team + '-' + home_team
 		soup = read_website(url)
 		if soup is not None:
+
+			# if one messes up, keep reading rest of games info
+			tod = ''
+			coverage = ''
+			city = ''
+			audience = ''
+
+			try:
 			
-			# 8:30 PM, January 5, 2024 -> 8:30
-			meta_game_info = list(soup.find('div', {'class':'GameInfo__Meta'}).findChildren())
-			# [<span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>, '8:00 PM', ' ', ', ', ' ', 'January 5, 2024']
-			print('meta_game_info: ' + str(meta_game_info))
-			# <span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>
-			tod = str(meta_game_info[0])
-			#print('tod: ' + tod)
-			# remove all tags
-			tod = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',tod)
-			#tod = re.sub(r'<!--\s-->','',tod)
-			# remove only end tags
-			#tod = re.sub(r'^<[a-z]+>|</[a-z]+>$','',tod)
-			#print('tod: ' + tod)
-			# 8:30 PM
-			tod = tod.split(',')[0]
-			#print('tod: ' + tod)
-			# always play in PM so remove pm
-			tod = re.sub('\s[A-Z]+$','',tod)
-			print('tod: ' + tod)
+				# 8:30 PM, January 5, 2024 -> 8:30
+				meta_game_info = list(soup.find('div', {'class':'GameInfo__Meta'}).findChildren())
+				# [<span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>, '8:00 PM', ' ', ', ', ' ', 'January 5, 2024']
+				#print('meta_game_info: ' + str(meta_game_info))
+				# <span>8:00 PM<!-- -->, <!-- -->January 5, 2024</span>
+				tod = str(meta_game_info[0])
+				#print('tod: ' + tod)
+				# remove all tags
+				tod = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',tod)
+				#tod = re.sub(r'<!--\s-->','',tod)
+				# remove only end tags
+				#tod = re.sub(r'^<[a-z]+>|</[a-z]+>$','',tod)
+				#print('tod: ' + tod)
+				# 8:30 PM
+				tod = tod.split(',')[0]
+				#print('tod: ' + tod)
+				# always play in PM so remove pm
+				tod = re.sub('\s[A-Z]+$','',tod)
+				#print('tod: ' + tod)
 
-			# doesnt matter which channel, just as long as national coverage
-			coverage = 'local'
-			if len(meta_game_info) > 1:
-				coverage = 'national'
-				# coverage = str(meta_game_info[1])
-				# print('coverage: ' + coverage)
-				# coverage = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',coverage)
-			print('coverage: ' + coverage)
+				# doesnt matter which channel, just as long as national coverage
+				coverage = 'local'
+				if len(meta_game_info) > 1:
+					coverage = 'national'
+					# coverage = str(meta_game_info[1])
+					# print('coverage: ' + coverage)
+					# coverage = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->','',coverage)
+				#print('coverage: ' + coverage)
 
-			city = str(soup.find('span', {'class':'Location__Text'}))
-			#print('city: ' + city)
-			# remove tags
-			city = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',city).strip()#.lower()
-			print('city: ' + city)
+				city = str(soup.find('span', {'class':'Location__Text'}))
+				#print('city: ' + city)
+				# remove tags
+				city = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',city).strip()#.lower()
+				#print('city: ' + city)
+				
+				# CAPACITY: 19,200 -> 19200
+				audience = str(soup.find('div', {'class':'Attendance__Capacity'}))
+				#print('audience: ' + audience)
+				# remove tags
+				audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
+				#print('audience: ' + audience)
+				
+				audience_data = audience.split(':')
+				if len(audience_data) > 1:
+					audience = audience_data[1].strip()
+
+					# round to the nearest 1000
+					audience = str(int(converter.round_half_up(int(audience), -3)))
+				else:
+					audience = ''
+					print('Warning: Blank audience info! ' + audience)
+				#print('audience: ' + audience)
+				# audience = re.sub(',','',audience)
+				# print('audience: ' + audience)
+				
+				#print('audience: ' + audience)
+
+				game_info = {'id':game_id, 'tod':tod, 'coverage':coverage, 'city':city, 'audience':audience}
 			
-			# CAPACITY: 19,200 -> 19200
-			audience = str(soup.find('div', {'class':'Attendance__Capacity'}))
-			#print('audience: ' + audience)
-			# remove tags
-			audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
-			#print('audience: ' + audience)
-			audience = audience.split(':')[1].strip()
-			#print('audience: ' + audience)
-			# audience = re.sub(',','',audience)
-			# print('audience: ' + audience)
-			# round to the nearest 1000
-			audience = str(int(converter.round_half_up(int(audience), -3)))
-			print('audience: ' + audience)
-
-			game_info = {'tod':tod, 'coverage':coverage, 'city':city, 'audience':audience}
+			except Exception as e:
+				print('Warning: Exception while reading game info! ' + str(e) + ', ' + game_key + ', ' + player.title())
+				print('tod: ' + tod)
+				print('coverage: ' + coverage)
+				print('city: ' + city)
+				print('audience: ' + audience)
 	else:
 		print('Warning: Blank game id! ' + game_key)
 
 	#print('game_info: ' + str(game_info))
 	return game_info
 
-def read_all_games_info(all_players_season_logs, all_players_teams, season_part, read_new_game_ids):
+def read_all_games_info(all_players_season_logs, all_players_teams, init_game_ids_dict, season_part, read_new_game_ids):
 	print("\n===Read All Games Info===\n")
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_games_info = {year:{game key:{city:c, time of day:tod, audience:a, ...\n')
@@ -3526,9 +3614,10 @@ def read_all_games_info(all_players_season_logs, all_players_teams, season_part,
 	#print("init_all_players_teams: " + str(init_all_players_teams))
 	all_games_info = copy.deepcopy(init_all_games_info)
 
-	# {game key: game id,...}
-	data_type = 'data/all games ids.csv' #'game ids'
-	init_game_ids_dict = extract_dict_from_data(data_type)
+	if init_game_ids_dict == '':
+		# {game key: game id,...}
+		data_type = 'data/all games ids.csv' #'game ids'
+		init_game_ids_dict = extract_dict_from_data(data_type)
 
 	# read all games info or just season part of interest?
 	# more efficient to ignore unused game info
@@ -3550,41 +3639,44 @@ def read_all_games_info(all_players_season_logs, all_players_teams, season_part,
 			player_team_idx = 0
 
 			# if we add try then it fails quietly and requires searching to see error
-			#try:
+			# but if we cancel for some reason then it will save the file before quitting
+			# is that what we want? yes bc if not then after long loading all work will be lost if error
+			# then need to be careful to notice exceptions
+			try:
 
-			# for reg season, idx starts after first playoff game
-			for game_idx, row in season_part_game_log.iterrows():
-				#player_team = determiner.determine_player_team(row)
+				# for reg season, idx starts after first playoff game
+				for game_idx, row in season_part_game_log.iterrows():
+					#player_team = determiner.determine_player_team(row)
 
-				# determine player team for game
-				player_team_idx = determiner.determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
-				team_abbrev = ''
-				if len(teams) > player_team_idx:
-					team_abbrev = teams[player_team_idx]
-				#print('team_abbrev: ' + team_abbrev)
-					
-				game_key = read_game_key(year, team_abbrev, row)
+					# determine player team for game
+					player_team_idx = determiner.determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
+					team_abbrev = ''
+					if len(teams) > player_team_idx:
+						team_abbrev = teams[player_team_idx]
+					#print('team_abbrev: ' + team_abbrev)
+						
+					game_key = read_game_key(year, team_abbrev, row)
 
-				# if game not saved then read from internet
-				if game_key not in all_games_info[year].keys():
+					# if game not saved then read from internet
+					if game_key not in all_games_info[year].keys():
 
-					game_espn_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
-					# if returned no game id, then bc too many requests, so stop reading new ids
-					# no bc could be any reason, so check error
-					# if too many requests error, stop reading new ids
-					if game_espn_id == 'HTTP Error 429: Too Many Requests':
-					#if re.search('too many requests', game_espn_id.lower()): 
-						read_new_game_ids = False
-						continue
+						game_espn_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
+						# if returned no game id, then bc too many requests, so stop reading new ids
+						# no bc could be any reason, so check error
+						# if too many requests error, stop reading new ids
+						if game_espn_id == 'HTTP Error 429: Too Many Requests':
+						#if re.search('too many requests', game_espn_id.lower()): 
+							read_new_game_ids = False
+							continue
 
-					if game_espn_id != '':
-						game_info = read_game_info(game_key, game_espn_id, player)
-						all_games_info[year][game_key] = game_info
-					else:
-						print('Warning: Blank Game ID! ' + game_key.upper())
+						if game_espn_id != '':
+							game_info = read_game_info(game_key, init_game_ids_dict, game_espn_id, player)
+							all_games_info[year][game_key] = game_info
+						else:
+							print('Warning: Blank Game ID! ' + game_key.upper())
 
-			# except Exception as e:
-			# 	print('Exception while reading all games info: ', e)
+			except Exception as e:
+				print('Exception while reading all games info: ', e)
 
 	if not init_all_games_info == all_games_info:
 		writer.write_json_to_file(all_games_info, all_games_info_file)
@@ -4393,7 +4485,7 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Tru
 
 				espn_id = re.findall(r'\d+', espn_id_link)[0]
 
-				print('Success', espn_id, game_key)
+				#print('Success', espn_id, game_key)
 
 				data = [[game_key, espn_id]]
 				filepath = 'data/all games ids.csv'
@@ -4809,7 +4901,7 @@ def read_all_teams_rosters(teams, read_new_teams=True, read_new_rosters=True):
 	# or if that is too inefficient then make sure never hangs
 	# by retrying same player if hit cancel instead of skipping player
 	if not init_all_teams_rosters == all_teams_rosters:
-		writer.write_json_to_file(all_teams_rosters, all_teams_rosters_file, 'w')
+		writer.write_json_to_file(all_teams_rosters, all_teams_rosters_file)
 		
 	#print('all_teams_rosters: ' + str(all_teams_rosters))
 	return all_teams_rosters

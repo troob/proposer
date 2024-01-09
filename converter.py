@@ -140,6 +140,26 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 
+
+
+def convert_month_abbrev_to_num(game_mth_abbrev):
+    #print('\n===Convert Month Abbrev to Num: ' + game_mth_abbrev + '===\n')
+
+    months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+    
+    game_mth_num = 1
+
+    game_mth_abbrev = game_mth_abbrev.lower()
+
+    for mth_idx in range(len(months)):
+        mth = months[mth_idx]
+        if mth == game_mth_abbrev:
+            game_mth_num = mth_idx + 1
+            break
+
+    #print('game_mth_num: ' + str(game_mth_num))
+    return game_mth_num
+
 def round_half_up(n, decimals=0):
     multiplier = 10**decimals
     return math.floor(n * multiplier + 0.5) / multiplier
