@@ -1504,7 +1504,7 @@ def determine_player_team_by_game(player, game_key, player_teams):
 # allowed player same stat but one over other under!
 # so if same player and stat, check val field for +/-
 # so we need a special field that looks for part of the values to match, in this case the +/- part
-def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key=''):
+def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='', num_vals=2):
     #print('\n===Determine Multiple Dicts with Vals===\n')
     #print('main_dict: ' + str(main_dict))
     #print('keys: ' + str(keys))
@@ -1540,7 +1540,7 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
         # then multiple = true
         if key_match == True:
             count += 1
-            if count > 1:
+            if count >= num_vals:
                 multiple = True
                 break
 

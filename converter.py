@@ -50,6 +50,19 @@ def convert_span_to_season(span):
     #print('season: ' + season)
     return season
 
+def convert_team_abbrev_to_espn_abbrev(team_abbrev):
+    
+    espn_irregular_abbrevs = {'uta':'utah',
+						   	'nyk':'ny',
+							'gsw':'gs',
+							'nop':'no',
+							'sas':'sa'}
+    
+    if team_abbrev in espn_irregular_abbrevs.keys():
+        team_abbrev = espn_irregular_abbrevs[team_abbrev]
+
+    return team_abbrev
+
 def convert_irregular_team_abbrev(init_team_abbrev):
     #print('\n===Convert Irregular Team Abbrev: ' + init_team_abbrev + '===\n')
 

@@ -306,6 +306,7 @@ def read_team_schedule_from_internet(team_abbrev):
 
 	team_name = converter.convert_team_abbrev_to_name(team_abbrev)
 	team_name = re.sub(' ', '-', team_name)
+	team_abbrev = converter.convert_team_abbrev_to_espn_abbrev(team_abbrev)
 	schedule_url = 'https://www.espn.com/nba/team/schedule/_/name/' + team_abbrev + '/' + team_name #cha/charlotte-hornets'
 
 	html_results = read_web_data(schedule_url)
@@ -331,7 +332,7 @@ def read_team_schedule(team, init_all_teams_schedules):
 		team_schedule = read_team_schedule_from_internet(team)
 
 
-	print('team_schedule: ' + str(team_schedule))
+	#print('team_schedule: ' + str(team_schedule))
 	return team_schedule
 
 def read_all_teams_schedules(game_teams):
@@ -1219,9 +1220,9 @@ def read_projected_lines(raw_projected_lines, all_player_teams, player_of_intere
 
 
 def read_player_former_teams(player_name, player_teams):
-	print('\n===Read Player Former Teams: ' + player_name.title() + '===\n')
-	print('Input: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-	print('\nOutput: former_teams = [team,...]\n')
+	# print('\n===Read Player Former Teams: ' + player_name.title() + '===\n')
+	# print('Input: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+	# print('\nOutput: former_teams = [team,...]\n')
 		
 	former_teams = []
 
@@ -1231,6 +1232,7 @@ def read_player_former_teams(player_name, player_teams):
 			if team not in former_teams:
 				former_teams.append(team)
 
+	#print('former_teams: ' + str(former_teams))
 	return former_teams
 
 # we may be given irregular abbrev or full name
@@ -3571,7 +3573,7 @@ def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
 				#print('audience: ' + audience)
 				# remove tags
 				audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
-				#print('audience: ' + audience)
+				print('audience: ' + audience)
 				
 				audience_data = audience.split(':')
 				if len(audience_data) > 1:
