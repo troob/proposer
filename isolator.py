@@ -192,6 +192,17 @@ def isolate_sg_props(main_prop, remaining_top_ev_props):
     #print('sg_props: ' + str(sg_props))
     return sg_props
 
+def isolate_highest_prob_prop(sg_props, field_key=''):
+    
+    # Iso by auto sort
+    if field_key == '':
+        field_key = 'true prob'
+    
+    highest_prop = sorter.sort_dicts_by_key(sg_props, field_key, reverse=True)[0]
+    
+    #print('highest_prop: ' + str(highest_prop))
+    return highest_prop
+
 def isolate_highest_ev_prop(sg_props):
     
     # Isolate by manul sort

@@ -51,7 +51,7 @@ def convert_span_to_season(span):
     return season
 
 def convert_team_abbrev_to_espn_abbrev(team_abbrev):
-    
+
     espn_irregular_abbrevs = {'uta':'utah',
 						   	'nyk':'ny',
 							'gsw':'gs',
@@ -154,6 +154,29 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 
+
+
+def convert_time_zone_to_time(timezone):
+    print('Input: timezone = ET')
+    print('\nOutput: time = 0\n')
+
+    # nba uses ET as standard time
+    time = 0
+
+    # each timezone needs a ref relative time
+    timezone_times = {'ET':0,
+                      'CT':-1,
+                      'MT':-2,
+                      'PT':-3,
+                      'CEST':6,
+                      'IST':7,
+                      'JST':14,
+                      'GMT':5,
+                      'GST':9}
+    
+    time = timezone_times[timezone]
+
+    return time
 
 def convert_month_abbrev_to_num(game_mth_abbrev):
     #print('\n===Convert Month Abbrev to Num: ' + game_mth_abbrev + '===\n')

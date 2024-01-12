@@ -3,6 +3,44 @@
 
 import reader, writer, re
 
+
+def remove_stat_order(props):
+    new_props = []
+    
+    for prop in props:
+        prop = {i:prop[i] for i in prop if i!='stat order'}
+        new_props.append(prop)
+    
+    return new_props
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
 init_file = 'data/box scores - 2024-1.json'
 out_file = 'data/box scores - 2024.json'
 
@@ -53,4 +91,4 @@ def remove_from_csv():
 
 
 
-remove_from_json()
+#remove_from_json()

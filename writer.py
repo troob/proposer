@@ -795,7 +795,7 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, todays_date=dateti
         sheet_name = sheet_names[table_idx]
 
         if sheet_name == 'Joint EVs':
-            desired_order = ['ev max picks top ev']
+            desired_order = ['joint', 'max picks top ev', 'max picks top prob']
         else:
             desired_order = init_desired_order
 

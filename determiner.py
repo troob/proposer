@@ -1622,6 +1622,26 @@ def determine_highest_value_dict(main_dict, duplicate_dicts, key):
     return highest
 
 # determine highest value dict
+def determine_highest_val_prop(main_prop, duplicate_props, field_key='true prob'):
+    #print('\n===Determine Highest Prob Prop===\n')
+
+    highest = True
+
+    if field_key == '':
+        field_key = 'true prob'
+
+    main_val = main_prop[field_key]
+
+    for prop in duplicate_props:
+        dup_val = prop[field_key]
+        if dup_val > main_val:
+            #print('not highest')
+            highest = False
+            break
+
+    return highest
+
+# determine highest value dict
 def determine_highest_ev_prop(main_prop, duplicate_props):
     #print('\n===Determine Highest EV Prop===\n')
 
@@ -2192,7 +2212,110 @@ def determine_combined_conditions_sample_size(player_stat_dict, conditions, seas
     print('combined_sample_size: ' + str(combined_sample_size))
     return combined_sample_size
 
+def determine_team_timezone(team):
+    #city = ''
 
+    team_cities = {'atl':'ET', 
+                    'bos':'ET', 
+                    'bkn':'ET', 
+                    'cha':'ET', 
+                    'chi':'CT',
+                    'cle':'ET',
+                    'dal':'CT',
+                    'den':'MT',
+                    'det':'ET',
+                    'gsw':'PT',
+                    'hou':'CT',
+                    'ind':'ET',
+                    'lac':'PT',
+                    'lal':'PT',
+                    'mem':'CT',
+                    'mia':'ET',
+                    'mil':'CT',
+                    'min':'CT',
+                    'nop':'CT',
+                    'nyk':'ET',
+                    'okc':'CT',
+                    'orl':'ET',
+                    'phi':'ET',
+                    'phx':'MT',
+                    'por':'PT',
+                    'sac':'PT',
+                    'sas':'CT',
+                    'tor':'ET',
+                    'uta':'MT',
+                    'wsh':'ET'}
+    
+    city = team_cities[team]
+
+    return city
+
+def determine_timelag(city, player_team):
+
+    timezone = determine_timezone(city)
+    timezone_time = converter.convert_time_zone_to_time(timezone)
+    # get timeshift from game timezone and home timezone
+    #home_city = determiner.determine_team_city(player_team)
+    home_timezone = determine_team_timezone(player_team)
+    home_timezone_time = converter.convert_time_zone_to_time(home_timezone)
+    
+    timelag = str(home_timezone_time - timezone_time) + ' lag'
+
+    return timelag
+
+def determine_timezone(city):
+    print('Input: city = city STATE ABBREV = ' + city)#= Milwaukee WI')
+    
+    # only need state abbrev for some
+    #state = city.split()[-1]
+    
+    timezones = {'Atlanta GA':'ET', 
+                 'Boston MA':'ET', 
+                 'Brooklyn NY':'ET', 
+                 'Charlotte NC':'ET',
+                 'Chicago IL':'CT',
+                 'Cleveland OH':'ET',
+                 'Dallas TX':'CT',
+                 'Denver CO':'MT',
+                 'Detroit MI':'ET',
+                 'San Francisco CA':'PT',
+                 'Houston TX':'CT',
+                 'Indianapolis IN':'ET',
+                 'Los Angeles CA':'PT',
+                 'Memphis TN':'CT',
+                 'Miami FL':'ET',
+                 'Milwaukee WI':'CT',
+                 'Minneapolis MN':'CT',
+                 'New Orleans LA':'CT',
+                 'New York NY':'ET',
+                 'Oklahoma City OK':'CT',
+                 'Tulsa OK':'CT',
+                 'Orlando FL':'ET',
+                 'Philadelphia PA':'ET',
+                 'Phoenix AZ':'MT',
+                 'Portland OR':'PT',
+                 'Sacramento CA':'PT',
+                 'San Antonio TX':'CT',
+                 'Austin TX':'CT',
+                 'Toronto ON':'ET',
+                 'Salt Lake City UT':'MT',
+                 'Washington DC':'ET',
+                 'Paris':'CEST',
+                 'Madrid':'CEST',
+                 'Mexico City':'CT',
+                 'Tel Aviv':'IST',
+                 'Saitama':'JST',
+                 'London':'GMT',
+                 'Las Vegas NV':'PT',
+                 'Abu Dhabi':'GST',
+                 'Palm Springs CA':'PT',
+                 'Anaheim CA':'PT'}
+    
+    # we want hard fail so we can add city to list
+    #if city in timezones.keys():
+    timezone = timezones[city]
+
+    return timezone
 
 # if reg season, game idx starts before playoffs
 # if post or full season, game idx starts at 0
