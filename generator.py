@@ -2117,7 +2117,7 @@ def generate_joint_prob_of_props(props):
         prop_prob = prop['true prob']
         probs.append(prop_prob)
 
-    joint_prob = round(generate_joint_prob(probs) * 100, 2)
+    joint_prob = str(round(generate_joint_prob(probs) * 100, 2))
 
 
     #print('joint_prob: ' + str(joint_prob))
@@ -2136,7 +2136,7 @@ def generate_joint_ev_of_props(props):
     joint_prob = generate_joint_prob(probs)
     joint_odds = generate_joint_odds(odds)
 
-    ev = round(generate_joint_ev(joint_prob, joint_odds) * 100, 2)
+    ev = str(round(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
 
     #print('ev: ' + str(ev))
     return ev
@@ -2277,7 +2277,7 @@ def generate_part_season_logs(player_season_logs, part):
 
 # desired order: key = S Curry Pg, B Podziemski G, K Thompson Sg, J Kuminga Pf, K Looney F Starters 2024 Regular Prob
 # available_prop_dicts: key = 
-def generate_prop_table_data(available_prop_dicts, desired_order=[]):
+def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet_name='Joints'):
     #print('\n===Generate Prop Table Data===\n')
     #print('available_prop_dicts before: ' + str(available_prop_dicts))
 
@@ -2573,7 +2573,7 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[]):
         # joint_evs: [{'ev max picks top ev': '0.29', 'ev max picks top prob': '0.29'}]
         print('joints: ' + str(joints))
         prop_tables.append(joints)
-        sheet_names.append('Joints')
+        sheet_names.append(joint_sheet_name)
 
         top_prob_props = []
 
@@ -6123,7 +6123,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # we only care about single season part bc if reg then take only reg box scores, and if post then take all full box scores
         # we may need to run both parts in comparison but that strategy would be based on current season part
         # if we devise a specific test needing both parts then can change code to input list of season parts
-        all_box_scores_data = reader.read_all_box_scores(all_players_season_logs, all_players_teams, season_part, read_new_game_ids)#, season_year) # go thru players in all_players_season_logs to get game ids
+        all_box_scores_data = reader.read_all_box_scores(all_players_season_logs, all_players_teams, season_years, season_part, read_new_game_ids)#, season_year) # go thru players in all_players_season_logs to get game ids
         #all_players_in_box_scores = all_box_scores['player']
         all_box_scores = all_box_scores_data[0]
         # all box scores of interest, not including old box scores saved
@@ -6440,8 +6440,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # strategy 3: highest prob
     # strategy 4: combine +ev picks into multiple ~+100 parlays
     
-    
-    prop_table_data = generate_prop_table_data(available_prop_dicts, desired_order)
+    joint_sheet_name = 'Joints'
+    prop_table_data = generate_prop_table_data(available_prop_dicts, desired_order, joint_sheet_name)
 
     prop_tables = prop_table_data[0]
     sheet_names = prop_table_data[1]
@@ -6455,7 +6455,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # todo: to fully predict current player stats, must predict teammate and opponent stats and prioritize and align with totals
     #print('final prop_tables: ' + str(prop_tables))
     #print('sheet_names: ' + str(sheet_names))
-    writer.write_prop_tables(prop_tables, sheet_names, desired_order, todays_date)
+    writer.write_prop_tables(prop_tables, sheet_names, desired_order, joint_sheet_name, todays_date)
 
     # pass player outcomes to another fcn to compute cumulative joint prob and ev?
     # do we need to return anything? we can always return whatever the final print is

@@ -1549,7 +1549,7 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
     return multiple
 
 # given main prop and fields, find vals in those fields
-def determine_multiple_dicts_with_val(main_dict, key, dict_list):
+def determine_multiple_dicts_with_val(main_dict, key, dict_list, num_vals=2):
     #print('\n===Determine Multiple Dicts with Val===\n')
     #print('main_dict: ' + str(main_dict))
     #print('key: ' + str(key))
@@ -1564,7 +1564,7 @@ def determine_multiple_dicts_with_val(main_dict, key, dict_list):
         if main_val == dict_val:
             count += 1
 
-        if count > 1:
+        if count >= num_vals:
             #print('found multiple')
             multiple = True
             break
@@ -2213,9 +2213,11 @@ def determine_combined_conditions_sample_size(player_stat_dict, conditions, seas
     return combined_sample_size
 
 def determine_team_timezone(team):
-    #city = ''
+    #print('\n===Determine Team Timezone: ' + team + '===\n')
 
-    team_cities = {'atl':'ET', 
+    timezone = ''
+
+    team_timezones = {'atl':'ET', 
                     'bos':'ET', 
                     'bkn':'ET', 
                     'cha':'ET', 
@@ -2246,9 +2248,12 @@ def determine_team_timezone(team):
                     'uta':'MT',
                     'wsh':'ET'}
     
-    city = team_cities[team]
+    if team in team_timezones.keys():
+    #if team != '':
+        timezone = team_timezones[team]
 
-    return city
+    #print('timezone: ' + timezone)
+    return timezone
 
 def determine_timelag(city, player_team):
 
@@ -2270,46 +2275,53 @@ def determine_timezone(city):
     #state = city.split()[-1]
     
     timezones = {'Atlanta GA':'ET', 
+                 'College Park GA':'ET',
+                 'Cleveland OH':'ET',
                  'Boston MA':'ET', 
                  'Brooklyn NY':'ET', 
                  'Charlotte NC':'ET',
-                 'Chicago IL':'CT',
-                 'Cleveland OH':'ET',
-                 'Dallas TX':'CT',
-                 'Denver CO':'MT',
-                 'Detroit MI':'ET',
-                 'San Francisco CA':'PT',
-                 'Houston TX':'CT',
                  'Indianapolis IN':'ET',
-                 'Los Angeles CA':'PT',
-                 'Memphis TN':'CT',
+                 'Detroit MI':'ET',
                  'Miami FL':'ET',
+                 'New York NY':'ET',
+                 'Orlando FL':'ET',
+                 'Philadelphia PA':'ET',
+                 'Toronto ON':'ET',
+                 'Montreal PQ':'ET',
+                 'Washington DC':'ET',
+                 'Chicago IL':'CT',
+                 'Birmingham AL':'CT',
+                 'Houston TX':'CT',
+                 'Dallas TX':'CT',
+                 'Memphis TN':'CT',
                  'Milwaukee WI':'CT',
                  'Minneapolis MN':'CT',
                  'New Orleans LA':'CT',
-                 'New York NY':'ET',
                  'Oklahoma City OK':'CT',
                  'Tulsa OK':'CT',
-                 'Orlando FL':'ET',
-                 'Philadelphia PA':'ET',
-                 'Phoenix AZ':'MT',
-                 'Portland OR':'PT',
-                 'Sacramento CA':'PT',
                  'San Antonio TX':'CT',
                  'Austin TX':'CT',
-                 'Toronto ON':'ET',
-                 'Salt Lake City UT':'MT',
-                 'Washington DC':'ET',
-                 'Paris':'CEST',
-                 'Madrid':'CEST',
                  'Mexico City':'CT',
-                 'Tel Aviv':'IST',
-                 'Saitama':'JST',
-                 'London':'GMT',
-                 'Las Vegas NV':'PT',
-                 'Abu Dhabi':'GST',
+                 'Denver CO':'MT',
+                 'Phoenix AZ':'MT',
+                 'Salt Lake City UT':'MT',
+                 'Edmonton AB':'MT',
+                 'Portland OR':'PT',
+                 'Sacramento CA':'PT',
                  'Palm Springs CA':'PT',
-                 'Anaheim CA':'PT'}
+                 'Anaheim CA':'PT',
+                 'Seattle WA':'PT',
+                 'Vancouver BC':'PT',
+                 'Las Vegas NV':'PT',
+                 'San Francisco CA':'PT',
+                 'Los Angeles CA':'PT',
+                 'Paris':'CET',
+                 'Madrid':'CET',
+                 'Tel Aviv':'IT',
+                 'Saitama':'JT',
+                 'London':'GMT',
+                 'Abu Dhabi':'GT',
+                 'Honolulu HI':'HAT'}
     
     # we want hard fail so we can add city to list
     #if city in timezones.keys():

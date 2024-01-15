@@ -153,13 +153,16 @@ def isolate_high_prob_props(prop_dicts):
     #print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
+# arbitrary uncertainty +/- 0.05???
 def isolate_plus_ev_props(prop_dicts):
     #print('\n===Isolate +EV Props===\n')
 
     plus_ev_props = []
 
+    uncertainty = 0.05 # bc 2 sig figs?
+
     for prop in prop_dicts:
-        if float(prop['ev']) > 0.0:
+        if float(prop['ev']) >= -uncertainty:
             plus_ev_props.append(prop)
 
     #print('plus_ev_props: ' + str(plus_ev_props))

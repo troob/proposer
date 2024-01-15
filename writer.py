@@ -777,7 +777,7 @@ def write_all_player_stat_probs(all_player_stat_probs):
 # AND write 1 sheet for all 0 ev props, sorted by true prob
 # AND write 1 sheet for all -ev props, sorted by true prob
 # AND write 1 sheet for each strategy
-def write_prop_tables(prop_dicts, sheet_names, desired_order, todays_date=datetime.today().strftime('%m-%d-%y')):
+def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='Joints', todays_date=datetime.today().strftime('%m-%d-%y')):
     print('\n===Write Prop Tables===\n')
     #print('prop_dicts: ' + str(prop_dicts))
     print('sheet_names: ' + str(sheet_names))
@@ -794,7 +794,7 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, todays_date=dateti
 
         sheet_name = sheet_names[table_idx]
 
-        if sheet_name == 'Joint EVs':
+        if sheet_name == joint_sheet_name:
             desired_order = ['joint', 'max picks top ev', 'max picks top prob']
         else:
             desired_order = init_desired_order
@@ -803,7 +803,13 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, todays_date=dateti
         table_df = pd.DataFrame(dict, columns=desired_order)
         table_df.columns = [x.title() for x in table_df.columns]
         if 'Player' in table_df.keys():
-            table_df['Player'] = table_df['Player'].str.title() 
+            #player_str = str(table_df['Player'])
+            #print('table_df[Player]: ' + str(table_df['Player']))
+            player_val = table_df['Player']
+            if isinstance(player_val, str):
+                table_df['Player'] = player_val.str.title() 
+            # else:
+            #     print('Warning: player val not string! ' + str(player_val))
 
         table_df.to_excel(writer,sheet_name)
 

@@ -157,7 +157,7 @@ def convert_american_to_decimal_odds(american_odds):
 
 
 def convert_time_zone_to_time(timezone):
-    print('Input: timezone = ET')
+    print('Input: timezone = ' + timezone)
     print('\nOutput: time = 0\n')
 
     # nba uses ET as standard time
@@ -168,13 +168,15 @@ def convert_time_zone_to_time(timezone):
                       'CT':-1,
                       'MT':-2,
                       'PT':-3,
-                      'CEST':6,
-                      'IST':7,
-                      'JST':14,
+                      'HAT':-5,
                       'GMT':5,
-                      'GST':9}
+                      'CET':6,
+                      'IT':7,
+                      'GT':9,
+                      'JT':14,}
     
-    time = timezone_times[timezone]
+    if timezone != '':
+        time = timezone_times[timezone]
 
     return time
 
