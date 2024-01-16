@@ -21,9 +21,9 @@ players_out = ['nikola jokic', 'jamal murray', 'kevin durant', 'bradley beal']
 # determine irreg play time from players out
 irreg_play_time = {'craig porter': 25, 'reggie jackson': 35}
 
-
-# settings
-find_matchups = False
+# ===============
+# Settings
+# ===============
 
 # read all seasons to compare and see trend
 read_x_seasons = 2 # set 0 or high number to read all seasons
@@ -40,6 +40,8 @@ read_new_odds = True
 # or else we would need to read from internet every time anyway which defeats the purpose of storing locally
 read_new_stats = False # set true when we add new feature to stats dict so we want to manually overwrite old dict rather than usual behavior of trusting prev stat dicts
 read_new_lineups = True # even if we saved lineups today they may have changed but we may not want to get new lineups yet if we are testing something else
+
+find_matchups = False # if we want to read matchup data from box scores, which means how many of each stat a team allows their opponents to get (ie defensive stats)
 
 # === TEST PERFORMANCE === 
 # we eval/test performance to see how it would perform on prev games
@@ -94,7 +96,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('cha','mia')]#, ('nop','lal')
+game_teams = [('okc','lal')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -102,8 +104,8 @@ game_teams = [('cha','mia')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters) # {team:roster,...}
-players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-#players_names = ['jaylen brown'] # use for testing
+#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+players_names = ['josh giddey'] # use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

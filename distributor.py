@@ -22,6 +22,7 @@ import matplotlib.pyplot as plt
 # print(sys.path)
 
 import reader # read stat dict data
+import converter # round
 
 # === SETTINGS ===
 player = 'jordan clarkson' # bam adebayo
@@ -182,7 +183,7 @@ def fit_data(data):
 
 
 # cumulative distribution
-def generate_prob_over_from_distrib(val, loc, scale, dist):
+def generate_prob_over_from_distrib(val, loc, dist):
     print('\n===Generate Prob Over from Distrib: ' + str(val+1) + '===\n')
 
     prob_over = 0 # includes val, just shorthand
@@ -197,8 +198,18 @@ def generate_prob_over_from_distrib(val, loc, scale, dist):
     # we want prob over to include val
     # but cdf returns <= val so take 1-cdf to get over
     # if we take 1-cdf for val we get 
-    prob_less_or_equal = dist.cdf(val, loc, scale)
-    prob_over = 1 - prob_less_or_equal
+    prob_less_or_equal = round(dist.cdf(val, loc), 4)
+    print('prob_less_or_equal: ' + str(prob_less_or_equal))
+    # bc nothing actually 100% or 0 and we dont need more accuracy than 1%
+    if prob_less_or_equal > 0.99:
+        prob_less_or_equal = 0.99
+    elif prob_less_or_equal < 0.01:
+        prob_less_or_equal = 0.01
+    else:
+        prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 2)
+
+    print('prob_less_or_equal: ' + str(prob_less_or_equal))
+    prob_over = round(1 - prob_less_or_equal, 2)
     #prob_over_or_equal_next_val = prob_strict_over
 
     print('prob_over: ' + str(prob_over))
@@ -209,7 +220,7 @@ def generate_prob_over_from_distrib(val, loc, scale, dist):
 # AND the data with all vals
 # FIT prob distrib to get parameters (eg mean and std dev)
 # COMPUTE prob of x from fmla given params
-def generate_prob_from_distrib(val, loc, scale, dist):
+def generate_prob_from_distrib(val, loc, dist):
     print('\n===Generate Prob from Distrib: ' + str(val) + '===\n')
     # print('loc: ' + str(loc))
     # print('scale: ' + str(scale))
@@ -220,8 +231,19 @@ def generate_prob_from_distrib(val, loc, scale, dist):
     # ASSUME normal distrib for now bc most examples
     # THEN determine best fit distrib (see quantile charts and best fit libs)
 
-    
-    prob = dist.pdf(val, loc, scale)
+    # bc nothing actually 100% or 0 and we dont need more accuracy than 1%
+    # if normal, use pdf
+    #prob = dist.pmf(val, loc)
+    # if poisson, use pmf
+    prob = round(dist.pmf(val, loc), 4)
+    print('prob: ' + str(prob))
+
+    if prob > 0.99:
+        prob = 0.99
+    elif prob < 0.01:
+        prob = 0.01
+    else:
+        prob = converter.round_half_up(prob, 2)
 
     print('prob: ' + str(prob))
     return prob
@@ -232,19 +254,96 @@ def generate_all_probs_from_distrib(data, dist):
 
     probs = [] # list all vals in range in order. or val:prob
 
-    loc, scale = dist.fit(data)
+    # if normal
+    #loc, scale = dist.fit(data)
+    # if poisson
+    bounds = [(0, 100)]
+    res = ss.fit(dist, data, bounds)
+    print('res: ' + str(res))
+    loc = res.params.mu
     print('loc: ' + str(loc))
-    print('scale: ' + str(scale))
+    #print('scale: ' + str(scale))
 
-    for val in range(len(data)):
+    # loop thru all vals, even those not directly hit but surpassed
+    #highest_val = data[-1] bc sorted
+    for val in range(data[-1]):
         prob = 0
         #if val not in probs.keys():
         # we get prob of exactly 0 and prob >= next val
         if val == 0:
-            prob = generate_prob_from_distrib(val, loc, scale, dist)
+            prob = generate_prob_from_distrib(val, loc, dist)
             probs.append(prob)
 
-        prob = generate_prob_over_from_distrib(val, loc, scale, dist)
+        prob = generate_prob_over_from_distrib(val, loc, dist)
+        probs.append(prob)
+
+    print('probs: ' + str(probs))
+    return probs
+
+def distribute_all_probs(data, dist): # if normal dist, avg_scale, dist_name='normal'):
+    print('\n===Distribute All Probs===\n')
+    print('data: ' + str(data))
+
+    # if only 1 sample, use it as mean, 
+    # and simulate 4 more samples to get at least 5 samples (consider 10)
+    # get scale of data from other conditions with more samples. easiest to get from 'all' condition
+    # use scale to get random samples with loc and scale of data
+    # Generate a random dataset
+    if len(data) == 1:
+        #data = np.random.normal(data[0], avg_scale, 100)
+        loc = data[0]
+        if loc == 0:
+            loc = 0.1
+        rng = np.random.default_rng()
+        data = list(rng.poisson(loc, 100))
+        print('poisson_data: ' + str(data))
+        # normal_data = list(rng.normal(data[0], avg_scale, 100))
+        # print('normal_data: ' + str(normal_data))
+        # data = normal_data
+    
+    # if <5 samples, more accurate to simulate samples with same mean and extrapolated scale
+    # then why not do for all conditions even with >5 samples?
+    # bc scale not same for all conditions
+    elif len(data) < 5:
+        loc = np.mean(data)
+        if loc == 0:
+            loc = 0.1
+        #data = np.random.normal(loc, avg_scale, 100)
+        rng = np.random.default_rng()
+        # data = list(rng.poisson(loc, 100))
+        # print('simulated data: ' + str(data))
+
+        data = list(rng.poisson(loc, 100))
+        print('poisson_data: ' + str(data))
+        # normal_data = list(rng.normal(loc, avg_scale, 100))
+        # print('normal_data: ' + str(normal_data))
+        # data = normal_data
+    
+    # sort to get highest val and all vals below that
+    data = sorted(data)
+
+    probs = [] # list all vals in range in order. or val:prob
+
+    # if normal
+    #loc, scale = dist.fit(data)
+    # if poisson
+    bounds = [(0, 100)]
+    loc = ss.fit(dist, data, bounds).params.mu
+    print('loc: ' + str(loc))
+    #print('scale: ' + str(scale))
+
+    # loop thru all vals, even those not directly hit but surpassed
+    highest_val = data[-1] # bc sorted
+    print('highest_val: ' + str(highest_val))
+    for val in range(highest_val):
+        prob = 0
+        #if val not in probs.keys():
+        # we get prob of exactly 0 and prob >= next val
+        if val == 0:
+            prob = generate_prob_from_distrib(val, loc, dist)
+            probs.append(prob)
+
+        prob = generate_prob_over_from_distrib(val, loc, dist)
         probs.append(prob)
 
     print('probs: ' + str(probs))
@@ -256,7 +355,7 @@ def generate_player_prob_distribs(player):
     
     player_prob_distribs = {} # mirrors stat probs but with probs from distribs instead of direct measurement and NA if not reached
     
-    dist = ss.norm
+    dist = ss.poisson
     #print('dist: ' + str(dist))
 
     # take data from a single condition to model fit that condition

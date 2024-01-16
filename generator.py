@@ -9,6 +9,7 @@ import determiner # determine regular season games, etc
 
 import numpy as np # mean, median
 from scipy import stats # calculate mode
+import scipy.stats as ss # get prob from distrib
 
 import reader # read game log from file if needed
 import writer # format record and other game data for readability
@@ -31,6 +32,8 @@ import converter # convert am to dec odds so we can get joint odds
 import itertools # get combos of player abbrevs
 
 import remover # remove temp field from table to sort but not display to user
+
+import distributor # prob distribs
 
 # we use all_players_stats_dicts = {player name:{stat name:{}}}
 # to reference stats 
@@ -1683,6 +1686,56 @@ def generate_all_consistent_stat_dicts(all_player_consistent_stats, all_player_s
 
     return sorted_consistent_stat_dicts
 
+def generate_min_risk_props(valid_top_prob_props):
+    #print('\n===Generate Min Risk Props===\n')
+
+    min_risk_props = []
+
+    # take min picks per game, which is 2 to min risk
+    min_picks = 2
+    # take 2 highest prob picks
+    # only take if both picks are >95% prob
+    # first isolate all props by game so we can take top 2 from each
+    all_sg_props = {} # track game num so we dont repeat, # game num:[],...
+    for prop in valid_top_prob_props:
+        #prob = prop['true prob']
+        game = prop['game']
+
+        # if not saved
+        if game not in all_sg_props.keys():
+
+            # if not multiple props from same game, only prop in game
+            # if only prop in game, individual prop, so cannot use
+            if determiner.determine_multiple_dicts_with_val(prop, 'game', valid_top_prob_props):
+
+                #take top 2 probs per game
+                # retains prob order, so take top 2
+                sg_props = isolator.isolate_sg_props(prop, valid_top_prob_props)[:min_picks]
+            
+                all_sg_props[game] = sg_props
+
+    #print('all_sg_props: ' + str(all_sg_props))
+
+    for sg_props in all_sg_props.values():
+        # if both probs >95%, add both
+        high_prob = True
+        # if any below 95, set false
+        for sg_prop in sg_props:
+            if sg_prop['true prob'] < 95:
+                high_prob = False
+                break
+
+        if high_prob:
+            min_risk_props.extend(sg_props)
+
+
+    # sort by game and stat for easy selection
+    # add stat order field to dict temp to sort so it is best for user
+    min_risk_props = generate_stat_order(min_risk_props)
+
+    #print('min_risk_props: ' + str(min_risk_props))
+    return min_risk_props
+
 def generate_max_picks_top_prob_props(valid_top_prob_props):
     # 3. max picks
     #print('\n===Max Picks===\n')
@@ -2126,6 +2179,9 @@ def generate_joint_prob_of_props(props):
 def generate_joint_ev_of_props(props):
     #print('\n===Generate Joint EV of Props===\n')
     #print('props: ' + str(props))
+
+    #ev = '0' # if prob 0
+
     probs = []
     odds = []
     for prop in props:
@@ -2136,6 +2192,7 @@ def generate_joint_ev_of_props(props):
     joint_prob = generate_joint_prob(probs)
     joint_odds = generate_joint_odds(odds)
 
+    #if joint_prob > 0:
     ev = str(round(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
 
     #print('ev: ' + str(ev))
@@ -2149,6 +2206,11 @@ def generate_joint_ev(joint_prob, joint_odds):
     #print('joint_prob: ' + str(joint_prob))
     #print('joint_odds: ' + str(joint_odds))
 
+    # ev = '0' # if prob = 0
+
+    # if joint_prob > 0:
+
+    # actually we want negative ev if prob 0 to show that value is lost
     stake = 1
     payout = stake * joint_odds
     #print('payout: ' + str(payout))
@@ -2542,6 +2604,9 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
         max_picks_top_prob_props = generate_max_picks_top_prob_props(valid_top_prob_props)
         print('max_picks_top_prob_props: ' + str(max_picks_top_prob_props))
 
+        min_risk_props = generate_min_risk_props(valid_top_prob_props)
+        print('min_risk_props: ' + str(min_risk_props))
+
         # now that we have list of max picks top prob
         # we can compute condition prob bt props on same team and same stat bc correlated
         # eg d book and kd both scoring 20p is much less likely than either one scoring it
@@ -2555,21 +2620,37 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
         # add stat order field to dict temp to sort so it is best for user
         #max_picks_top_ev_props = generate_stat_order(max_picks_top_ev_props)
         sort_keys = ['game', 'stat order']
+
+        # Strategy: Max EV
         max_picks_top_ev_props = sorter.sort_dicts_by_str_keys(max_picks_top_ev_props, sort_keys)
         # remove stat order field before displaying bc not used by user
         max_picks_top_ev_props = remover.remove_stat_order(max_picks_top_ev_props)
         prop_tables.append(max_picks_top_ev_props)
         sheet_names.append('Max EV')
+        
+        # Strategy: Max Prob
         max_picks_top_prob_props = sorter.sort_dicts_by_str_keys(max_picks_top_prob_props, sort_keys)
         max_picks_top_prob_props = remover.remove_stat_order(max_picks_top_prob_props)
         prop_tables.append(max_picks_top_prob_props)
         sheet_names.append('Max Prob')
 
+        # Strategy: Min Risk
+        min_risk_props = sorter.sort_dicts_by_str_keys(min_risk_props, sort_keys)
+        min_risk_props = remover.remove_stat_order(min_risk_props)
+        prop_tables.append(min_risk_props)
+        sheet_names.append('Min Risk')
+
+
+
+
         ev_max_picks_top_ev = generate_joint_ev_of_props(max_picks_top_ev_props)
-        ev_max_picks_top_prob = generate_joint_ev_of_props(max_picks_top_prob_props)
         prob_max_picks_top_ev = generate_joint_prob_of_props(max_picks_top_ev_props)
+        ev_max_picks_top_prob = generate_joint_ev_of_props(max_picks_top_prob_props)
         prob_max_picks_top_prob = generate_joint_prob_of_props(max_picks_top_prob_props)
-        joints = [{'joint':'EV', 'max picks top ev': ev_max_picks_top_ev, 'max picks top prob': ev_max_picks_top_prob}, {'joint':'Prob', 'max picks top ev': prob_max_picks_top_ev, 'max picks top prob': prob_max_picks_top_prob}]
+        ev_min_risk = generate_joint_ev_of_props(min_risk_props)
+        prob_min_risk = generate_joint_prob_of_props(min_risk_props)
+
+        joints = [{'joint':'EV', 'min risk': ev_min_risk, 'max picks top ev': ev_max_picks_top_ev, 'max picks top prob': ev_max_picks_top_prob}, {'joint':'Prob', 'min risk': prob_min_risk, 'max picks top ev': prob_max_picks_top_ev, 'max picks top prob': prob_max_picks_top_prob}]
         # joint_evs: [{'ev max picks top ev': '0.29', 'ev max picks top prob': '0.29'}]
         print('joints: ' + str(joints))
         prop_tables.append(joints)
@@ -2605,6 +2686,47 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
 
     return (prop_tables, sheet_names)
 
+def generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, part):
+    # print('\n===Generate Conditions Order===\n')
+    # print('Input: all_cur_conds_dicts = {player: {cond_key:cond_val, ... = ' + str(all_cur_conds_dicts))
+    # print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
+
+    all_cur_conds_lists = {}
+
+    conditions_order = []#['all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
+    
+    # find all condition vals
+    # get all unique vals of cur conds
+    # return list of all conds for all players
+    # and dict of lists of each players conds?
+    current_conditions = determiner.determine_all_current_conditions(all_cur_conds_dicts)
+
+    # we need to know all conditions of all players bc all players listed in same table
+    # so location will show both home away
+    # conditions with more options only need to show options that have current conditions
+    # once we get all cur conds we can get all cur cond vals of all players
+    # conditon val means the value of the condition like location is the key but home/away are the vals
+    for player, player_cur_conds in current_conditions.items():
+        for current_condition in player_cur_conds:
+            #for year_idx in range(len(season_years)):
+                #year = season_years[year_idx]
+
+            #condition_title = current_condition
+            if current_condition not in conditions_order:
+                conditions_order.append(current_condition)
+
+    # for game players conds we just want overall for all yrs bc too many subconditions to show on this page
+    gp_conds = determiner.determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs)
+    for current_condition in gp_conds:
+        #condition_title = current_condition
+        if current_condition not in conditions_order:
+            conditions_order.append(current_condition)
+
+    #print('conditions_order: ' + str(conditions_order))
+            
+            
+    return all_cur_conds_lists
+
 # conditions = list(list(all_current_conditions.values())[0].keys()) ['loc']
 # desired_order.extend(conditions)
 # # add columns in order of conditions used, by weight high to low
@@ -2612,16 +2734,16 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
 # # take current conditions for each year
 # conditions_order = generate_conditions_order(conditions)
 # conditions_order = ['all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
-def generate_conditions_order(all_cur_conds_lists, all_game_player_cur_conds, all_players_abbrevs, season_years, part):
+def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, part):
     # print('\n===Generate Conditions Order===\n')
-    # print('Input: all_cur_conds_lists = {player: {cond_key:cond_val, ... = ' + str(all_cur_conds_lists))
+    # print('Input: all_cur_conds_dicts = {player: {cond_key:cond_val, ... = ' + str(all_cur_conds_dicts))
     # print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
 
     conditions_order = []#['all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
     
     # find all condition vals
     # get all unique vals of cur conds
-    current_conditions = determiner.determine_all_current_conditions(all_cur_conds_lists)
+    current_conditions = determiner.determine_all_current_conditions(all_cur_conds_dicts)
 
     # we need to know all conditions of all players bc all players listed in same table
     # so location will show both home away
@@ -4343,6 +4465,165 @@ def generate_all_stat_probs_dict(all_player_stat_probs, all_player_stat_dicts={}
     # all_stat_probs_dict = {player:stat:val:conditions:prob}
     #print('all_stat_probs_dict: ' + str(all_stat_probs_dict))
     return all_stat_probs_dict
+
+
+
+
+def generate_player_distrib_probs(player_stat_dict, current_conditions, player_name):
+    print('\n===Generate Player Distrib Probs: ' + player_name.title() + '===\n')
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: current_conditions = [all, home, t watford f in, ...] = ' + str(current_conditions))
+    print('\nOutput: player_distrib_probs = {condition: {year: {season part: {stat name: {stat val: prob over, ... = {\'all\': {\'2024\': {\'regular\': {\'pts\': {0: 0.0, ...}, ... \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'2023\': {\'regular\': {\'pts\': {0: 0.0, ...\n')
+
+    player_distrib_probs = {}
+
+    dist = ss.poisson
+
+    for year, year_stat_dict in player_stat_dict.items():
+        print('\nyear: ' + year)
+        for part, part_stat_dict in year_stat_dict.items():
+            print('\npart: ' + part)
+            for stat_name, stat_dict in part_stat_dict.items():
+                print('\nstat_name: ' + stat_name)
+                # if normal dist
+                # all_condition_dict = stat_dict['all']
+                # all_condition_data = list(all_condition_dict.values())
+                # avg_scale = dist.fit(all_condition_data)[1]
+                # print('avg_scale: ' + str(avg_scale))
+
+                stats_of_interest = ['pts','reb','ast']
+                if stat_name in stats_of_interest:
+
+                    # condition_stat_dict = {game idx: stat val, ...
+                    for condition, condition_stat_dict in stat_dict.items():
+                        print('\ncondition: ' + condition)
+
+                        if condition in current_conditions:
+
+                            # data to fit for distrib
+                            stat_vals = list(condition_stat_dict.values()) 
+                            
+                            # formerly: stat_probs[stat_val] = prob_over
+                            stat_probs = distributor.distribute_all_probs(stat_vals, dist) # if normal dist, avg_scale)
+
+
+                            # reformat for user interface display purposes
+                            if condition not in player_distrib_probs.keys():
+                                player_distrib_probs[condition] = {}
+                            if year not in player_distrib_probs[condition].keys():
+                                player_distrib_probs[condition][year] = {}
+                            if part not in player_distrib_probs[condition][year].keys():
+                                player_distrib_probs[condition][year][part] = {}
+
+                            
+                            player_distrib_probs[condition][year][part][stat_name] = stat_probs
+
+    
+    # player_distrib_probs = {'all': {2023: {'regular': {'pts': [prob 0, prob over 0, prob over 1,...
+    print('player_distrib_probs: ' + str(player_distrib_probs))
+    return player_distrib_probs
+
+def generate_player_unit_stat_dict(player_stat_dict, player_season_logs, player_name):
+    print('\n===Generate Player Unit Stat Dict: ' + player_name.title() + '===\n')
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('\nOutput: player_unit_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...\n')
+
+    
+    player_unit_stat_dict = {}
+
+    #print('player_season_logs: ' + str(player_season_logs))
+
+    if len(player_season_logs.keys()) > 0:
+    # gen list of reg season logs from full season logs
+    # similar to iso fcn
+        reg_season_logs = generate_reg_season_logs(player_season_logs)
+
+        
+        # get current season mean minutes to compare to prev seasons
+        # we use mean of last 3 games bc most accurate considering ups and downs of rotation
+        cur_yr = list(player_season_logs.keys())[0]
+        #print('cur_yr: ' + cur_yr)
+        cur_season_log = reg_season_logs[cur_yr]#list(player_season_logs.values())[0]
+        #print('cur_season_log: ' + str(cur_season_log))
+        cur_mean_minutes = 0
+        # season_log = {stat name: {game idx: stat val, ...
+        if 'MIN' in cur_season_log.keys():
+            cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
+            #print('cur_minutes_log: ' + str(cur_minutes_log))
+            cur_mean_minutes = round(np.mean(np.array(cur_minutes_log)))
+            #print('cur_mean_minutes: ' + str(cur_mean_minutes))
+
+        stats_of_interest = ['pts','reb','ast','3pm']
+
+        # year is a string bc it can be read from json which forces string
+        for year, year_stat_dict in player_stat_dict.items():
+            year = str(year) # to compare to json
+            #print("\n===Year " + year + "===\n")
+
+            if year not in player_unit_stat_dict.keys():
+                player_unit_stat_dict[year] = {}
+
+            for part, part_stat_dict in year_stat_dict.items():
+                #print("\n===Season Part " + str(part) + "===\n")
+
+                if part not in player_unit_stat_dict[year].keys():
+                    player_unit_stat_dict[year][part] = {}
+
+                # need to isolate season part df to align with nested dict
+                part_season_logs = generate_part_season_logs(player_season_logs, part)
+                for stat, stat_dict in part_stat_dict.items():
+                    
+                    if stat in stats_of_interest:
+                        #print("\n===Stat Name " + str(stat) + "===\n")
+
+                        if stat not in player_unit_stat_dict[year][part].keys():
+                            player_unit_stat_dict[year][part][stat] = {}
+
+                        # condition_stat_dict = {game idx: stat val, ...
+                        for condition, condition_stat_dict in stat_dict.items():
+                            #print("\n===Condition " + str(condition) + "===\n")
+
+                            if condition not in player_unit_stat_dict[year][part][stat].keys():
+                                player_unit_stat_dict[year][part][stat][condition] = {}
+
+                            #num_games_reached = 0 # num games >= stat val, stat count, reset for each check stat val bc new count
+                            # loop through games to get count stat val >= game stat val
+                            for game_idx, game_stat_val in condition_stat_dict.items():
+                                #print('\ngame_idx: ' + str(game_idx))
+                                # if 0 consider adding x instead of multiplying 0
+
+                                # prev stat val meaning from a prev game so will be adjusted to current minutes
+                                #prev_stat_val = stat_vals[game_idx]
+                                #print('prev_stat_val: ' + str(prev_stat_val))
+                                unit_stat_val = game_stat_val
+                                
+                                # CHANGE to adjust all yrs including cur yr
+                                # by avg minutes of last 3 games
+                                #if year != cur_yr:
+                                    
+                                #relative_game_idx = game_idx + int(list(list(season_log.values()[0].keys())[0]))
+                                season_log = part_season_logs[year]
+                                #print('season_log: ' + str(season_log))
+                                game_minutes = list(season_log['MIN'].values())[int(game_idx)]#[str(relative_game_idx)]
+                                #print('game_minutes: ' + str(game_minutes))
+                                #print('game_stat_val * cur_mean_minutes / game_minutes')
+                                #print(str(game_stat_val) + ' * ' + str(cur_mean_minutes) + ' / ' + str(game_minutes))
+                                # game stat val is what the stat val would be if playing current minutes
+                                if game_minutes != 0.0:
+                                    unit_stat_val = round(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
+                                
+                                #print('unit_stat_val: ' + str(unit_stat_val))
+                                    
+                                player_unit_stat_dict[year][part][stat][condition][game_idx] = unit_stat_val
+
+
+
+    print('player_unit_stat_dict: ' + str(player_unit_stat_dict))
+    return player_unit_stat_dict
+
+
+
 
 # need season logs for minutes played to scale stat vals
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
@@ -6214,13 +6495,29 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     # === organize external data into internal structure
 
+    # need to know current conditions to determine true prob
+    # AND which condition probs to read and compute
+    # and also later we order spreadsheet based on current conditions used to get true prob
+    # conditions such as prev val are player specific but most conditions are team specific
+    # all_current_conditions = {p1:{out:[m fultz pg, j ingles sg, ...], loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
+    # read init game ids again now that they have been updated while reading box scores
+    init_game_ids_dict = reader.extract_dict_from_data(data_type)
+    all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players) #determiner.determine_current_conditions() # [all, regular, home, ...]
+    # all_cur_conds_lists = {p1:[m fultz pg out, j ingles sg out, away, ...],...}
+    all_cur_conds_data = converter.convert_all_conditions_to_dicts(all_current_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years, current_year_str)
+    all_cur_conds_dicts = all_cur_conds_data[0]
+    all_game_player_cur_conds = all_cur_conds_data[1]
+
+    all_cur_conds_lists = generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
 
 
     #all_player_consistent_stats = {} # we want to display all player consistent stats together for viewing convenience and analysis comparison
     all_player_stat_records = {}
     all_player_stat_dicts = {} # {player:{year:...}}
+    all_player_unit_stat_dicts = {}
     all_player_stat_probs = {} # for all stat vals so gets messy if same dict as other measures
-    all_unit_stat_probs = {}
+    all_player_unit_stat_probs = {}
+    all_player_distrib_probs = {}
 
     all_player_weekly_stat_dicts = {} # {player:{week:...}}
     all_player_weekly_stat_records = {}
@@ -6319,13 +6616,20 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # but then see if we need prev stat dicts for anything else bc if so then need to perm save that too
         # also adjust current season stats to avg minutes of last 3 games bc much more accurate than season avg minutes
         player_unit_stat_probs = generate_player_unit_stat_probs(player_stat_dict, player_season_logs, player_name)
-        all_unit_stat_probs[player_name] = player_unit_stat_probs
+        all_player_unit_stat_probs[player_name] = player_unit_stat_probs
 
         # player_weekly_unit_stat_probs = generate_player_weekly_unit_stat_probs(player_weekly_stat_dict, player_name, player_season_logs)
         # all_weekly_unit_stat_probs[player_name] = player_weekly_unit_stat_probs
         
 
-
+        # prob for each stat over and under, from prob distrib instead of direct measure
+        # include per unit adjustment, by estimating minutes according to teammates in/out and only conditions affecting minutes such as week of season
+        player_unit_stat_dict = generate_player_unit_stat_dict(player_stat_dict, player_season_logs, player_name)
+        all_player_unit_stat_dicts[player_name] = player_unit_stat_dict
+        
+        player_cur_conds_list = all_cur_conds_lists[player_name]
+        player_distrib_probs = generate_player_distrib_probs(player_unit_stat_dict, player_cur_conds_list, player_name)
+        all_player_distrib_probs[player_name] = player_distrib_probs
 
     
 
@@ -6345,7 +6649,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # but we may eventually use other similar players to get more samples for current player
     # so need to get all player stats before getting all stat probs
     # all_stat_probs_dict = {player:stat:val:conditions}
-    all_stat_probs_dict = generate_all_stat_probs_dict(all_player_stat_probs, all_player_stat_dicts, all_unit_stat_probs, season_years, irreg_play_time)
+    all_stat_probs_dict = generate_all_stat_probs_dict(all_player_stat_probs, all_player_stat_dicts, all_player_unit_stat_probs, season_years, irreg_play_time)
     
     # add true probs to stat probs dict
     # need to know current conditions to determine true prob

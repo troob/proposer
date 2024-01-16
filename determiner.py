@@ -1180,31 +1180,37 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
 # all_current_conditions: {'marvin bagley iii': {'loc': 'away', 'start': 'bench'}, 'bojan bogdanovic': {'loc':...
 # input: all_cur_conds_lists = {p1:[m fultz pg out, away, ...],...}
 # output: all_cur_conds: ['all', 'away', 'm fultz pg out', 'bench', 'start', 'home']
-def determine_all_current_conditions(all_cur_conds_lists):
+def determine_all_current_conditions(all_cur_conds_dicts):
     print('\n===Determine All Current Conditions===\n')
-    print('Input: all_cur_conds_lists = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_lists))
-    print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
+    print('Input: all_cur_conds_dicts = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_dicts))
+    print('\nOutput: all_cur_conds = {p1:[\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...], ...\n')
 
-    all_cur_conds = ['all']
+    all_cur_conds = {}#['all']
 
     #for player, player_cur_conds in all_current_conditions.items():
     # player_cur_conds = [m fultz pg out, away, ...]
-    for player, player_cur_conds in all_cur_conds_lists.items():
+    for player, player_cur_conds in all_cur_conds_dicts.items():
         #print('\nplayer: ' + player.title())
         #print('player_cur_conds: ' + str(player_cur_conds))
         #for cond_key, cond_val in player_cur_conds.items():
             #print('cond_key: ' + str(cond_key))
+        
+        player_conds_list = ['all']
+
         for cond_val in player_cur_conds.values():
             #print('cond_val: ' + str(cond_val))
             if cond_val != '':
                 # if cond_key == 'out': # cond_val = []
                 #     for out_player in cond_val:
                 #         out_player_abbrev = converter.convert_player_name_to_abbrev()
-                if cond_val not in all_cur_conds:
+                if cond_val not in player_conds_list:
                     #print('add cond val')
-                    all_cur_conds.append(cond_val)
+                    player_conds_list.append(cond_val)
+
             else:
                 print('Warning: Blank cond_val! ' + player.title())
+
+        all_cur_conds[player] = player_conds_list
 
     # for game player conditions, we want to show overall 2: teammates and opp
     # then we also want to show 4 team parts per team

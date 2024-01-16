@@ -183,11 +183,11 @@ def isolate_duplicate_dicts(main_dict, keys, dict_list):
     #print('duplicate_dicts: ' + str(duplicate_dicts))
     return duplicate_dicts
 
-def isolate_sg_props(main_prop, remaining_top_ev_props):
+def isolate_sg_props(main_prop, props):
     sg_props = []
 
     main_game = main_prop['game']
-    for prop in remaining_top_ev_props:
+    for prop in props:
         prop_game = prop['game']
         if main_game == prop_game:
             sg_props.append(prop)
