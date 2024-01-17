@@ -184,7 +184,7 @@ def fit_data(data):
 
 # cumulative distribution
 def generate_prob_over_from_distrib(val, loc, dist):
-    print('\n===Generate Prob Over from Distrib: ' + str(val+1) + '===\n')
+    #print('\n===Generate Prob Over from Distrib: ' + str(val+1) + '===\n')
 
     prob_over = 0 # includes val, just shorthand
 
@@ -199,7 +199,7 @@ def generate_prob_over_from_distrib(val, loc, dist):
     # but cdf returns <= val so take 1-cdf to get over
     # if we take 1-cdf for val we get 
     prob_less_or_equal = round(dist.cdf(val, loc), 4)
-    print('prob_less_or_equal: ' + str(prob_less_or_equal))
+    #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     # bc nothing actually 100% or 0 and we dont need more accuracy than 1%
     if prob_less_or_equal > 0.99:
         prob_less_or_equal = 0.99
@@ -208,11 +208,11 @@ def generate_prob_over_from_distrib(val, loc, dist):
     else:
         prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 2)
 
-    print('prob_less_or_equal: ' + str(prob_less_or_equal))
+    #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     prob_over = round(1 - prob_less_or_equal, 2)
     #prob_over_or_equal_next_val = prob_strict_over
 
-    print('prob_over: ' + str(prob_over))
+    #print('prob_over: ' + str(prob_over))
     return prob_over
 
 # prob distrib
@@ -221,8 +221,8 @@ def generate_prob_over_from_distrib(val, loc, dist):
 # FIT prob distrib to get parameters (eg mean and std dev)
 # COMPUTE prob of x from fmla given params
 def generate_prob_from_distrib(val, loc, dist):
-    print('\n===Generate Prob from Distrib: ' + str(val) + '===\n')
-    # print('loc: ' + str(loc))
+    #print('\n===Generate Prob from Distrib: ' + str(val) + '===\n')
+    #print('loc: ' + str(loc))
     # print('scale: ' + str(scale))
     #print('dist: ' + str(dist))
 
@@ -236,7 +236,7 @@ def generate_prob_from_distrib(val, loc, dist):
     #prob = dist.pmf(val, loc)
     # if poisson, use pmf
     prob = round(dist.pmf(val, loc), 4)
-    print('prob: ' + str(prob))
+    #print('prob: ' + str(prob))
 
     if prob > 0.99:
         prob = 0.99
@@ -245,7 +245,7 @@ def generate_prob_from_distrib(val, loc, dist):
     else:
         prob = converter.round_half_up(prob, 2)
 
-    print('prob: ' + str(prob))
+    #print('prob: ' + str(prob))
     return prob
 
 def generate_all_probs_from_distrib(data, dist):
@@ -280,9 +280,13 @@ def generate_all_probs_from_distrib(data, dist):
     print('probs: ' + str(probs))
     return probs
 
-def distribute_all_probs(data, dist): # if normal dist, avg_scale, dist_name='normal'):
+def distribute_all_probs(data, dist, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
     print('\n===Distribute All Probs===\n')
     print('data: ' + str(data))
+    print('player: ' + str(player))
+    print('stat: ' + str(stat))
+    print('condition: ' + str(condition))
+    print('\nOutput: all_probs = [p1,...]\n')
 
     # if only 1 sample, use it as mean, 
     # and simulate 4 more samples to get at least 5 samples (consider 10)
@@ -296,7 +300,7 @@ def distribute_all_probs(data, dist): # if normal dist, avg_scale, dist_name='no
             loc = 0.1
         rng = np.random.default_rng()
         data = list(rng.poisson(loc, 100))
-        print('poisson_data: ' + str(data))
+        #print('poisson_data: ' + str(data))
         # normal_data = list(rng.normal(data[0], avg_scale, 100))
         # print('normal_data: ' + str(normal_data))
         # data = normal_data
@@ -314,7 +318,7 @@ def distribute_all_probs(data, dist): # if normal dist, avg_scale, dist_name='no
         # print('simulated data: ' + str(data))
 
         data = list(rng.poisson(loc, 100))
-        print('poisson_data: ' + str(data))
+        #print('poisson_data: ' + str(data))
         # normal_data = list(rng.normal(loc, avg_scale, 100))
         # print('normal_data: ' + str(normal_data))
         # data = normal_data
@@ -334,7 +338,7 @@ def distribute_all_probs(data, dist): # if normal dist, avg_scale, dist_name='no
 
     # loop thru all vals, even those not directly hit but surpassed
     highest_val = data[-1] # bc sorted
-    print('highest_val: ' + str(highest_val))
+    #print('highest_val: ' + str(highest_val))
     for val in range(highest_val):
         prob = 0
         #if val not in probs.keys():

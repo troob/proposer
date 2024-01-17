@@ -3408,7 +3408,7 @@ def read_game_key(season_year, team_abbrev, game_row):
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 # use init_player_stat_dict to see saved stats
 # init_player_stat_dicts = {player: {"2023": {"regular": {"pts": {"all": {"0": 14,...
-def read_all_box_scores(all_players_season_logs, all_players_teams, season_years, season_part, read_new_game_ids=True):#, season_year=2024):
+def read_all_box_scores(all_players_season_logs, all_players_teams, season_years, season_part, cur_yr, read_new_game_ids=True):#, season_year=2024):
 	print('\n===Read All Box Scores===\n')
 	print('Setting: season years = ' + str(season_years))
 	print('Setting: season part = ' + season_part)
@@ -3441,17 +3441,23 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 	data_type = 'data/all games ids.csv' #'game ids'
 	existing_game_ids_dict = extract_dict_from_data(data_type)
 
+
+
 	for player, player_season_logs in all_players_season_logs.items():
 		#print('\nplayer: ' + player)
-		for year, player_season_log in player_season_logs.items():
+
+		player_teams = all_players_teams[player]
+		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
+
+		for season_year, player_season_log in player_season_logs.items():
 			#print('\nyear: ' + year)
-			if year not in all_box_scores.keys():
-				all_box_scores[year] = {}
-			if year not in current_box_scores.keys():
-				current_box_scores[year] = {}
+			if season_year not in all_box_scores.keys():
+				all_box_scores[season_year] = {}
+			if season_year not in current_box_scores.keys():
+				current_box_scores[season_year] = {}
 
 			# (teams_reg_and_playoff_games_played, season_part_game_log, teams, games_played)		
-			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(all_players_teams, player_season_log, season_part, year, player)
+			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player)
 			teams_reg_and_playoff_games_played = season_games_played_data[0]
 			season_part_game_log = season_games_played_data[1]
 			teams = season_games_played_data[2]
@@ -3471,10 +3477,10 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 						team_abbrev = teams[player_team_idx]
 					#print('team_abbrev: ' + team_abbrev)
 						
-					game_key = read_game_key(year, team_abbrev, row)
+					game_key = read_game_key(season_year, team_abbrev, row)
 
 					# if game not saved then read from internet
-					if game_key not in all_box_scores[year].keys():
+					if game_key not in all_box_scores[season_year].keys():
 
 						game_espn_id = read_game_espn_id(game_key, existing_game_ids_dict, read_new_game_ids)
 						# if returned no game id, then bc too many requests, so stop reading new ids
@@ -3610,7 +3616,7 @@ def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
 	#print('game_info: ' + str(game_info))
 	return game_info
 
-def read_all_games_info(all_players_season_logs, all_players_teams, init_game_ids_dict, season_part, read_new_game_ids):
+def read_all_games_info(all_players_season_logs, all_players_teams, init_game_ids_dict, season_part, read_new_game_ids, cur_yr=''):
 	print("\n===Read All Games Info===\n")
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_games_info = {year:{game key:{city:c, time of day:tod, audience:a, ...\n')
@@ -3633,12 +3639,17 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 
 	for player, player_season_logs in all_players_season_logs.items():
 		#print('\nplayer: ' + player)
-		for year, player_season_log in player_season_logs.items():
-			#print('\nyear: ' + year)
-			if year not in all_games_info.keys():
-				all_games_info[year] = {}
+		player_teams = all_players_teams[player]
+		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
 
-			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(all_players_teams, player_season_log, season_part, year, player)
+		for season_year, player_season_log in player_season_logs.items():
+			#print('\nseason_year: ' + season_year)
+			if season_year not in all_games_info.keys():
+				all_games_info[season_year] = {}
+
+
+			
+			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player)
 			teams_reg_and_playoff_games_played = season_games_played_data[0]
 			season_part_game_log = season_games_played_data[1]
 			teams = season_games_played_data[2]
@@ -3663,10 +3674,10 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 						team_abbrev = teams[player_team_idx]
 					#print('team_abbrev: ' + team_abbrev)
 						
-					game_key = read_game_key(year, team_abbrev, row)
+					game_key = read_game_key(season_year, team_abbrev, row)
 
 					# if game not saved then read from internet
-					if game_key not in all_games_info[year].keys():
+					if game_key not in all_games_info[season_year].keys():
 
 						game_espn_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
 						# if returned no game id, then bc too many requests, so stop reading new ids
@@ -3679,7 +3690,7 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 
 						if game_espn_id != '':
 							game_info = read_game_info(game_key, init_game_ids_dict, game_espn_id, player)
-							all_games_info[year][game_key] = game_info
+							all_games_info[season_year][game_key] = game_info
 						else:
 							print('Warning: Blank Game ID! ' + game_key.upper())
 

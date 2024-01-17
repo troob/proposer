@@ -1137,11 +1137,12 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
     return unit_time_period
 
 def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
-    print('\n===Determine All Current Conditions===\n')
+    print('\n===Determine All Current GP Conds===\n')
     print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
     print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
 
     all_cur_conds = []
+    all_players_gp_conds = {}
 
     # for game player conditions, we want to show overall 2: teammates and opp
     # then we also want to show 4 team parts per team
@@ -1149,12 +1150,17 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
     # all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...
     for player, gp_cur_conds in all_game_player_cur_conds.items():
         print('\nplayer: ' + player)
+
+        player_gp_conds = []
+
         # {teammates: {starters:[],...}, opp: {...}}, ...
         for team_condition, team_parts in gp_cur_conds.items():
             print('\nteam_condition: ' + team_condition)
             # add 2 overall gp conds
             # all_cur_conds = ['all', 'teammates', 'opp']
             #all_cur_conds.extend(['teammates', 'opp'])
+            # we add team cond as cur cond bc we want overall prob for team cond for review/comparison/analysis
+            # even tho it does not match a measured condition. instead it averages a group of conds
             if team_condition not in all_cur_conds:
                 all_cur_conds.append(team_condition)
 
@@ -1169,12 +1175,16 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
                     gp_cond_str += ' ' + team_condition + ' ' + team_part
                     if gp_cond_str not in all_cur_conds:
                         all_cur_conds.append(gp_cond_str)
+                    if gp_cond_str not in player_gp_conds:
+                        player_gp_conds.append(gp_cond_str)
 
+        
+        all_players_gp_conds[player] = player_gp_conds
 
     
 
     print('all_cur_conds: ' + str(all_cur_conds))
-    return all_cur_conds
+    return all_cur_conds, all_players_gp_conds
 
 # all unique conds for all players so we can display all players in same table with NA for stats that dont have condition
 # all_current_conditions: {'marvin bagley iii': {'loc': 'away', 'start': 'bench'}, 'bojan bogdanovic': {'loc':...
@@ -1185,7 +1195,8 @@ def determine_all_current_conditions(all_cur_conds_dicts):
     print('Input: all_cur_conds_dicts = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_dicts))
     print('\nOutput: all_cur_conds = {p1:[\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...], ...\n')
 
-    all_cur_conds = {}#['all']
+    all_cur_conds = ['all']
+    all_players_cur_conds = {}
 
     #for player, player_cur_conds in all_current_conditions.items():
     # player_cur_conds = [m fultz pg out, away, ...]
@@ -1207,10 +1218,12 @@ def determine_all_current_conditions(all_cur_conds_dicts):
                     #print('add cond val')
                     player_conds_list.append(cond_val)
 
+                if cond_val not in all_cur_conds:
+                    all_cur_conds.append(cond_val)
             else:
                 print('Warning: Blank cond_val! ' + player.title())
 
-        all_cur_conds[player] = player_conds_list
+        all_players_cur_conds[player] = player_conds_list
 
     # for game player conditions, we want to show overall 2: teammates and opp
     # then we also want to show 4 team parts per team
@@ -1240,7 +1253,7 @@ def determine_all_current_conditions(all_cur_conds_dicts):
     
 
     print('all_cur_conds: ' + str(all_cur_conds))
-    return all_cur_conds
+    return all_cur_conds, all_players_cur_conds
 
 # determine game num so we can sort by game
 def determine_game_num(game_teams, player_team):
@@ -1381,6 +1394,33 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
 
 
     return need_box_score
+
+# only reg season
+def determine_gp_cur_team(player_teams, player_season_logs, current_year_str):
+    #print('\n===Determine GP Cur Team===\n')
+
+    gp_cur_team = 0
+
+    if current_year_str in player_season_logs.keys() and current_year_str in player_teams.keys():
+        cur_season_log = player_season_logs[current_year_str]
+        cur_season_log_df = pd.DataFrame(cur_season_log)
+        cur_reg_season_log = determine_season_part_games(cur_season_log_df)
+        gp_cur_season = len(cur_reg_season_log.index)
+        
+        team_stats_dict = player_teams[current_year_str]
+
+        teams = list(reversed(team_stats_dict.keys()))
+        all_teams_stats = list(reversed(team_stats_dict.values()))
+        
+        gp_other_teams = 0
+        if len(teams) > 0:
+            for team_stats in all_teams_stats[1:]: 
+                gp_other_teams += team_stats['GP']
+
+        gp_cur_team = gp_cur_season - gp_other_teams
+
+    #print('gp_cur_team: ' + str(gp_cur_team))
+    return gp_cur_team
 
 # if missing season yr or missing condition in season yr
 # init_player_stat_dict = {"2023": {"regular": {"pts": {"all": {"0": 14,...
@@ -2362,7 +2402,7 @@ def determine_player_team_idx(player, player_team_idx, game_idx, row, games_play
 
 
 
-def determine_teams_reg_and_playoff_games_played(all_players_teams, player_season_log, season_part, year, player):
+def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player):
     # read all box scores if postseason to get more samples and compare to reg season
     if season_part == 'postseason':
         season_part = 'full'
@@ -2386,14 +2426,38 @@ def determine_teams_reg_and_playoff_games_played(all_players_teams, player_seaso
     # team_stats_dict = {team:{GP:gp, MIN:min}}
     team_stats_dict = {}
     #team_gp_dict = {}
-    if year in all_players_teams[player].keys():
-        team_stats_dict = all_players_teams[player][year]
+    if season_year in player_teams.keys():
+        team_stats_dict = player_teams[season_year]
     # reverse team gp dict so same order as game idx recent to distant
     teams = list(reversed(team_stats_dict.keys()))
     all_teams_stats = list(reversed(team_stats_dict.values()))
+
+
     games_played = []#list(reversed(team_gp_dict.values()))
     for team_stats in all_teams_stats:
         games_played.append(team_stats['GP'])
+    # get games played w/ current team from season log bc updates each day
+    games_played = []
+    if season_year != cur_yr:
+        for team_stats in all_teams_stats:
+            games_played.append(team_stats['GP'])
+    else:
+        # if more than 1 team this yr then get prev teams gp from player teams
+        # then get cur team gp from season log
+        # gp_other_teams = 0
+        # if len(teams) > 0:
+        #     for team_stats in all_teams_stats[1:]: 
+        #         gp_other_teams += team_stats['GP']
+
+        #gp_cur_team = num_games_played - gp_other_teams
+        games_played.append(gp_cur_team)
+
+        if len(teams) > 0:
+            for team_stats in all_teams_stats[1:]: 
+                games_played.append(team_stats['GP'])
+
+
+
     # add postseason games to num games played so it lines up for full season
     # final games played not used if season part = post
     # bc we do not care games played to get team
