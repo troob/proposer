@@ -74,6 +74,9 @@ for stat_name, stat_dict in part_stat_dict.items():
         # if Poisson: param: lam = mean
         # if Normal: params: mu = mean, sigma = std dev
         # if Gamma: params: a = shape, scale = 1 / rate (b = rate)
+        # if Pareto: param: c = shape
+        # if Weibull: params: 
+        
         bounds = [(-100, 100), (-100, 100)]
         
         # Before passing to fit fcn, 
