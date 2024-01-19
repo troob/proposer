@@ -2772,9 +2772,10 @@ def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, al
             year = season_years[year_idx]
 
             condition_title = current_condition + ' ' + str(year) + ' ' + part + ' prob'
-            if year_idx > 0:
-                condition_unit_title = condition_title + ' per unit'
-                conditions_order.append(condition_unit_title)
+            
+            # if year_idx > 0:
+            #     condition_unit_title = condition_title + ' per unit'
+            #     conditions_order.append(condition_unit_title)
 
             conditions_order.append(condition_title)
 
@@ -3287,14 +3288,19 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
         # for each yr, we need a new cur cond dict bc the yr changes the cur conds
         cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
         current_conditions = condition + ' ' + str(year) + ' ' + part + ' prob'
-        if year_idx > 0:
-            current_conditions += ' per unit'
+        
+        # NOW with distrib probs all probs are per unit even cur yr adjusted to expected play time
+        # if year_idx > 0:
+        #     current_conditions += ' per unit'
+
         #print('current_conditions: ' + str(current_conditions))
 
         if current_conditions in val_probs_dict.keys():
             probs.append(val_probs_dict[current_conditions])
             #all_current_conditions.append(current_conditions)
             all_cur_cond_dicts.append(cur_cond_dict)
+        else:
+            print('Warning: Current Conditions not in val probs dict! ' + str(current_conditions))
 
     # print('probs: ' + str(probs))
     # print('all_cur_cond_dicts: ' + str(all_cur_cond_dicts))
@@ -3374,10 +3380,10 @@ def generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions
 
     # should we add 'all' cond to player cur conds dict so it is treated like all others???
     #conditions = ['all']# + list(player_current_conditions.values())
-    condition = 'all'
-    condition_mean_prob = generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, season_years, part)
-    if condition_mean_prob is not None:
-        all_conditions_mean_probs[condition] = condition_mean_prob
+    # condition = 'all'
+    # condition_mean_prob = generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, season_years, part)
+    # if condition_mean_prob is not None:
+    #     all_conditions_mean_probs[condition] = condition_mean_prob
     
     #game_players_cond_keys = ['out', 'starters', 'bench']
     
@@ -3546,12 +3552,15 @@ def generate_game_players_cond_sample_weight(cond_key, lineup_team, team_gp_cur_
     # first consider outer layer?
     # bc runs in parallel with other conditions
     # could possibly combine this fcn with gen cond sample weights if similar enough
+    # remove in cond bc covered by subconds: 'in': 2 }
+    # bench barely affects starters so make 1/5 or even 1/10 factor until tuned
+    # NEED to make weight scale per player based on play time
     cond_weights = {'teammates': 10, 
-                    'opp':5, 
+                    'opp':10, # test opp factor just as important as teammates factor bc dictates change in play
                     'starters': 10, 
-                    'bench': 4, 
-                    'out': 2, 
-                    'in': 2 }
+                    'bench': 2, 
+                    'out': 6} # for now bt start and bench as avg but still error bc need to scale weight by play time
+                    
     # player_cond_weights = {'starters': 10, 
     #                         'bench': 4, 
     #                         'out': 2, 
@@ -3640,18 +3649,18 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
     #                         'in': 2 }
     
     if len(cond_weights) == 0:
-        cond_weights = {'all': 1, 
+        cond_weights = {'all': 0, # reflected by specific cur conds 
                         'loc':3, 
                         'city':1,
                         'dow':3, 
                         'tod':3, 
                         'timelag':3,
                         'coverage':2,
-                        'audience':2,
+                        'audience':0, # reflected by city
                         'odds':2, # game odds and/or player prop odds?
                         'game line':2,
                         'game total':2,
-                        'start':6, 
+                        'start':0, # reflected by teammates 
                         'teammates': 10, 
                         'opp':5, 
                         'prev':5,
@@ -3750,9 +3759,10 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
     # get weights for each condition prob
     # 1 sample size per condition, bc each condition gets total sample size over all yrs
     #sample_sizes = []
-    all_cond = 'all'
-    condition_sample_weight = generate_condition_sample_weight(player_stat_dict, all_cond, all_cond, part, player)
-    all_conditions_weights[all_cond] = condition_sample_weight
+    # CHANGE TEST: remove 'all' cond to see if subconds more accurate
+    # all_cond = 'all'
+    # condition_sample_weight = generate_condition_sample_weight(player_stat_dict, all_cond, all_cond, part, player)
+    # all_conditions_weights[all_cond] = condition_sample_weight
 
     for cond_key, cond_val in player_current_conditions.items():
         # print('condition: ' + str(condition))
@@ -3764,6 +3774,7 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
             condition_sample_weight = generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part, player)
             if condition_sample_weight is not None:
                 all_conditions_weights[cond_key] = condition_sample_weight
+
 
     #all_conditions_weights = generate_all_game_players_cond_sample_weights()
     #print('\n===Generate All Game Players Condition Sample Weights===\n')
@@ -3790,10 +3801,13 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
         all_conditions_weights[team_condition] = game_players_cond_weight
 
         # after getting overall team weight, get individ weights for each team part
+        # remove 'in' condition bc weights established per player based on avg play time: 'in': 0 }
+        # also separate out starters and bench
+        # BUT then why not just weight relative to minutes played???
         all_gp_conds_weights[team_condition] = {'starters': 0, 
                                                 'bench': 0, 
-                                                'out': 0, 
-                                                'in': 0 }
+                                                'out': 0}
+                                                
         for gp_cond_key in all_gp_conds_weights[team_condition].keys():
             gp_cond_weight = generate_game_players_cond_sample_weight(gp_cond_key, lineup_team, team_gp_cur_conds, player_stat_dict, part, player)
             if gp_cond_weight is not None:
@@ -3984,23 +3998,24 @@ def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, p
                 #print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
                 game_players_conditions[game_part_players_cond_val] = team_part
 
+    # REMOVED in key bc covered by subgroups better weights until we tune player weights based on play time
     # add all players probs here bc we dont need in condition until now since we already have starters and bench which makes up in
     # we do not want to show in condition due to clutter but still account for it
-    if len(game_players.keys()) > 0: # all players in game
-        # convert to list of game_part_players_strings with all combos of abbrevs
-        combos_of_abbrevs = generate_combos_of_abbrevs(game_players)
-        # need a string for each combo
-        for abbrev_combo in combos_of_abbrevs:
-            #print('abbrev_combo: ' + str(abbrev_combo))
+    # if len(game_players.keys()) > 0: # all players in game
+    #     # convert to list of game_part_players_strings with all combos of abbrevs
+    #     combos_of_abbrevs = generate_combos_of_abbrevs(game_players)
+    #     # need a string for each combo
+    #     for abbrev_combo in combos_of_abbrevs:
+    #         #print('abbrev_combo: ' + str(abbrev_combo))
     
-            game_players_str = converter.convert_to_game_players_str(abbrev_combo)
+    #         game_players_str = converter.convert_to_game_players_str(abbrev_combo)
                 
-            game_players_cond_val = game_players_str
-            if team_condition == opp_key:
-                game_players_cond_val += ' ' + opp_key
-            game_players_cond_val += ' ' + in_key
-            #print('game_players_cond_val: ' + str(game_players_cond_val))
-            game_players_conditions[game_players_cond_val] = in_key
+    #         game_players_cond_val = game_players_str
+    #         if team_condition == opp_key:
+    #             game_players_cond_val += ' ' + opp_key
+    #         game_players_cond_val += ' ' + in_key
+    #         #print('game_players_cond_val: ' + str(game_players_cond_val))
+    #         game_players_conditions[game_players_cond_val] = in_key
 
     #print('game_players_conditions: ' + str(game_players_conditions))
     return game_players_conditions
@@ -4038,7 +4053,7 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
     #cur_yr = str(season_years[0])
 
     # need stats of interest to get prev vals
-    stats_of_interest = ['pts','ast','reb']
+    stats_of_interest = ['pts','reb','ast']
 
     all_true_probs_dict = all_stat_probs_dict # deepcopy?
     
@@ -5691,8 +5706,8 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             # we need players in alphabetical string to easily compare to other games
                             # might as well compare strings bc need str as key
                             #in_teammates_list = []
-                            game_teammates_str = generate_players_string(game_teammates_list) + ' ' + in_key
-                            game_opps_str = generate_players_string(game_opps_list) + ' ' + opp_key + ' ' + in_key
+                            # game_teammates_str = generate_players_string(game_teammates_list) + ' ' + in_key
+                            # game_opps_str = generate_players_string(game_opps_list) + ' ' + opp_key + ' ' + in_key
                             # OR we could compare each player in list
                             # but then what would we use as key? names in order so first 5 are starters and remaining are bench
                             # order matters bc it is in order of position and therefore matchup 
@@ -5747,19 +5762,23 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 # teammates and opps
                                 # starters and bench
 
+                                # keep all game teammates cond (for now) bc most precise 
+                                # BUT so few samples that it is misleading
+                                # ideally get cond for all combos of teammates but we can infer combos in string with all players
                                 # condition: game teammates
-                                if not game_teammates_str in stat_dict.keys():
-                                    stat_dict[game_teammates_str] = {}
-                                stat_dict[game_teammates_str][game_idx] = stat
+                                # if not game_teammates_str in stat_dict.keys():
+                                #     stat_dict[game_teammates_str] = {}
+                                # stat_dict[game_teammates_str][game_idx] = stat
                                 
 
+                                # removed In cond bc covered by subconds
                                 # condition: teammate, add at same time as starters and bench bc inclusive
-                                for teammate in game_teammates_list:
-                                    if teammate in starters or teammate in bench:
-                                        teammate_str = teammate + ' ' + in_key
-                                        if not teammate_str in stat_dict.keys():
-                                            stat_dict[teammate_str] = {}
-                                        stat_dict[teammate_str][game_idx] = stat
+                                # for teammate in game_teammates_list:
+                                #     if teammate in starters or teammate in bench:
+                                #         teammate_str = teammate + ' ' + in_key
+                                #         if not teammate_str in stat_dict.keys():
+                                #             stat_dict[teammate_str] = {}
+                                #         stat_dict[teammate_str][game_idx] = stat
                                 
 
                                 # condition: game starters
@@ -5825,9 +5844,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 opp_bench_str = generate_players_string(opp_bench) + ' ' + opp_key + ' ' + bench_key
                             
                                 # condition: game opps
-                                if not game_opps_str in stat_dict.keys():
-                                    stat_dict[game_opps_str] = {}
-                                stat_dict[game_opps_str][game_idx] = stat
+                                # if not game_opps_str in stat_dict.keys():
+                                #     stat_dict[game_opps_str] = {}
+                                # stat_dict[game_opps_str][game_idx] = stat
 
                                 # condition: opp player
                                 for opp in game_opps_list:

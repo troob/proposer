@@ -332,7 +332,7 @@ def distribute_all_probs(data, dist, player='', stat='', condition=''): # if nor
     #loc, scale = dist.fit(data)
     # if poisson
     bounds = [(0, 100)]
-    loc = ss.fit(dist, data, bounds).params.mu
+    loc = np.mean(data)#ss.fit(dist, data, bounds).params.mu
     print('loc: ' + str(loc))
     #print('scale: ' + str(scale))
 

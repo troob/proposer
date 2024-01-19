@@ -2953,12 +2953,12 @@ def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, 
 # player_teammates = {year:[teammates],...}
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 def read_player_teammates(player, player_season_logs, all_box_scores, init_all_players_teammates={}, cur_yr=''):
-	# print('\n===Read Player Teammates: ' + player.title() + '===\n')
-	# print('\nInput: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-	# print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-	# print('Input: init_all_players_teammates = {player:{year:[teammates],... = ')
-	# print('Input: Current Year bc new teammates each game.')
-	# print('\nOutput: player_teammates = {year:[teammates],... =  {\'2024\': [\'J Randle PF\', ...')
+	print('\n===Read Player Teammates: ' + player.title() + '===\n')
+	print('\nInput: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+	print('Input: init_all_players_teammates = {player:{year:[teammates],... = ')
+	print('Input: Current Year bc new teammates each game.')
+	print('\nOutput: player_teammates = {year:[teammates],... =  {\'2024\': [\'J Randle PF\', ...\n')
 
 
 	player_teammates = {}
@@ -2984,10 +2984,10 @@ def read_player_teammates(player, player_season_logs, all_box_scores, init_all_p
 # read teammates using box score data in all players in games dict
 # which gives away home teams players
 def read_year_teammates(player, season_year, player_season_log, year_box_scores):
-	# print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
-	# print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-	# print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-	# print('\nOutput: season_teammates = [p1,...] =  [\'J Randle PF\', ...')
+	print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
+	print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+	print('\nOutput: season_teammates = [p1,...] =  [\'J Randle PF\', ...\n')
 
 	year_teammates = []
 
