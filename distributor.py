@@ -339,13 +339,14 @@ def distribute_all_probs(data, dist, player='', stat='', condition=''): # if nor
     # loop thru all vals, even those not directly hit but surpassed
     highest_val = data[-1] # bc sorted
     #print('highest_val: ' + str(highest_val))
-    for val in range(highest_val):
+    # start at 1
+    for val in range(1, highest_val):
         prob = 0
         #if val not in probs.keys():
         # we get prob of exactly 0 and prob >= next val
-        if val == 0:
-            prob = generate_prob_from_distrib(val, loc, dist)
-            probs.append(prob)
+        # if val == 0:
+        #     prob = generate_prob_from_distrib(val, loc, dist)
+        #     probs.append(prob)
 
         prob = generate_prob_over_from_distrib(val, loc, dist)
         probs.append(prob)
