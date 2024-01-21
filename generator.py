@@ -4474,9 +4474,11 @@ def generate_all_distrib_probs_dict(all_player_stat_probs, all_player_stat_dicts
                             stat_probs_by_stat[stat] = {}
 
                         #for val, prob in stat_probs.items():
-                        for val in range(len(distrib_probs)):
-                            prob = distrib_probs[val]
+                        for idx in range(len(distrib_probs)):
+                            prob = distrib_probs[idx]
                             
+                            val = idx+1 # list starts at 1 bc we do not need P(0)
+
                             if val not in stat_probs_by_stat[stat].keys():
                                 stat_probs_by_stat[stat][val] = {}
 
@@ -4570,11 +4572,14 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_n
     print('\n===Generate Player Distrib Probs: ' + player_name.title() + '===\n')
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: current_conditions = [all, home, t watford f in, ...] = ' + str(current_conditions))
+    print('Input: player_distrib_models = {stat name: model name, ...')
     print('\nOutput: player_distrib_probs = {condition: {year: {season part: {stat name: {stat val: prob over, ... = {\'all\': {\'2024\': {\'regular\': {\'pts\': [0.01, ...], ... \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'2023\': {\'regular\': {\'pts\': [0.01, ...], ...\n')
 
     player_distrib_probs = {}
 
-    dist = ss.poisson
+    #dist = ss.poisson
+
+    stats_of_interest = ['pts','reb','ast']
 
     for year, year_stat_dict in player_stat_dict.items():
         #print('\nyear: ' + year)
@@ -4588,8 +4593,14 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_n
                 # avg_scale = dist.fit(all_condition_data)[1]
                 # print('avg_scale: ' + str(avg_scale))
 
-                stats_of_interest = ['pts','reb','ast']
+                
                 if stat_name in stats_of_interest:
+
+                    # get model for this stat+player
+                    # use model name to get dist code
+                    # input player models/disribs dict
+                    dist_str = 'ss.' + model_name
+                    dist = eval(dist_str)
 
                     # condition_stat_dict = {game idx: stat val, ...
                     for condition, condition_stat_dict in stat_dict.items():

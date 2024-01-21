@@ -188,6 +188,14 @@ def generate_prob_over_from_distrib(val, loc, dist):
 
     prob_over = 0 # includes val, just shorthand
 
+    #if val == 0:
+        
+    val += 0.499999 # <0.5
+
+
+    # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?
+    # NO bc P(1) should include P(>0.5)? 
+
     # ASSUME normal distrib for now bc most examples
     # THEN determine best fit distrib (see quantile charts and best fit libs)
 
@@ -198,18 +206,19 @@ def generate_prob_over_from_distrib(val, loc, dist):
     # we want prob over to include val
     # but cdf returns <= val so take 1-cdf to get over
     # if we take 1-cdf for val we get 
-    prob_less_or_equal = round(dist.cdf(val, loc), 4)
+    prob_less_or_equal = round(dist.cdf(val, loc), 5)
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
-    # bc nothing actually 100% or 0 and we dont need more accuracy than 1%
-    if prob_less_or_equal > 0.99:
-        prob_less_or_equal = 0.99
-    elif prob_less_or_equal < 0.01:
-        prob_less_or_equal = 0.01
+    # bc nothing actually 100% or 0 and we dont need more accuracy than 1%???
+    # NO actually we need accuracy up to 0.1% to diff extremely likely vs very likely
+    if prob_less_or_equal > 0.999:
+        prob_less_or_equal = 0.999
+    elif prob_less_or_equal < 0.001:
+        prob_less_or_equal = 0.001
     else:
-        prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 2)
+        prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 3)
 
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
-    prob_over = round(1 - prob_less_or_equal, 2)
+    prob_over = round(1 - prob_less_or_equal, 2) # P(>val+1)
     #prob_over_or_equal_next_val = prob_strict_over
 
     #print('prob_over: ' + str(prob_over))
@@ -339,15 +348,17 @@ def distribute_all_probs(data, dist, player='', stat='', condition=''): # if nor
     # loop thru all vals, even those not directly hit but surpassed
     highest_val = data[-1] # bc sorted
     #print('highest_val: ' + str(highest_val))
-    # start at 1
-    for val in range(1, highest_val):
-        prob = 0
+    # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
+    # include highest val
+    for val in range(highest_val):
+        #prob = 0
         #if val not in probs.keys():
         # we get prob of exactly 0 and prob >= next val
         # if val == 0:
         #     prob = generate_prob_from_distrib(val, loc, dist)
         #     probs.append(prob)
 
+        dist_dict = {'model name':'', 'shape':'', 'loc':'', 'scale':''}
         prob = generate_prob_over_from_distrib(val, loc, dist)
         probs.append(prob)
 

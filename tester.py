@@ -72,6 +72,8 @@ for stat_name, stat_dict in part_stat_dict.items():
         condition = 'all'
         condition_stat_dict = stat_dict[condition]
         all_data = np.sort(all_data_dict[stat_name])#np.sort(list(condition_stat_dict.values()))
+        num_samples = len(all_data)
+        print('num_samples: ' + str(num_samples))
         all_avg = np.mean(all_data)
         all_var = np.var(all_data)
         # print('all_loc: ' + str(all_loc))
@@ -148,7 +150,7 @@ for stat_name, stat_dict in part_stat_dict.items():
         
 
         # get prob of 0
-        test_val = 1
+        test_val = 3
         print('test_val: ' + str(test_val))
 
         # dists use shape param but different letters
@@ -172,18 +174,40 @@ for stat_name, stat_dict in part_stat_dict.items():
 
             samples = []
             print('all_data: ' + str(all_data))
-            print('small_avg: ' + str(small_avg))
+
             print('all_avg: ' + str(all_avg))
             
+            
+            
             sim_all_data = np.sort(dist.rvs(all_shape, all_loc, all_scale, size=sample_size))
-            for data_val in sim_all_data:
-                sample_val = int(round_half_up(data_val * small_avg / all_avg))
-                samples.append(sample_val)
-            samples = np.array(samples)
-            print('samples: ' + str(samples))
-            sample_fit_results = ss.fit(dist, samples, bounds)
+            sim_avg = np.mean(sim_all_data)
+            print('sim_avg: ' + str(sim_avg))
+            sim_fit_results = ss.fit(dist, sim_all_data, bounds)
+            sim_fit_params = sim_fit_results.params
+            sim_shape_param = 'sim_fit_params.' + dist_param
+            sim_shape = eval(sim_shape_param) #fit_params.c
+            sim_loc = sim_fit_params.loc
+            sim_scale = sim_fit_params.scale
+            sim_prob = round(dist.pdf(test_val, sim_shape, sim_loc, sim_scale), 4)
+            sim_prob_cdf = round(dist.cdf(test_val, sim_shape, sim_loc, sim_scale), 4)
+            plt.figure()
+            sim_fit_results.plot()
+            # for data_val in sim_all_data:
+            #     sample_val = int(round_half_up(data_val * small_avg / all_avg))
+            #     samples.append(sample_val)
+            #samples = np.array(samples)
+            
+            sample_data = sim_all_data * (small_avg / all_avg)
+            sample_avg = np.mean(sample_data)
+            print('sample_avg: ' + str(sample_avg))
+            print('small_avg: ' + str(small_avg))
+
+            #print('\nsamples: ' + str(samples))
+
+            sample_fit_results = ss.fit(dist, sample_data, bounds)
             sample_fit_params = sample_fit_results.params
-            print('all_fit_params: ' + str(all_fit_params))
+            print('\nall_fit_params: ' + str(all_fit_params))
+            print('sim_fit_params: ' + str(sim_fit_params))
             print('sample_fit_params: ' + str(sample_fit_params))
 
             sample_shape_param = 'sample_fit_params.' + dist_param
@@ -195,8 +219,10 @@ for stat_name, stat_dict in part_stat_dict.items():
 
 
             print('all_prob: ' + str(all_prob))
+            print('sim_prob: ' + str(sim_prob))
             print('sample_prob: ' + str(sample_prob))
-            print('all_prob_cdf: ' + str(all_prob_cdf))
+            print('\nall_prob_cdf: ' + str(all_prob_cdf))
+            print('sim_prob_cdf: ' + str(sim_prob_cdf))
             print('sample_prob_cdf: ' + str(sample_prob_cdf))
 
             plt.figure()
