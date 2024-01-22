@@ -24,7 +24,7 @@ print('small_data_dict: ' + str(small_data_dict))
 #dist = ss.lognorm
 
 sample_size = 10000
-stats_of_interest = ['pts', 'reb', 'ast']
+stats_of_interest = ['pts']#, 'reb', 'ast']
 
 # get scale from all samples
 player = 'clint capela'
@@ -39,11 +39,11 @@ for year, year_stat_dict in player_stat_dict.items():
         for stat_name, stat_dict in part_stat_dict.items():
 
             if stat_name in stats_of_interest:
-                print('\nstat_name: ' + stat_name)
+                #print('\nstat_name: ' + stat_name)
 
                 condition = 'all'
                 condition_stat_dict = stat_dict[condition]
-                condition_stat_data = np.sort(list(condition_stat_dict.values()))
+                condition_stat_data = list(condition_stat_dict.values())
 
                 if stat_name not in all_data_dict.keys():
                     all_data_dict[stat_name] = []
@@ -72,10 +72,11 @@ for stat_name, stat_dict in part_stat_dict.items():
         condition = 'all'
         condition_stat_dict = stat_dict[condition]
         all_data = np.sort(all_data_dict[stat_name])#np.sort(list(condition_stat_dict.values()))
+        print('all_data: ' + str(all_data))
         num_samples = len(all_data)
         print('num_samples: ' + str(num_samples))
         all_avg = np.mean(all_data)
-        all_var = np.var(all_data)
+        #all_var = np.var(all_data)
         # print('all_loc: ' + str(all_loc))
 
         # # need std dev for normal distrib
@@ -85,7 +86,7 @@ for stat_name, stat_dict in part_stat_dict.items():
 
         #print('\n===Find Best Fit===\n')
         # Initialize
-        dfit = distfit()
+        dfit = distfit(distr=['gamma','loggamma', 'pareto', 't'])
 
         # Search for best theoretical fit on your empirical data
         # model_results: {'model': {'name': 'loggamma', 'score': 0.002701250960026347, 'loc': -789.9132427398613, 'scale': 120.10481575160037, 'arg': (794.0689856756094,), 'params': (794.0689856756094, -789.9132427398613, 120.10481575160037), ...
@@ -156,8 +157,7 @@ for stat_name, stat_dict in part_stat_dict.items():
         # dists use shape param but different letters
         params_dict = {'gamma':'a',
                        'pareto':'b',
-                       'loggamma':'c', 
-                       'dweibull':'c'}
+                       'loggamma':'c'}
         dist_param = ''
         all_shape = 0
         all_loc = 0
@@ -172,7 +172,7 @@ for stat_name, stat_dict in part_stat_dict.items():
             all_prob = round(dist.pdf(test_val, all_shape, all_loc, all_scale), 4)
             all_prob_cdf = round(dist.cdf(test_val, all_shape, all_loc, all_scale), 4)
 
-            samples = []
+            #samples = []
             print('all_data: ' + str(all_data))
 
             print('all_avg: ' + str(all_avg))

@@ -29,6 +29,9 @@ irreg_play_time = {'craig porter': 25, 'reggie jackson': 35}
 read_x_seasons = 2 # set 0 or high number to read all seasons
 read_season_year = 2024 # user can choose year. read x seasons previous
 
+# === STATS OF INTEREST === 
+stats_of_interest = ['pts','reb','ast']
+
 # if we want to see how it would perform for previous years
 # we need to know the exact game (or even specific prop) that we want to evaluate
 # by default, go through entire year
@@ -85,7 +88,8 @@ settings = {'find matchups': find_matchups,
             'read odds': read_odds, 
             'irreg play time': irreg_play_time, 
             'read new game ids': read_new_game_ids, 
-            'read new player ids': read_new_player_ids}
+            'read new player ids': read_new_player_ids,
+            'stats of interest': stats_of_interest}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -96,7 +100,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('orl','atl')]#, ('sas','bos')]#, ('mil','cle'), ('hou','nyk')]#, ('mia','tor'), ('cha','nop'), ('dal','lal'), ('bkn','por')]#, ('nop','lal')
+game_teams = [('atl','sac')]#, ('sas','bos')]#, ('mil','cle'), ('hou','nyk')]#, ('mia','tor'), ('cha','nop'), ('dal','lal'), ('bkn','por')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:

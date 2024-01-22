@@ -1164,15 +1164,28 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
             if team_condition not in all_cur_conds:
                 all_cur_conds.append(team_condition)
 
-            # 4 team parts per team
+            # 3or4 team parts per team, or 1 per player weighted by playtime
             for team_part, team_part_players in team_parts.items():
                 if len(team_part_players) > 0:
                     # remove team name from abbrev for display
                     team_part_players_abbrevs = converter.convert_all_players_name_to_abbrevs(team_part_players, all_players_abbrevs)
+                    
+                    # add single player conds
+                    for player_abbrev in team_part_players_abbrevs:
+                        gp_cond_str = player_abbrev + ' ' + team_part
+                        if gp_cond_str not in all_cur_conds:
+                            all_cur_conds.append(gp_cond_str)
+                        if gp_cond_str not in player_gp_conds:
+                            player_gp_conds.append(gp_cond_str)
+                    
+                    # add group conds
                     gp_cond_str = generator.generate_players_string(team_part_players_abbrevs)
                     # add team cond bc diff if teammates or opp
                     # and not directly from sample, instead from avg of subsamples
-                    gp_cond_str += ' ' + team_condition + ' ' + team_part
+                    if team_condition == 'opp':
+                        gp_cond_str += ' ' + team_condition
+                    gp_cond_str += ' ' + team_part
+
                     if gp_cond_str not in all_cur_conds:
                         all_cur_conds.append(gp_cond_str)
                     if gp_cond_str not in player_gp_conds:
@@ -2178,9 +2191,9 @@ def determine_team_from_game_key(game_key, team_loc):
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
 def determine_condition_sample_size(player_stat_dict, condition, part):
-    print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
-    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    print('\nOutput: sample_size = x\n')
+    # print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+    # print('\nOutput: sample_size = x\n')
 
     sample_size = 0
 
@@ -2196,7 +2209,7 @@ def determine_condition_sample_size(player_stat_dict, condition, part):
                 #print('stat_dict: ' + str(stat_dict))
                 sample_size += len(stat_dict.keys())
 
-    print('sample_size: ' + str(sample_size))
+    #print('sample_size: ' + str(sample_size))
     return sample_size
 
 # get game idxs for each condition to see overlap
@@ -2232,11 +2245,11 @@ def determine_condition_sample_indexes(player_stat_dict, condition, part):
 # is that possible? i think not bc at least 1 player? no bc if new team then no matching conds
 # many cases all samples will have at least 1 player from cur conds, if played on team 2 seasons
 def determine_combined_conditions_sample_size(player_stat_dict, conditions, season_part):
-    print('\n===Determine Combined Conditions Sample Size===\n')
-    print('Setting: Season Part = ' + season_part)
-    print('\nInput: Conditions = {condition: cond type, ... = ' + str(conditions))
-    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    print('\nOutput: combined_sample_size = x\n')
+    # print('\n===Determine Combined Conditions Sample Size===\n')
+    # print('Setting: Season Part = ' + season_part)
+    # print('\nInput: Conditions = {condition: cond type, ... = ' + str(conditions))
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+    # print('\nOutput: combined_sample_size = x\n')
 
     combined_sample_size = 0
     all_unique_sample_idxs = {}
@@ -2255,7 +2268,7 @@ def determine_combined_conditions_sample_size(player_stat_dict, conditions, seas
 
     #print('all_unique_sample_idxs: ' + str(all_unique_sample_idxs))
 
-    print('combined_sample_size: ' + str(combined_sample_size))
+    #print('combined_sample_size: ' + str(combined_sample_size))
     return combined_sample_size
 
 def determine_team_timezone(team):
