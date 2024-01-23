@@ -330,13 +330,27 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     sample_scale = sample_fit_dict['scale']
 
     shape_key = 'shape'
-    mean_key = 'mean'
-    sample_shape = ''
-    sample_mean = ''
+    shape_1_key = 'shape 1'
+    shape_2_key = 'shape 2'
+    shape_3_key = 'shape 3'
+    #mean_key = 'mean'
+    #sample_shape = ''
+    #sample_mean = ''
     if shape_key in sample_fit_dict.keys():
         sample_shape = sample_fit_dict[shape_key]
 
         prob_less_or_equal = round(dist.cdf(val, sample_shape, sample_loc, sample_scale), 5)
+    elif shape_3_key in sample_fit_dict.keys():
+        sample_shape_1 = sample_fit_dict[shape_1_key]
+        sample_shape_2 = sample_fit_dict[shape_2_key]
+        sample_shape_3 = sample_fit_dict[shape_3_key]
+
+        prob_less_or_equal = round(dist.cdf(val, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale), 5)
+    elif shape_1_key in sample_fit_dict.keys():
+        sample_shape_1 = sample_fit_dict[shape_1_key]
+        sample_shape_2 = sample_fit_dict[shape_2_key]
+
+        prob_less_or_equal = round(dist.cdf(val, sample_shape_1, sample_shape_2, sample_loc, sample_scale), 5)
     else:
         #sample_mean = sample_fit_dict[mean_key] ???
 
@@ -375,13 +389,13 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     return prob_over
 
 def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
-    print('\n===Distribute All Probs===\n')
-    print('cond_data: ' + str(cond_data))
-    print('player: ' + str(player))
-    print('stat: ' + str(stat))
-    print('condition: ' + str(condition))
-    print('Input: player_stat_model = {model name, sim data, sim avg, sim max} = {name:pareto, data:sim_all_data, avg:a, max:m} = ' + str(player_stat_model))
-    print('\nOutput: all_probs = [p1,...]\n')
+    # print('\n===Distribute All Probs===\n')
+    # print('cond_data: ' + str(cond_data))
+    # print('player: ' + str(player))
+    # print('stat: ' + str(stat))
+    # print('condition: ' + str(condition))
+    # print('Input: player_stat_model = {model name, sim data, sim avg, sim max} = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
+    # print('\nOutput: all_probs = [p1,...]\n')
 
     probs = [] # 1 to N, list all vals in range in order. or val:prob
 
@@ -433,86 +447,145 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
     # all_scale = player_stat_model['scale']
 
 
+    if 'data' in player_stat_model.keys():
+        sim_all_data = player_stat_model['data']
+        all_avg = player_stat_model['avg'] #sim_all_data.mean #np.mean(sim_all_data) # ??? should be = all avg but could change to actually = avg?
+        #print('all_avg: ' + str(all_avg))
 
-    sim_all_data = player_stat_model['data']
-    all_avg = player_stat_model['avg'] #sim_all_data.mean #np.mean(sim_all_data) # ??? should be = all avg but could change to actually = avg?
-    print('all_avg: ' + str(all_avg))
+        cond_avg = np.mean(cond_data)#ss.fit(dist, data, bounds).params.mu
+        #print('cond_avg: ' + str(cond_avg))
 
-    cond_avg = np.mean(cond_data)#ss.fit(dist, data, bounds).params.mu
-    print('cond_avg: ' + str(cond_avg))
+        sample_data = sim_all_data * (cond_avg / all_avg)
 
-    sample_data = sim_all_data * (cond_avg / all_avg)
-
-    sample_avg = np.mean(sample_data)
-    print('sample_avg: ' + str(sample_avg))
-    #print('cond_avg: ' + str(cond_avg))
-
-
-    model_name = player_stat_model['name']#.keys()[0] #only 1 model per stat
-    dist_str = 'ss.' + model_name
-    dist = eval(dist_str)
-
-    params_dict = {'gamma':'a',
-                    'pareto':'b',
-                    'loggamma':'c',
-                    'lognorm':'s',
-                    't':'df'}
-
-    bounds = [(-200, 200), (-200, 200)]
-    if model_name in params_dict.keys():
-        bounds = [(-200, 200), (-200, 200), (-200, 200)]
-    #print('bounds: ' + str(bounds))
-    sample_fit_results = ss.fit(dist, sample_data, bounds)
-    sample_fit_params = sample_fit_results.params
-    print('sample_fit_params: ' + str(sample_fit_params))
+        #sample_avg = np.mean(sample_data)
+        #print('sample_avg: ' + str(sample_avg))
+        #print('cond_avg: ' + str(cond_avg))
 
 
-    
-    dist_param = ''
-    sample_fit_dict = {}
-    if model_name in params_dict.keys():
-        dist_param = params_dict[model_name]
+        model_name = player_stat_model['name']#.keys()[0] #only 1 model per stat
+        dist_str = 'ss.' + model_name
+        dist = eval(dist_str)
 
-        sample_shape_param = 'sample_fit_params.' + dist_param
-        sample_shape = eval(sample_shape_param) #fit_params.c
-        sample_loc = sample_fit_params.loc
-        sample_scale = sample_fit_params.scale
+        params_dict = {'gamma':'a',
+                        'powerlaw':'a',
+                        'skewcauchy':'a', 
+                        'skewnorm':'a', 
+                        'pareto':'b', # problem with pareto
+                        'exponpow':'b',
+                        'rice':'b',
+                        'loggamma':'c',
+                        'genextreme':'c',
+                        'powernorm':'c',
+                        'dweibull':'c',
+                        'exponnorm':'K',
+                        'lognorm':'s',
+                        't':'df',
+                        'chi':'df',
+                        'chi2':'df',
+                        'recipinvgauss':'mu',
+                        'pearson3':'skew'}
+        
+        two_params_dict = {'beta':['a', 'b'], 
+                           'norminvgauss':['a', 'b'], 
+                           'exponweib':['a', 'c'],
+                           'burr':['c', 'd'],
+                           'powerlognorm':['c', 's'],
+                           'f':['dfn', 'dfd'],
+                           'nct':['df', 'nc']}
+                           #'ncx':['df', 'nc']}
+        three_params_dict = {'ncf':['df1','df2','nc']}
 
-        sample_fit_dict = {'shape':sample_shape, 'loc':sample_loc, 'scale':sample_scale}
+        bounds = [(-200, 200), (-200, 200)]
+        if model_name in params_dict.keys():
+            bounds = [(-200, 200), (-200, 200), (-200, 200)]
+        elif model_name in two_params_dict.keys():
+            bounds = [(-200, 200), (-200, 200), (-200, 200), (-200, 200)]
+        elif model_name in three_params_dict.keys():
+            bounds = [(-200, 200), (-200, 200), (-200, 200), (-200, 200), (-200, 200)]
+        #print('bounds: ' + str(bounds))
+        sample_fit_results = ss.fit(dist, sample_data, bounds)
+        sample_fit_params = sample_fit_results.params
+        #print('sample_fit_params: ' + str(sample_fit_params))
 
-    else:
-        sample_loc = sample_fit_params.loc
-        sample_scale = sample_fit_params.scale
 
-        sample_fit_dict = {'loc':sample_loc, 'scale':sample_scale}
-    
+        
+        dist_param = ''
+        sample_fit_dict = {}
+        if model_name in params_dict.keys():
+            dist_param = params_dict[model_name]
 
-    # if normal
-    #loc, scale = dist.fit(data)
-    # if poisson
-    #bounds = [(0, 100)]
-    
-    #print('scale: ' + str(scale))
+            sample_shape_param = 'sample_fit_params.' + dist_param
+            sample_shape = eval(sample_shape_param) #fit_params.c
+            sample_loc = sample_fit_params.loc
+            sample_scale = sample_fit_params.scale
 
-    # NEED highest val from all data
-    # loop thru all vals, even those not directly hit but surpassed
-    highest_val = int(converter.round_half_up(player_stat_model['max'])) #sim_all_data.max #data[-1] # bc sorted
-    #print('highest_val: ' + str(highest_val))
-    # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
-    # include highest val
-    for val in range(highest_val):
-        #prob = 0
-        #if val not in probs.keys():
-        # we get prob of exactly 0 and prob >= next val
-        # if val == 0:
-        #     prob = generate_prob_from_distrib(val, loc, dist)
-        #     probs.append(prob)
+            sample_fit_dict = {'shape':sample_shape, 'loc':sample_loc, 'scale':sample_scale}
 
-        # dist_dict = {'model name':'', 'shape':'', 'loc':'', 'scale':''}
-        prob = generate_prob_over_from_distrib(val, dist, sample_fit_dict)
-        probs.append(prob)
+        elif model_name in two_params_dict.keys():
+            dist_params = two_params_dict[model_name]
 
-    print('probs: ' + str(probs))
+            shape_param_1 = 'sample_fit_params.' + dist_params[0]
+            shape_param_2 = 'sample_fit_params.' + dist_params[1]
+            sample_shape_1 = eval(shape_param_1) #fit_params.c
+            sample_shape_2 = eval(shape_param_2)
+            sample_loc = sample_fit_params.loc
+            sample_scale = sample_fit_params.scale
+
+            sample_fit_dict = {'shape 1':sample_shape_1, 'shape 2':sample_shape_2, 'loc':sample_loc, 'scale':sample_scale}
+
+        elif model_name in three_params_dict.keys():
+            dist_params = three_params_dict[model_name]
+
+            shape_param_1 = 'sample_fit_params.' + dist_params[0]
+            shape_param_2 = 'sample_fit_params.' + dist_params[1]
+            shape_param_3 = 'sample_fit_params.' + dist_params[2]
+            sample_shape_1 = eval(shape_param_1) #fit_params.c
+            sample_shape_2 = eval(shape_param_2)
+            sample_shape_3 = eval(shape_param_3)
+            sample_loc = sample_fit_params.loc
+            sample_scale = sample_fit_params.scale
+
+            sample_fit_dict = {'shape 1':sample_shape_1, 'shape 2':sample_shape_2, 'shape 3':sample_shape_3, 'loc':sample_loc, 'scale':sample_scale}
+
+        elif model_name == 'poisson':
+            sample_mu = sample_fit_params.mu
+            sample_loc = sample_fit_params.loc
+
+            sample_fit_dict = {'mu':sample_mu, 'loc':sample_loc}
+
+        else:
+            sample_loc = sample_fit_params.loc
+            sample_scale = sample_fit_params.scale
+
+            sample_fit_dict = {'loc':sample_loc, 'scale':sample_scale}
+        
+
+        # if normal
+        #loc, scale = dist.fit(data)
+        # if poisson
+        #bounds = [(0, 100)]
+        
+        #print('scale: ' + str(scale))
+
+        # NEED highest val from all data
+        # loop thru all vals, even those not directly hit but surpassed
+        highest_val = int(converter.round_half_up(player_stat_model['max'])) #sim_all_data.max #data[-1] # bc sorted
+        #print('highest_val: ' + str(highest_val))
+        # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
+        # include highest val
+        for val in range(highest_val):
+            #prob = 0
+            #if val not in probs.keys():
+            # we get prob of exactly 0 and prob >= next val
+            # if val == 0:
+            #     prob = generate_prob_from_distrib(val, loc, dist)
+            #     probs.append(prob)
+
+            # dist_dict = {'model name':'', 'shape':'', 'loc':'', 'scale':''}
+            prob = generate_prob_over_from_distrib(val, dist, sample_fit_dict)
+            probs.append(prob)
+
+    #print('probs: ' + str(probs))
     return probs
 
 

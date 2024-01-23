@@ -1083,9 +1083,10 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # so we can compute true prob weighted avg
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # cur_conds = {year:year, part:part, cond:cond}
-def determine_sample_size(player_stat_dict, cur_conds):
-    #print('\n===Determine Sample Size===\n')
-    #print('cur_conds: ' + str(cur_conds))
+def determine_sample_size(player_stat_dict, cur_conds, stat_name):
+    print('\n===Determine Sample Size===\n')
+    print('cur_conds: ' + str(cur_conds))
+    print('stat_name: ' + str(stat_name))
     #print('player_stat_dict: ' + str(player_stat_dict))
     sample_size = 0
 
@@ -1094,11 +1095,17 @@ def determine_sample_size(player_stat_dict, cur_conds):
     part = cur_conds['part']
     #stat = 'pts' first val in part_stats dict
 
-    if year in player_stat_dict.keys() and part in player_stat_dict[year].keys() and condition in list(player_stat_dict[year][part].values())[0].keys():
-        stat_dict = list(player_stat_dict[year][part].values())[0][condition]
-        sample_size = len(stat_dict.keys())
+    
+    if year in player_stat_dict.keys() and part in player_stat_dict[year].keys():
+        stat_dict = player_stat_dict[year][part][stat_name]
+        if condition in stat_dict.keys():
+            # cannot take first stat dict bc prev val depends on which stat
+            #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+            cond_stat_dict = stat_dict[condition]
+            print('cond_stat_dict: ' + str(cond_stat_dict))
+            sample_size = len(cond_stat_dict.keys())
 
-    #print('sample_size: ' + str(sample_size))
+    print('sample_size: ' + str(sample_size))
     return sample_size
 
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
@@ -1172,7 +1179,12 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
                     
                     # add single player conds
                     for player_abbrev in team_part_players_abbrevs:
-                        gp_cond_str = player_abbrev + ' ' + team_part
+                        
+                        gp_cond_str = player_abbrev
+                        if team_condition == 'opp':
+                            gp_cond_str += ' ' + team_condition
+                        gp_cond_str += ' ' + team_part
+
                         if gp_cond_str not in all_cur_conds:
                             all_cur_conds.append(gp_cond_str)
                         if gp_cond_str not in player_gp_conds:
@@ -2190,7 +2202,7 @@ def determine_team_from_game_key(game_key, team_loc):
 # all yrs for single condition
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
-def determine_condition_sample_size(player_stat_dict, condition, part):
+def determine_condition_sample_size(player_stat_dict, condition, part, stat_name=''):
     # print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
     # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
     # print('\nOutput: sample_size = x\n')
@@ -2200,8 +2212,15 @@ def determine_condition_sample_size(player_stat_dict, condition, part):
     for year, year_stat_dicts in player_stat_dict.items():
         #print('\nyear: ' + year)
         if part in year_stat_dicts.keys():
+            part_stat_dict = year_stat_dicts[part]
             # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
-            full_stat_dict = list(year_stat_dicts[part].values())[0]
+            # BUT we need to know stat to get prev val!!!
+            full_stat_dict = {}
+            if stat_name in part_stat_dict.keys():
+                full_stat_dict = part_stat_dict[stat_name]
+            else: # fail with error message or take first stat???
+                full_stat_dict = list(part_stat_dict.values())[0]
+                
             #print('full_stat_dict: ' + str(full_stat_dict))
             if condition in full_stat_dict.keys():
                 #print('found condition ' + condition)

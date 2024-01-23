@@ -372,7 +372,7 @@ def read_player_prev_stat_vals(season_log_of_interest):
 # read along with current conditions
 def read_all_prev_stat_vals(all_players_season_logs, season_year):
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ...\n')
+	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
 
 	all_prev_stat_vals = {}
 
@@ -3522,13 +3522,13 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 	#print('all_box_scores: ' + str(all_box_scores))
 	return (all_box_scores, current_box_scores)
 
-def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
+def read_game_info(game_key, init_game_ids_dict={}, game_id='', player='', read_new_game_ids=False):
 	#print("\n===Read Game Info: " + game_key.upper() + ", " + player.title() + "===\n")
 
 	game_info = {}
 
 	if game_id == '':
-		game_id = read_game_espn_id(game_key, init_game_ids_dict)
+		game_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
 
 	if game_id != '':
 		#game_info['id'] = game_id
@@ -3541,7 +3541,7 @@ def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
 			tod = ''
 			coverage = ''
 			city = ''
-			audience = ''
+			#audience = ''
 
 			try:
 			
@@ -3581,28 +3581,28 @@ def read_game_info(game_key, init_game_ids_dict={}, game_id='', player=''):
 				#print('city: ' + city)
 				
 				# CAPACITY: 19,200 -> 19200
-				audience = str(soup.find('div', {'class':'Attendance__Capacity'}))
+				#audience = str(soup.find('div', {'class':'Attendance__Capacity'}))
 				#print('audience: ' + audience)
 				# remove tags
-				audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
-				print('audience: ' + audience)
+				#audience = re.sub(r'</?[a-z]+(\s[a-z]+=".+")?>|<!--\s-->|,','',audience)
+				#print('audience: ' + audience)
 				
-				audience_data = audience.split(':')
-				if len(audience_data) > 1:
-					audience = audience_data[1].strip()
+				# audience_data = audience.split(':')
+				# if len(audience_data) > 1:
+				# 	audience = audience_data[1].strip()
 
-					# round to the nearest 1000
-					audience = str(int(converter.round_half_up(int(audience), -3)))
-				else:
-					audience = ''
-					print('Warning: Blank audience info! ' + audience)
+				# 	# round to the nearest 1000
+				# 	audience = str(int(converter.round_half_up(int(audience), -3)))
+				# else:
+				# 	audience = ''
+				# 	print('Warning: Blank audience info! ' + audience)
 				#print('audience: ' + audience)
 				# audience = re.sub(',','',audience)
 				# print('audience: ' + audience)
 				
 				#print('audience: ' + audience)
 
-				game_info = {'id':game_id, 'tod':tod, 'coverage':coverage, 'city':city, 'audience':audience}
+				game_info = {'id':game_id, 'tod':tod, 'coverage':coverage, 'city':city}#, 'audience':audience}
 			
 			except Exception as e:
 				print('Warning: Exception while reading game info! ' + str(e) + ', ' + game_key + ', ' + player.title())
@@ -3689,7 +3689,7 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 							continue
 
 						if game_espn_id != '':
-							game_info = read_game_info(game_key, init_game_ids_dict, game_espn_id, player)
+							game_info = read_game_info(game_key, init_game_ids_dict, game_espn_id, player, read_new_game_ids)
 							all_games_info[season_year][game_key] = game_info
 						else:
 							print('Warning: Blank Game ID! ' + game_key.upper())
@@ -4427,7 +4427,7 @@ def read_all_players_teams(players_names, all_players_espn_ids, read_new_teams=F
 
 
 # get game espn id from google
-def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=True):
+def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=False):
 	print('\n===Read Game ESPN ID======\n')
 	print('Input: game_key = away home date = ' + game_key)
 	# print('read_new_game_ids: ' + str(read_new_game_ids))
