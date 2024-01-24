@@ -18,6 +18,8 @@ import pandas as pd # write spreadsheets from lists to dataframes
 
 from datetime import datetime # add date to filename
 
+import pathlib # delete files
+
 def display_game_data(all_valid_streaks_list):
     #print("\n===Game Data===\n")
     # all_player_pre_dicts = [{'prediction':val,'overall record':[],..},{},..]
@@ -821,9 +823,10 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
 # so here we separate to write cur and prev separately
 # bc prev stays same while cur changes each new game
 # need cur_yr bc only cur yr changes
-def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subject_name=''):
+def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, yesterday_file, cur_yr, subject_name=''):
     # print('\n===Write Cur and Prev===\n')
     # print('cur_yr: ' + str(cur_yr))
+    # cur file = player_cur_season_log_filename = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
 
     if cur_yr == '':
         cur_yr = determiner.determine_current_season_year()
@@ -873,10 +876,19 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subje
     #print('final_prev_dict: ' + str(final_prev_dict))
     if not init_cur_dict == final_cur_dict:
         #print(subject_name + ' CURRENT year data changed so write to file')
-        write_json_to_file(final_cur_dict, cur_file, 'w')
+        write_json_to_file(final_cur_dict, cur_file)
+
+        # delete prev day cur file bc replaced by cur day
+        #yesterday = 
+        #yesterday_file = prev_day_cur_file = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
+        #pathlib.Path(path).is_file():
+        path = pathlib.Path(yesterday_file)
+        if path.is_file():
+            path.unlink()
+
     if not init_prev_dict == final_prev_dict:
         #print(subject_name + ' PREVIOUS year data changed so write to file')
-        write_json_to_file(final_prev_dict, prev_file, 'w')
+        write_json_to_file(final_prev_dict, prev_file)
 
 
 	# now that we have new cur game log, we can delete the old one

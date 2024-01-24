@@ -1084,9 +1084,9 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # cur_conds = {year:year, part:part, cond:cond}
 def determine_sample_size(player_stat_dict, cur_conds, stat_name):
-    print('\n===Determine Sample Size===\n')
-    print('cur_conds: ' + str(cur_conds))
-    print('stat_name: ' + str(stat_name))
+    # print('\n===Determine Sample Size===\n')
+    # print('cur_conds: ' + str(cur_conds))
+    # print('stat_name: ' + str(stat_name))
     #print('player_stat_dict: ' + str(player_stat_dict))
     sample_size = 0
 
@@ -1102,10 +1102,10 @@ def determine_sample_size(player_stat_dict, cur_conds, stat_name):
             # cannot take first stat dict bc prev val depends on which stat
             #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
             cond_stat_dict = stat_dict[condition]
-            print('cond_stat_dict: ' + str(cond_stat_dict))
+            #print('cond_stat_dict: ' + str(cond_stat_dict))
             sample_size = len(cond_stat_dict.keys())
 
-    print('sample_size: ' + str(sample_size))
+    #print('sample_size: ' + str(sample_size))
     return sample_size
 
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
@@ -1144,9 +1144,9 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
     return unit_time_period
 
 def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
-    print('\n===Determine All Current GP Conds===\n')
-    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
-    print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
+    # print('\n===Determine All Current GP Conds===\n')
+    # print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
+    # print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
 
     all_cur_conds = []
     all_players_gp_conds = {}
@@ -1156,13 +1156,13 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
     # so 10 total: 2 for overall 2 teams per game, plus 8 bc 4 parts per team and 2 teams
     # all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...
     for player, gp_cur_conds in all_game_player_cur_conds.items():
-        print('\nplayer: ' + player)
+        #print('\nplayer: ' + player)
 
         player_gp_conds = []
 
         # {teammates: {starters:[],...}, opp: {...}}, ...
         for team_condition, team_parts in gp_cur_conds.items():
-            print('\nteam_condition: ' + team_condition)
+            #print('\nteam_condition: ' + team_condition)
             # add 2 overall gp conds
             # all_cur_conds = ['all', 'teammates', 'opp']
             #all_cur_conds.extend(['teammates', 'opp'])
@@ -1208,7 +1208,7 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
 
     
 
-    print('all_cur_conds: ' + str(all_cur_conds))
+    #print('all_cur_conds: ' + str(all_cur_conds))
     return all_cur_conds, all_players_gp_conds
 
 # all unique conds for all players so we can display all players in same table with NA for stats that dont have condition
@@ -1216,9 +1216,9 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
 # input: all_cur_conds_lists = {p1:[m fultz pg out, away, ...],...}
 # output: all_cur_conds: ['all', 'away', 'm fultz pg out', 'bench', 'start', 'home']
 def determine_all_current_conditions(all_cur_conds_dicts):
-    print('\n===Determine All Current Conditions===\n')
-    print('Input: all_cur_conds_dicts = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_dicts))
-    print('\nOutput: all_cur_conds = {p1:[\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...], ...\n')
+    # print('\n===Determine All Current Conditions===\n')
+    # print('Input: all_cur_conds_dicts = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_dicts))
+    # print('\nOutput: all_cur_conds = {p1:[\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...], ...\n')
 
     all_cur_conds = ['all']
     all_players_cur_conds = {}
@@ -1277,7 +1277,7 @@ def determine_all_current_conditions(all_cur_conds_dicts):
 
     
 
-    print('all_cur_conds: ' + str(all_cur_conds))
+    #print('all_cur_conds: ' + str(all_cur_conds))
     return all_cur_conds, all_players_cur_conds
 
 # determine game num so we can sort by game
@@ -1765,6 +1765,32 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+def determine_dnp_player(player_teams, cur_yr, player_name):
+    print('\n===Determine DNP Player: ' + player_name.title() + '===\n')
+    print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...')
+
+    dnp = False
+
+    player_mean_minutes = 0
+    if cur_yr in player_teams.keys():
+        # player may have been recently traded and not played yet (eg theo maledon)
+        # ordered from distant to recent
+        cur_yr_teams_dicts = list(player_teams[cur_yr].values()) # {team:{min:m, gp:gp}, ...}
+        #if team in cur_yr_teams_dict.keys():
+        cur_team_dict = cur_yr_teams_dicts[-1] # {min:m, gp:gp}
+        player_mean_minutes = cur_team_dict['MIN']
+
+    print('player_mean_minutes: ' + str(player_mean_minutes))
+    if player_mean_minutes < 11.5:
+        dnp = True
+
+    print('dnp: ' + str(dnp))
+    return dnp
+
+
 # given todays date find next game date
 def determine_next_game_num(schedule_date_dict, cur_yr):
     # print('\n===Determine Next Game Num===\n')
@@ -2220,7 +2246,7 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
                 full_stat_dict = part_stat_dict[stat_name]
             else: # fail with error message or take first stat???
                 full_stat_dict = list(part_stat_dict.values())[0]
-                
+
             #print('full_stat_dict: ' + str(full_stat_dict))
             if condition in full_stat_dict.keys():
                 #print('found condition ' + condition)

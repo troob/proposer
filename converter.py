@@ -180,6 +180,21 @@ def convert_time_zone_to_time(timezone):
 
     return time
 
+# convert 12/29/2023 to Dec 29 2023
+# so convert month num to name
+def convert_month_num_to_abbrev(date):
+
+    months = ['jan', 'feb', 'mar', 'apr', 'may', 'jun', 'jul', 'aug', 'sep', 'oct', 'nov', 'dec']
+
+    date_data = date.split('/')
+    mth_num = date_data[0]
+    day_num = date_data[1]
+    year = date_data[2]
+
+    abbrev = months[int(mth_num)-1] + ' ' + day_num + ' ' + year
+
+    return abbrev
+
 def convert_month_abbrev_to_num(game_mth_abbrev):
     #print('\n===Convert Month Abbrev to Num: ' + game_mth_abbrev + '===\n')
 
@@ -419,9 +434,11 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     return game_player_abbrev
 
 def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
-    print('\n===Convert All Players Names to Abbrevs===\n')
-    print('players: ' + str(players))
+    # print('\n===Convert All Players Names to Abbrevs===\n')
+    # print('players: ' + str(players))
+    
     abbrevs = []
+    
     for player in players:
         # check both forms of name
         abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
@@ -430,7 +447,8 @@ def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
             abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
         
         abbrevs.append(abbrev)
-    print('abbrevs: ' + str(abbrevs))
+
+    #print('abbrevs: ' + str(abbrevs))
     return abbrevs
 
 # combine all names into single string condition, alphabet order

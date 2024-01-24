@@ -389,13 +389,13 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     return prob_over
 
 def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
-    # print('\n===Distribute All Probs===\n')
-    # print('cond_data: ' + str(cond_data))
-    # print('player: ' + str(player))
-    # print('stat: ' + str(stat))
-    # print('condition: ' + str(condition))
-    # print('Input: player_stat_model = {model name, sim data, sim avg, sim max} = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
-    # print('\nOutput: all_probs = [p1,...]\n')
+    print('\n===Distribute All Probs===\n')
+    print('cond_data: ' + str(cond_data))
+    print('player: ' + str(player))
+    print('stat: ' + str(stat))
+    print('condition: ' + str(condition))
+    print('Input: player_stat_model = {model name, sim data, sim avg, sim max} = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
+    print('\nOutput: all_probs = [p1,...]\n')
 
     probs = [] # 1 to N, list all vals in range in order. or val:prob
 
@@ -491,9 +491,9 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
                            'burr':['c', 'd'],
                            'powerlognorm':['c', 's'],
                            'f':['dfn', 'dfd'],
-                           'nct':['df', 'nc']}
+                           'nct':['df', 'nc']} # takes extra long to load
                            #'ncx':['df', 'nc']}
-        three_params_dict = {'ncf':['df1','df2','nc']}
+        three_params_dict = {'ncf':['dfn','dfd','nc']}
 
         bounds = [(-200, 200), (-200, 200)]
         if model_name in params_dict.keys():
@@ -585,7 +585,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
             prob = generate_prob_over_from_distrib(val, dist, sample_fit_dict)
             probs.append(prob)
 
-    #print('probs: ' + str(probs))
+    print('probs: ' + str(probs))
     return probs
 
 
