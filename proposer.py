@@ -5,6 +5,9 @@
 # list of conditions
 # playing against former team players probably play better bc more effort
 
+#!/.venv/bin/python
+# source .venv/bin/activate
+
 
 import generator, reader
 
@@ -26,7 +29,7 @@ irreg_play_time = {'craig porter': 25, 'reggie jackson': 35}
 # ===============
 
 # read all seasons to compare and see trend
-read_x_seasons = 3 # set 0 or high number to read all seasons
+read_x_seasons = 2 # set 0 or high number to read all seasons
 read_season_year = 2024 # user can choose year. read x seasons previous
 
 # === STATS OF INTEREST === 
@@ -62,7 +65,7 @@ read_new_rosters = False
 # === GAME IDs === 
 # if error 429 too many requests then we need to stop reading new game ids for 1hr
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
-read_new_game_ids = False
+read_new_game_ids = True
 
 # === PLAYER IDs ===
 # need all players ids but halt if error too many requests
@@ -75,6 +78,10 @@ find_players = True # if true, read all players in game box scores to see prob w
 # set false to save time if observing all probs
 # make list of sources with different odds 
 read_odds = False # set false to test other features
+
+#===CONTROL CONDITIONs===
+# test a condition or group of conditions by itself
+control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
 
 
 
@@ -89,7 +96,8 @@ settings = {'find matchups': find_matchups,
             'irreg play time': irreg_play_time, 
             'read new game ids': read_new_game_ids, 
             'read new player ids': read_new_player_ids,
-            'stats of interest': stats_of_interest}
+            'stats of interest': stats_of_interest,
+            'control conditions': control_conds}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -100,7 +108,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = []#[('lal','lac')]#, ('nop','lal')
+game_teams = [('phi','ind')]#, ('uta','wsh'), ('min','bkn'), ('bos','mia'), ('den','nyk'), ('sac','gsw'), ('chi','lal')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -108,8 +116,8 @@ game_teams = []#[('lal','lac')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-#players_names = ['anthony davis'] # 'jacob gilyard', use for testing
+#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+players_names = ['joel embiid'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

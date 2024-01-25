@@ -1,37 +1,40 @@
 # reader.py
 # functions for a reader
 
-import re
-import pandas as pd # read html results from webpage
-from urllib.request import Request, urlopen # request website, open webpage given req
-from urllib.error import URLError
-import time # halt code to retry website request
-import requests # track timeout error
+# === Standard External Libraries ===
 from bs4 import BeautifulSoup # read html from webpage
-from tabulate import tabulate # display output, which for the reader is input files to confirm and review their contents
-
-from selenium import webdriver # need to read html5 webpages
-from webdriver_manager.chrome import ChromeDriverManager # need to access dynamic webpages
-import time # need to read dynamic webpages
-from selenium.webdriver.chrome.options import Options # block ads
 
 import csv
-import json # we need projected lines table to be json so we can refer to player when analyzing stats
-
-import determiner # determine played season before reading webpage to avoid exception/error
-import isolator # isolate_player_game_data to read data from file
-
-import math # round up to nearest integer while reading
-
-import writer # write to file so we can check if data exists in local file so we can read from file
 
 from datetime import datetime # get current year so we can get current teams
 
 import copy # deepcopy game logs json so we can add to it before writing to file without losing data
+import json # we need projected lines table to be json so we can refer to player when analyzing stats
+import math # round up to nearest integer while reading
+import pandas as pd # read html results from webpage
+#import random # random user agents to avoid being blocked for too many requests
 
-import random # random user agents to avoid being blocked for too many requests
+import re
+import requests # track timeout error
 
+from tabulate import tabulate # display output, which for the reader is input files to confirm and review their contents
+
+import time # halt code to retry website request, # need to read dynamic webpages
+
+from selenium import webdriver # need to read html5 webpages
+from webdriver_manager.chrome import ChromeDriverManager # need to access dynamic webpages
+#from selenium.webdriver.chrome.options import Options # block ads
+
+from urllib.error import URLError
+from urllib.request import Request, urlopen # request website, open webpage given req
+
+# === Local Internal Libraries ===
 import converter # convert year span to current season
+import determiner # determine played season before reading webpage to avoid exception/error
+import isolator # isolate_player_game_data to read data from file
+import writer # write to file so we can check if data exists in local file so we can read from file
+
+
 
 # get data from a file and format into a list (same as generator version of this fcn but more general)
 # input such as Game Data - All Games
@@ -3395,21 +3398,25 @@ def read_game_key(season_year, team_abbrev, game_row):
 	opp_str = game_row['OPP']#player_reg_season_log.loc[game_idx, 'OPP']
 	opp_abbrev = read_team_abbrev(opp_str) #re.sub('@|vs','',opp_str)
 
-	# irregular_abbrevs = {'no':'nop', 'ny':'nyk', 'sa': 'sas', 'gs':'gsw' } # for these match the first 3 letters of team name instead
-	# if opp_abbrev in irregular_abbrevs.keys():
-	# 	opp_abbrev = irregular_abbrevs[opp_abbrev]
-	#print('opp_abbrev: ' + opp_abbrev)
+	game_key = ''
+	if opp_abbrev != '': # maybe blank if exhibition game preseason
+		# irregular_abbrevs = {'no':'nop', 'ny':'nyk', 'sa': 'sas', 'gs':'gsw' } # for these match the first 3 letters of team name instead
+		# if opp_abbrev in irregular_abbrevs.keys():
+		# 	opp_abbrev = irregular_abbrevs[opp_abbrev]
+		#print('opp_abbrev: ' + opp_abbrev)
 
-	# if we always use format 'away home m/d/y' then we can check to see if key exists and get game id from local file
-	away_abbrev = opp_abbrev
-	home_abbrev = team_abbrev
-	#player_loc = 'home' # for box score players in game sort by teammates
-	if re.search('@',opp_str):
-		away_abbrev = team_abbrev
-		home_abbrev = opp_abbrev
-		#player_loc = 'away'
+		# if we always use format 'away home m/d/y' then we can check to see if key exists and get game id from local file
+		away_abbrev = opp_abbrev
+		home_abbrev = team_abbrev
+		#player_loc = 'home' # for box score players in game sort by teammates
+		if re.search('@',opp_str):
+			away_abbrev = team_abbrev
+			home_abbrev = opp_abbrev
+			#player_loc = 'away'
+			
 		
-	game_key = away_abbrev + ' ' + home_abbrev + ' ' + date
+		#if away_abbrev != '' and home_abbrev != '':
+		game_key = away_abbrev + ' ' + home_abbrev + ' ' + date
 	
 	#print('game_key: ' + game_key)
 	return game_key
@@ -3494,7 +3501,7 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 					game_key = read_game_key(season_year, team_abbrev, row)
 
 					# if game not saved then read from internet
-					if game_key not in all_box_scores[season_year].keys():
+					if game_key != '' and game_key not in all_box_scores[season_year].keys():
 
 						game_espn_id = read_game_espn_id(game_key, existing_game_ids_dict, read_new_game_ids)
 						# if returned no game id, then bc too many requests, so stop reading new ids
@@ -3691,7 +3698,7 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 					game_key = read_game_key(season_year, team_abbrev, row)
 
 					# if game not saved then read from internet
-					if game_key not in all_games_info[season_year].keys():
+					if game_key != '' and game_key not in all_games_info[season_year].keys():
 
 						game_espn_id = read_game_espn_id(game_key, init_game_ids_dict, read_new_game_ids)
 						# if returned no game id, then bc too many requests, so stop reading new ids

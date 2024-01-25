@@ -7,9 +7,9 @@ import reader # format stat val
 
 from datetime import datetime # convert date str to date so we can see if games 1 day apart and how many games apart
 
-import requests # check if webpage exists while we are looping through player game log seasons until we cannot find game log for that year (note rare players may take a year off and come back but for now assume consistent years)
+#import requests # check if webpage exists while we are looping through player game log seasons until we cannot find game log for that year (note rare players may take a year off and come back but for now assume consistent years)
 # request not working by checking status code 200 so test httplib2
-import httplib2
+#import httplib2
 
 import pandas as pd # read html results from webpage to determine if player played season
 
@@ -152,6 +152,71 @@ def determine_col_name(keyword,data):
 
     #print("final_col_name: " + final_col_name)
     return final_col_name
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+
+# 1 falls in range 0-4 bc includes 4
+def determine_stat_range(val, stat):
+    print("\n===Determine Stat Range: " + str(val) + " " + stat + "===\n")
+
+    set_range = 5
+    if stat == 'pts':
+        set_range = 10
+
+    min_val = 0
+    max_val = set_range - 1
+    #val_range = min_val + '-' + max_val
+
+    while val > max_val:
+
+        min_val += set_range
+        max_val += set_range
+
+
+    val_range = str(min_val) + '-' + str(max_val)
+
+
+
+    # max_val = set_range
+
+    # while val < max_val:
+
+    #     min_val = 0
+    #     max_val = set_range - 1
+    #     if val > min_val and val < max_val:
+    #         val_range = 
+
+    #     set_range += set_range
+
+    print("val_range: " + str(val_range))
+    return val_range
+
 
 def determine_team_name(team_abbrev, team_abbrevs_dict={}):
     #print("\n===Determine Team Name: " + team_abbrev + "===\n")
@@ -1301,6 +1366,7 @@ def determine_game_num(game_teams, player_team):
 
 
 def determine_player_game(game_teams, player_team):
+    #game = ()
     for game in game_teams:
         if player_team in game:
             return game
@@ -1842,9 +1908,9 @@ def determine_next_game_num(schedule_date_dict, cur_yr):
 
 # given todays date find next game date
 def determine_next_game_date(schedule_date_dict, cur_yr):
-    print('\n===Determine Next Game Date===\n')
-    print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
-    print('\nOutput: next_game_date = mm/dd/yyyy\n')
+    # print('\n===Determine Next Game Date===\n')
+    # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
+    # print('\nOutput: next_game_date = mm/dd/yyyy\n')
 
 
     next_game_num = determine_next_game_num(schedule_date_dict, cur_yr)
@@ -1868,7 +1934,7 @@ def determine_next_game_date(schedule_date_dict, cur_yr):
     # next_game_date_obj = datetime.strptime(next_game_date, '%b %d %Y')
     # next_game_date = next_game_date_obj.strftime('%m/%d/%Y')
     
-    print('next_game_date: ' + next_game_date)
+    #print('next_game_date: ' + next_game_date)
     return next_game_date
 
 
@@ -2373,7 +2439,7 @@ def determine_timelag(city, player_team):
     return timelag
 
 def determine_timezone(city):
-    print('Input: city = city STATE ABBREV = ' + city)#= Milwaukee WI')
+    #print('Input: city = city STATE ABBREV = ' + city)#= Milwaukee WI')
     
     # only need state abbrev for some
     #state = city.split()[-1]

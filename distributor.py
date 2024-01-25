@@ -299,7 +299,7 @@ def generate_player_prob_distribs(player):
     return player_prob_distribs
 
 
-player_prob_distribs = generate_player_prob_distribs(player)
+#player_prob_distribs = generate_player_prob_distribs(player)
 
 
 
@@ -389,66 +389,19 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     return prob_over
 
 def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
-    print('\n===Distribute All Probs===\n')
-    print('cond_data: ' + str(cond_data))
-    print('player: ' + str(player))
-    print('stat: ' + str(stat))
-    print('condition: ' + str(condition))
-    print('Input: player_stat_model = {model name, sim data, sim avg, sim max} = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
-    print('\nOutput: all_probs = [p1,...]\n')
+    # print('\n===Distribute All Probs===\n')
+    # print('cond_data: ' + str(cond_data))
+    # print('player: ' + str(player))
+    # print('stat: ' + str(stat))
+    # print('condition: ' + str(condition))
+    # print('Input: player_stat_model = {model name, sim data, sim avg, sim max}')# = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
+    # print('\nOutput: all_probs = [p1,...]\n')
 
     probs = [] # 1 to N, list all vals in range in order. or val:prob
 
 
-    # if only 1 sample, use it as mean, 
-    # and simulate 4 more samples to get at least 5 samples (consider 10)
-    # get scale of data from other conditions with more samples. easiest to get from 'all' condition
-    # use scale to get random samples with loc and scale of data
-    # Generate a random dataset
-    # if len(data) == 1:
-    #     #data = np.random.normal(data[0], avg_scale, 100)
-    #     loc = data[0]
-    #     if loc == 0:
-    #         loc = 0.1
-    #     rng = np.random.default_rng()
-    #     data = list(rng.poisson(loc, 100))
-    #     #print('poisson_data: ' + str(data))
-    #     # normal_data = list(rng.normal(data[0], avg_scale, 100))
-    #     # print('normal_data: ' + str(normal_data))
-    #     # data = normal_data
-    
-    # # if <5 samples, more accurate to simulate samples with same mean and extrapolated scale
-    # # then why not do for all conditions even with >5 samples?
-    # # bc scale not same for all conditions
-    # elif len(data) < 5:
-    #     loc = np.mean(data)
-    #     if loc == 0:
-    #         loc = 0.1
-    #     #data = np.random.normal(loc, avg_scale, 100)
-    #     rng = np.random.default_rng()
-    #     # data = list(rng.poisson(loc, 100))
-    #     # print('simulated data: ' + str(data))
-
-    #     data = list(rng.poisson(loc, 100))
-    #     #print('poisson_data: ' + str(data))
-    #     # normal_data = list(rng.normal(loc, avg_scale, 100))
-    #     # print('normal_data: ' + str(normal_data))
-    #     # data = normal_data
-    
-    # # sort to get highest val and all vals below that
-    # data = sorted(data)
-
-    
-
-    # {shape:a, loc:l, scale:s}
-    #all_fit_params = player_stat_model.values()[0]
-    # all_shape = player_stat_model['shape']
-    # all_loc = player_stat_model['loc']
-    # all_scale = player_stat_model['scale']
-
-
     if 'data' in player_stat_model.keys():
-        sim_all_data = player_stat_model['data']
+        sim_all_data = np.array(player_stat_model['data'])
         all_avg = player_stat_model['avg'] #sim_all_data.mean #np.mean(sim_all_data) # ??? should be = all avg but could change to actually = avg?
         #print('all_avg: ' + str(all_avg))
 
@@ -560,13 +513,6 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
             sample_fit_dict = {'loc':sample_loc, 'scale':sample_scale}
         
 
-        # if normal
-        #loc, scale = dist.fit(data)
-        # if poisson
-        #bounds = [(0, 100)]
-        
-        #print('scale: ' + str(scale))
-
         # NEED highest val from all data
         # loop thru all vals, even those not directly hit but surpassed
         highest_val = int(converter.round_half_up(player_stat_model['max'])) #sim_all_data.max #data[-1] # bc sorted
@@ -574,18 +520,11 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
         # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
         # include highest val
         for val in range(highest_val):
-            #prob = 0
-            #if val not in probs.keys():
-            # we get prob of exactly 0 and prob >= next val
-            # if val == 0:
-            #     prob = generate_prob_from_distrib(val, loc, dist)
-            #     probs.append(prob)
-
             # dist_dict = {'model name':'', 'shape':'', 'loc':'', 'scale':''}
             prob = generate_prob_over_from_distrib(val, dist, sample_fit_dict)
             probs.append(prob)
 
-    print('probs: ' + str(probs))
+    #print('probs: ' + str(probs))
     return probs
 
 

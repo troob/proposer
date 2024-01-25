@@ -884,7 +884,7 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, yesterday_fil
         #pathlib.Path(path).is_file():
         path = pathlib.Path(yesterday_file)
         if path.is_file():
-            path.unlink()
+            path.unlink() # delete
 
     if not init_prev_dict == final_prev_dict:
         #print(subject_name + ' PREVIOUS year data changed so write to file')

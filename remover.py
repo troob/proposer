@@ -214,7 +214,7 @@ def remove_empty_box_scores():
 
 
 
-remove_empty_box_scores()
+#remove_empty_box_scores()
 
 
 
