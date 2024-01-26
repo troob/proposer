@@ -420,6 +420,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
         dist = eval(dist_str)
 
         params_dict = {'gamma':'a',
+                        'erlang':'a',
                         'powerlaw':'a',
                         'skewcauchy':'a', 
                         'skewnorm':'a', 
@@ -448,13 +449,14 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
                            #'ncx':['df', 'nc']}
         three_params_dict = {'ncf':['dfn','dfd','nc']}
 
-        bounds = [(-200, 200), (-200, 200)]
+        bounds = [(-100, 100), (-100, 100)]
+        #bounds = [(-200, 200), (-200, 200)]
         if model_name in params_dict.keys():
-            bounds = [(-200, 200), (-200, 200), (-200, 200)]
+            bounds = [(-100, 100), (-100, 100), (-100, 100)]
         elif model_name in two_params_dict.keys():
-            bounds = [(-200, 200), (-200, 200), (-200, 200), (-200, 200)]
+            bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100)]
         elif model_name in three_params_dict.keys():
-            bounds = [(-200, 200), (-200, 200), (-200, 200), (-200, 200), (-200, 200)]
+            bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)]
         #print('bounds: ' + str(bounds))
         sample_fit_results = ss.fit(dist, sample_data, bounds)
         sample_fit_params = sample_fit_results.params
@@ -506,6 +508,12 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
             sample_fit_dict = {'mu':sample_mu, 'loc':sample_loc}
 
+        elif model_name == 'binom':
+            sample_n = sample_fit_params.n
+            sample_p = sample_fit_params.p
+            sample_loc = sample_fit_params.loc
+
+            sample_fit_dict = {'n':sample_n, 'p':sample_p, 'loc':sample_loc}
         else:
             sample_loc = sample_fit_params.loc
             sample_scale = sample_fit_params.scale

@@ -1,7 +1,44 @@
 # remover.py
 # remove erroneous logs by key
 
+# === Standard External Libraries ===
+import fnmatch
+import os
 import re, json, csv
+import pathlib # delete files
+
+
+
+def delete_file(subject_name, todays_date, data_type=''):
+	# print('\n===Delete File===\n')
+	# print('subject_name: ' + subject_name)
+	# print('todays_date: ' + todays_date)
+
+
+	folder = 'data'
+	#file_path = ''
+	if data_type != '':
+		folder += '/' + data_type # data type eg models
+		#file_path = folder + '/'
+	for file in os.listdir(folder):
+		#print('file: ' + file)
+		file_key = subject_name + '*'#.xlsx'#.json'
+		if fnmatch.fnmatch(file, file_key):
+			# if not same day
+			# get date from filename
+			file_data = file.split() # ...01-25-2024.json
+			file_date = file_data[-1].split('.')[0] # 01-25-2024
+			#print('file_date: ' + file_date)
+
+			if file_date != todays_date:
+
+				path_str = folder + '/' + file
+				#print('found file to delete: ' + path_str)
+				path = pathlib.Path(path_str)
+				#if path.is_file():
+				path.unlink() # delete
+				# always remove prev file so only 1 so break after
+				break
 
 
 def remove_stat_order(props):
@@ -12,6 +49,12 @@ def remove_stat_order(props):
         new_props.append(prop)
     
     return new_props
+
+
+
+
+
+
 
 
 

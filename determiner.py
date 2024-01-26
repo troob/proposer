@@ -183,7 +183,7 @@ def determine_col_name(keyword,data):
 
 # 1 falls in range 0-4 bc includes 4
 def determine_stat_range(val, stat):
-    print("\n===Determine Stat Range: " + str(val) + " " + stat + "===\n")
+    #print("\n===Determine Stat Range: " + str(val) + " " + stat + "===\n")
 
     set_range = 5
     if stat == 'pts':
@@ -214,7 +214,7 @@ def determine_stat_range(val, stat):
 
     #     set_range += set_range
 
-    print("val_range: " + str(val_range))
+    #print("val_range: " + str(val_range))
     return val_range
 
 
@@ -1285,7 +1285,8 @@ def determine_all_current_conditions(all_cur_conds_dicts):
     # print('Input: all_cur_conds_dicts = {player:{cond_key:cond_val,... = ' + str(all_cur_conds_dicts))
     # print('\nOutput: all_cur_conds = {p1:[\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...], ...\n')
 
-    all_cur_conds = ['all']
+    # does all here affect later???
+    all_cur_conds = ['all'] 
     all_players_cur_conds = {}
 
     #for player, player_cur_conds in all_current_conditions.items():
@@ -1296,6 +1297,7 @@ def determine_all_current_conditions(all_cur_conds_dicts):
         #for cond_key, cond_val in player_cur_conds.items():
             #print('cond_key: ' + str(cond_key))
         
+        # does all here affect later???
         player_conds_list = ['all']
 
         for cond_val in player_cur_conds.values():
@@ -1517,8 +1519,7 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str):
 # init_player_stat_dict = {"2023": {"regular": {"pts": {"all": {"0": 14,...
 # dont need season part bc if missing any season part then need stat dict
 def determine_need_stat_dict(player_stat_dict, season_year, find_players=False):
-
-    #print('\n===Determine Need Stat Dict===\n')
+    print('\n===Determine Need Stat Dict: ' + season_year + '===\n')
 
     need_stat_dict = False
 
@@ -1533,6 +1534,7 @@ def determine_need_stat_dict(player_stat_dict, season_year, find_players=False):
     elif find_players and not determine_key_in_stat_dict(team_players_conditions, condition_keys):
         need_stat_dict = True
 
+    print('need_stat_dict: ' + str(need_stat_dict))
     return need_stat_dict
 
 # if reg season, game idx starts before playoffs

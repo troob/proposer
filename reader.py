@@ -374,8 +374,8 @@ def read_player_prev_stat_vals(season_log_of_interest):
 
 # read along with current conditions
 def read_all_prev_stat_vals(all_players_season_logs, season_year):
-	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
+	# print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	# print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
 
 	all_prev_stat_vals = {}
 
@@ -390,7 +390,7 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
-	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+	#print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 	return all_prev_stat_vals
 
 # get team season schedule from espn.com
@@ -1520,7 +1520,7 @@ def read_all_players_in_games(all_players_season_logs, all_players_teams, cur_yr
 			#year_idx += 1
 						
 	if not init_box_scores == all_box_scores:
-		writer.write_cur_and_prev(init_box_scores, all_box_scores, cur_box_scores_file, prev_box_scores_file, yesterday_box_scores_file, cur_yr)
+		writer.write_cur_and_prev(init_box_scores, all_box_scores, cur_box_scores_file, prev_box_scores_file, cur_yr)
 		
 	# all_box_scores = {game:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}}
 	print('all_box_scores: ' + str(all_box_scores))
@@ -2926,7 +2926,7 @@ def read_all_players_abbrevs(all_box_scores, init_all_players_teams, rosters, cu
 
 # active teammates actually played with so not including practice players on roster
 # all_players_teammates = {player:{year:[teammates],...},...}
-def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, todays_date):
+def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, season_years):
 	print('\n===Read All Players Teammates===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
@@ -2950,7 +2950,7 @@ def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, 
 
 	for player, player_season_logs in all_players_season_logs.items():
 		# player_teammates = {year:[teammates],...}
-		player_teammates = read_player_teammates(player, player_season_logs, all_box_scores, all_players_teammates, cur_yr)
+		player_teammates = read_player_teammates(player, player_season_logs, all_box_scores, all_players_teammates, cur_yr, season_years)
 
 		all_players_teammates[player] = player_teammates
 
@@ -2969,7 +2969,7 @@ def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, 
 # all_players_teammates = {player:{year:[teammates],...},...}
 # player_teammates = {year:[teammates],...}
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
-def read_player_teammates(player, player_season_logs, all_box_scores, init_all_players_teammates={}, cur_yr=''):
+def read_player_teammates(player, player_season_logs, all_box_scores, init_all_players_teammates={}, cur_yr='', season_years=[]):
 	print('\n===Read Player Teammates: ' + player.title() + '===\n')
 	print('\nInput: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
@@ -2986,6 +2986,8 @@ def read_player_teammates(player, player_season_logs, all_box_scores, init_all_p
 	# otherwise it would not have read in file
 	for year, player_season_log in player_season_logs.items():
 		#print('\nyear: ' + year)
+		if year not in season_years:
+			continue
 		# for prev seasons teammates unchanged
 		# for cur yr must update each new game
 		if year == cur_yr or year not in player_teammates.keys():
@@ -3471,6 +3473,11 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
 
 		for season_year, player_season_log in player_season_logs.items():
+
+			# we read more seasons to get model but we only use limited seasons to get true prob???
+			if season_year not in season_years:
+				continue
+
 			#print('\nyear: ' + year)
 			if season_year not in all_box_scores.keys():
 				all_box_scores[season_year] = {}
@@ -3637,7 +3644,7 @@ def read_game_info(game_key, init_game_ids_dict={}, game_id='', player='', read_
 	#print('game_info: ' + str(game_info))
 	return game_info
 
-def read_all_games_info(all_players_season_logs, all_players_teams, init_game_ids_dict, season_part, read_new_game_ids, cur_yr=''):
+def read_all_games_info(all_players_season_logs, all_players_teams, init_game_ids_dict, season_part, read_new_game_ids, cur_yr='', season_years=[]):
 	print("\n===Read All Games Info===\n")
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_games_info = {year:{game key:{city:c, time of day:tod, audience:a, ...\n')
@@ -3664,6 +3671,12 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
 
 		for season_year, player_season_log in player_season_logs.items():
+		# for season_year in range(cur_yr, final_yr+1):
+		# 	player_season_log = player_season_logs[season_year]
+			if season_year not in season_years:
+				continue
+
+
 			#print('\nseason_year: ' + season_year)
 			if season_year not in all_games_info.keys():
 				all_games_info[season_year] = {}
@@ -4064,7 +4077,8 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 	# init_player_cur_season_log = read_json(player_cur_season_log_filename)
 	#print('init_player_cur_season_log: ' + str(init_player_cur_season_log))
 
-	yesterday_season_log_filename = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + yesterday + '.json'
+	# look for same name but different date
+	#yestergame_season_log_filename = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + prev_game_date + '.json'
 	
 
 	# get prev seasons unchanged
@@ -4150,7 +4164,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 	
 	#print('final player_game_logs: ' + str(player_game_logs))
 	if not init_player_game_logs == player_game_logs:
-		writer.write_cur_and_prev(init_player_game_logs, player_game_logs, player_cur_season_log_filename, player_prev_logs_filename, yesterday_season_log_filename, current_year_str, player_name)
+		writer.write_cur_and_prev(init_player_game_logs, player_game_logs, player_cur_season_log_filename, player_prev_logs_filename, current_year_str, player_name, todays_date, data_type='game logs')
 
 
 	#print('player_season_logs: ' + str(player_season_logs))

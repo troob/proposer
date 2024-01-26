@@ -1,16 +1,8 @@
 #writer.py
 # display data
 
-import re # see if string contains stat and player of interest to display
-import numpy as np # mean, median to display over time
+# === Standard External Libraries ===
 import csv # save player and game espn ID's so we do not have to request each run
-import sorter # sort players outcomes so we see conditions grouped by type and other useful visuals
-
-from tabulate import tabulate # display output, eg consistent stat vals
-
-import converter # convert dicts to lists
-
-import determiner # determine matching key
 
 import json # for team players
 
@@ -18,7 +10,17 @@ import pandas as pd # write spreadsheets from lists to dataframes
 
 from datetime import datetime # add date to filename
 
-import pathlib # delete files
+import numpy as np # mean, median to display over time
+import re # see if string contains stat and player of interest to display
+
+from tabulate import tabulate # display output, eg consistent stat vals
+
+
+#import determiner # determine matching key
+#import sorter # sort players outcomes so we see conditions grouped by type and other useful visuals
+
+import converter # convert dicts to lists
+import remover
 
 def display_game_data(all_valid_streaks_list):
     #print("\n===Game Data===\n")
@@ -785,6 +787,8 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
     print('sheet_names: ' + str(sheet_names))
     print('desired_order: ' + str(desired_order))
 
+    
+
     # book name = prop tables
     book_name = 'data/prop tables - ' + todays_date + '.xlsx'
     print('book_name: ' + str(book_name))
@@ -818,18 +822,20 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
 
     writer.close()
 
+    # delete prev game prop table bc already backed up
+    remover.delete_file('prop tables', todays_date)
+    
+
 # divide logs/data (eg player game logs) into cur yr and prev yrs
 # init and final dicts combine cur and prev yrs
 # so here we separate to write cur and prev separately
 # bc prev stays same while cur changes each new game
 # need cur_yr bc only cur yr changes
-def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, yesterday_file, cur_yr, subject_name=''):
+# data_type is folder to find preexisting file to delete
+def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subject_name='', todays_date='', data_type=''):
     # print('\n===Write Cur and Prev===\n')
     # print('cur_yr: ' + str(cur_yr))
     # cur file = player_cur_season_log_filename = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
-
-    if cur_yr == '':
-        cur_yr = determiner.determine_current_season_year()
 
     # print('init_dict: ' + str(init_dict))
     # print('final_dict: ' + str(final_dict))
@@ -882,9 +888,12 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, yesterday_fil
         #yesterday = 
         #yesterday_file = prev_day_cur_file = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
         #pathlib.Path(path).is_file():
-        path = pathlib.Path(yesterday_file)
-        if path.is_file():
-            path.unlink() # delete
+        # determine if existing file in folder has player name
+        if data_type != '':
+            remover.delete_file(subject_name, todays_date, data_type)
+            
+
+        
 
     if not init_prev_dict == final_prev_dict:
         #print(subject_name + ' PREVIOUS year data changed so write to file')
