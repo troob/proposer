@@ -4070,7 +4070,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 	# always current yr bc no matter what yr of interest only current yr changes with each new game
 	if current_year_str == '':
 		current_year_str = determiner.determine_current_season_year() #str(datetime.today().year)
-	player_cur_season_log_filename = 'data/game logs/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
+	player_cur_season_log_filename = 'data/game logs/cur/' + player_name + ' ' + current_year_str + ' game log ' + todays_date + '.json'
 	#print('player_cur_season_log_filename: ' + player_cur_season_log_filename)
 	# print('Try to find local CURRENT season game log for ' + player_name + '.')
 	# # init_player_cur_season_log = {'PTS':[],...}

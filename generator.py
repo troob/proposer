@@ -6646,7 +6646,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
     # need filenames to write every time and read only if not already passed init dicts
     if current_year_str == '':
         current_year_str = determiner.determine_current_season_year()
-    player_cur_stat_dict_filename = 'data/stat dicts/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
+    player_cur_stat_dict_filename = 'data/stat dicts/cur/' + player_name + ' ' + current_year_str + ' stat dict ' + todays_date + '.json'
     # print('player_cur_stat_dict_filename: ' + cur_file)
     # print('Try to find local CURRENT season stat dict for ' + player_name + '.')
     # init_player_cur_stat_dict = reader.read_json(player_cur_stat_dict_filename)
