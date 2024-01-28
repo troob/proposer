@@ -513,6 +513,17 @@ def write_data_to_file(data, filepath, write_param, extension='csv'):
     
 def write_json_to_file(dict, filepath, write_param='w'):
     #print('\n===Write JSON to File: ' + filepath + '===\n')
+    # filepath = data/game logs/cur/...
+
+    # see if dir exists and make new if not
+    # path_data = filepath.split('/')[:-1]
+    # folder_path = ''
+    # for folder in path_data:
+    #     folder_path += folder
+    #     if not os.path.exists(folder_path):
+    #         os.mkdir(folder_path)
+
+
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?
     with open(filepath, write_param) as outfile:
@@ -890,6 +901,9 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subje
         #pathlib.Path(path).is_file():
         # determine if existing file in folder has player name
         if data_type != '':
+            # add cur bc we only need to delete cur files which get changed each game
+            # separate folder bc we ignore it when backing up files
+            data_type += '/cur' # game logs/cur
             remover.delete_file(subject_name, todays_date, data_type)
             
 

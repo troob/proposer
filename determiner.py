@@ -1488,6 +1488,26 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
 
     return need_box_score
 
+def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team):
+    print('\n===Determine Cur Avg Playtime===\n')
+    print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: player_gp_cur_team = x = ' + str(player_gp_cur_team))
+    print('\nOutput: gp_cond_weight = x\n')
+
+    cur_avg_playtime = 0
+
+    cur_season_minutes = player_cur_season_log['MIN']
+    cur_team_minutes = []
+    for game_idx in range(player_gp_cur_team):
+        game_minutes = cur_season_minutes[game_idx]
+        cur_team_minutes.append(game_minutes)
+
+    if len(cur_team_minutes) > 0:
+        cur_avg_playtime = np.mean(cur_team_minutes)
+    
+    print('cur_avg_playtime: ' + str(cur_avg_playtime))
+    return cur_avg_playtime
+
 # only reg season
 def determine_gp_cur_team(player_teams, player_season_logs, current_year_str):
     #print('\n===Determine GP Cur Team===\n')
