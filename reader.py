@@ -374,23 +374,26 @@ def read_player_prev_stat_vals(season_log_of_interest):
 
 # read along with current conditions
 def read_all_prev_stat_vals(all_players_season_logs, season_year):
-	# print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-	# print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
+	print('\n===Read All Prev Stat Vals===\n')
+	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
 
 	all_prev_stat_vals = {}
 
 	for player, player_season_logs in all_players_season_logs.items():
-
+		print('\nPlayer: ' + player.title())
+		print('player_season_logs: ' + str(player_season_logs))
 		player_prev_stat_vals = {}
 		# dict goes from recent to distant so take first 1
 		if len(player_season_logs.keys()) > 0:
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
+			print('season_log_of_interest: ' + str(season_log_of_interest))
 
 			player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest)
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
-	#print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 	return all_prev_stat_vals
 
 # get team season schedule from espn.com
@@ -908,20 +911,20 @@ def read_season_log_from_file(data_type, player_name, ext):
 			fg_data = fgs.split('-')
 			fgm = int(fg_data[0])
 			fga = int(fg_data[1])
-			fg_rate = round(float(game[fg_rate_idx]), 1)
+			fg_rate = converter.round_half_up(float(game[fg_rate_idx]), 1)
 
 			threes = game[three_idx]
 			threes_data = threes.split('-')
 			#print("threes_data: " + str(threes_data))
 			threes_made = int(threes_data[0])
 			threes_attempts = int(threes_data[1])
-			three_rate = round(float(game[three_rate_idx]), 1)
+			three_rate = converter.round_half_up(float(game[three_rate_idx]), 1)
 
 			fts = game[ft_idx]
 			ft_data = fts.split('-')
 			ftm = int(ft_data[0])
 			fta = int(ft_data[1])
-			ft_rate = round(float(game[ft_rate_idx]), 1)
+			ft_rate = converter.round_half_up(float(game[ft_rate_idx]), 1)
 
 			bs = int(game[b_idx])
 			ss = int(game[s_idx])
@@ -1996,16 +1999,16 @@ def read_react_website(url, timeout=10, max_retries=3):
 									# old: stat = re.sub('\+','',stat)
 									if re.search('Over',stat):
 										stat = re.sub('[a-zA-Z]','',stat).strip()
-										stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
+										stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
 									else: #under
 										stat = re.sub('[a-zA-Z]','',stat).strip()
-										stat = str(round(float(stat) - 0.5)) + '-'
+										stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
 								elif re.search('O/U',player_btn_header):
 									# start with over and then take every other value as over
 									if idx % 2 == 0:
-										stat = str(round(float(stat) + 0.5)) + '+' #or str(int(stat))#str(round(float(stat) + 0.5)) # 0.5 to 1
+										stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
 									else: #under
-										stat = str(round(float(stat) - 0.5)) + '-'
+										stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
 
 								odds = re.sub('−','-',odds) # change abnormal '-' char
 								#odds = re.sub('\+','',odds) # prefer symbol to differentiate odds from probs, prefer no + symbol for +odds bc implied so not to confuse with val over under
@@ -3470,7 +3473,7 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 		#print('\nplayer: ' + player)
 
 		player_teams = all_players_teams[player]
-		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
+		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr, player)
 
 		for season_year, player_season_log in player_season_logs.items():
 
@@ -3668,7 +3671,7 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 	for player, player_season_logs in all_players_season_logs.items():
 		#print('\nplayer: ' + player)
 		player_teams = all_players_teams[player]
-		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr)
+		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr, player)
 
 		for season_year, player_season_log in player_season_logs.items():
 		# for season_year in range(cur_yr, final_yr+1):
@@ -3836,11 +3839,14 @@ def read_all_players_positions(players_names, all_players_espn_ids):
 # get game log from espn.com
 # not using all game logs anymore bc too slow to store all game logs in 1 file and search whole file each time
 # instead use player game logs
-def read_player_season_log(player_name, season_year=2024, player_url='', player_id='', all_game_logs={}, todays_date=datetime.today().strftime('%m-%d-%y'), player_game_logs={}):
+def read_player_season_log(player_name, season_year=2024, player_url='', player_id='', all_game_logs={}, todays_date=datetime.today().strftime('%m-%d-%y'), player_game_logs={}, all_seasons_start_days={}):
 	#print('\n===Read Player Season Log: ' + player_name.title() + ', ' + str(season_year) + '===\n')
 
 	player_game_log_df = pd.DataFrame()
 	player_game_log_dict = {}
+
+	season_start_day = all_seasons_start_days[str(season_year)]
+	#print('season_start_day: ' + str(season_start_day))
 
 	# much faster to save in one file
 	# print('Try to find local game logs for ' + str(season_year))
@@ -3926,10 +3932,43 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 						# when only preseason, len html results = 2
 						# when only reg season, also 2
 						# so need date: if before season_start_date=m/d=10/10, then preseason
+						# len=4 does not work for unknown reason
+						preseason = False
 						if len_html_results - 2 == order and len_html_results > 4: # 3 or more should work but check if invalid for any players bc 4 or more means they did not play preseason but does not account for if they played postseason
 							part_of_season['Type'] = 'Preseason'
+							preseason = True
 
-						else:
+						# what if len only 3 bc missed preseason? check that games are in october
+						#elif len_html_results == 3 and order == 1:
+						elif len_html_results < 4 and order == len_html_results - 2:
+							# check that games are in october
+							# get latest game
+							last_game_date = part_of_season.iloc[0,0]
+							#print('last_game_date: ' + str(last_game_date)) # Thu 10/19
+							# get month num
+							last_game_date_data = last_game_date.split()[1].split('/')
+							last_game_mth_num = int(last_game_date_data[0])
+							#print('last_game_mth_num: ' + str(last_game_mth_num))
+							last_game_day_num = int(last_game_date_data[1])
+							#print('last_game_day_num: ' + str(last_game_day_num))
+							if last_game_mth_num == 10 and last_game_day_num < season_start_day:
+								#print('Preseason')
+								part_of_season['Type'] = 'Preseason'
+								preseason = True
+
+						# elif len_html_results == 2 and order == 0:
+						# 	# check that games are in october
+						# 	# get latest game
+						# 	last_game_date = part_of_season.iloc[0,0]
+						# 	print('last_game_date: ' + str(last_game_date)) # Thu 10/19
+						# 	# get month num
+						# 	last_game_mth_num = int(last_game_date.split()[1].split('/')[0])
+						# 	print('last_game_mth_num: ' + str(last_game_mth_num))
+						# 	if last_game_mth_num == 10:
+						# 		print('Preseason')
+						# 		part_of_season['Type'] = 'Preseason'
+
+						if not preseason:
 							# last row of postseason section has 'finals' in it, eg quarter finals, semi finals, finals
 							last_cell = part_of_season.iloc[-1,0]
 							#print('last_cell: ' + str(last_cell))
@@ -4058,10 +4097,12 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 
 
 # here we decide default season year, so make input variable parameter
-def read_player_season_logs(player_name, current_year_str, todays_date, yesterday, player_espn_id='', read_x_seasons=1, all_players_espn_ids={}, season_year=2024, all_game_logs={}, player_teams={}):
+def read_player_season_logs(player_name, current_year_str, todays_date, player_espn_id='', read_x_seasons=1, all_players_espn_ids={}, season_year=2024, all_game_logs={}, player_teams={}, all_seasons_start_days={}):
 	#print('\n===Read Player Season Logs: ' + player_name.title() + '===\n')
 
 	player_name = player_name.lower()
+
+	
 
 	# see if saved season logs for player
 	# need to separate current season from prev seasons bc only cur seas changes
@@ -4120,7 +4161,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 			while determiner.determine_played_season(player_url, player_name, season_year, all_game_logs, player_game_logs, player_teams):
 
 				#print("player_url: " + player_url)
-				game_log_dict = read_player_season_log(player_name, season_year, player_url, all_game_logs=all_game_logs, todays_date=todays_date, player_game_logs=player_game_logs)
+				game_log_dict = read_player_season_log(player_name, season_year, player_url, all_seasons_start_days=all_seasons_start_days, all_game_logs=all_game_logs, todays_date=todays_date, player_game_logs=player_game_logs)
 				player_season_logs[str(season_year)] = game_log_dict
 				# if not game_log_df.empty:
 				# 	player_game_logs.append(game_log_df)
@@ -4141,7 +4182,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 			if determiner.determine_played_season(player_url, player_name, season_year, all_game_logs, player_game_logs, player_teams):
 
 				#print("player_url: " + player_url)
-				game_log_dict = read_player_season_log(player_name, season_year, player_url, all_game_logs=all_game_logs, todays_date=todays_date, player_game_logs=player_game_logs)
+				game_log_dict = read_player_season_log(player_name, season_year, player_url, all_seasons_start_days=all_seasons_start_days, all_game_logs=all_game_logs, todays_date=todays_date, player_game_logs=player_game_logs)
 				player_season_logs[str(season_year)] = game_log_dict
 				# if not game_log_df.empty:
 				# 	player_game_logs.append(game_log_df)
@@ -4170,7 +4211,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, yesterda
 	#print('player_season_logs: ' + str(player_season_logs))
 	return player_season_logs#player_game_logs
 
-def read_all_players_season_logs(players_names, cur_yr, todays_date, yesterday, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024):
+def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024, game_teams=[], rosters={}):
 	print('\n===Read All Players Season Logs===\n')
 	print('Settings: read x seasons prev, init year of interest')
 	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')# + str(players_names))
@@ -4179,6 +4220,8 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, yesterday, 
 	print('\nOutput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...\n')
 
 	all_players_season_logs = {}
+
+	all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 
 	# much faster to save in one file
 	# but too large for single variable in memory?
@@ -4195,13 +4238,24 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, yesterday, 
 	if cur_yr == '':
 		cur_yr = determiner.determine_current_season_year()
 	
+	# given players of interest
+	# get all teams theyre on
+	# and get all logs from all 
+	# if given game teams, we can simply get players on game teams
+	if len(game_teams) > 0:
+		players_names = []
+		for game in game_teams:
+			for team in game:
+				team_roster = rosters[team]
+				for player in team_roster:
+					players_names.append(player)
 
 	for player_name in players_names:
 		# {player:season:log}
 		if player_name in all_players_teams.keys():
 			player_teams = all_players_teams[player_name]
 			player_espn_id = all_players_espn_ids[player_name]
-			players_season_logs = read_player_season_logs(player_name, cur_yr, todays_date, yesterday, player_espn_id, read_x_seasons, all_players_espn_ids, season_year, all_players_season_logs, player_teams=player_teams)
+			players_season_logs = read_player_season_logs(player_name, cur_yr, todays_date, player_espn_id, read_x_seasons, all_players_espn_ids, season_year, all_players_season_logs, player_teams, all_seasons_start_days)
 			
 			all_players_season_logs[player_name] = players_season_logs
 

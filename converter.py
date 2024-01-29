@@ -215,7 +215,11 @@ def convert_month_abbrev_to_num(game_mth_abbrev):
 
 def round_half_up(n, decimals=0):
     multiplier = 10**decimals
-    return math.floor(n * multiplier + 0.5) / multiplier
+    nr = math.floor(n * multiplier + 0.5) / multiplier
+    if decimals == 0:
+        return int(nr)
+    else:
+        return nr
 
 def convert_year_to_span(year):
 

@@ -204,7 +204,7 @@ def generate_prob_from_distrib(val, loc, dist):
     # if normal, use pdf
     #prob = dist.pmf(val, loc)
     # if poisson, use pmf
-    prob = round(dist.pmf(val, loc), 4)
+    prob = converter.round_half_up(dist.pmf(val, loc), 4)
     #print('prob: ' + str(prob))
 
     if prob > 0.99:
@@ -339,22 +339,22 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     if shape_key in sample_fit_dict.keys():
         sample_shape = sample_fit_dict[shape_key]
 
-        prob_less_or_equal = round(dist.cdf(val, sample_shape, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape, sample_loc, sample_scale), 5)
     elif shape_3_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
         sample_shape_3 = sample_fit_dict[shape_3_key]
 
-        prob_less_or_equal = round(dist.cdf(val, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale), 5)
     elif shape_1_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
 
-        prob_less_or_equal = round(dist.cdf(val, sample_shape_1, sample_shape_2, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_loc, sample_scale), 5)
     else:
         #sample_mean = sample_fit_dict[mean_key] ???
 
-        prob_less_or_equal = round(dist.cdf(val, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_loc, sample_scale), 5)
 
 
     # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?

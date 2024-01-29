@@ -560,7 +560,7 @@ def determine_rank_avgs(pos, matchup_dict):
 
     pos_matchup_ranks = [matchup_dict[pos]['s1'],matchup_dict[pos]['s2'],matchup_dict[pos]['s3']]
 
-    rank_avgs['mean'] = round(np.mean(np.array(pos_matchup_ranks)))
+    rank_avgs['mean'] = converter.round_half_up(np.mean(np.array(pos_matchup_ranks)))
 
     alt_pos = 'c' # if listed pos=pg then combine with guard bc sometimes play both
     if pos == 'pg':
@@ -572,7 +572,7 @@ def determine_rank_avgs(pos, matchup_dict):
     elif pos == 'pf':
         alt_pos = 'sf'
     alt_pos_matchup_ranks = [matchup_dict[alt_pos]['s1'],matchup_dict[alt_pos]['s2'],matchup_dict[alt_pos]['s3']]
-    rank_avgs['combined mean'] = round(np.mean(np.array(pos_matchup_ranks+alt_pos_matchup_ranks)))
+    rank_avgs['combined mean'] = converter.round_half_up(np.mean(np.array(pos_matchup_ranks+alt_pos_matchup_ranks)))
 
 
     return rank_avgs
@@ -901,7 +901,7 @@ def determine_probability_from_record(record, games_traded=0):
 
 
     # display as percentage
-    prob = round(count * 100 / total) # eg 10 * 100 / 20 = 50
+    prob = converter.round_half_up(count * 100 / total) # eg 10 * 100 / 20 = 50
 
     print('prob: ' + str(prob))
     return prob
@@ -949,20 +949,20 @@ def determine_game_stats(player_game_log, game_idx):
     fg_data = fgs.split('-')
     fgm = int(fg_data[0])
     fga = int(fg_data[1])
-    fg_rate = round(float(player_game_log.loc[game_idx, 'FG%']), 1)
+    fg_rate = converter.round_half_up(float(player_game_log.loc[game_idx, 'FG%']), 1)
 
     #threes = game[three_idx]
     #threes_data = threes.split('-')
     #print("threes_data: " + str(threes_data))
     threes_made = int(player_game_log.loc[game_idx, '3PT_SA'])
     threes_attempts = int(player_game_log.loc[game_idx, '3PT_A'])
-    three_rate = round(float(player_game_log.loc[game_idx, '3P%']), 1)
+    three_rate = converter.round_half_up(float(player_game_log.loc[game_idx, '3P%']), 1)
 
     fts = player_game_log.loc[game_idx, 'FT']
     ft_data = fts.split('-')
     ftm = int(ft_data[0])
     fta = int(ft_data[1])
-    ft_rate = round(float(player_game_log.loc[game_idx, 'FT%']), 1)
+    ft_rate = converter.round_half_up(float(player_game_log.loc[game_idx, 'FT%']), 1)
 
     bs = int(player_game_log.loc[game_idx, 'BLK'])
     ss = int(player_game_log.loc[game_idx, 'STL'])
@@ -1034,7 +1034,7 @@ def determine_ok_val_prob(dict, ok_val, player_stat_records, season_part, stat_n
     if ok_val_post_val_key == '':
         # we can find post prob from stat records
         ok_val_post_prob = determine_prob_of_stat_from_records(ok_val, player_stat_records, season_part, stat_name, season_year=season_year)
-        ok_val_post_prob = round(ok_val_post_prob * 100)
+        ok_val_post_prob = converter.round_half_up(ok_val_post_prob * 100)
     else:
         ok_val_post_prob_key = re.sub('val','',ok_val_post_val_key).strip()
 
@@ -1488,29 +1488,70 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
 
     return need_box_score
 
-def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team):
-    print('\n===Determine Cur Avg Playtime===\n')
-    print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-    print('Input: player_gp_cur_team = x = ' + str(player_gp_cur_team))
-    print('\nOutput: gp_cond_weight = x\n')
+# cur avg playtime is weight of player condition
+def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player):
+    # print('\n===Determine Cur Avg Playtime: ' + player.title() + '===\n')
+    # print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    # print('Input: player_gp_cur_team = x = ' + str(player_gp_cur_team))
+    # print('\nOutput: gp_cond_weight = x\n')
 
     cur_avg_playtime = 0
 
-    cur_season_minutes = player_cur_season_log['MIN']
     cur_team_minutes = []
+
+    # player_cur_season_log
+    # player_cur_reg_season_log = determine_season_part_games(player_cur_season_log)
+    # for game_idx, row in player_cur_reg_season_log.iterrows():
+
+    #     if int(game_idx) == player_gp_cur_team:
+    #         break
+
+    #     #game_minutes = row['MIN']
+    #     cur_team_minutes.append(row['MIN'])
+
+    
+    cur_season_minutes = player_cur_season_log['MIN']
+    
     for game_idx in range(player_gp_cur_team):
-        game_minutes = cur_season_minutes[game_idx]
+        game_minutes = cur_season_minutes[str(game_idx)]
         cur_team_minutes.append(game_minutes)
 
     if len(cur_team_minutes) > 0:
-        cur_avg_playtime = np.mean(cur_team_minutes)
+        cur_avg_playtime = converter.round_half_up(np.mean(cur_team_minutes), 2)
     
-    print('cur_avg_playtime: ' + str(cur_avg_playtime))
+    #print('cur_avg_playtime: ' + str(cur_avg_playtime))
     return cur_avg_playtime
 
+# cur avg playtime is weight of player condition
+def determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players_teams, cur_yr):
+    print('\n===Determine All Players Cur Avg Playtimes===\n')
+    print('Setting: Current Year = ' + cur_yr)
+    print('\nInput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('\nOutput: all_players_cur_avg_playtimes = {player:playtime, ....\n')
+
+    all_players_cur_avg_playtimes = {}
+
+    for player, player_season_logs in all_players_season_logs.items():
+        #print('\nplayer: ' + str(player))
+        #print('player_season_logs: ' + str(player_season_logs))
+        # CHANGE to enable players who is first game this season
+        if cur_yr in player_season_logs.keys():
+            player_cur_season_log = player_season_logs[cur_yr]
+            
+            player_teams = all_players_teams[player]
+            player_gp_cur_team = determine_gp_cur_team(player_teams, player_season_logs, cur_yr, player)
+            
+            all_players_cur_avg_playtimes[player] = determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player)
+
+    #print('all_players_cur_avg_playtimes: ' + str(all_players_cur_avg_playtimes))
+    return all_players_cur_avg_playtimes
+
+
+
 # only reg season
-def determine_gp_cur_team(player_teams, player_season_logs, current_year_str):
-    #print('\n===Determine GP Cur Team===\n')
+def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player):
+    #print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
 
     gp_cur_team = 0
 
@@ -1539,7 +1580,7 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str):
 # init_player_stat_dict = {"2023": {"regular": {"pts": {"all": {"0": 14,...
 # dont need season part bc if missing any season part then need stat dict
 def determine_need_stat_dict(player_stat_dict, season_year, find_players=False):
-    print('\n===Determine Need Stat Dict: ' + season_year + '===\n')
+    #print('\n===Determine Need Stat Dict: ' + season_year + '===\n')
 
     need_stat_dict = False
 
@@ -1554,7 +1595,7 @@ def determine_need_stat_dict(player_stat_dict, season_year, find_players=False):
     elif find_players and not determine_key_in_stat_dict(team_players_conditions, condition_keys):
         need_stat_dict = True
 
-    print('need_stat_dict: ' + str(need_stat_dict))
+    #print('need_stat_dict: ' + str(need_stat_dict))
     return need_stat_dict
 
 # if reg season, game idx starts before playoffs
@@ -1854,6 +1895,25 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 
+
+
+
+def determine_out_player(player_name, player_gp_cur_conds):
+    print('\n===Determine Out Player: ' + player_name.title() + '===\n')
+    print('Input: player_gp_cur_conds = {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(player_gp_cur_conds))
+
+    out = False 
+
+    teammates = player_gp_cur_conds['teammates']
+    if len(teammates.keys()) > 0:
+        out_teammates = teammates['out']
+        print('out_teammates: ' + str(out_teammates))
+
+        if player_name in out_teammates:
+            out = True
+
+    print('out: ' + str(out))
+    return out
 
 
 def determine_dnp_player(player_teams, cur_yr, player_name):
@@ -2640,10 +2700,11 @@ def determine_regular_season_games(player_game_log):
     #print("final reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
     return reg_season_games_df
 
-def determine_season_part_games(player_game_log, season_part='regular'):
-
-    # print('\n===Determine Season Games for Player: ' + season_part + '===\n')
-    # print('player_game_log:\n' + str(player_game_log))
+def determine_season_part_games(player_game_log, season_part='regular', player='player'):
+    # print('\n===Determine Season Part Games for ' + player.title() + ', ' + season_part + '===\n')
+    # #print('player_game_log:\n' + str(player_game_log))
+    # print('Input: player_game_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    # print('\nOutput: season_part_games_df = df\n')
 
     season_part_games_df = pd.DataFrame()
 
@@ -2652,11 +2713,16 @@ def determine_season_part_games(player_game_log, season_part='regular'):
         # always separate special games
         # reset index first so games line up with teams
         season_part_games_df = player_game_log[~player_game_log['OPP'].str.endswith('*')].reset_index(drop=True)
+        
+        # remove tournament games
         if season_part != 'tournament':
             season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Tournament')].reset_index(drop=True)
+        
         season_part_games_df.index = season_part_games_df.index.map(str)
+
         #print('season_part_games_df:\n' + str(season_part_games_df))
 
+        # need to recognize games as preseason
         #season_part_games_df = player_game_log[~player_game_log['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log
         # dont need to reset index after removing preseason bc those games are at end of log idx
         season_part_games_df = season_part_games_df[~season_part_games_df['Type'].str.startswith('Preseason')]#pd.DataFrame()#player_game_log

@@ -138,11 +138,11 @@ def display_stat_plot(all_valid_streaks_list, all_players_stats_dicts, stat_of_i
                     past_three_mean_stat_val = stat_val
 
                 else:
-                    mean_stat_val = round(np.mean(np.array(prev_stat_vals)), 1)
+                    mean_stat_val = converter.round_half_up(np.mean(np.array(prev_stat_vals)), 1)
                     #print('mean_stat_val: ' + str(mean_stat_val))
-                    past_ten_mean_stat_val = round(np.mean(np.array(past_ten_stat_vals)), 1)
+                    past_ten_mean_stat_val = converter.round_half_up(np.mean(np.array(past_ten_stat_vals)), 1)
                     #print('past_ten_mean_stat_val: ' + str(past_ten_mean_stat_val))
-                    past_three_mean_stat_val = round(np.mean(np.array(past_three_stat_vals)), 1)
+                    past_three_mean_stat_val = converter.round_half_up(np.mean(np.array(past_three_stat_vals)), 1)
                     #print('past_three_mean_stat_val: ' + str(past_three_mean_stat_val))
 
                 mean_stat_vals.append(mean_stat_val)
@@ -662,8 +662,8 @@ def write_all_stat_probs_by_stat(all_player_stat_probs):
                         p_u = 100
                         if conditions in val_probs_dict.keys():
                             stat_prob = val_probs_dict[conditions]
-                            p_o = round(stat_prob*100)
-                            p_u = 100 - p_o #round(stat_probs_dict['prob under']*100)
+                            p_o = converter.round_half_up(stat_prob*100)
+                            p_u = 100 - p_o #converter.round_half_up(stat_probs_dict['prob under']*100)
                         stat_probs_row.extend([p_o, p_u])
 
                     #print('stat_probs_row: ' + str(stat_probs_row))
@@ -770,8 +770,8 @@ def write_all_player_stat_probs(all_player_stat_probs):
                                     if stat in val_probs_dict.keys():
                                         stat_prob = val_probs_dict[stat]
                                 #for stat, stat_probs_dict in val_probs_dict.items():
-                                        p_o = round(stat_prob*100)
-                                        p_u = 100 - p_o #round(stat_probs_dict['prob under']*100)
+                                        p_o = converter.round_half_up(stat_prob*100)
+                                        p_u = 100 - p_o #converter.round_half_up(stat_probs_dict['prob under']*100)
                                     stat_probs_row.extend([p_o, p_u])
 
                                 stat_probs_table.append(stat_probs_row)

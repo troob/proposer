@@ -476,7 +476,7 @@ def generate_player_avg_range_dict(player_name, player_stat_dict, key):
                         stat_avg_range = 0
                         if len(stat_vals) > 0:
                             if key == 'mean':
-                                stat_avg_range = round(np.mean(np.array(stat_vals)), 1)
+                                stat_avg_range = converter.round_half_up(np.mean(np.array(stat_vals)), 1)
                             elif key == 'median':
                                 stat_avg_range = int(np.median(np.array(stat_vals)))
                             elif key == 'mode':
@@ -1115,7 +1115,7 @@ def generate_mean_margin(init_val, stat_dict):
 
     mean_val = 0 # init
     if len(stat_vals) > 0:
-        mean_val = round(np.mean(np.array(stat_vals)), 1)
+        mean_val = converter.round_half_up(np.mean(np.array(stat_vals)), 1)
     else:
         print('Warning: No stat vals while generating min margin!')
 
@@ -1141,7 +1141,7 @@ def generate_margin(init_val, stat_dict, margin_type='min'):
             val = np.mean(np.array(stat_vals))
             #print('val: ' + str(val))
             # we want to round to whole number for easy comparison and we cannot be certain with any more accuracy due to other conditions
-            margin = round(val - init_val) 
+            margin = converter.round_half_up(val - init_val) 
         else:
             val = min(stat_vals)
             margin = val - init_val
@@ -1429,16 +1429,16 @@ def generate_all_consistent_stat_dicts(all_player_consistent_stats, all_player_s
                                 
                                 prob = prob_stat_dict[prob_key]
                                 #print('prob: ' + str(prob))
-                                consistent_stat_prob = round(prob * 100)
+                                consistent_stat_prob = converter.round_half_up(prob * 100)
                                 #print('consistent_stat_prob: ' + str(consistent_stat_prob))
 
                                 second_consistent_stat = prob_stat_dict[second_prob_stat_key]
-                                second_consistent_stat_prob = round(prob_stat_dict[second_prob_key] * 100)
+                                second_consistent_stat_prob = converter.round_half_up(prob_stat_dict[second_prob_key] * 100)
 
                                 min_margin = prob_stat_dict[min_margin_key]
                                 second_min_margin = prob_stat_dict[second_min_margin_key]
-                                mean_margin = round(prob_stat_dict[mean_margin_key])
-                                second_mean_margin = round(prob_stat_dict[second_mean_margin_key])
+                                mean_margin = converter.round_half_up(prob_stat_dict[mean_margin_key])
+                                second_mean_margin = converter.round_half_up(prob_stat_dict[second_mean_margin_key])
 
                                 # set keys for each field for each part of season and for each season
                                 part_prob_stat_key = season_part_key + ' ' + prob_stat_key
@@ -2179,7 +2179,7 @@ def generate_joint_prob_of_props(props):
         prop_prob = prop['true prob']
         probs.append(prop_prob)
 
-    joint_prob = str(round(generate_joint_prob(probs) * 100, 2))
+    joint_prob = str(converter.round_half_up(generate_joint_prob(probs) * 100, 2))
 
 
     #print('joint_prob: ' + str(joint_prob))
@@ -2202,7 +2202,7 @@ def generate_joint_ev_of_props(props):
     joint_odds = generate_joint_odds(odds)
 
     #if joint_prob > 0:
-    ev = str(round(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
+    ev = str(converter.round_half_up(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
 
     #print('ev: ' + str(ev))
     return ev
@@ -2262,7 +2262,7 @@ def generate_ev(prob, odds):
         spent = 1 # unit
         profit = profit_multiplier * prob_over 
         loss = spent * prob_under
-        # "%.2f" % () returns accurate 2 decimal places instead of round(2) which always rounds up
+        # "%.2f" % () returns accurate 2 decimal places instead of converter.round_half_up(2) which always rounds up
         ev = "%.2f" % (profit - loss)
     
     #print('ev: ' + str(ev))
@@ -2895,7 +2895,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
             prob_under = 1 - prob_over
             #print('prob_under: ' + str(prob_under))
             spent = 1 # unit
-            # "%.2f" % () returns accurate 2 decimal places instead of round(2) which always rounds up
+            # "%.2f" % () returns accurate 2 decimal places instead of converter.round_half_up(2) which always rounds up
             ev = "%.2f" % (profit_multipier * prob_over - spent * prob_under)
         
         #print('ev: ' + str(ev))
@@ -3068,11 +3068,11 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #per_unit_prob = per_unit_probs_dict[player][stat_name][val][conditions] #val_probs_dict[per_unit_conditions]
                         #print('prob: ' + str(prob))
                         if prob is not None:
-                            stat_val_probs_dict[true_prob_key] = round(prob * 100)
+                            stat_val_probs_dict[true_prob_key] = converter.round_half_up(prob * 100)
                     #     else:
                     #         stat_val_probs_dict[true_prob_key] = 'NA'
                     #         print('Caution: No prob for player stat val: ' + player + ', ' + stat_name + ', ' + str(val))
-                    #     #stat_val_probs_dict[per_unit_conditions] = round(per_unit_prob * 100)
+                    #     #stat_val_probs_dict[per_unit_conditions] = converter.round_half_up(per_unit_prob * 100)
                     # # if condition not in val probs dict
                     # # then this player did not play in this condition, so show NA
                     # #for conditions in all_conditions:
@@ -3131,8 +3131,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #         #per_unit_conditions = conditions + ' per unit'
                         #         #per_unit_prob = val_probs_dict[per_unit_conditions]
                         #         #print('over prob: ' + str(prob))
-                        #         stat_val_probs_dict[conditions] = 100 - round(prob * 100)
-                        #         #stat_val_probs_dict[per_unit_conditions] = 100 - round(per_unit_prob * 100)
+                        #         stat_val_probs_dict[conditions] = 100 - converter.round_half_up(prob * 100)
+                        #         #stat_val_probs_dict[per_unit_conditions] = 100 - converter.round_half_up(per_unit_prob * 100)
 
                         #     # if condition not in val probs dict
                         #     # then this player did not play in this condition, so show NA
@@ -3144,7 +3144,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                             prob = val_probs_dict[true_prob_key]
                             #print('over prob: ' + str(prob))
                             if prob is not None:
-                                stat_val_probs_dict[true_prob_key] = 100 - round(prob * 100)
+                                stat_val_probs_dict[true_prob_key] = 100 - converter.round_half_up(prob * 100)
                                 #print('under prob: ' + str(stat_val_probs_dict['true prob']))
                         #     else:
                         #         stat_val_probs_dict[true_prob_key] = 'NA'
@@ -3186,7 +3186,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
 # overall gp cond is either teammates or opp
 # for a specific player, stat, val
 # so not all vals reached for all samples
-def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, team_gp_conds_weights_dict, val_probs_dict, season_years, part, stat, player_stat_dict):
+def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, team_gp_conds_weights_dict, val_probs_dict, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, stat):
     print('\n===Generate Game Players Condition Mean Prob: ' + team_condition + '===\n')
     print('Settings: Season Years, Season Part')
     print('\nInput: team_gp_conds = {gp condition:cond type,... = {\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ...}, opp:{...} = ' + str(team_gp_conds))
@@ -3246,7 +3246,7 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
             # print('team_part_sum_weights: ' + str(sum_weights))
             
             if sum_weights > 0:
-                team_part_true_prob = round(sum_weighted_probs / sum_weights,2)
+                team_part_true_prob = converter.round_half_up(sum_weighted_probs / sum_weights,2)
             else:
                 print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3273,7 +3273,7 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
         # print('gp_sum_weights: ' + str(sum_weights))
 
         if sum_weights > 0:
-            gp_condition_mean_prob = round(sum_weighted_probs / sum_weights,2)
+            gp_condition_mean_prob = converter.round_half_up(sum_weighted_probs / sum_weights,2)
         else:
             print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3356,7 +3356,9 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
             t_constant = 1.25
             t_n *= t_constant
             s_n = sample_sizes[p_idx] #65 #previous years
-            w_n = round(w_1 * round(t_1 / t_n, 6) * round(s_n / s_1, 6), 2)
+            # Do i need to round before computing to ensure floating pt accuracy???
+            #w_n = converter.round_half_up(w_1 * round(t_1 / t_n, 6) * round(s_n / s_1, 6), 2)
+            w_n = converter.round_half_up(w_1 * (t_1 / t_n) * (s_n / s_1), 2)
             weights.append(w_n)
         #print('weights: ' + str(weights))
 
@@ -3368,14 +3370,14 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
             #print('prob: ' + str(prob))
             w = weights[p_idx]
             #print('w: ' + str(w))
-            wp = round(w * prob, 6)
+            wp = converter.round_half_up(w * prob, 6)
             #print('wp: ' + str(wp))
             weighted_probs.append(wp) #+= wp
             #print('true_prob: ' + str(true_prob))
         
         sum_weights = sum(weights)
         if sum_weights > 0:
-            condition_mean_prob = round(sum(weighted_probs) / sum_weights, 2)
+            condition_mean_prob = converter.round_half_up(sum(weighted_probs) / sum_weights, 2)
         else:
             print('Warning: sum_weights 0 bc no samples for condition!')
         
@@ -3385,7 +3387,7 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
 # player_current_conditions = {loc:away, out:[p1,....],...}
 # need all_players_abbrevs, all_players_teams, cur_yr, all_box_scores to get player abbrev to match cond with lineup
 # all_conditions_mean_probs = {c1:p1,...}
-def generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions, all_gp_conds, all_gp_conds_weights, prev_val, stat, player_stat_dict, season_years, part, player='player', val='val'):
+def generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions, all_gp_conds, all_gp_conds_weights, prev_val, stat, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, player='player', val='val'):
     print('\n===Generate All Conditions Mean Probs: ' + player.title() + ', ' + stat.upper() + ', ' + str(val) + '===\n')
     print('Settings: Season Years, Season Part')
     print('\nInput: val_probs_dict = {\'condition year part\': prob, ... = {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')
@@ -3441,7 +3443,7 @@ def generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions
         #print('\nteam_condition: ' + str(team_condition))
         team_gp_conds_weights = all_gp_conds_weights[team_condition]
         #all_conditions_mean_probs[condition] = generate_condition_mean_prob(condition, val_probs_dict, season_years, part, player_stat_dict)
-        condition_mean_prob = generate_game_players_condition_mean_prob(team_condition, team_gp_conds, team_gp_conds_weights, val_probs_dict, season_years, part, stat, player_stat_dict)
+        condition_mean_prob = generate_game_players_condition_mean_prob(team_condition, team_gp_conds, team_gp_conds_weights, val_probs_dict, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, stat)
 
         if condition_mean_prob is not None:
             #all_conditions_mean_probs[condition] = condition_mean_prob
@@ -3462,7 +3464,7 @@ def generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions
     return all_conditions_mean_probs
 
 def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats):
-    print('\n===Generate Weighted Probs===\n')
+    print('\n===Generate Weighted Stats===\n')
     print('Input: all_conditions_mean_stats = {cond1:p1,... = ' + str(all_conditions_mean_stats))
     print('Input: all_conditions_stats = {cond1:w1,... = ' + str(all_conditions_stats))
     print('\nOutput: weighted_stats = [ws1,...]\n')
@@ -3472,11 +3474,12 @@ def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats):
     # always outer layer of conditions
     weighted_stats = []
     for cond, stat in all_conditions_mean_stats.items():
-        #print('prob: ' + str(prob))
+        print('\ncond: ' + str(cond))
+        print('stat: ' + str(stat))
         weight = all_conditions_stats[cond]
-        #print('weight: ' + str(weight))
-        ws = round(weight * stat, 6)
-        #print('ws: ' + str(ws))
+        print('weight: ' + str(weight))
+        ws = converter.round_half_up(weight * stat, 6)
+        print('ws: ' + str(ws))
         weighted_stats.append(ws)
 
     print('weighted_stats: ' + str(weighted_stats))
@@ -3498,7 +3501,7 @@ def generate_weighted_probs(all_conditions_mean_probs, all_conditions_weights):
         #print('prob: ' + str(prob))
         weight = all_conditions_weights[cond]
         #print('weight: ' + str(weight))
-        wp = round(weight * prob, 6)
+        wp = converter.round_half_up(weight * prob, 6)
         #print('wp: ' + str(wp))
         weighted_probs.append(wp)
         #true_prob += wp
@@ -3512,7 +3515,7 @@ def generate_weighted_probs(all_conditions_mean_probs, all_conditions_weights):
 # player current conds = p1:{loc:l1, city:c1, dow:d1, tod:t1,...}
 # all_conditions_weights = [w1,...]
 # gp_current_conditions, where gp = game players
-def generate_true_prob(val_probs_dict, player_current_conditions, all_conditions_weights_dict, all_gp_conds, all_gp_conds_weights, prev_val, prev_val_weight, player_stat_dict, all_players_abbrevs, all_players_teams, all_box_scores, season_years, part, player='player', stat='stat', val='val'):
+def generate_true_prob(val_probs_dict, player_current_conditions, all_conditions_weights_dict, all_gp_conds, all_gp_conds_weights, prev_val, prev_val_weight, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, player='player', stat='stat', val='val'):
     print('\n===Generate True Prob: ' + player.title() + ', ' + stat.upper() + ', ' + str(val) + '===\n')
     print('Settings: Season Years, Season Part')
     print('\nInput: val_probs_dict = {\'condition year part\': prob, ... = {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ... = ' + str(val_probs_dict))
@@ -3544,7 +3547,7 @@ def generate_true_prob(val_probs_dict, player_current_conditions, all_conditions
     # it makes more sense to combine all the samples for a current condition to get as many samples as possible for the current condition
     # we must adjust by rate and weight to scale past season samples to current season relevance
     # all_conditions_mean_probs = {c1:p1,...}
-    all_conditions_mean_probs = generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions, all_gp_conds, all_gp_conds_weights, prev_val, stat, player_stat_dict, season_years, part, player, val) # for the stat described in val probs dict
+    all_conditions_mean_probs = generate_all_conditions_mean_probs(val_probs_dict, player_current_conditions, all_gp_conds, all_gp_conds_weights, prev_val, stat, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, player, val) # for the stat described in val probs dict
 
     # all_conditions_weights = [w1,...]
     # solved for other ws in relation to w_1 already used to sub above
@@ -3562,7 +3565,7 @@ def generate_true_prob(val_probs_dict, player_current_conditions, all_conditions
 
     sum_weights = sum(all_conditions_weights)
     if sum_weights > 0:
-        true_prob = round(sum(weighted_probs) / sum_weights,2)
+        true_prob = converter.round_half_up(sum(weighted_probs) / sum_weights,2)
     else:
         print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3633,13 +3636,13 @@ def generate_game_players_cond_sample_weight(cond_key, lineup_team, team_gp_cur_
     if combined_sample_size > 0:
         print('combined_sample_size: ' + str(combined_sample_size))
 
-        combined_sample_weight = round(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+        combined_sample_weight = converter.round_half_up(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
         print('combined_sample_weight = log(combined_sample_size) = ' + str(combined_sample_weight))
 
         cond_weight = cond_weights[cond_key]
         print('cond_weight: ' + str(cond_weight))
 
-        game_players_cond_weight = round(float(cond_weight) * combined_sample_weight, 2)
+        game_players_cond_weight = converter.round_half_up(float(cond_weight) * combined_sample_weight, 2)
 
         # for team_part, team_part_players in lineup.items():
         #     # get dict of each cond weight:sample weight pair
@@ -3764,14 +3767,14 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
         # we want sample size to have very little effect
         # bc we want the condition weights to control the outcome with slight adjustments to account for sample size
         # bc some conditions have tons of samples of same val while only small number of samples of other val but the condition itself should hold about the same weight
-        sample_weight = round(math.log10(s_n),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+        sample_weight = converter.round_half_up(math.log10(s_n),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
         print('sample_weight = log(sample_size) ' + str(sample_weight))
         #print('condition_sample_weight = ' + str(cond_weights[cond_key]) + ' * ' + str(sample_weight))
         
         cond_weight = cond_weights[cond_key]
         print('cond_weight: ' + str(cond_weight))
 
-        condition_sample_weight = round(float(cond_weight) * sample_weight, 2)
+        condition_sample_weight = converter.round_half_up(float(cond_weight) * sample_weight, 2)
     
     print('condition_sample_weight = cond_weight*sample_weight: ' + str(condition_sample_weight))
     return condition_sample_weight
@@ -3801,7 +3804,8 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
     print('\nOutput: all_conditions_weights = {cond_key: w1, ... = {teammates:15, opp:10, loc:2, prev:x, ... ')
-    print('Output: all_gp_conds_weights = {team condition:{cond_key: w1, ... = {teammates: {starters:10,bench:5,...}, opp:{...}, ...')
+    #print('Output: all_gp_conds_weights = {team condition:{cond_key: w1, ... = {teammates: {starters:10,bench:5,...}, opp:{...}, ...')
+    print('Output: all_gp_conds_weights = {team condition:{player1: weight1, ... = {teammates: {p1:10,p2:5,...}, opp:{...}, ...')
     print('Output: all_prev_val_weights = {stat name:prev val weight, ...}\n')
 
     all_conditions_weights = {} # adjusted for sample size
@@ -4094,18 +4098,19 @@ def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, p
 # instead made per unit stat records
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...}
 # given sub stat probs, add true prob key to probs dict
-def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs={}, all_players_teams={}, rosters={}, all_box_scores={}, all_cur_conds_dicts={}, all_game_player_cur_conds={}, all_prev_vals={}, season_years=[], cur_yr='', stats_of_interest=[]):
+def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs={}, all_players_teams={}, rosters={}, all_cur_conds_dicts={}, all_game_player_cur_conds={}, all_prev_vals={}, all_players_cur_avg_playtimes={}, season_years=[], cur_yr='', stats_of_interest=[]):
     print('\n===Generate All True Probs Dict===\n')
     print('Settings: Season Years, Current Year to get cur team')
     print('\nInput: all_stat_probs_dict = {player: {stat name: {stat val: {\'condition year part\': prob, ... = {\'kyle kuzma\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
+    print('Input: rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
     print('Input: all_cur_conds_dicts = {p1:{loc:away, start:start, dow:5, ...},... = {christian braun: {loc: away, start: bench, ... = ' + str(all_cur_conds_dicts))
     print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = {christian braun: {teammates: {out: [...], starters: [jamal murray,...], ... = ' + str(all_game_player_cur_conds))
     print('Input: all_prev_vals = {player:{stat name:prev val,...}, ... = {jalen brunson:{pts:20,...},...')
+    print('Input: all_players_cur_avg_playtimes = {player:playtime, ....')
     print('\nOutput: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {1: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...\n')
 
     # before we get true prob we must know per unit probs
@@ -4214,7 +4219,7 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
                     # technically prev game stat vals affects stat prob so include in all stat probs dict
                     #all_stat_prob_dicts = generate_all_prev_game_stat_vals
                     
-                    val_probs_dict['true prob'] = generate_true_prob(val_probs_dict, player_current_conditions, all_conditions_weights, all_gp_conds, all_gp_conds_weights, prev_val, prev_val_weight, player_stat_dict, all_players_abbrevs, all_players_teams, all_box_scores, season_years, part, player, stat, val)
+                    val_probs_dict['true prob'] = generate_true_prob(val_probs_dict, player_current_conditions, all_conditions_weights, all_gp_conds, all_gp_conds_weights, prev_val, prev_val_weight, player_stat_dict, all_players_cur_avg_playtimes, season_years, part, player, stat, val)
 
                     # # add keys to dict not used for ref but not yet to gen true prob
                     # # otherwise it will use string value to compute prob
@@ -4435,7 +4440,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # if player on new team but has not yet played (eg injury) then only consider current conditions if they are specifically noted as playing? 
 # cant bc only lists starters and out
-def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, read_new_game_ids):
+def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, read_new_game_ids, read_lineups):
     print('\n===Generate All Current Conditions===\n')
     print('Settings: Find Players')
     print('\nInput: Players of Interest')
@@ -4458,9 +4463,9 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     # could get mean minutes played to see play time which might be better than knowing if starter
     # also see which position is out and needs to be filled
     # all_teammates_out = {game:{team:{out:[],gtd:[]}
-    all_teammates_out = {}
-    all_starters = {}
-    all_benches = {}
+    # all_teammates_out = {}
+    # all_starters = {}
+    # all_benches = {}
     # if expected lineup, show both with and without questionable teammates
     # so when lineup confirmed, can go with correct option but really if lineup not yet confirmed then odds will not be set
     # but sometimes odds set only for expected lineups so better to avoid if unsure
@@ -4469,12 +4474,12 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     # if there are unknowns then starters and bench are also unknown so should we classify by mean minutes?
     #all_lineups = {confirmed:{team:{starters:[],out:[],bench:[],unknown:[]},...}, expected:{team:{starters:[],bench:[],out:[]},...}}
     all_lineups = {}
-    if find_players:
+    if find_players and read_lineups:
         all_lineups = reader.read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur_yr)
     # if questionable then it is very hard to say how teammates will perform so can only go with safest options
     # we could figure out how likely it is for player to play based on injury reports
     # and adjust teammates true probs accordingly
-    questionable_players = [] 
+    #questionable_players = [] 
     # can we actually measure probability of player being out?
     # if we had access to all past injury reports but i dont think we do easily although it might be worth looking up
     # first try to use rotowire uncertainty rating on lineups page if available
@@ -4674,6 +4679,8 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
     #stats_of_interest = ['pts','reb','ast']
 
     # if probs not yet saved today
+    # or if read lineups is true but no lineup probs saved
+    # bc that means we prepared by reading all other conds first while we wait for lineups to be set
     if len(player_distrib_probs.keys()) == 0:
 
         for year, year_stat_dict in player_stat_dict.items():
@@ -5194,30 +5201,32 @@ def generate_all_players_distrib_models(all_player_unit_stat_dicts, stats_of_int
     return all_players_models
 
 def generate_condition_mean_minutes(cond, player_cur_part_stat_dict):
-    print('\n===Generate Condition Mean Minutes===\n')
-    print('\nInput: cond = player abbrev game status = ' + cond)
+    print('\n===Generate Condition Mean Minutes: ' + cond + '===\n')
+    #print('Input: cond = player abbrev game status = ' + cond)
     print('Input: player_cur_part_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('\nOutput: condition_mean_minutes = x\n')
 
-    condition_mean_minutes = 0
+    condition_mean_minutes = None
 
     # minutes_dict = {condition: {game idx: stat val, ...
     minutes_dict = player_cur_part_stat_dict['min']
 
     # cond_minutes_dict = {game idx: stat val, ...
-    cond_minutes_dict = minutes_dict[cond]
+    if cond in minutes_dict.keys():
+        cond_minutes_dict = minutes_dict[cond]
 
-    cond_minutes = list(cond_minutes_dict.values())
+        cond_minutes = list(cond_minutes_dict.values())
+        #print('cond_minutes: ' + str(cond_minutes))
 
-    if len(cond_minutes) > 0:
-        condition_mean_minutes = np.mean(cond_minutes)
+        if len(cond_minutes) > 0:
+            condition_mean_minutes = converter.round_half_up(np.mean(cond_minutes), 2)
 
     print('condition_mean_minutes: ' + str(condition_mean_minutes))
     return condition_mean_minutes
 
 
-def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team):
-    print('\n===Generate GP Cond Weight===\n')
+def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond):
+    print('\n===Generate GP Cond Weight: ' + cond + '===\n')
     print('Input: teammate_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
     print('Input: teammate_gp_cur_team = x = ' + str(teammate_gp_cur_team))
     print('\nOutput: gp_cond_weight = x\n')
@@ -5227,18 +5236,21 @@ def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team):
     cur_season_minutes = teammate_cur_season_log['MIN']
     cur_team_minutes = []
     for game_idx in range(teammate_gp_cur_team):
-        game_minutes = cur_season_minutes[game_idx]
+        game_minutes = cur_season_minutes[str(game_idx)]
         cur_team_minutes.append(game_minutes)
+    #print('cur_team_minutes: ' + str(cur_team_minutes))
 
     if len(cur_team_minutes) > 0:
-        gp_cond_weight = np.mean(cur_team_minutes)
+        gp_cond_weight = converter.round_half_up(np.mean(cur_team_minutes), 2)
     
     print('gp_cond_weight: ' + str(gp_cond_weight))
     return gp_cond_weight
 
 # playtime is weighted avg of playtime under player conditions
 # like gen true prob
-def generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part):
+# use cond of player of interest starter/bench
+# and use out conds
+def generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, cur_yr, season_part):
     print('\n===Generate Player Playtime: ' + player_name.title() + '===\n')
     print('Settings: Current Year = ' + cur_yr)
     print('Settings: Season Part = ' + season_part)
@@ -5246,6 +5258,8 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
     print('Input: player_gp_conds = [\'teammate out\',..., \'t1,...out\'] = [\'A Gordon F out\', ..., \'A Gordon F,...out\'] = ' + str(player_gp_conds))
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
     print('\nOutput: playtime = x\n')
 
     playtime = 0
@@ -5254,8 +5268,8 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
         #cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part)
     
 
-        all_cond_weights = []
-        all_cond_playtimes = []
+        all_cond_weights = {}#[]
+        all_cond_playtimes = {}#[]
 
         player_cur_part_stat_dict = player_stat_dict[cur_yr][season_part]
 
@@ -5264,21 +5278,42 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
             if not re.search('opp', cond):
                 teammate_gp_conds.append(cond)
 
+
+
+
+
+        # get only single teammate conds so we can sum weights for multiconds
+        multi_cond_weights = {'out':0, 'starters':0, 'bench':0}
+        multi_conds = {}
         for cond in teammate_gp_conds:
+            print('\nCondition: ' + cond)
+
+            cond_data = cond.rsplit(' ', 1)
+            cond_key = cond_data[1]
+            print('cond_key: ' + cond_key)
+
+            # only need out cond and player cond for minutes avg and multiconds
+            # so exclude single player conds except player of interest
+            # first check for player cond
 
             # if multiplayer cond, sum single player weights
             if re.search(',', cond):
+                multi_conds[cond_key] = cond
                 continue
 
             # get teammate name from abbrev
             # cond = teammate out
-            teammate_abbrev = cond.rsplit(' ', 1)[0] #determiner.determine_teammate_in_cond(cond)
+            
+            teammate_abbrev = cond_data[0] #determiner.determine_teammate_in_cond(cond)
             teammate_abbrev_key = teammate_abbrev + '-' + player_team
-            teammate = all_players_abbrevs[teammate_abbrev_key]
-            teammate_teams = all_players_teams[teammate]
-            teammate_season_logs = all_players_season_logs[teammate]
-            teammate_gp_cur_team = determiner.determine_gp_cur_team(teammate_teams, teammate_season_logs, cur_yr)
-            teammate_cur_season_log = teammate_season_logs[cur_yr]
+            teammate = all_players_abbrevs[cur_yr][teammate_abbrev_key]
+            
+            #if teammate != player_name: # exclude cur player of interest? no bc what if only cond matching cur cond?
+            # teammate_teams = all_players_teams[teammate]
+            # teammate_season_logs = all_players_season_logs[teammate]
+            # teammate_gp_cur_team = determiner.determine_gp_cur_team(teammate_teams, teammate_season_logs, cur_yr)
+            # teammate_cur_season_log = teammate_season_logs[cur_yr]
+
             # get cond weight from teammate avg playtime 
             # cond weight = weighted avg playtime over yrs of interest
             # no, bc minutes drastically change yr to yr 
@@ -5289,25 +5324,60 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
             # whereas player scaled minutes is absolute value
             # get teammate avg playtime from their season log all cond
             # cond weight = avg playtime on cur team
-            cond_weight = generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team)
-            all_cond_weights.append(cond_weight)
+            cond_weight = all_players_cur_avg_playtimes[teammate]#generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
+            
+            # get weighted avg bt all season yrs, like gen all conds weights?
+            # no just get this yr bc minutes change drastically each yr
+            cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict)
+            
+            if cond_playtime is not None:
+
+                if teammate == player_name or cond_key == 'out':
+                    all_cond_playtimes[cond] = cond_playtime
+                    #all_cond_playtimes.append(cond_playtime)
+
+                    all_cond_weights[cond] = cond_weight
+                    #all_cond_weights.append(cond_weight)
+                
+                multi_cond_weights[cond_key] += cond_weight
+
+        for cond_key, cond in multi_conds.items():
+            print('\ncond: ' + cond)
+
+            #cond_weight = generate_multi_cond_weight(teammate_cur_season_log, teammate_gp_cur_team)
+            cond_weight = multi_cond_weights[cond_key]
 
             # get weighted avg bt all season yrs, like gen all conds weights?
             # no just get this yr bc minutes change drastically each yr
             cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict)
-            all_cond_playtimes.append(cond_playtime)
+            
+            if cond_playtime is not None:
+                all_cond_playtimes[cond] = cond_playtime
+                #all_cond_playtimes.append(cond_playtime)
+                all_cond_weights[cond] = cond_weight
+                #all_cond_weights.append(cond_weight)
 
 
         weighted_minutes = generate_weighted_stats(all_cond_playtimes, all_cond_weights)
 
-        sum_weights = sum(all_cond_weights)
+        all_cond_weights_list = []
+        # for cond, weight in all_cond_weights.items():
+        #     if cond in all_cond_playtimes.keys():
+        #         all_cond_weights_list.append(weight)
+        for cond in all_cond_playtimes.keys():
+            weight = all_cond_weights[cond]
+            all_cond_weights_list.append(weight)
+
+        sum_weights = sum(all_cond_weights_list)
+        #print('sum_weights: ' + str(sum_weights))
         if sum_weights > 0:
-            playtime = round(sum(weighted_minutes) / sum_weights,2)
+            playtime = converter.round_half_up(sum(weighted_minutes) / sum_weights,2)
+            print('playtime = sum(weighted_minutes) / sum_weights = ' + str(sum(weighted_minutes)) + '/' + str(sum_weights) + ' = ' + str(playtime))
         else:
             print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
     else: # not given player conds so just use most recent games to get idea of minutes if all teammates happen to be the same
-        player_season_logs = all_players_season_logs[player_name]
+        #player_season_logs = all_players_season_logs[player_name]
         # get current season mean minutes to compare to prev seasons
         # we use mean of last 3 games bc most accurate considering ups and downs of rotation
         #cur_yr = list(player_season_logs.keys())[0]
@@ -5320,12 +5390,12 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
         if 'MIN' in cur_season_log.keys():
             cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
             #print('cur_minutes_log: ' + str(cur_minutes_log))
-            playtime = round(np.mean(np.array(cur_minutes_log)))
+            playtime = converter.round_half_up(np.mean(np.array(cur_minutes_log)), 2)
 
     print('playtime: ' + str(playtime))
     return playtime
 
-def generate_player_unit_stat_dict(player_name, cur_yr, season_part, stats_of_interest, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs):
+def generate_player_unit_stat_dict(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, cur_yr, season_part, stats_of_interest):
     print('\n===Generate Player Unit Stat Dict: ' + player_name.title() + '===\n')
     print('Setting: Current Year = ' + cur_yr)
     print('Setting: Season Part = ' + season_part)
@@ -5355,7 +5425,7 @@ def generate_player_unit_stat_dict(player_name, cur_yr, season_part, stats_of_in
         # so until then must manually remove cases where backups are starting role
         # which they have not played in past 3 games
         
-        cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part)
+        cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, cur_yr, season_part)
 
         # if len(player_gp_conds) > 0:
         #     cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part)
@@ -5373,7 +5443,7 @@ def generate_player_unit_stat_dict(player_name, cur_yr, season_part, stats_of_in
         #     if 'MIN' in cur_season_log.keys():
         #         cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
         #         #print('cur_minutes_log: ' + str(cur_minutes_log))
-        #         cur_mean_minutes = round(np.mean(np.array(cur_minutes_log)))
+        #         cur_mean_minutes = converter.round_half_up(np.mean(np.array(cur_minutes_log)))
         
         # print('cur_mean_minutes: ' + str(cur_mean_minutes))
 
@@ -5436,7 +5506,7 @@ def generate_player_unit_stat_dict(player_name, cur_yr, season_part, stats_of_in
                                 # game stat val is what the stat val would be if playing current minutes
                                 # need game minutes >5 or elese could get 2 pts in few minutes which would be multiplied too much by normal minutes
                                 if game_minutes > 4:
-                                    unit_stat_val = round(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
+                                    unit_stat_val = converter.round_half_up(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
                                 
                                 #print('unit_stat_val: ' + str(unit_stat_val))
                                     
@@ -5481,7 +5551,7 @@ def generate_player_unit_stat_records(player_stat_dict, player_season_logs, play
         if 'MIN' in cur_season_log.keys():
             cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
             #print('cur_minutes_log: ' + str(cur_minutes_log))
-            cur_mean_minutes = round(np.mean(np.array(cur_minutes_log)))
+            cur_mean_minutes = converter.round_half_up(np.mean(np.array(cur_minutes_log)), 2)
             #print('cur_mean_minutes: ' + str(cur_mean_minutes))
 
         stats_of_interest = ['pts','reb','ast','3pm']
@@ -5539,7 +5609,7 @@ def generate_player_unit_stat_records(player_stat_dict, player_season_logs, play
                                             #print(str(prev_stat_val) + ' * ' + str(cur_mean_minutes) + ' / ' + str(prev_minutes))
                                             # game stat val is what the stat val would be if playing current minutes
                                             if prev_minutes != 0.0:
-                                                game_stat_val = round(float(prev_stat_val) * float(cur_mean_minutes) / float(prev_minutes))
+                                                game_stat_val = converter.round_half_up(float(prev_stat_val) * float(cur_mean_minutes) / float(prev_minutes))
                                             
                                             #print('game_stat_val: ' + str(game_stat_val))
 
@@ -5614,8 +5684,8 @@ def generate_prob_stat_reached(record):
         record_data = record.split('/')
         num_games_reached = record_data[0]
         num_games_played = record_data[1]
-        #prob_stat_reached = round((float(num_games_reached) / float(num_games_played)) * 100)
-        prob_stat_reached = round(float(num_games_reached) / float(num_games_played), 2)
+        #prob_stat_reached = converter.round_half_up((float(num_games_reached) / float(num_games_played)) * 100)
+        prob_stat_reached = converter.round_half_up(float(num_games_reached) / float(num_games_played), 2)
         
     #print('prob_stat_reached: ' + str(prob_stat_reached))
     return prob_stat_reached
@@ -5678,7 +5748,7 @@ def generate_player_stat_probs(player_stat_records, player_name=''):
                         # 'raw prob' and 'per min prob'
                         prob_over = generate_prob_stat_reached(record)
 
-                        #prob_under = round(1 - prob_over,2)
+                        #prob_under = converter.round_half_up(1 - prob_over,2)
 
                         # prob under for a stat val is over 1-prob ober so only need to save prob over
                         stat_probs[stat_val] = prob_over #{ 'prob over': prob_over, 'prob under': prob_under }
@@ -6472,7 +6542,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 
                                 starters_key = 'starters'
                                 bench_key = 'bench'
-                                in_key = 'in'
+                                out_key = 'out'
                                 opp_key = 'opp'
                                 # we need players in alphabetical string to easily compare to other games
                                 # might as well compare strings bc need str as key
@@ -6503,6 +6573,10 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                     # condition: bench
                                     bench = game_teammates[bench_key]
                                     bench_str = generate_players_string(bench) + ' ' + bench_key
+
+                                    # condition: out
+                                    out_teammates = game_teammates[out_key]
+                                    all_out_str = generate_players_string(out_teammates) + ' ' + out_key
                                     
 
                                     # condition: player start
@@ -6587,14 +6661,18 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                     
 
                                     # condition: teammate out
-                                    out_key = 'out'
+                                    #out_key = 'out'
                                     out = game_teammates[out_key]
                                     for out_player in out:
                                         out_str = out_player + ' ' + out_key
                                         if not out_str in stat_dict.keys():
                                             stat_dict[out_str] = {}
                                         stat_dict[out_str][game_idx] = stat
-                                
+
+                                    # condition: teammates out
+                                    if not all_out_str in stat_dict.keys():
+                                        stat_dict[all_out_str] = {}
+                                    stat_dict[all_out_str][game_idx] = stat
                                     
                                     # todo: condition: roles need to be filled due to players out
                                     # eg lillard out, starting pg, but new team so backup pg has no samples with this team
@@ -6614,6 +6692,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                     opp_bench = game_opps[bench_key]
                                     opp_bench_str = generate_players_string(opp_bench) + ' ' + opp_key + ' ' + bench_key
                                 
+                                    out_opps = game_opps[out_key]
+                                    all_opps_out_str = generate_players_string(out_opps) + ' ' + out_key
+
                                     # condition: game opps
                                     # if not game_opps_str in stat_dict.keys():
                                     #     stat_dict[game_opps_str] = {}
@@ -6659,6 +6740,11 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                         if not opp_out_str in stat_dict.keys():
                                             stat_dict[opp_out_str] = {}
                                         stat_dict[opp_out_str][game_idx] = stat
+
+                                    # condition: opps out
+                                    if not all_opps_out_str in stat_dict.keys():
+                                        stat_dict[all_opps_out_str] = {}
+                                    stat_dict[all_opps_out_str][game_idx] = stat
 
                                 else:
                                     print('Caution: No Game Opponents! ' + game_key)
@@ -6899,7 +6985,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
 
     all_seasons_stats_dicts = {'pts':all_seasons_pts_dicts, 'reb':all_seasons_rebs_dicts, 'ast':all_seasons_asts_dicts, 'w score':all_seasons_winning_scores_dicts, 'l score':all_seasons_losing_scores_dicts, 'min':all_seasons_minutes_dicts, 'fgm':all_seasons_fgms_dicts, 'fga':all_seasons_fgas_dicts, 'fg%':all_seasons_fg_rates_dicts, '3pm':all_seasons_threes_made_dicts, '3pa':all_seasons_threes_attempts_dicts, '3p%':all_seasons_threes_rates_dicts, 'ftm':all_seasons_ftms_dicts, 'fta':all_seasons_ftas_dicts, 'ft%':all_seasons_ft_rates_dicts, 'blk':all_seasons_bs_dicts, 'stl':all_seasons_ss_dicts, 'pf':all_seasons_fs_dicts, 'to':all_seasons_tos_dicts} # loop through to add all new stats with 1 fcn
 
-    gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str)
+    gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player_name)
 
     for season_year, player_game_log in player_season_logs.items():
 
@@ -7188,8 +7274,8 @@ def test_distrib_models(all_player_distrib_models):
             #print('\nstat ' + stat_name.upper())
 
             model_name = stat_model['name']
-            sim_avg = round(stat_model['avg'])
-            sim_max = round(stat_model['max'])
+            sim_avg = converter.round_half_up(stat_model['avg'])
+            sim_max = converter.round_half_up(stat_model['max'])
 
             # sim max and avg are result of np mean and max so they are floats
             max_diffs = {'pts':20, 'ast':10, 'reb':10}
@@ -7224,8 +7310,8 @@ def test_distrib_models(all_player_distrib_models):
             #print('\nstat ' + stat_name.upper())
 
             model_name = stat_model['name']
-            sim_avg = round(stat_model['avg'])
-            sim_max = round(stat_model['max'])
+            sim_avg = converter.round_half_up(stat_model['avg'])
+            sim_max = converter.round_half_up(stat_model['max'])
 
             # sim max and avg are result of np mean and max so they are floats
             max_diffs = {'pts':20, 'ast':10, 'reb':10}
@@ -7294,13 +7380,13 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     current_year_str = determiner.determine_current_season_year(todays_games_date_obj)
     todays_date = todays_games_date_obj.strftime('%m-%d-%y')
-    yesterday_obj = todays_games_date_obj - timedelta(days = 1)
-    yesterday = yesterday_obj.strftime('%m-%d-%y')
-    print("Yesterday was: ", yesterday_obj)
+    # yesterday_obj = todays_games_date_obj - timedelta(days = 1)
+    # yesterday = yesterday_obj.strftime('%m-%d-%y')
+    # print("Yesterday was: ", yesterday_obj)
 
     # should init setting be string?
     # as user input i think it will be string converted to int
-    season_year = current_year_str #determiner.determine_current_season_year() # based on mth, changed to default or current season year, which is yr season ends
+    season_year = int(current_year_str) #determiner.determine_current_season_year() # based on mth, changed to default or current season year, which is yr season ends
     if 'read season year' in settings.keys():
         season_year = settings['read season year']
 
@@ -7349,8 +7435,18 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     if 'model x seasons' in settings.keys():
         model_x_seasons = settings['model x seasons']
     # OLD: all_player_season_logs_dict
-    all_players_season_logs = reader.read_all_players_season_logs(players_names, current_year_str, todays_date, yesterday, all_players_espn_ids, all_players_teams, model_x_seasons, season_year)
+    all_players_season_logs = reader.read_all_players_season_logs(players_names, current_year_str, todays_date, all_players_espn_ids, all_players_teams, model_x_seasons, season_year, game_teams, teams_current_rosters)
     
+    # need season yrs to get per unit time stats
+    # and prev vals in stat dict to see sequence/trend
+    # could just take the first year in the dict by default
+    # but user already told us the years to look at in settings
+    season_years = []
+    for yr in range(season_year,season_year-read_x_seasons,-1):
+        season_years.append(str(yr)) # make string to compare to json keys
+
+
+
     #print('projected_lines_dict after read season logs: ' + str(projected_lines_dict))
 
     # read player positions so we can see prob of stats with certain positions playing
@@ -7359,13 +7455,12 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}
     all_players_positions = reader.read_all_players_positions(players_names, all_players_espn_ids)
 
-    # need season yrs to get per unit time stats
-    # and prev vals in stat dict to see sequence/trend
-    # could just take the first year in the dict by default
-    # but user already told us the years to look at in settings
-    season_years = []
-    for yr in range(season_year,season_year-read_x_seasons,-1):
-        season_years.append(str(yr)) # make string to compare to json keys
+    
+
+    read_lineups = True
+    if 'read lineups' in settings.keys():
+        read_lineups = settings['read lineups']
+
 
     # use init stat dicts to see which stats already saved so no need to read from internet
     # use for box scores
@@ -7510,7 +7605,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_prev_vals = {}
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
-        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, read_new_game_ids) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, read_new_game_ids, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
         # all_cur_conds_lists = {p1:[m fultz pg out, j ingles sg out, away, ...],...}
         all_cur_conds_data = converter.convert_all_conditions_to_dicts(all_current_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years, current_year_str)
         all_cur_conds_dicts = all_cur_conds_data[0]
@@ -7522,6 +7617,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_cur_conds_list_data = generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
     all_cur_conds_lists = all_cur_conds_list_data[0]
     all_gp_cur_conds_lists = all_cur_conds_list_data[1] # just teammates for now bc easiest way to get playtime? eventually will account for opponents to predict playtime so get both and treat differently
+
+    # all players weights we use for scaling unit stat dict
+    # AND true prob
+    all_players_cur_avg_playtimes = determiner.determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players_teams, current_year_str)
 
     #all_player_consistent_stats = {} # we want to display all player consistent stats together for viewing convenience and analysis comparison
     all_player_stat_records = {}
@@ -7561,6 +7660,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         player_teams = all_players_teams[player_name]
 
         if determiner.determine_dnp_player(player_teams, current_year_str, player_name):
+            continue
+
+        player_gp_cur_conds = all_game_player_cur_conds[player_name]
+        if determiner.determine_out_player(player_name, player_gp_cur_conds):
             continue
 
         # init saved stats
@@ -7648,7 +7751,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
         # prob for each stat over and under, from prob distrib instead of direct measure
         # include per unit adjustment, by estimating minutes according to teammates in/out and only conditions affecting minutes such as week of season
-        player_unit_stat_dict = generate_player_unit_stat_dict(player_stat_dict, player_season_logs, player_gp_conds, stats_of_interest, player_name, gp_cur_team)
+        player_team = determiner.determine_player_current_team(player_name, player_teams, current_year_str, teams_current_rosters)
+        player_unit_stat_dict = generate_player_unit_stat_dict(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, current_year_str, season_part, stats_of_interest)
         all_player_unit_stat_dicts[player_name] = player_unit_stat_dict
         
         
@@ -7714,7 +7818,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # get from game log
     # diff for each stat
     
-    all_true_probs_dict = generate_all_true_probs_dict(all_distrib_probs_dict, all_player_stat_dicts, all_players_abbrevs, all_players_teams, teams_current_rosters, all_box_scores, all_cur_conds_dicts, all_game_player_cur_conds, all_prev_vals, season_years, current_year_str, stats_of_interest)
+    all_true_probs_dict = generate_all_true_probs_dict(all_distrib_probs_dict, all_player_stat_dicts, all_players_abbrevs, all_players_teams, teams_current_rosters, all_cur_conds_dicts, all_game_player_cur_conds, all_prev_vals, all_players_cur_avg_playtimes, season_years, current_year_str, stats_of_interest)
     
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
@@ -7759,19 +7863,24 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
     # here we show conditions keys eg loc, out, ...
     # need all players to have all cond keys, even if blank?
-    conditions = list(list(all_current_conditions.values())[0].keys())
-    desired_order.extend(conditions)
+    if len(all_current_conditions.values()) > 0:
+        conditions = list(list(all_current_conditions.values())[0].keys())
+        desired_order.extend(conditions)
 
-    # add columns in order of conditions used, by weight high to low
-    # given current conditions used to determine true prob
-    # take current conditions for each year
-    # here we show conditions values eg away, b biyombo c out, ...
-    # get season part from time of yr
-    season_part = 'regular'
-    # add condition prob titles to desired order after condition val columns showing the current cond vals
-    conditions_order = generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
-    #conditions_order = ['m fultz pg out prob', 'all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
-    desired_order.extend(conditions_order)
+        # add columns in order of conditions used, by weight high to low
+        # given current conditions used to determine true prob
+        # take current conditions for each year
+        # here we show conditions values eg away, b biyombo c out, ...
+        # get season part from time of yr
+        season_part = 'regular'
+        # add condition prob titles to desired order after condition val columns showing the current cond vals
+        conditions_order = generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
+        #conditions_order = ['m fultz pg out prob', 'all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
+        desired_order.extend(conditions_order)
+    
+    else:
+        print('Warning: No current conditions!')
+    
     #print('desired_order: ' + str(desired_order))
     #writer.list_dicts(available_prop_dicts, desired_order)#, output='excel')
 

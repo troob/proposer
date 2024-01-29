@@ -90,6 +90,11 @@ read_odds = False # set false to test other features
 # test a condition or group of conditions by itself
 control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
 
+#===READ LINEUPS===
+# true when we want to include gp conds prob distribs
+# false to ignore and prepare before lineups set
+# so we can get prob distribs for all conds except gp conds
+read_lineups = False
 
 
 settings = {'find matchups': find_matchups, 
@@ -105,7 +110,8 @@ settings = {'find matchups': find_matchups,
             'read new game ids': read_new_game_ids, 
             'read new player ids': read_new_player_ids,
             'stats of interest': stats_of_interest,
-            'control conditions': control_conds}
+            'control conditions': control_conds,
+            'read lineups': read_lineups}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -116,7 +122,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('sac','dal')]#, ('hou','cha'), ('phx','ind'), ('lac','tor'), ('orl','mem'), ('cle','mil'), ('okc','nop'), ('por','sas')]#, ('nop','lal')
+game_teams = [('nyk','cha'), ('lac','cle'), ('nop','bos'), ('uta','bkn'), ('phx','mia'), ('lal','hou'), ('sac','mem'), ('min','okc'), ('wsh','sas'), ('orl','dal'), ('mil','den'), ('phi','por')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -124,8 +130,8 @@ game_teams = [('sac','dal')]#, ('hou','cha'), ('phx','ind'), ('lac','tor'), ('or
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['luka doncic'] # 'jacob gilyard', use for testing
+players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+#players_names = ['demar derozan'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
