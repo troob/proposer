@@ -376,13 +376,17 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
     #print('game_player_abbrevs: ' + str(game_player_abbrevs))
     return game_player_abbrevs
 
+# CHANGE to get list of all abbrevs
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    #print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
-    #print('all_players_abbrevs: ' + str(all_players_abbrevs))
+    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
+
+    # some players w/ jr/sr have 2 entries
+
 
 
     for year_players_abbrev in all_players_abbrevs.values():
@@ -390,7 +394,11 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
             abbrev_data = abbrev_key.split('-')
             abbrev = abbrev_data[0]
 
-            if name == game_player:
+            # CAUTION: does this cause mismatch
+            # we want kelly oubre to match kelly oubre jr
+            # but are there any irregular cases where 1 players name fits in another players name???
+            #if name == game_player:
+            if re.search(game_player, name):
                 game_player_abbrev = abbrev#all_players_abbrevs[game_player]#convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_box_scores, season_years, cur_yr)
                 break
 
@@ -434,9 +442,10 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #         if game_player_abbrev != '':
     #             break
 
-    #print('game_player_abbrev: ' + str(game_player_abbrev))
+    print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
+# CHANGE to get list of all abbrevs bc each player may have multiple
 def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
     # print('\n===Convert All Players Names to Abbrevs===\n')
     # print('players: ' + str(players))

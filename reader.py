@@ -323,8 +323,8 @@ def read_team_schedule_from_internet(team_abbrev):
 	return team_schedule
 
 def read_team_schedule(team, init_all_teams_schedules):
-	print('\n===Read Team Schedule: ' + team + '===\n')
-	print('\nOutput: team_schedule = {field idx:{\'0\':field name, game num:field val, ... = {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
+	# print('\n===Read Team Schedule: ' + team + '===\n')
+	# print('\nOutput: team_schedule = {field idx:{\'0\':field name, game num:field val, ... = {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
 
 	team_schedule = {}
 
@@ -2248,7 +2248,7 @@ def read_players_from_rosters(rosters, game_teams=[]):
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # all_teams_players = {year:{team:[players],...},...}
-def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur_yr):
+def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):
 	print('\n===Read All Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_lineups = {\'cle\': {\'starters\': [\'donovan mitchell\', ...\n')
@@ -2262,7 +2262,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	url = 'https://www.rotowire.com/basketball/nba-lineups.php'
 	soup = read_website(url)
 
-	init_lineups = []
+	#init_lineups = []
 
 	starters_key = 'starters'
 	bench_key = 'bench'
@@ -2270,7 +2270,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	probable_key = 'probable'
 	question_key = 'question'
 	doubt_key = 'doubt'
-	in_key = 'in'
+	#in_key = 'in'
 	dnp_key = 'dnp'
 
 	if soup is not None:
@@ -2402,7 +2402,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 	# but if took everyone on roster then it would show players that dont play
 	# but it doesnt matter if they havent played before bc we have no data with them on this team yet
 	# all_teams_current_players: {'sac': ['Domantas Sabonis',...
-	all_teams_current_players = all_teams_players[cur_yr]
+	#all_teams_current_players = all_teams_players[cur_yr]
 	#print('all_teams_current_players: ' + str(all_teams_current_players))
 	for team, lineup in all_lineups.items():
 		# print('team: ' + str(team))
@@ -2411,19 +2411,27 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 		# then we do not need to get the current lineup
 		# likely bc the game already started but there are other games today
 		if team in rosters.keys():
+			# add ofs players to out so they are not put on bench
+			team_ofs_players = []
+			if team in ofs_players.keys():
+				team_ofs_players = ofs_players[team]
+
 			team_roster = rosters[team]
 			#print('team_roster: ' + str(team_roster))
-			team_current_players = all_teams_current_players[team]
+			
+			#team_current_players = all_teams_current_players[team]
 			#print('team_current_players: ' + str(team_current_players))
+			
 			bench = []
-			in_players = []
+			#in_players = []
 			# current players shows players in past box scores this season
 			# while roster shows current players including practice players who dont play
 			# and new teammates havent played before, 
 			# AND shows if teammate was in box score no longer on team so not on bench
-			starters = lineup[starters_key]
-			out = lineup[out_key]
-			doubtful = lineup[doubt_key]
+			#starters = lineup[starters_key]
+			#out = lineup[out_key]
+			lineup[out_key].extend(team_ofs_players)
+			#doubtful = lineup[doubt_key]
 			# print('starters: ' + str(starters))
 			# print('out: ' + str(out))
 			# print('doubtful: ' + str(doubtful))
@@ -2446,26 +2454,36 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, cur
 				if avg_play_time <= 11.5:
 					dnp.append(player)
 			#print('dnp: ' + str(dnp))
+			lineup[dnp_key] = dnp
 
 			# need to add starters and bench to in players separate in case new player on team so cur cond does not match prev conds without player
-			for starter in starters:
-				in_players.append(starter)
+			# for starter in starters:
+			# 	in_players.append(starter)
 
 			for player in team_roster:
 				#print('\nplayer: ' + player.title())
 
 				#if player in team_roster: # check still on team
 
-				if player not in starters and player not in out and player not in doubtful and player not in dnp:
+				player_names = [player] # for players with jr like kelly oubre jr sometimes excluded bc only 1
+				if re.search('\sjr$|\ssr$', player):
+					player_name = re.sub('\sjr$|\ssr$', '', player)
+					player_names.append(player_name)
+
+				#if player not in starters and player not in out and player not in doubtful and player not in dnp:
+				if determiner.determine_player_benched(player_names, lineup):
 					# and player not in out and player not in doubtful:
+					# for players with jr like kelly oubre jr sometimes excluded bc only 1
+					# so try both
+					
 					bench.append(player)
-					in_players.append(player)
+					#in_players.append(player)
 
 				
 			
 			#print('bench: ' + str(bench))
 			lineup[bench_key] = bench
-			lineup[in_key] = in_players
+			#lineup[in_key] = in_players
 
 
 	# standardize format to unique player id
@@ -2973,12 +2991,12 @@ def read_all_players_teammates(all_players_season_logs, all_box_scores, cur_yr, 
 # player_teammates = {year:[teammates],...}
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 def read_player_teammates(player, player_season_logs, all_box_scores, init_all_players_teammates={}, cur_yr='', season_years=[]):
-	print('\n===Read Player Teammates: ' + player.title() + '===\n')
-	print('\nInput: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-	print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-	print('Input: init_all_players_teammates = {player:{year:[teammates],... = ')
-	print('Input: Current Year bc new teammates each game.')
-	print('\nOutput: player_teammates = {year:[teammates],... =  {\'2024\': [\'J Randle PF\', ...\n')
+	# print('\n===Read Player Teammates: ' + player.title() + '===\n')
+	# print('\nInput: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	# print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+	# print('Input: init_all_players_teammates = {player:{year:[teammates],... = ')
+	# print('Input: Current Year bc new teammates each game.')
+	# print('\nOutput: player_teammates = {year:[teammates],... =  {\'2024\': [\'J Randle PF\', ...\n')
 
 
 	player_teammates = {}
@@ -3006,10 +3024,10 @@ def read_player_teammates(player, player_season_logs, all_box_scores, init_all_p
 # read teammates using box score data in all players in games dict
 # which gives away home teams players
 def read_year_teammates(player, season_year, player_season_log, year_box_scores):
-	print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
-	print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-	print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-	print('\nOutput: season_teammates = [p1,...] =  [\'J Randle PF\', ...\n')
+	# print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
+	# print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+	# print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+	# print('\nOutput: season_teammates = [p1,...] =  [\'J Randle PF\', ...\n')
 
 	year_teammates = []
 

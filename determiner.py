@@ -1190,6 +1190,30 @@ def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
     return sample_size
 
 
+def determine_player_benched(player_names, lineup):
+    print('\n===Determine Player Benched===\n')
+    print('player_names: ' + str(player_names))
+    print('lineup: ' + str(lineup))
+
+    benched = True
+
+    starters_key = 'starters'
+    out_key = 'out'
+    doubt_key = 'doubt'
+    dnp_key = 'dnp'
+
+    starters = lineup[starters_key]
+    out = lineup[out_key]
+    doubtful = lineup[doubt_key]
+    dnp = lineup[dnp_key]
+
+    for player in player_names:
+        if player in starters or player in out or player in doubtful or player in dnp:
+            benched = False
+            break
+
+    print('benched: ' + str(benched))
+    return benched
 
 
 def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, season_years=[], irreg_play_time={}):
@@ -1209,9 +1233,9 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
     return unit_time_period
 
 def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
-    # print('\n===Determine All Current GP Conds===\n')
-    # print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
-    # print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
+    print('\n===Determine All Current GP Conds===\n')
+    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
+    print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
 
     all_cur_conds = []
     all_players_gp_conds = {}
@@ -1487,6 +1511,33 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
 
 
     return need_box_score
+
+def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur_yr):
+    print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
+
+    teammate_abbrev_key = teammate_abbrev + '-' + player_team
+    player_name = ''
+    if teammate_abbrev_key in all_players_abbrevs[cur_yr].keys():
+        player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
+
+    # try variations of irregular abbrevs
+    # OR store list of abbrevs together
+    if player_name == '':
+        # take only first letter of first initial + rest of name + position
+        name_data = teammate_abbrev.split()
+        first_abbrev = name_data[0]
+        if len(first_abbrev) > 1: # if already 1 then no need to try again
+            teammate_abbrev = first_abbrev[0]
+            for name in name_data[1:]:
+                teammate_abbrev += ' ' + name
+            teammate_abbrev_key = teammate_abbrev + '-' + player_team
+
+            player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
+
+    
+    print('player_name: ' + str(player_name))
+    print('teammate_abbrev: ' + str(teammate_abbrev))
+    return player_name, teammate_abbrev
 
 # cur avg playtime is weight of player condition
 def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player):
@@ -1899,26 +1950,26 @@ def determine_highest_ev_prop(main_prop, duplicate_props):
 
 
 def determine_out_player(player_name, player_gp_cur_conds):
-    print('\n===Determine Out Player: ' + player_name.title() + '===\n')
-    print('Input: player_gp_cur_conds = {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(player_gp_cur_conds))
+    # print('\n===Determine Out Player: ' + player_name.title() + '===\n')
+    # print('Input: player_gp_cur_conds = {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(player_gp_cur_conds))
 
     out = False 
 
     teammates = player_gp_cur_conds['teammates']
     if len(teammates.keys()) > 0:
         out_teammates = teammates['out']
-        print('out_teammates: ' + str(out_teammates))
+        #print('out_teammates: ' + str(out_teammates))
 
         if player_name in out_teammates:
             out = True
 
-    print('out: ' + str(out))
+    #print('out: ' + str(out))
     return out
 
 
 def determine_dnp_player(player_teams, cur_yr, player_name):
-    print('\n===Determine DNP Player: ' + player_name.title() + '===\n')
-    print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...')
+    # print('\n===Determine DNP Player: ' + player_name.title() + '===\n')
+    # print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...')
 
     dnp = False
 
@@ -1931,11 +1982,11 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
         cur_team_dict = cur_yr_teams_dicts[-1] # {min:m, gp:gp}
         player_mean_minutes = cur_team_dict['MIN']
 
-    print('player_mean_minutes: ' + str(player_mean_minutes))
+    #print('player_mean_minutes: ' + str(player_mean_minutes))
     if player_mean_minutes < 11.5:
         dnp = True
 
-    print('dnp: ' + str(dnp))
+    #print('dnp: ' + str(dnp))
     return dnp
 
 
