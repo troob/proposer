@@ -31,6 +31,7 @@ from tabulate import tabulate # display output
 
 # === Local Internal Libraries ===
 import converter # convert am to dec odds so we can get joint odds
+from converter import round_half_up
 import determiner # determine regular season games, etc
 import distributor # prob distribs
 
@@ -476,7 +477,7 @@ def generate_player_avg_range_dict(player_name, player_stat_dict, key):
                         stat_avg_range = 0
                         if len(stat_vals) > 0:
                             if key == 'mean':
-                                stat_avg_range = converter.round_half_up(np.mean(np.array(stat_vals)), 1)
+                                stat_avg_range = round_half_up(np.mean(np.array(stat_vals)), 1)
                             elif key == 'median':
                                 stat_avg_range = int(np.median(np.array(stat_vals)))
                             elif key == 'mode':
@@ -1115,7 +1116,7 @@ def generate_mean_margin(init_val, stat_dict):
 
     mean_val = 0 # init
     if len(stat_vals) > 0:
-        mean_val = converter.round_half_up(np.mean(np.array(stat_vals)), 1)
+        mean_val = round_half_up(np.mean(np.array(stat_vals)), 1)
     else:
         print('Warning: No stat vals while generating min margin!')
 
@@ -1141,7 +1142,7 @@ def generate_margin(init_val, stat_dict, margin_type='min'):
             val = np.mean(np.array(stat_vals))
             #print('val: ' + str(val))
             # we want to round to whole number for easy comparison and we cannot be certain with any more accuracy due to other conditions
-            margin = converter.round_half_up(val - init_val) 
+            margin = round_half_up(val - init_val) 
         else:
             val = min(stat_vals)
             margin = val - init_val
@@ -1429,16 +1430,16 @@ def generate_all_consistent_stat_dicts(all_player_consistent_stats, all_player_s
                                 
                                 prob = prob_stat_dict[prob_key]
                                 #print('prob: ' + str(prob))
-                                consistent_stat_prob = converter.round_half_up(prob * 100)
+                                consistent_stat_prob = round_half_up(prob * 100)
                                 #print('consistent_stat_prob: ' + str(consistent_stat_prob))
 
                                 second_consistent_stat = prob_stat_dict[second_prob_stat_key]
-                                second_consistent_stat_prob = converter.round_half_up(prob_stat_dict[second_prob_key] * 100)
+                                second_consistent_stat_prob = round_half_up(prob_stat_dict[second_prob_key] * 100)
 
                                 min_margin = prob_stat_dict[min_margin_key]
                                 second_min_margin = prob_stat_dict[second_min_margin_key]
-                                mean_margin = converter.round_half_up(prob_stat_dict[mean_margin_key])
-                                second_mean_margin = converter.round_half_up(prob_stat_dict[second_mean_margin_key])
+                                mean_margin = round_half_up(prob_stat_dict[mean_margin_key])
+                                second_mean_margin = round_half_up(prob_stat_dict[second_mean_margin_key])
 
                                 # set keys for each field for each part of season and for each season
                                 part_prob_stat_key = season_part_key + ' ' + prob_stat_key
@@ -2179,7 +2180,7 @@ def generate_joint_prob_of_props(props):
         prop_prob = prop['true prob']
         probs.append(prop_prob)
 
-    joint_prob = str(converter.round_half_up(generate_joint_prob(probs) * 100, 2))
+    joint_prob = str(round_half_up(generate_joint_prob(probs) * 100, 2))
 
 
     #print('joint_prob: ' + str(joint_prob))
@@ -2202,7 +2203,7 @@ def generate_joint_ev_of_props(props):
     joint_odds = generate_joint_odds(odds)
 
     #if joint_prob > 0:
-    ev = str(converter.round_half_up(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
+    ev = str(round_half_up(float(generate_joint_ev(joint_prob, joint_odds)) * 100, 2))
 
     #print('ev: ' + str(ev))
     return ev
@@ -2262,7 +2263,7 @@ def generate_ev(prob, odds):
         spent = 1 # unit
         profit = profit_multiplier * prob_over 
         loss = spent * prob_under
-        # "%.2f" % () returns accurate 2 decimal places instead of converter.round_half_up(2) which always rounds up
+        # "%.2f" % () returns accurate 2 decimal places instead of round_half_up(2) which always rounds up
         ev = "%.2f" % (profit - loss)
     
     #print('ev: ' + str(ev))
@@ -2895,7 +2896,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
             prob_under = 1 - prob_over
             #print('prob_under: ' + str(prob_under))
             spent = 1 # unit
-            # "%.2f" % () returns accurate 2 decimal places instead of converter.round_half_up(2) which always rounds up
+            # "%.2f" % () returns accurate 2 decimal places instead of round_half_up(2) which always rounds up
             ev = "%.2f" % (profit_multipier * prob_over - spent * prob_under)
         
         #print('ev: ' + str(ev))
@@ -3068,11 +3069,11 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #per_unit_prob = per_unit_probs_dict[player][stat_name][val][conditions] #val_probs_dict[per_unit_conditions]
                         #print('prob: ' + str(prob))
                         if prob is not None:
-                            stat_val_probs_dict[true_prob_key] = converter.round_half_up(prob * 100)
+                            stat_val_probs_dict[true_prob_key] = round_half_up(prob * 100)
                     #     else:
                     #         stat_val_probs_dict[true_prob_key] = 'NA'
                     #         print('Caution: No prob for player stat val: ' + player + ', ' + stat_name + ', ' + str(val))
-                    #     #stat_val_probs_dict[per_unit_conditions] = converter.round_half_up(per_unit_prob * 100)
+                    #     #stat_val_probs_dict[per_unit_conditions] = round_half_up(per_unit_prob * 100)
                     # # if condition not in val probs dict
                     # # then this player did not play in this condition, so show NA
                     # #for conditions in all_conditions:
@@ -3131,8 +3132,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #         #per_unit_conditions = conditions + ' per unit'
                         #         #per_unit_prob = val_probs_dict[per_unit_conditions]
                         #         #print('over prob: ' + str(prob))
-                        #         stat_val_probs_dict[conditions] = 100 - converter.round_half_up(prob * 100)
-                        #         #stat_val_probs_dict[per_unit_conditions] = 100 - converter.round_half_up(per_unit_prob * 100)
+                        #         stat_val_probs_dict[conditions] = 100 - round_half_up(prob * 100)
+                        #         #stat_val_probs_dict[per_unit_conditions] = 100 - round_half_up(per_unit_prob * 100)
 
                         #     # if condition not in val probs dict
                         #     # then this player did not play in this condition, so show NA
@@ -3144,7 +3145,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                             prob = val_probs_dict[true_prob_key]
                             #print('over prob: ' + str(prob))
                             if prob is not None:
-                                stat_val_probs_dict[true_prob_key] = 100 - converter.round_half_up(prob * 100)
+                                stat_val_probs_dict[true_prob_key] = 100 - round_half_up(prob * 100)
                                 #print('under prob: ' + str(stat_val_probs_dict['true prob']))
                         #     else:
                         #         stat_val_probs_dict[true_prob_key] = 'NA'
@@ -3246,7 +3247,7 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
             # print('team_part_sum_weights: ' + str(sum_weights))
             
             if sum_weights > 0:
-                team_part_true_prob = converter.round_half_up(sum_weighted_probs / sum_weights,2)
+                team_part_true_prob = round_half_up(sum_weighted_probs / sum_weights,2)
             else:
                 print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3273,7 +3274,7 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
         # print('gp_sum_weights: ' + str(sum_weights))
 
         if sum_weights > 0:
-            gp_condition_mean_prob = converter.round_half_up(sum_weighted_probs / sum_weights,2)
+            gp_condition_mean_prob = round_half_up(sum_weighted_probs / sum_weights,2)
         else:
             print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3284,7 +3285,7 @@ def generate_game_players_condition_mean_prob(team_condition, team_gp_conds, tea
 # just like old true prob bc takes one condition and gets all yrs samples combined into weighted avg
 # where each yr adds 1 to the inverse multiplier so as data gets far away it gets less weight
 # yr multiplier is arbitrary and must be discovered by ml algo
-def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, season_years, part, stat_name):
+def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, season_years, part, stat_name, single_conds=[]):
     print('\n===Generate Condition Mean Prob: ' + condition + '===\n')
     print('Settings: Season Years, Season Part')
     print('\nInput: val_probs_dict = {\'condition year part\': prob, ... = {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')# = ' + str(val_probs_dict))
@@ -3293,93 +3294,96 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
 
     condition_mean_prob = None # need samples or prob distrib?
 
-    probs = []
-    # in this fcn it is for 1 condition and part of season so the conditions will just be different years, so 1 for each year
-    all_current_conditions = [] # header field title 'condition year part'
-    all_cur_cond_dicts = [] # cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
-    
-    
+    single_conds = ['nf', 'local']
+    if condition not in single_conds:
 
-    # we dont need to label probs in dict 
-    # bc they are same condition in order by year going from recent to distant
-    for year_idx in range(len(season_years)):
-        year = season_years[year_idx]
-        #print('\nyear: ' + str(year))
-
-        # for each yr, we need a new cur cond dict bc the yr changes the cur conds
-        cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
-        current_conditions = condition + ' ' + str(year) + ' ' + part + ' prob'
+        probs = []
+        # in this fcn it is for 1 condition and part of season so the conditions will just be different years, so 1 for each year
+        all_current_conditions = [] # header field title 'condition year part'
+        all_cur_cond_dicts = [] # cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
         
-        # NOW with distrib probs all probs are per unit even cur yr adjusted to expected play time
-        # if year_idx > 0:
-        #     current_conditions += ' per unit'
-
-        #print('current_conditions: ' + str(current_conditions))
-
-        if current_conditions in val_probs_dict.keys():
-            probs.append(val_probs_dict[current_conditions])
-            #all_current_conditions.append(current_conditions)
-            all_cur_cond_dicts.append(cur_cond_dict)
-        else:
-            print('Warning: Current Conditions not in val probs dict! ' + str(current_conditions))
-
-    # print('probs: ' + str(probs))
-    # print('all_cur_cond_dicts: ' + str(all_cur_cond_dicts))
-
-    # if no probs or cur conds then no need to find weights
-    # which means unable to find cur conds in val probs dict so prob unknown
-    # default condition mean prob to 0 for now but eventually can use other similar players mean prob but that would need to be separate bc it is not measured for this player
-    # but if default to 0 then we must differentiate those without samples and those with samples who have reached line 0 times
-    if len(probs) > 0:
-
-        sample_sizes = []
-        for p_idx in range(len(probs)):
-            cur_conds = all_cur_cond_dicts[p_idx]
-            s_n = determiner.determine_sample_size(player_stat_dict, cur_conds, stat_name) # for a given yr
-            sample_sizes.append(s_n)
-        #print('sample_sizes: ' + str(sample_sizes))
-
-        s_1 = sample_sizes[0]
-
-        t_1 = 1.0 # set bc current year is origin so multiply by 1. each year adds time scale constant as weight decreases. that weight should be determined by ml algo
         
-        # already added first weight to list so start from idx 1
-        # get weights by relation where each year adds 1 to divisor
-        # eg this yr is 1 so divide by 1, prev yr is 2 and so on
-        # this is arbitrary and must get more accurate way to show decay of relevance
-        w_1 = 1.0 # other weights relative to current yr sample
-        weights = [w_1]
-        for p_idx in range(1,len(probs)): # starting with prev yr, idx 1
-            t_n = p_idx + 1 # years away
-            # scale time by 1.5 to show even less effect over time
-            # so 2 becomes 3, 3 becomes 4.5 BUT we may only use >2 prev seasons if played >5 seasons bc stable
-            t_constant = 1.25
-            t_n *= t_constant
-            s_n = sample_sizes[p_idx] #65 #previous years
-            # Do i need to round before computing to ensure floating pt accuracy???
-            #w_n = converter.round_half_up(w_1 * round(t_1 / t_n, 6) * round(s_n / s_1, 6), 2)
-            w_n = converter.round_half_up(w_1 * (t_1 / t_n) * (s_n / s_1), 2)
-            weights.append(w_n)
-        #print('weights: ' + str(weights))
 
-        # solved for other ws in relation to w_1 already used to sub above
-        #true_prob = 0#w_1 * p_1
-        weighted_probs = []#0
-        for p_idx in range(len(probs)):
-            prob = probs[p_idx]
-            #print('prob: ' + str(prob))
-            w = weights[p_idx]
-            #print('w: ' + str(w))
-            wp = converter.round_half_up(w * prob, 6)
-            #print('wp: ' + str(wp))
-            weighted_probs.append(wp) #+= wp
-            #print('true_prob: ' + str(true_prob))
-        
-        sum_weights = sum(weights)
-        if sum_weights > 0:
-            condition_mean_prob = converter.round_half_up(sum(weighted_probs) / sum_weights, 2)
-        else:
-            print('Warning: sum_weights 0 bc no samples for condition!')
+        # we dont need to label probs in dict 
+        # bc they are same condition in order by year going from recent to distant
+        for year_idx in range(len(season_years)):
+            year = season_years[year_idx]
+            #print('\nyear: ' + str(year))
+
+            # for each yr, we need a new cur cond dict bc the yr changes the cur conds
+            cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
+            current_conditions = condition + ' ' + str(year) + ' ' + part + ' prob'
+            
+            # NOW with distrib probs all probs are per unit even cur yr adjusted to expected play time
+            # if year_idx > 0:
+            #     current_conditions += ' per unit'
+
+            #print('current_conditions: ' + str(current_conditions))
+
+            if current_conditions in val_probs_dict.keys():
+                probs.append(val_probs_dict[current_conditions])
+                #all_current_conditions.append(current_conditions)
+                all_cur_cond_dicts.append(cur_cond_dict)
+            else:
+                print('Warning: Current Conditions not in val probs dict! ' + str(current_conditions))
+
+        # print('probs: ' + str(probs))
+        # print('all_cur_cond_dicts: ' + str(all_cur_cond_dicts))
+
+        # if no probs or cur conds then no need to find weights
+        # which means unable to find cur conds in val probs dict so prob unknown
+        # default condition mean prob to 0 for now but eventually can use other similar players mean prob but that would need to be separate bc it is not measured for this player
+        # but if default to 0 then we must differentiate those without samples and those with samples who have reached line 0 times
+        if len(probs) > 0:
+
+            sample_sizes = []
+            for p_idx in range(len(probs)):
+                cur_conds = all_cur_cond_dicts[p_idx]
+                s_n = determiner.determine_sample_size(player_stat_dict, cur_conds, stat_name) # for a given yr
+                sample_sizes.append(s_n)
+            #print('sample_sizes: ' + str(sample_sizes))
+
+            s_1 = sample_sizes[0]
+
+            t_1 = 1.0 # set bc current year is origin so multiply by 1. each year adds time scale constant as weight decreases. that weight should be determined by ml algo
+            
+            # already added first weight to list so start from idx 1
+            # get weights by relation where each year adds 1 to divisor
+            # eg this yr is 1 so divide by 1, prev yr is 2 and so on
+            # this is arbitrary and must get more accurate way to show decay of relevance
+            w_1 = 1.0 # other weights relative to current yr sample
+            weights = [w_1]
+            for p_idx in range(1,len(probs)): # starting with prev yr, idx 1
+                t_n = p_idx + 1 # years away
+                # scale time by 1.5 to show even less effect over time
+                # so 2 becomes 3, 3 becomes 4.5 BUT we may only use >2 prev seasons if played >5 seasons bc stable
+                t_constant = 1.25
+                t_n *= t_constant
+                s_n = sample_sizes[p_idx] #65 #previous years
+                # Do i need to round before computing to ensure floating pt accuracy???
+                #w_n = round_half_up(w_1 * round(t_1 / t_n, 6) * round(s_n / s_1, 6), 2)
+                w_n = round_half_up(w_1 * (t_1 / t_n) * (s_n / s_1), 2)
+                weights.append(w_n)
+            #print('weights: ' + str(weights))
+
+            # solved for other ws in relation to w_1 already used to sub above
+            #true_prob = 0#w_1 * p_1
+            weighted_probs = []#0
+            for p_idx in range(len(probs)):
+                prob = probs[p_idx]
+                #print('prob: ' + str(prob))
+                w = weights[p_idx]
+                #print('w: ' + str(w))
+                wp = round_half_up(w * prob, 6)
+                #print('wp: ' + str(wp))
+                weighted_probs.append(wp) #+= wp
+                #print('true_prob: ' + str(true_prob))
+            
+            sum_weights = sum(weights)
+            if sum_weights > 0:
+                condition_mean_prob = round_half_up(sum(weighted_probs) / sum_weights, 2)
+            else:
+                print('Warning: sum_weights 0 bc no samples for condition!')
         
     print('condition_mean_prob: ' + str(condition_mean_prob))
     return condition_mean_prob
@@ -3478,7 +3482,7 @@ def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats):
         print('stat: ' + str(stat))
         weight = all_conditions_stats[cond]
         print('weight: ' + str(weight))
-        ws = converter.round_half_up(weight * stat, 6)
+        ws = round_half_up(weight * stat, 6)
         print('ws: ' + str(ws))
         weighted_stats.append(ws)
 
@@ -3501,7 +3505,7 @@ def generate_weighted_probs(all_conditions_mean_probs, all_conditions_weights):
         #print('prob: ' + str(prob))
         weight = all_conditions_weights[cond]
         #print('weight: ' + str(weight))
-        wp = converter.round_half_up(weight * prob, 6)
+        wp = round_half_up(weight * prob, 6)
         #print('wp: ' + str(wp))
         weighted_probs.append(wp)
         #true_prob += wp
@@ -3565,7 +3569,7 @@ def generate_true_prob(val_probs_dict, player_current_conditions, all_conditions
 
     sum_weights = sum(all_conditions_weights)
     if sum_weights > 0:
-        true_prob = converter.round_half_up(sum(weighted_probs) / sum_weights,2)
+        true_prob = round_half_up(sum(weighted_probs) / sum_weights,2)
     else:
         print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -3636,13 +3640,13 @@ def generate_game_players_cond_sample_weight(cond_key, lineup_team, team_gp_cur_
     if combined_sample_size > 0:
         print('combined_sample_size: ' + str(combined_sample_size))
 
-        combined_sample_weight = converter.round_half_up(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+        combined_sample_weight = round_half_up(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
         print('combined_sample_weight = log(combined_sample_size) = ' + str(combined_sample_weight))
 
         cond_weight = cond_weights[cond_key]
         print('cond_weight: ' + str(cond_weight))
 
-        game_players_cond_weight = converter.round_half_up(float(cond_weight) * combined_sample_weight, 2)
+        game_players_cond_weight = round_half_up(float(cond_weight) * combined_sample_weight, 2)
 
         # for team_part, team_part_players in lineup.items():
         #     # get dict of each cond weight:sample weight pair
@@ -3680,101 +3684,110 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
 
     condition_sample_weight = None # if sample size 0 then weight 0 or None?
 
-    # need to tune these arbitrary weights
-    # when they always start or bench then start=all
-    # so would it still have more weight?
-    # similar if a teammate is almost always out then it makes almost no difference
-    # how it was when out but it matters the few games they were in
-    # that would be covered in game teammates condition
-    # does that mean some conditions dont apply to all players?
-    # from an absolute perspective, starting a game usually means more minutes so higher stats
-    # whereas location barely affects minutes but can affect energy and performance
-    # whereas teammate out/in affects minutes and stat attempts rate
-    # if start=all then all samples condition will overpower every other condition
-    # based on sample size, which would mislead away from important conditions like teammates in/out
-    # if player starts most, but is benched a few how does that affect? 
-    # then those few bench games do prove useful so make it neglect any condition that equals all
-    # if a player is in does it have same opposite weight as if they are out?
-    # with each player accounting for in or out as group, the weight goes up bc more specific but less sample size
-    # player_cond_weights = {'starters': 10, 
-    #                         'bench': 4, 
-    #                         'out': 2, 
-    #                         'in': 2 }
-    
-    if len(cond_weights) == 0:
-        cond_weights = {'all': 0, # reflected by specific cur conds 
-                        'loc':3, 
-                        'city':1,
-                        'dow':3, 
-                        'tod':1, 
-                        'timelag':1,
-                        'coverage':1,
-                        'audience':0, # reflected by city
-                        'odds':2, # game odds and/or player prop odds?
-                        'game line':2,
-                        'game total':2,
-                        'start':0, # reflected by teammates 
-                        'teammates': 10, 
-                        'opp':5, 
-                        'prev':4,
-                        'opp team':0, # placed in top level for ref but given no weight bc integrated in opponents group cond
-                        'time before':2, 
-                        'time after':3, 
-                        'former':3,
-                        'wos':3, # week of season
-                        'wop':3} # week of play
-    
-    # get mean probs and weights for player conds
-    # if re.search('opp', cond_key):
-    #     cond_key = 'opp'
-    # elif cond_key in player_cond_weights.keys():
-    #     cond_key = 'teammates'
+    # Boolean true/false single conditions 
+    # that have different weight based on value bc 1 is rare so other is ~=all
+    single_conds = ['nf', 'local']
+    if cond_val not in single_conds:
 
-    
-    s_n = determiner.determine_condition_sample_size(player_stat_dict, cond_val, part, stat) # for all yrs
-    
-    # player_conds = ['teammates', 'opp']
-    # if cond_key in player_conds:
-    #     conditions = generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player)
-    #     s_n = determiner.determine_combined_conditions_sample_size(player_stat_dict, conditions, part) # for all yrs
-    
-    # if same sample size as all then do we know it is = all? yes bc includes all yrs
-    # if cond != all but same sample size, then cond sample 0 bc only 1 cond same as all and we cannot differentiate from all
-    # if assigned same weight as all if same sample, then it would mislead to give more weight to irrelevant samples
-    # not 'all' condition, but same sample size, so this cond applies to all samples
-    # and so does not differentiate conditions
-    # what if randomly started or benched 1 game?
-    # then other cond will have huge sample size with huge weight even though it is basically the same as 'all' condition
-    # on the other hand, we want to offset other conditions with this condition
-    # bc the condition is still valid even if it applies to all games
-    # by minimizing the effect of sample size with log fcn we can still account for this condition even if it applies to all games
-    # bc it tells us 1 important factor affecting his stats, eg teammate in happens to be all games but still important factor controlling the game
-    # another example is if a teammate is always out then they would not be in teammates list, but if they are always out they have no effect, but if they are always in they have a massive effect but we cant tell what it is bc there is nothing to compare it to
-    # keeping a cond even if it equals all is saying that cond has more weight than if all had no other factors applying to all condition
-    # so we must have all with no other factors less than all with other factors
-    # if cond_key != 'all':
-    #     all_sample_size =  determiner.determine_condition_sample_size(player_stat_dict, cond_val, part) # for all yrs
-    #     if s_n == all_sample_size:
-    #         s_n = 0 
-
-    #sample_sizes.append(s_n)
-    # log(0)=-inf
-    # if cond != all but same sample size, then cond weight 0
-    if s_n > 0:
-        print('sample_size: ' + str(s_n))
-        # log10(100)=2, log(100)~=4.6
-        # log10(10)=1
-        # we want sample size to have very little effect
-        # bc we want the condition weights to control the outcome with slight adjustments to account for sample size
-        # bc some conditions have tons of samples of same val while only small number of samples of other val but the condition itself should hold about the same weight
-        sample_weight = converter.round_half_up(math.log10(s_n),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
-        print('sample_weight = log(sample_size) ' + str(sample_weight))
-        #print('condition_sample_weight = ' + str(cond_weights[cond_key]) + ' * ' + str(sample_weight))
+        # need to tune these arbitrary weights
+        # when they always start or bench then start=all
+        # so would it still have more weight?
+        # similar if a teammate is almost always out then it makes almost no difference
+        # how it was when out but it matters the few games they were in
+        # that would be covered in game teammates condition
+        # does that mean some conditions dont apply to all players?
+        # from an absolute perspective, starting a game usually means more minutes so higher stats
+        # whereas location barely affects minutes but can affect energy and performance
+        # whereas teammate out/in affects minutes and stat attempts rate
+        # if start=all then all samples condition will overpower every other condition
+        # based on sample size, which would mislead away from important conditions like teammates in/out
+        # if player starts most, but is benched a few how does that affect? 
+        # then those few bench games do prove useful so make it neglect any condition that equals all
+        # if a player is in does it have same opposite weight as if they are out?
+        # with each player accounting for in or out as group, the weight goes up bc more specific but less sample size
+        # player_cond_weights = {'starters': 10, 
+        #                         'bench': 4, 
+        #                         'out': 2, 
+        #                         'in': 2 }
         
-        cond_weight = cond_weights[cond_key]
-        print('cond_weight: ' + str(cond_weight))
+        if len(cond_weights) == 0:
+            cond_weights = {'all': 0, # reflected by specific cur conds 
+                            'loc':3, 
+                            'city':1,
+                            'audience':0, # reflected by city
+                            'dow':3, 
+                            'tod':1, 
+                            'timelag':1,
+                            'odds':2, # game odds and/or player prop odds?
+                            'game line':2,
+                            'game total':2,
+                            'start':0, # reflected by teammates 
+                            'teammates': 10, 
+                            'opp':5, 
+                            'prev':4,
+                            'prev over':4,
+                            'prev less':4, # last time went under val, so what are odds going over this time
+                            'opp team':0, # placed in top level for ref but given no weight bc integrated in opponents group cond
+                            'time before':2, 
+                            'time after':3, 
+                            'coverage':1,
+                            'local':0, # normal conditions so no relative effect
+                            'former':3, # only counts if former=true bc else ~=all
+                            'nf':0, # normal conditions so no relative effect
+                            'wos':3, # week of season
+                            'wop':3} # week of play
+        
+        # get mean probs and weights for player conds
+        # if re.search('opp', cond_key):
+        #     cond_key = 'opp'
+        # elif cond_key in player_cond_weights.keys():
+        #     cond_key = 'teammates'
 
-        condition_sample_weight = converter.round_half_up(float(cond_weight) * sample_weight, 2)
+        
+        s_n = determiner.determine_condition_sample_size(player_stat_dict, cond_val, part, stat) # for all yrs
+        
+        # player_conds = ['teammates', 'opp']
+        # if cond_key in player_conds:
+        #     conditions = generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player)
+        #     s_n = determiner.determine_combined_conditions_sample_size(player_stat_dict, conditions, part) # for all yrs
+        
+        # if same sample size as all then do we know it is = all? yes bc includes all yrs
+        # if cond != all but same sample size, then cond sample 0 bc only 1 cond same as all and we cannot differentiate from all
+        # if assigned same weight as all if same sample, then it would mislead to give more weight to irrelevant samples
+        # not 'all' condition, but same sample size, so this cond applies to all samples
+        # and so does not differentiate conditions
+        # what if randomly started or benched 1 game?
+        # then other cond will have huge sample size with huge weight even though it is basically the same as 'all' condition
+        # on the other hand, we want to offset other conditions with this condition
+        # bc the condition is still valid even if it applies to all games
+        # by minimizing the effect of sample size with log fcn we can still account for this condition even if it applies to all games
+        # bc it tells us 1 important factor affecting his stats, eg teammate in happens to be all games but still important factor controlling the game
+        # another example is if a teammate is always out then they would not be in teammates list, but if they are always out they have no effect, but if they are always in they have a massive effect but we cant tell what it is bc there is nothing to compare it to
+        # keeping a cond even if it equals all is saying that cond has more weight than if all had no other factors applying to all condition
+        # so we must have all with no other factors less than all with other factors
+        # if cond_key != 'all':
+        #     all_sample_size =  determiner.determine_condition_sample_size(player_stat_dict, cond_val, part) # for all yrs
+        #     if s_n == all_sample_size:
+        #         s_n = 0 
+
+        #sample_sizes.append(s_n)
+        # log(0)=-inf
+        # if cond != all but same sample size, then cond weight 0
+        if s_n > 0:
+            print('sample_size: ' + str(s_n))
+            # log10(100)=2, log(100)~=4.6
+            # log10(10)=1
+            # we want sample size to have very little effect
+            # bc we want the condition weights to control the outcome with slight adjustments to account for sample size
+            # bc some conditions have tons of samples of same val while only small number of samples of other val but the condition itself should hold about the same weight
+            sample_weight = round_half_up(math.log10(s_n),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+            print('sample_weight = log(sample_size) ' + str(sample_weight))
+            #print('condition_sample_weight = ' + str(cond_weights[cond_key]) + ' * ' + str(sample_weight))
+        
+            cond_weight = cond_weights[cond_key]
+            print('cond_weight: ' + str(cond_weight))
+
+            condition_sample_weight = round_half_up(float(cond_weight) * sample_weight, 2)
     
     print('condition_sample_weight = cond_weight*sample_weight: ' + str(condition_sample_weight))
     return condition_sample_weight
@@ -3800,7 +3813,7 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
     #print('\nInput: game_player_cur_conds = {teammates: {starters: [],...}, opps: {...} = ' + str(game_player_cur_conds))
     print('\nInput: player_current_conditions = {loc:away, start:start, prev:5, ... = ' + str(player_current_conditions))#{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ...')
     print('Input: all_gp_conds = {team condition:{gp condition:cond type,... = {teammates:{\'A Gordon PF, J Murray PG,... out\':out, \'A Gordon PF out\':out, ... = ' + str(all_gp_conds))
-    print('Input: player_prev_vals = {stat name: prev stat val, ...}')
+    print('Input: player_prev_vals = {stat name: prev stat val, ...} = ' + str(player_prev_vals))
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
     print('\nOutput: all_conditions_weights = {cond_key: w1, ... = {teammates:15, opp:10, loc:2, prev:x, ... ')
@@ -4440,7 +4453,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # if player on new team but has not yet played (eg injury) then only consider current conditions if they are specifically noted as playing? 
 # cant bc only lists starters and out
-def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, read_new_game_ids):#, read_lineups):
+def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, read_new_game_ids, init_all_lineups):#, read_lineups):
     print('\n===Generate All Current Conditions===\n')
     print('Settings: Find Players')
     print('\nInput: Players of Interest')
@@ -4475,7 +4488,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     #all_lineups = {confirmed:{team:{starters:[],out:[],bench:[],unknown:[]},...}, expected:{team:{starters:[],bench:[],out:[]},...}}
     all_lineups = {}
     if find_players:# and read_lineups:
-        all_lineups = reader.read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr)
+        all_lineups = reader.read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, init_all_lineups)
     # if questionable then it is very hard to say how teammates will perform so can only go with safest options
     # we could figure out how likely it is for player to play based on injury reports
     # and adjust teammates true probs accordingly
@@ -4512,7 +4525,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
                 all_current_conditions[player] = player_cur_conds
 
     #print('all_current_conditions: ' + str(all_current_conditions))
-    return all_current_conditions
+    return all_current_conditions, all_lineups
 
 
 # all_stat_probs_dict = {player:stat:val:conditions:prob}
@@ -4577,7 +4590,7 @@ def generate_all_distrib_probs_dict(all_distrib_probs, season_years):
         all_distrib_probs_dict[player] = stat_probs_by_stat
     
     # all_stat_probs_dict = {player:stat:val:conditions:prob}
-    print('all_distrib_probs_dict: ' + str(all_distrib_probs_dict))
+    #print('all_distrib_probs_dict: ' + str(all_distrib_probs_dict))
     return all_distrib_probs_dict
 
 # all_stat_probs_dict = {player:stat:val:conditions:prob}
@@ -4657,7 +4670,7 @@ def generate_all_stat_probs_dict(all_player_stat_probs, all_player_stat_dicts={}
 
 
 
-def generate_player_distrib_probs(player_stat_dict, current_conditions, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years):
+def generate_player_distrib_probs(player_stat_dict, current_conditions, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years, init_team_lineup, team_lineup):
     print('\n===Generate Player Distrib Probs: ' + player_name.title() + '===\n')
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: current_conditions = [all, home, t watford f in, ...] = ' + str(current_conditions))
@@ -4667,10 +4680,14 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
 
     player_distrib_probs = {}
 
-    
+    single_conds = ['nf', 'local']
+
+    low_avg_stats = []
 
     player_stat_model = list(player_distrib_models.values())[0]
     if len(player_stat_model.keys()) > 0:
+
+        # if same lineup as last run, then already got probs so skip
 
         # all yrs get updated each game bc new model new sim data and cond data running avg
         player_probs_file = 'data/probs/' + player_name + ' probs ' + todays_date + '.json'
@@ -4683,16 +4700,18 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
 
         #stats_of_interest = ['pts','reb','ast']
 
-        # if probs not yet saved today
+        # if probs not yet saved today OR new lineups so read new
         # or if read lineups is true but no lineup probs saved
         # bc that means we prepared by reading all other conds first while we wait for lineups to be set
-        if len(player_distrib_probs.keys()) == 0:
+        if len(player_distrib_probs.keys()) == 0 or init_team_lineup != team_lineup:
 
             for year, year_stat_dict in player_stat_dict.items():
                 #print('\nyear: ' + year)
                 # only seasons of interest, not model seasons
                 if year not in season_years:
                     continue
+
+                
 
                 for part, part_stat_dict in year_stat_dict.items():
                     #print('\npart: ' + part)
@@ -4721,86 +4740,96 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                             print('player_stat_model_name: ' + str(player_stat_model_name))
                             player_stat_model_avg = player_stat_model['avg']
                             print('player_stat_model_avg: ' + str(player_stat_model_avg))
-                            # if avg <= 1, skip
-                            if player_stat_model_avg > 1:
-                                player_stat_model_max = player_stat_model['max']
-                                print('player_stat_model_max: ' + str(player_stat_model_max))
-                                # model_name = player_stat_model.keys()[0] #only 1 model per stat
-                                # dist_str = 'ss.' + model_name
-                                # dist = eval(dist_str)
+                            # if avg <= 1, skip??? or are they important for unders and low overs???
+                            if player_stat_model_avg < 1:
+                                # iso only those with avg<1 and see if valid picks on any platform
+                                low_avg_model = (player_name, stat_name, player_stat_model_name, player_stat_model_avg)
+                                low_avg_stats.append(low_avg_model)
+                            
+                            player_stat_model_max = player_stat_model['max']
+                            print('player_stat_model_max: ' + str(player_stat_model_max))
+                            # model_name = player_stat_model.keys()[0] #only 1 model per stat
+                            # dist_str = 'ss.' + model_name
+                            # dist = eval(dist_str)
 
-                                # # {shape:a, loc:l, scale:s}
-                                # all_fit_params = player_stat_model.values()[0]
+                            # # {shape:a, loc:l, scale:s}
+                            # all_fit_params = player_stat_model.values()[0]
 
-                                # condition_stat_dict = {game idx: stat val, ...
-                                for condition, condition_stat_dict in stat_dict.items():
+                            # condition_stat_dict = {game idx: stat val, ...
+                            for condition, condition_stat_dict in stat_dict.items():
 
+                                #print('\ncondition: ' + condition) 
+                                # skip single conds here or remove from cur conds since negligible?
+                                # try to remove from cur conds bc negligible
+                                if condition in single_conds:
+                                    continue
+
+                                # if conditon has prev in it
+                                min_prev_stat_val = 0
+                                max_prev_stat_val = 0
+                                if re.search('prev', condition): # 0-4 prev
+                                    cond_prev_stat_range = condition.split()[0] # 0-4
+                                    #print('\ncond_prev_stat_range: ' + str(cond_prev_stat_range))
+                                    prev_stat_val_limits = cond_prev_stat_range.split('-')
+                                    min_prev_stat_val = int(prev_stat_val_limits[0])
+                                    max_prev_stat_val = int(prev_stat_val_limits[1])
+                                    # print('min_prev_stat_val: ' + str(min_prev_stat_val))
+                                    # print('max_prev_stat_val: ' + str(max_prev_stat_val))
+                                    # print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
+                                
+
+                                # elif condition not in current_conditions:
+                                #     continue
+
+
+                                # CHANGE to only update condition if matches prev condition
+                                # bc we already have all conds saved and we first must update cur conds so we can get results and make picks for today
+                                # then we can update prev conds once we have already made the days picks
+                                # OR update prev conds before lineups are available
+                                # then when lineups are there, make picks with as much info as available
+
+                                #print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
+                                #if cur_prev_stat_val >= min_prev_stat_val and cur_prev_stat_val <= max_prev_stat_val: #cond_prev_stat_val == cur_prev_stat_val:
+                                if condition in current_conditions or min_prev_stat_val <= cur_prev_stat_val <= max_prev_stat_val:
                                     #print('\ncondition: ' + condition) 
-
-                                    # if conditon has prev in it
-                                    min_prev_stat_val = 0
-                                    max_prev_stat_val = 0
-                                    if re.search('prev', condition): # 0-4 prev
-                                        cond_prev_stat_range = condition.split()[0] # 0-4
-                                        #print('\ncond_prev_stat_range: ' + str(cond_prev_stat_range))
-                                        prev_stat_val_limits = cond_prev_stat_range.split('-')
-                                        min_prev_stat_val = int(prev_stat_val_limits[0])
-                                        max_prev_stat_val = int(prev_stat_val_limits[1])
-                                        # print('min_prev_stat_val: ' + str(min_prev_stat_val))
-                                        # print('max_prev_stat_val: ' + str(max_prev_stat_val))
-                                        # print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
+                                    # print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
+                                    # print('min_prev_stat_val: ' + str(min_prev_stat_val))
+                                    # print('max_prev_stat_val: ' + str(max_prev_stat_val))
                                     
+                                    #player_distrib_probs[condition][year][part][stat_name] = generate_dist_probs(condition_stat_dict, player_distrib_probs, player_stat_model, player_name, stat_name, condition)
+                                    
+                                    # data to fit for distrib
+                                    stat_vals = np.array(list(condition_stat_dict.values()))
+                                    # print('\nstat_vals: ' + str(stat_vals))
+                                    # all_zeros = not np.any(stat_vals)
+                                    # print('all zeros: ' + str(all_zeros))
 
-                                    # elif condition not in current_conditions:
-                                    #     continue
+                                    # NEED >1 datapoint or else could be anomaly like injury which would completely throw off results
+                                    # if <2 points, then empty the array so it is ignored
+                                    # condition will not be added to dict so it wont be added to true prob
+                                    #print('len(stat_vals): ' + str(len(stat_vals)))
+                                    # OR all zeros bc cannot fit all 0s bc we know not uniform
+                                    # closest would be to take from similar player with more samples
+                                    if len(stat_vals) > 1 and np.any(stat_vals):
+                                        #print('valid')
+                                        # formerly: stat_probs[stat_val] = prob_over
+                                        stat_probs = distributor.distribute_all_probs(stat_vals, player_stat_model, player_name, stat_name, condition) # if normal dist, avg_scale)
 
 
-                                    # CHANGE to only update condition if matches prev condition
-                                    # bc we already have all conds saved and we first must update cur conds so we can get results and make picks for today
-                                    # then we can update prev conds once we have already made the days picks
-                                    # OR update prev conds before lineups are available
-                                    # then when lineups are there, make picks with as much info as available
+                                        # reformat for user interface display purposes
+                                        if condition not in player_distrib_probs.keys():
+                                            player_distrib_probs[condition] = {}
+                                        if year not in player_distrib_probs[condition].keys():
+                                            player_distrib_probs[condition][year] = {}
+                                        if part not in player_distrib_probs[condition][year].keys():
+                                            player_distrib_probs[condition][year][part] = {}
 
-                                    #print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
-                                    #if cur_prev_stat_val >= min_prev_stat_val and cur_prev_stat_val <= max_prev_stat_val: #cond_prev_stat_val == cur_prev_stat_val:
-                                    if condition in current_conditions or min_prev_stat_val <= cur_prev_stat_val <= max_prev_stat_val:
-                                        #print('\ncondition: ' + condition) 
-                                        # print('cur_prev_stat_val: ' + str(cur_prev_stat_val))
-                                        # print('min_prev_stat_val: ' + str(min_prev_stat_val))
-                                        # print('max_prev_stat_val: ' + str(max_prev_stat_val))
                                         
-                                        #player_distrib_probs[condition][year][part][stat_name] = generate_dist_probs(condition_stat_dict, player_distrib_probs, player_stat_model, player_name, stat_name, condition)
-                                        
-                                        # data to fit for distrib
-                                        stat_vals = np.array(list(condition_stat_dict.values()))
-                                        # print('\nstat_vals: ' + str(stat_vals))
-                                        # all_zeros = not np.any(stat_vals)
-                                        # print('all zeros: ' + str(all_zeros))
+                                        player_distrib_probs[condition][year][part][stat_name] = stat_probs
 
-                                        # NEED >1 datapoint or else could be anomaly like injury which would completely throw off results
-                                        # if <2 points, then empty the array so it is ignored
-                                        # condition will not be added to dict so it wont be added to true prob
-                                        #print('len(stat_vals): ' + str(len(stat_vals)))
-                                        # OR all zeros bc cannot fit all 0s bc we know not uniform
-                                        # closest would be to take from similar player with more samples
-                                        if len(stat_vals) > 1 and np.any(stat_vals):
-                                            #print('valid')
-                                            # formerly: stat_probs[stat_val] = prob_over
-                                            stat_probs = distributor.distribute_all_probs(stat_vals, player_stat_model, player_name, stat_name, condition) # if normal dist, avg_scale)
+        # if low avg below 1 are they still valid picks on any platform???
+        print('low_avg_stats: ' + str(low_avg_stats))
 
-
-                                            # reformat for user interface display purposes
-                                            if condition not in player_distrib_probs.keys():
-                                                player_distrib_probs[condition] = {}
-                                            if year not in player_distrib_probs[condition].keys():
-                                                player_distrib_probs[condition][year] = {}
-                                            if part not in player_distrib_probs[condition][year].keys():
-                                                player_distrib_probs[condition][year][part] = {}
-
-                                            
-                                            player_distrib_probs[condition][year][part][stat_name] = stat_probs
-
-    
         # always write new probs to file
         #if not init_player_probs == player_distrib_probs:
         writer.write_json_to_file(player_distrib_probs, player_probs_file)
@@ -4872,7 +4901,7 @@ def generate_num_samples(season_year, furthest_year, base_num_samples):
         t_constant = 1.25 # NEED to tune, how data decays over time
         t_n = num_years * t_constant #p_idx + 1 # years away
         #print('t_n = num_years * t_constant = ' + str(t_n))
-        total_num_samples = int(converter.round_half_up(base_num_samples * t_n))
+        total_num_samples = int(round_half_up(base_num_samples * t_n))
         #print('total_num_samples = base_num_samples * t_n = ' + str(total_num_samples))
         num_samples = total_num_samples - base_num_samples
 
@@ -4886,7 +4915,7 @@ def fit_dist(all_data):
     # ADD Beta dist
     # problem with 'pareto'
     # powerlaw special case of beta and pareto
-    # TEST: truncnorm, invgamma, weibull_min
+    # TEST: truncnorm, invgamma, weibull_min, gengamma
     # PROBLEMS: Cauchy, Skewcauchy, Pareto, Expon, truncexpon, Dweibull, Chi, Chi2, Pearson3, Gamma, Exponweib, Exponpow, NCF, F, T, Rice, Genextreme, powerlognorm, burr, recipinvgauss, norminvgauss, Beta, lognorm, Exponnorm 
     # --w/ 3 yrs: powernorm
     # POSSIBLE PROBLEMS: 
@@ -5155,10 +5184,10 @@ def generate_player_distrib_models(player_stat_dict, stats_of_interest, player_n
             #sim_all_data = np.round(sim_all_data, 6)
 
             player_distrib_models[stat_name]['data'] = sim_all_data.tolist()
-            sim_avg = converter.round_half_up(np.mean(sim_all_data), 2)
+            sim_avg = round_half_up(np.mean(sim_all_data), 2)
             print('sim_avg: ' + str(sim_avg))
             player_distrib_models[stat_name]['avg'] = sim_avg
-            sim_max = converter.round_half_up(np.max(sim_all_data), 2)
+            sim_max = round_half_up(np.max(sim_all_data), 2)
             print('sim_max: ' + str(sim_max))
             player_distrib_models[stat_name]['max'] = sim_max
             
@@ -5219,10 +5248,10 @@ def generate_all_players_distrib_models(all_player_unit_stat_dicts, stats_of_int
     return all_players_models
 
 def generate_condition_mean_minutes(cond, player_cur_part_stat_dict):
-    print('\n===Generate Condition Mean Minutes: ' + cond + '===\n')
-    #print('Input: cond = player abbrev game status = ' + cond)
-    print('Input: player_cur_part_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    print('\nOutput: condition_mean_minutes = x\n')
+    # print('\n===Generate Condition Mean Minutes: ' + cond + '===\n')
+    # #print('Input: cond = player abbrev game status = ' + cond)
+    # print('Input: player_cur_part_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    # print('\nOutput: condition_mean_minutes = x\n')
 
     condition_mean_minutes = None
 
@@ -5237,9 +5266,9 @@ def generate_condition_mean_minutes(cond, player_cur_part_stat_dict):
         #print('cond_minutes: ' + str(cond_minutes))
 
         if len(cond_minutes) > 0:
-            condition_mean_minutes = converter.round_half_up(np.mean(cond_minutes), 2)
+            condition_mean_minutes = round_half_up(np.mean(cond_minutes), 2)
 
-    print('condition_mean_minutes: ' + str(condition_mean_minutes))
+    #print('condition_mean_minutes: ' + str(condition_mean_minutes))
     return condition_mean_minutes
 
 
@@ -5259,7 +5288,7 @@ def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
     #print('cur_team_minutes: ' + str(cur_team_minutes))
 
     if len(cur_team_minutes) > 0:
-        gp_cond_weight = converter.round_half_up(np.mean(cur_team_minutes), 2)
+        gp_cond_weight = round_half_up(np.mean(cur_team_minutes), 2)
     
     print('gp_cond_weight: ' + str(gp_cond_weight))
     return gp_cond_weight
@@ -5305,11 +5334,11 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
         multi_conds = {}
         # need multiconds made first
         for cond in teammate_gp_conds:
-            print('\nCondition: ' + cond)
+            #print('\nCondition: ' + cond)
 
             cond_data = cond.rsplit(' ', 1)
             cond_key = cond_data[1]
-            print('cond_key: ' + cond_key)
+            #print('cond_key: ' + cond_key)
 
             # only need out cond and player cond for minutes avg and multiconds
             # so exclude single player conds except player of interest
@@ -5321,11 +5350,11 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                 #continue
 
         for cond in teammate_gp_conds:
-            print('\nCondition: ' + cond)
+            #print('\nCondition: ' + cond)
 
             cond_data = cond.rsplit(' ', 1)
             cond_key = cond_data[1]
-            print('cond_key: ' + cond_key)
+            #print('cond_key: ' + cond_key)
 
             # only need out cond and player cond for minutes avg and multiconds
             # so exclude single player conds except player of interest
@@ -5349,7 +5378,7 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
             # INSTEAD of changing cond, NEED to check for all combos of abbrevs
             if init_teammmate_abbrev != teammate_abbrev:
                 cond = teammate_abbrev + ' ' + cond_key
-                print('cond: ' + cond)
+                #print('cond: ' + cond)
                 multi_conds[cond_key] = re.sub(init_teammmate_abbrev, teammate_abbrev, multi_conds[cond_key])
             #if teammate != player_name: # exclude cur player of interest? no bc what if only cond matching cur cond?
             # teammate_teams = all_players_teams[teammate]
@@ -5388,7 +5417,7 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                 print('Warning: Teammate not in playtimes dict! ' + teammate + ', ' + player_team)
 
         for cond_key, cond in multi_conds.items():
-            print('\ncond: ' + cond)
+            #print('\ncond: ' + cond)
 
             #cond_weight = generate_multi_cond_weight(teammate_cur_season_log, teammate_gp_cur_team)
             cond_weight = multi_cond_weights[cond_key]
@@ -5404,6 +5433,9 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                 #all_cond_weights.append(cond_weight)
 
 
+        # minutes are also affected if back to back game
+
+
         weighted_minutes = generate_weighted_stats(all_cond_playtimes, all_cond_weights)
 
         all_cond_weights_list = []
@@ -5417,8 +5449,8 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
         sum_weights = sum(all_cond_weights_list)
         #print('sum_weights: ' + str(sum_weights))
         if sum_weights > 0:
-            playtime = converter.round_half_up(sum(weighted_minutes) / sum_weights,2)
-            print('playtime = sum(weighted_minutes) / sum_weights = ' + str(sum(weighted_minutes)) + '/' + str(sum_weights) + ' = ' + str(playtime))
+            playtime = round_half_up(sum(weighted_minutes) / sum_weights,2)
+            #print('playtime = sum(weighted_minutes) / sum_weights = ' + str(sum(weighted_minutes)) + '/' + str(sum_weights) + ' = ' + str(playtime))
         else:
             print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
@@ -5436,7 +5468,7 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
         if 'MIN' in cur_season_log.keys():
             cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
             #print('cur_minutes_log: ' + str(cur_minutes_log))
-            playtime = converter.round_half_up(np.mean(np.array(cur_minutes_log)), 2)
+            playtime = round_half_up(np.mean(np.array(cur_minutes_log)), 2)
 
     print('playtime: ' + str(playtime))
     return playtime
@@ -5489,7 +5521,7 @@ def generate_player_unit_stat_dict(player_name, player_team, player_gp_conds, pl
         #     if 'MIN' in cur_season_log.keys():
         #         cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
         #         #print('cur_minutes_log: ' + str(cur_minutes_log))
-        #         cur_mean_minutes = converter.round_half_up(np.mean(np.array(cur_minutes_log)))
+        #         cur_mean_minutes = round_half_up(np.mean(np.array(cur_minutes_log)))
         
         # print('cur_mean_minutes: ' + str(cur_mean_minutes))
 
@@ -5552,7 +5584,7 @@ def generate_player_unit_stat_dict(player_name, player_team, player_gp_conds, pl
                                 # game stat val is what the stat val would be if playing current minutes
                                 # need game minutes >5 or elese could get 2 pts in few minutes which would be multiplied too much by normal minutes
                                 if game_minutes > 4:
-                                    unit_stat_val = converter.round_half_up(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
+                                    unit_stat_val = round_half_up(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
                                 
                                 #print('unit_stat_val: ' + str(unit_stat_val))
                                     
@@ -5597,7 +5629,7 @@ def generate_player_unit_stat_records(player_stat_dict, player_season_logs, play
         if 'MIN' in cur_season_log.keys():
             cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
             #print('cur_minutes_log: ' + str(cur_minutes_log))
-            cur_mean_minutes = converter.round_half_up(np.mean(np.array(cur_minutes_log)), 2)
+            cur_mean_minutes = round_half_up(np.mean(np.array(cur_minutes_log)), 2)
             #print('cur_mean_minutes: ' + str(cur_mean_minutes))
 
         stats_of_interest = ['pts','reb','ast','3pm']
@@ -5655,7 +5687,7 @@ def generate_player_unit_stat_records(player_stat_dict, player_season_logs, play
                                             #print(str(prev_stat_val) + ' * ' + str(cur_mean_minutes) + ' / ' + str(prev_minutes))
                                             # game stat val is what the stat val would be if playing current minutes
                                             if prev_minutes != 0.0:
-                                                game_stat_val = converter.round_half_up(float(prev_stat_val) * float(cur_mean_minutes) / float(prev_minutes))
+                                                game_stat_val = round_half_up(float(prev_stat_val) * float(cur_mean_minutes) / float(prev_minutes))
                                             
                                             #print('game_stat_val: ' + str(game_stat_val))
 
@@ -5730,8 +5762,8 @@ def generate_prob_stat_reached(record):
         record_data = record.split('/')
         num_games_reached = record_data[0]
         num_games_played = record_data[1]
-        #prob_stat_reached = converter.round_half_up((float(num_games_reached) / float(num_games_played)) * 100)
-        prob_stat_reached = converter.round_half_up(float(num_games_reached) / float(num_games_played), 2)
+        #prob_stat_reached = round_half_up((float(num_games_reached) / float(num_games_played)) * 100)
+        prob_stat_reached = round_half_up(float(num_games_reached) / float(num_games_played), 2)
         
     #print('prob_stat_reached: ' + str(prob_stat_reached))
     return prob_stat_reached
@@ -5794,7 +5826,7 @@ def generate_player_stat_probs(player_stat_records, player_name=''):
                         # 'raw prob' and 'per min prob'
                         prob_over = generate_prob_stat_reached(record)
 
-                        #prob_under = converter.round_half_up(1 - prob_over,2)
+                        #prob_under = round_half_up(1 - prob_over,2)
 
                         # prob under for a stat val is over 1-prob ober so only need to save prob over
                         stat_probs[stat_val] = prob_over #{ 'prob over': prob_over, 'prob under': prob_under }
@@ -6314,6 +6346,11 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     if not city in stat_dict.keys():
                         stat_dict[city] = {}
                     stat_dict[city][game_idx] = stat
+
+                    # condition: new city
+                    # if player not played in this city before
+                    # we need list of all cities played in
+
                     # condition: time shift
                     # get game timezone from game city
                     if not timezone in stat_dict.keys():
@@ -7320,8 +7357,8 @@ def test_distrib_models(all_player_distrib_models):
             #print('\nstat ' + stat_name.upper())
 
             model_name = stat_model['name']
-            sim_avg = converter.round_half_up(stat_model['avg'])
-            sim_max = converter.round_half_up(stat_model['max'])
+            sim_avg = round_half_up(stat_model['avg'])
+            sim_max = round_half_up(stat_model['max'])
 
             # sim max and avg are result of np mean and max so they are floats
             max_diffs = {'pts':20, 'ast':10, 'reb':10}
@@ -7356,8 +7393,8 @@ def test_distrib_models(all_player_distrib_models):
             #print('\nstat ' + stat_name.upper())
 
             model_name = stat_model['name']
-            sim_avg = converter.round_half_up(stat_model['avg'])
-            sim_max = converter.round_half_up(stat_model['max'])
+            sim_avg = round_half_up(stat_model['avg'])
+            sim_max = round_half_up(stat_model['max'])
 
             # sim max and avg are result of np mean and max so they are floats
             max_diffs = {'pts':20, 'ast':10, 'reb':10}
@@ -7642,6 +7679,12 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         ofs_players = settings['ofs players']
 
     # === organize external data into internal structure
+        
+    # init all lineups before getting cur conds
+    # so we can compare after reading new lineups
+    # to see if we need to update probs
+    lineups_file = 'data/all lineups.json'
+    init_all_lineups = reader.read_json(lineups_file)
 
     # need to know current conditions to determine true prob
     # AND which condition probs to read and compute
@@ -7655,7 +7698,9 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_prev_vals = {}
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
-        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, read_new_game_ids)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        all_cur_conds_data = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, read_new_game_ids, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        all_current_conditions = all_cur_conds_data[0]
+        all_lineups = all_cur_conds_data[1]
         # all_cur_conds_lists = {p1:[m fultz pg out, j ingles sg out, away, ...],...}
         all_cur_conds_data = converter.convert_all_conditions_to_dicts(all_current_conditions, all_players_abbrevs, all_players_teams, all_box_scores, season_years, current_year_str)
         all_cur_conds_dicts = all_cur_conds_data[0]
@@ -7671,6 +7716,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # all players weights we use for scaling unit stat dict
     # AND true prob
     all_players_cur_avg_playtimes = determiner.determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players_teams, current_year_str)
+
+    
 
     #all_player_consistent_stats = {} # we want to display all player consistent stats together for viewing convenience and analysis comparison
     all_player_stat_records = {}
@@ -7828,7 +7875,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         if len(game_teams) > 0:
             player_cur_conds_list = all_cur_conds_lists[player_name]
             player_prev_vals = all_prev_vals[player_name]
-        player_distrib_probs = generate_player_distrib_probs(player_unit_stat_dict, player_cur_conds_list, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years)
+        # only get probs if cur lineup diff than prev lineup
+        init_team_lineup = init_all_lineups[player_team]
+        team_lineup = all_lineups[player_team]
+        player_distrib_probs = generate_player_distrib_probs(player_unit_stat_dict, player_cur_conds_list, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years, init_team_lineup, team_lineup)
         all_player_distrib_probs[player_name] = player_distrib_probs
         #if batched: all_player_distrib_probs = generate_all_players_distrib_probs(all_player_unit_stat_dicts, all_cur_conds_lists, all_prev_vals, all_player_distrib_models, stats_of_interest)
 

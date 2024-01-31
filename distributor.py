@@ -8,10 +8,11 @@
 # multinomial distribution
 
 # library still works even though warning
-import scipy.stats as ss
+#import scipy.stats as ss
+from scipy.stats import norm, skewnorm, loggamma, fit
 from numba import jit
 import numpy as np
-import math # for pi to get prob of x in distrib
+#import math # for pi to get prob of x in distrib
 
 # read from csv
 # import pandas as pd
@@ -23,7 +24,7 @@ import matplotlib.pyplot as plt
 # print(sys.path)
 
 import reader # read stat dict data
-import converter # round
+#import converter # round
 from converter import round_half_up
 
 # === SETTINGS ===
@@ -57,7 +58,7 @@ def multinom_pmf(data):
 
     bounds = [(0, 10)]
 
-    res = ss.fit(dist, data, bounds) 
+    res = fit(dist, data, bounds) 
     print("res = "+str(res))
 
     res.plot()
@@ -94,7 +95,7 @@ def plot_cdf(data):
     plt.plot(x, y)
 
     bounds = [(-100, 100), (-100, 100)]
-    norm_fit = ss.fit(dist, data, bounds) #dist.fit(data)
+    norm_fit = fit(dist, data, bounds) #dist.fit(data)
     cdf_fit = norm_fit.cdf(data)
     plt.figure()
     plt.xlabel('Data')
@@ -118,7 +119,7 @@ def fit_data(data):
     # plt.hist(data, bins=int(np.max(data)+1), density=True)
 
     # === Normal === 
-    dist = ss.norm
+    dist = norm
 
     #loc, scale = dist.fit(data)
     #print('normfit: ' + str(normfit))
@@ -139,7 +140,7 @@ def fit_data(data):
     # poisson takes 1 param: mean = var
     #bounds = [(-100, 100)]
 
-    res = ss.fit(dist, data, bounds) 
+    res = fit(dist, data, bounds) 
     print("res = "+str(res))
     #loc, scale = ss.fit(dist, data, bounds) 
     #print("res = "+str(res))
@@ -229,7 +230,7 @@ def generate_all_probs_from_distrib(data, dist):
     #loc, scale = dist.fit(data)
     # if poisson
     bounds = [(0, 100)]
-    res = ss.fit(dist, data, bounds)
+    res = fit(dist, data, bounds)
     print('res: ' + str(res))
     loc = res.params.mu
     print('loc: ' + str(loc))
@@ -417,24 +418,24 @@ def generate_cdf_over(vals, dist, sample_fit_dict):
     if shape_key in sample_fit_dict.keys():
         sample_shape = sample_fit_dict[shape_key]
 
-        prob_less_or_equal = np.array(dist.cdf(vals, sample_shape, sample_loc, sample_scale))
+        prob_less_or_equal = dist.cdf(vals, sample_shape, sample_loc, sample_scale)
     elif shape_3_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
         sample_shape_3 = sample_fit_dict[shape_3_key]
 
-        prob_less_or_equal = np.array(dist.cdf(vals, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale))
+        prob_less_or_equal = dist.cdf(vals, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale)
     elif shape_1_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
 
-        prob_less_or_equal = np.array(dist.cdf(vals, sample_shape_1, sample_shape_2, sample_loc, sample_scale))
+        prob_less_or_equal = dist.cdf(vals, sample_shape_1, sample_shape_2, sample_loc, sample_scale)
     else:
         #sample_mean = sample_fit_dict[mean_key] ???
 
-        prob_less_or_equal = np.array(dist.cdf(vals, sample_loc, sample_scale))
+        prob_less_or_equal = dist.cdf(vals, sample_loc, sample_scale)
 
-
+    #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?
     # NO bc P(1) should include P(>0.5)? 
 
@@ -505,8 +506,8 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
 
         model_name = player_stat_model['name']#.keys()[0] #only 1 model per stat
-        dist_str = 'ss.' + model_name
-        dist = eval(dist_str)
+        #dist_str = 'ss.' + model_name
+        dist = eval(model_name)
 
         params_dict = {'gamma':'a',
                         'erlang':'a',
@@ -547,7 +548,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
         elif model_name in three_params_dict.keys():
             bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)]
         #print('bounds: ' + str(bounds))
-        sample_fit_results = ss.fit(dist, sample_data, bounds)
+        sample_fit_results = fit(dist, sample_data, bounds)
         sample_fit_params = sample_fit_results.params
         #print('sample_fit_params: ' + str(sample_fit_params))
 

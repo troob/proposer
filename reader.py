@@ -2248,7 +2248,7 @@ def read_players_from_rosters(rosters, game_teams=[]):
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # all_teams_players = {year:{team:[players],...},...}
-def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):
+def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, init_all_lineups):
 	print('\n===Read All Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_lineups = {\'cle\': {\'starters\': [\'donovan mitchell\', ...\n')
@@ -2263,6 +2263,8 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 	soup = read_website(url)
 
 	#init_lineups = []
+	lineups_file = 'data/all lineups.json'
+	# init_lineups = read_json(lineups_file)
 
 	starters_key = 'starters'
 	bench_key = 'bench'
@@ -2499,6 +2501,12 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 	# 			# already given team so use that
 	# 			# check which player in all players teams list with this team has this abbrev
 	# 			player = determiner.determine_player_full_name(player, team, all_players_teams)
+
+	# save lineups so we can compare bt runs 
+	# and see if we need to get new projected minutes
+	if init_all_lineups != all_lineups:
+		writer.write_json_to_file(all_lineups, lineups_file)
+
 
 	#all_lineups = {'dal': {'out': ['luka doncic', 'dante exum', 'maxi kleber', 'dereck lively ii', 'grant williams'], 'starters': ['jaden hardy', 'kyrie irving', 'josh green', 'derrick jones jr', 'dwight powell'], 'bench': ['seth curry', 'tim hardaway jr']}, 'por': {'out': [], 'starters': ['scoot henderson', 'anfernee simons', 'toumani camara', 'jerami grant', 'duop reath'], 'bench': ['deandre ayton', 'malcolm brogdon', 'skylar mays', 'shaedon sharpe', 'matisse thybulle', 'jabari walker', 'robert williams iii']}}
 	print('all_lineups: ' + str(all_lineups))

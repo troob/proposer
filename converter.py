@@ -380,8 +380,8 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
-    print('all_players_abbrevs: ' + str(all_players_abbrevs))
+    # print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    # print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
 
@@ -442,7 +442,7 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #         if game_player_abbrev != '':
     #             break
 
-    print('game_player_abbrev: ' + str(game_player_abbrev))
+    #print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
 # CHANGE to get list of all abbrevs bc each player may have multiple

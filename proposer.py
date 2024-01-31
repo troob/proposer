@@ -46,6 +46,27 @@ stats_of_interest = ['pts','reb','ast']
 # we need to know the exact game (or even specific prop) that we want to evaluate
 # by default, go through entire year
 
+
+#===CONTROL CONDITIONs===
+# test a condition or group of conditions by itself
+control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
+
+#===OUT FOR SEASON PLAYERS===
+# players out for season not listed on report
+# they played this season so they are included in all teammates 
+# but are now out for the rest of season
+ofs_players = {'mem':['ja morant']}
+
+
+#===READ LINEUPS===
+# CANNOT work bc needs lineups to get projected minutes to get unit stats
+# UNTIL we get unit prob dict and scale that if possible???
+# true when we want to include gp conds prob distribs
+# false to ignore and prepare before lineups set
+# so we can get prob distribs for all conds except gp conds
+#read_lineups = False
+
+
 # read new odds at least once per day if false but set true if we want to update odds more than once per day
 read_new_odds = True 
 # keep in mind, when we add a new feature such as a new condition to the stat dict,
@@ -72,7 +93,7 @@ read_new_rosters = False
 # === GAME IDs === 
 # if error 429 too many requests then we need to stop reading new game ids for 1hr
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
-read_new_game_ids = True
+read_new_game_ids = False
 
 # === PLAYER IDs ===
 # need all players ids but halt if error too many requests
@@ -86,24 +107,7 @@ find_players = True # if true, read all players in game box scores to see prob w
 # make list of sources with different odds 
 read_odds = False # set false to test other features
 
-#===CONTROL CONDITIONs===
-# test a condition or group of conditions by itself
-control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
 
-#===OUT FOR SEASON PLAYERS===
-# players out for season not listed on report
-# they played this season so they are included in all teammates 
-# but are now out for the rest of season
-ofs_players = {'mem':['ja morant']}
-
-
-#===READ LINEUPS===
-# CANNOT work bc needs lineups to get projected minutes to get unit stats
-# UNTIL we get unit prob dict and scale that if possible???
-# true when we want to include gp conds prob distribs
-# false to ignore and prepare before lineups set
-# so we can get prob distribs for all conds except gp conds
-#read_lineups = False
 
 
 settings = {'find matchups': find_matchups, 
@@ -131,7 +135,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('phi','por'), ('nyk','cha'), ('lac','cle'), ('nop','bos'), ('uta','bkn')]#, ('nop','lal')
+game_teams = [('uta','nyk')] #[('lal','atl'), ('ind','bos'), ('uta','nyk'), ('tor','chi'), ('phi','gsw')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -139,8 +143,8 @@ game_teams = [('phi','por'), ('nyk','cha'), ('lac','cle'), ('nop','bos'), ('uta'
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-#players_names = ['patrick beverley'] # 'jacob gilyard', use for testing
+#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+players_names = ['keyonte george'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

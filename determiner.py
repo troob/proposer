@@ -1513,7 +1513,7 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
     return need_box_score
 
 def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur_yr):
-    print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
+    #print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
 
     teammate_abbrev_key = teammate_abbrev + '-' + player_team
     player_name = ''
@@ -1535,8 +1535,8 @@ def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur
             player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
 
     
-    print('player_name: ' + str(player_name))
-    print('teammate_abbrev: ' + str(teammate_abbrev))
+    # print('player_name: ' + str(player_name))
+    # print('teammate_abbrev: ' + str(teammate_abbrev))
     return player_name, teammate_abbrev
 
 # cur avg playtime is weight of player condition
@@ -1959,8 +1959,9 @@ def determine_out_player(player_name, player_gp_cur_conds):
     if len(teammates.keys()) > 0:
         out_teammates = teammates['out']
         #print('out_teammates: ' + str(out_teammates))
+        #doubt_teammates = teammates['doubt']
 
-        if player_name in out_teammates:
+        if player_name in out_teammates:# or player_name in doubt_teammates:
             out = True
 
     #print('out: ' + str(out))
