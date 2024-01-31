@@ -135,7 +135,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('uta','nyk')] #[('lal','atl'), ('ind','bos'), ('uta','nyk'), ('tor','chi'), ('phi','gsw')]#, ('nop','lal')
+game_teams = [('chi','cha'), ('det','cle'), ('lac','wsh'), ('sac','mia'), ('nop','hou'), ('dal','min'), ('orl','sas'), ('den','okc'), ('phx','bkn'), ('mil','por')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -143,8 +143,8 @@ game_teams = [('uta','nyk')] #[('lal','atl'), ('ind','bos'), ('uta','nyk'), ('to
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['keyonte george'] # 'jacob gilyard', use for testing
+players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+#players_names = ['keyonte george'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

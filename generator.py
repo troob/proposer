@@ -7876,7 +7876,11 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
             player_cur_conds_list = all_cur_conds_lists[player_name]
             player_prev_vals = all_prev_vals[player_name]
         # only get probs if cur lineup diff than prev lineup
-        init_team_lineup = init_all_lineups[player_team]
+        init_team_lineup = {}
+        if player_team in init_all_lineups.keys():
+            init_team_lineup = init_all_lineups[player_team]
+        #if player_team in init_all_lineups.keys():
+        # always have team lineup unless find players is off
         team_lineup = all_lineups[player_team]
         player_distrib_probs = generate_player_distrib_probs(player_unit_stat_dict, player_cur_conds_list, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years, init_team_lineup, team_lineup)
         all_player_distrib_probs[player_name] = player_distrib_probs
