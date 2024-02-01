@@ -1190,10 +1190,24 @@ def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
     return sample_size
 
 
+# list all changed lineups since last run
+# init lineups != all lineups
+def determine_changed_lineups(init_all_lineups, all_lineups):
+    print('\n===Changed Lineups===\n')
+    for team, lineup in all_lineups.items():
+        if team in init_all_lineups.keys():
+            init_team_lineup = init_all_lineups[team]
+            if init_team_lineup != lineup:
+                print(team.upper())
+        else: # team not read last run due to error
+            print('Warning: Team lineup not read! ' + team)
+    print('\n=====================\n')
+
+
 def determine_player_benched(player_names, lineup):
-    print('\n===Determine Player Benched===\n')
-    print('player_names: ' + str(player_names))
-    print('lineup: ' + str(lineup))
+    # print('\n===Determine Player Benched===\n')
+    # print('player_names: ' + str(player_names))
+    # print('lineup: ' + str(lineup))
 
     benched = True
 
@@ -1212,7 +1226,7 @@ def determine_player_benched(player_names, lineup):
             benched = False
             break
 
-    print('benched: ' + str(benched))
+    #print('benched: ' + str(benched))
     return benched
 
 

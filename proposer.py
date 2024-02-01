@@ -55,7 +55,7 @@ control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city
 # players out for season not listed on report
 # they played this season so they are included in all teammates 
 # but are now out for the rest of season
-ofs_players = {'mem':['ja morant']}
+ofs_players = {'mem':['ja morant'], 'por':['robert williams iii']}
 
 
 #===READ LINEUPS===
@@ -90,17 +90,18 @@ read_new_teams = False
 # but before they actually played on new team
 read_new_rosters = False
 
-# === GAME IDs === 
-# if error 429 too many requests then we need to stop reading new game ids for 1hr
-# could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
-read_new_game_ids = False
-
 # === PLAYER IDs ===
 # need all players ids but halt if error too many requests
 read_new_player_ids = False
 
 # === FIND PLAYERS ===
 find_players = True # if true, read all players in game box scores to see prob with teammates out
+
+
+# === GAME IDs === 
+# if error 429 too many requests then we need to stop reading new game ids for 1hr
+# could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
+read_new_game_ids = True
 
 # === READ ODDS ===
 # set false to save time if observing all probs
@@ -135,7 +136,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('chi','cha'), ('det','cle'), ('lac','wsh'), ('sac','mia'), ('nop','hou'), ('dal','min'), ('orl','sas'), ('den','okc'), ('phx','bkn'), ('mil','por')]#, ('nop','lal')
+game_teams = [('lal','bos')]#, ('ind','nyk'), ('cle','mem'), ('phi','uta')]#, ('nop','lal')
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -143,8 +144,8 @@ game_teams = [('chi','cha'), ('det','cle'), ('lac','wsh'), ('sac','mia'), ('nop'
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-#players_names = ['keyonte george'] # 'jacob gilyard', use for testing
+#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+players_names = ['lebron james'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

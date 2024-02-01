@@ -381,19 +381,19 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 	all_prev_stat_vals = {}
 
 	for player, player_season_logs in all_players_season_logs.items():
-		print('\nPlayer: ' + player.title())
-		print('player_season_logs: ' + str(player_season_logs))
+		# print('\nPlayer: ' + player.title())
+		# print('player_season_logs: ' + str(player_season_logs))
 		player_prev_stat_vals = {}
 		# dict goes from recent to distant so take first 1
 		if len(player_season_logs.keys()) > 0:
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
-			print('season_log_of_interest: ' + str(season_log_of_interest))
+			#print('season_log_of_interest: ' + str(season_log_of_interest))
 
 			player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest)
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
-	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+	#print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 	return all_prev_stat_vals
 
 # get team season schedule from espn.com
@@ -2248,7 +2248,7 @@ def read_players_from_rosters(rosters, game_teams=[]):
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # all_teams_players = {year:{team:[players],...},...}
-def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, init_all_lineups):
+def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):#, init_all_lineups):
 	print('\n===Read All Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_lineups = {\'cle\': {\'starters\': [\'donovan mitchell\', ...\n')
@@ -2263,7 +2263,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 	soup = read_website(url)
 
 	#init_lineups = []
-	lineups_file = 'data/all lineups.json'
+	#lineups_file = 'data/all lineups.json'
 	# init_lineups = read_json(lineups_file)
 
 	starters_key = 'starters'
@@ -2318,6 +2318,8 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 				# if team not in rosters for todays games, 
 				# then we do not need to get the current lineup
 				# likely bc the game already started but there are other games today
+				# read all lineups not just those of interest, 
+				# bc used to compare prev lineups used to get game models if updated
 				if lineup_team in rosters.keys():
 					all_lineups[lineup_team] = {starters_key:[],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}
 
@@ -2363,7 +2365,9 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 											# title="Unlikely To Play"
 											elif re.search('Unlikely',str(player_element)):
 												#print('doubtful')
-												doubtful.append(player_name)
+												#doubtful.append(player_name)
+												# change doubt to out bc always ends up being out
+												out.append(player_name)
 											# if questionable
 											# title="Toss Up To Play"
 											elif re.search('Toss Up',str(player_element)):
@@ -2371,9 +2375,11 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 												questionable.append(player_name)
 											# if probable
 											# title="Likely To Play"
-											elif re.search('Likely',str(player_element)):
-												#print('probable')
-												probable.append(player_name)
+											# elif re.search('Likely',str(player_element)):
+											# 	#print('probable')
+											# 	probable.append(player_name)
+												# change probable to in bc usually ends up in
+
 
 							player_num += 1
 
@@ -2487,6 +2493,17 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 			lineup[bench_key] = bench
 			#lineup[in_key] = in_players
 
+			# save lineups so we can compare bt runs 
+			# and see if we need to get new projected minutes
+			# we can write lineups before each team probs are computed
+			# bc if we cancel before reading all probs then it will see probs not read yet
+			# init_team_lineup = init_all_lineups[team]
+			# #team_lineup_file = 'data/lineups/' + team + ' lineup.json'
+			# if init_team_lineup != lineup:
+			# 	# overwrite only team of interest
+				
+			# 	writer.write_json_to_file(lineup, lineups_file)
+
 
 	# standardize format to unique player id
 	# should we have actual player espn id?
@@ -2502,10 +2519,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 	# 			# check which player in all players teams list with this team has this abbrev
 	# 			player = determiner.determine_player_full_name(player, team, all_players_teams)
 
-	# save lineups so we can compare bt runs 
-	# and see if we need to get new projected minutes
-	if init_all_lineups != all_lineups:
-		writer.write_json_to_file(all_lineups, lineups_file)
+	
 
 
 	#all_lineups = {'dal': {'out': ['luka doncic', 'dante exum', 'maxi kleber', 'dereck lively ii', 'grant williams'], 'starters': ['jaden hardy', 'kyrie irving', 'josh green', 'derrick jones jr', 'dwight powell'], 'bench': ['seth curry', 'tim hardaway jr']}, 'por': {'out': [], 'starters': ['scoot henderson', 'anfernee simons', 'toumani camara', 'jerami grant', 'duop reath'], 'bench': ['deandre ayton', 'malcolm brogdon', 'skylar mays', 'shaedon sharpe', 'matisse thybulle', 'jabari walker', 'robert williams iii']}}

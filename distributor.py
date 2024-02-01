@@ -539,14 +539,26 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
                            #'ncx':['df', 'nc']}
         three_params_dict = {'ncf':['dfn','dfd','nc']}
 
-        bounds = [(-100, 100), (-100, 100)]
-        #bounds = [(-200, 200), (-200, 200)]
+        # CONSIDER change back to 100 bounds bc worked that way
+        # even tho all data bounds were set to 200 at the time
+        # so the mismatched bounds shouldve cause errors
+        # CONSIDER increase bounds to 250 bc noted pat bev bounds=200 so past limit
+
+        # bounds = [(-100, 100), (-100, 100)]
+        # #bounds = [(-200, 200), (-200, 200)]
+        # if model_name in params_dict.keys():
+        #     bounds = [(-100, 100), (-100, 100), (-100, 100)]
+        # elif model_name in two_params_dict.keys():
+        #     bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100)]
+        # elif model_name in three_params_dict.keys():
+        #     bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)]
+        bounds = [(-250, 250), (-250, 250)]
         if model_name in params_dict.keys():
-            bounds = [(-100, 100), (-100, 100), (-100, 100)]
+            bounds = [(-250, 250), (-250, 250), (-250, 250)]
         elif model_name in two_params_dict.keys():
-            bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100)]
+            bounds = [(-250, 250), (-250, 250), (-250, 250), (-250, 250)]
         elif model_name in three_params_dict.keys():
-            bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)]
+            bounds = [(-250, 250), (-250, 250), (-250, 250), (-250, 250), (-250, 250)]
         #print('bounds: ' + str(bounds))
         sample_fit_results = fit(dist, sample_data, bounds)
         sample_fit_params = sample_fit_results.params
