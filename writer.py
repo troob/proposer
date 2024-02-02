@@ -795,8 +795,8 @@ def write_all_player_stat_probs(all_player_stat_probs):
 def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='Joints', todays_date=datetime.today().strftime('%m-%d-%y')):
     print('\n===Write Prop Tables===\n')
     #print('prop_dicts: ' + str(prop_dicts))
-    print('sheet_names: ' + str(sheet_names))
-    print('desired_order: ' + str(desired_order))
+    # print('sheet_names: ' + str(sheet_names))
+    # print('desired_order: ' + str(desired_order))
 
     
 
@@ -922,3 +922,14 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subje
 	# player_old_cur_season_log_key = player_name + ' ' + current_year_str + ' game log '
 	# not_string = todays_date
 	# writer.delete_file(player_old_cur_season_log_key, not_string) # delete file in folder with name containing key string but not other string
+        
+
+
+
+def display_list(list, title):
+    print('\n===' + title.title() + '===\n')
+
+    for item in list:
+        print(item)
+
+    print('\n==============================\n')

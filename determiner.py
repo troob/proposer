@@ -1229,6 +1229,84 @@ def determine_player_benched(player_names, lineup):
     #print('benched: ' + str(benched))
     return benched
 
+# affects playtime
+def determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
+    # print('\n===Determine Week After Injury: ' + player.title() + '===\n')
+    # print('Input: player_cur_season_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+
+    after_injury = False
+
+    # if any of the last 2-4 games are > 2 weeks ago?
+    # then we know injury gap within a week
+    # bc teams play up to 4 games per week
+    # check if the gap bt any of the last 2-4 games > 10 days!
+    num_restricted_games = 3
+    # game_dates = player_cur_season_log['Date']
+    cur_game_date_obj = todays_games_date_obj
+
+    for game_idx in range(num_restricted_games):
+        # datetime.strptime(date_str, date_format)
+        prev_game_date = player_cur_season_log['Date'][str(game_idx)].split()[1] # dow mm/dd
+        game_mth = prev_game_date.split('/')[0]
+        prev_game_yr = determine_game_year(game_mth, cur_yr)
+        prev_game_date += '/' + prev_game_yr # mm/dd + /yyyy
+        #print('prev_game_date: ' + prev_game_date)
+        prev_game_date_obj = datetime.strptime(prev_game_date, '%m/%d/%Y')
+        
+        # print('cur_game_date_obj: ' + str(cur_game_date_obj))
+        # print('prev_game_date_obj: ' + str(prev_game_date_obj))
+        game_gap = (cur_game_date_obj - prev_game_date_obj).days
+        #print('game_gap: ' + str(game_gap))
+        # prev_game_date_str = game_dates[str(game_idx)]
+        # game_gap = (cur_game_date - prev_game_date).days
+
+        if game_gap > 9:
+            #print('Warning: Week After Injury!!! Double Check Playtime Minute Restriction!!! ' + player.title())
+            after_injury = True
+            break
+
+        cur_game_date_obj = prev_game_date_obj
+
+    #print('after_injury: ' + str(after_injury))
+    return after_injury
+
+def determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr):
+    #print('\n===Determine Valid Player===\n')
+
+    valid = True
+
+    if len(player_season_logs.keys()) == 0:
+        valid = False
+    elif determine_dnp_player(player_teams, cur_yr, player):
+        valid = False
+    elif determine_out_player(player, player_gp_cur_conds):
+        valid = False
+
+    return valid
+
+# double check playtime in news reports
+def determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, cur_yr):
+    print('\n===All After Injury Players===\n')
+    print('Warning: Double check playtime in lineups reports details!')
+
+    after_injury_players = []
+
+    for player, player_season_logs in all_players_season_logs.items():
+        #print('\nPlayer: ' + player.title())
+        player_teams = all_players_teams[player]
+        if player in all_game_player_cur_conds.keys():
+            player_gp_cur_conds = all_game_player_cur_conds[player]
+            if determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr):
+                if cur_yr in player_season_logs.keys():
+                    player_cur_season_log = player_season_logs[cur_yr]
+                    if determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
+                        after_injury_players.append(player)
+                        print(player.title())
+
+    print('\n==============================\n')
+
+    return after_injury_players
+
 
 def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, season_years=[], irreg_play_time={}):
     # determine unit time period by observing if drastic change indicates change in team or role
@@ -2109,15 +2187,15 @@ def determine_abbrev_in_game(player_abbrevs, team_part_players):
 # game_teams = [('mil','mia'),...]
 # player_teams = {'2018': {'mia': 69}, '2019...
 # player_teams = {year:{team:gp,...},...
-def determine_opponent_team(player, player_teams, game_teams, cur_yr='', rosters={}, player_team=''):
+def determine_opponent_team(player, player_team, game_teams):#, player_teams={}, cur_yr='', rosters={}):
     #print('\n===Determine Player Opponent Team: ' + player.title() + '===\n')
     #print('player_teams: ' + str(player_teams))
     #print('game_teams: ' + str(game_teams))
     
     opp_team = ''
 
-    if player_team == '':
-        player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
+    # if player_team == '':
+    #     player_team = determine_player_current_team(player, player_teams, cur_yr, rosters)
 
     # look for player team in games
     # game = ('mil','mia')
