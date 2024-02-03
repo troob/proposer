@@ -2359,8 +2359,9 @@ def determine_player_abbrev(player_name):
                 player_abbrev += ' ' + name
 
         player_abbrev = player_abbrev.lower()
-    else:
-        print('Warning: Blank player name while determining player abbrev!')
+    
+    # else:
+    #     print('Warning: Blank player name while determining player abbrev!')
     
     #print('player_abbrev: ' + player_abbrev)
     return player_abbrev

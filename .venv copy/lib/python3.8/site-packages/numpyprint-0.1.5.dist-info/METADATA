@@ -1,0 +1,125 @@
+Metadata-Version: 2.1
+Name: numpyprint
+Version: 0.1.5
+Summary: prints numpy arrays nicely
+Home-page: https://gitlab.com/steinegger.daniel/numpyprint
+Author: Daniel Steinegger
+Author-email: steinegger.daniel@gmail.com
+License: UNKNOWN
+Platform: UNKNOWN
+Classifier: Programming Language :: Python :: 3
+Classifier: License :: OSI Approved :: MIT License
+Classifier: Operating System :: OS Independent
+Requires-Python: >=3.6
+Description-Content-Type: text/markdown
+
+# NumpyPrint
+
+Numpyprint uses the Package prettytable to print numpy arrays in a nice format. At the moment this works well until a 2D Dimension.
+
+## Installation
+
+```bash
+pip install numpyprint
+
+or
+
+python3 -m pip install numpyprint
+```
+
+## What is it
+
+NumpyPrint nicely prints an numpy array with the help of the package PrettyTable. It prints arrays of any dimension.
+
+### Example
+
+```python
+import numpy as np
+from numpyprint import np_print
+
+numpy_array = np.random.rand(1,2,3)*100
+np_print(numpy_array)
+```
+
+The output with the default settings looks like this:
+
+```bash
++---+----------------------------+---------------------------+
+| 0 | +---+--------------------+ | +---+-------------------+ |
+|   | | 0 | 40.361415789985486 | | | 0 | 89.54304456427288 | |
+|   | | 1 | 42.44964170184573  | | | 1 | 43.11298502039822 | |
+|   | | 2 | 19.234562477482196 | | | 2 |  40.0682288789328 | |
+|   | +---+--------------------+ | +---+-------------------+ |
++---+----------------------------+---------------------------+
+```
+
+It prints a nice table with frame boarders and row numbers.
+
+## How to use it
+
+### Print to Console
+
+```python
+import numpy as np
+import numpyprint as npp
+
+array = np.random.rand(3, 2, 3)*100
+
+npp.np_print(array)
+
+# or with change of some settings
+
+npp.np_print(array,precision= 2 ,row_numbers= True, column_numbers= True,odd_vertical= False,style='plain')
+
+```
+
+### Use it in Jupyter Notebooks
+
+In Jupyter Notebook it is possible to use HTML to format the output. The following command prints the numpy array in a nice table.
+
+```python
+import numpy as np
+import numpyprint as npp
+
+array = np.random.rand(3, 2)
+
+npp.np_display(array)
+```
+
+### Get the PrettyTable Object
+
+If you want the PrettyTable object you can use `np_format()`. But keep in mind that multidimensional arrays have nested tables.
+
+```python
+import numpy as np
+import numpyprint as npp
+
+array = np.random.rand(3, 2)
+
+table = npp.np_format(array)
+```
+
+## Change the Default Settings
+
+The defaults/settings are:
+
+```python
+defaults=dict({
+    'row_numbers': True,
+    'column_numbers': False,
+    'precision': None, # None or int like 2
+    'style': 'default', # 'default' or 'plain'
+    'odd_vertical': True
+})
+```
+
+It is possible to change it like:
+
+```python
+import numpy as np
+import numpyprint as npp
+
+npp.defaults['precision'] = 2
+```
+
+

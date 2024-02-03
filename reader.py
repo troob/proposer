@@ -2786,8 +2786,8 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 
 	unknown_names = []
 	for game_key, game_players in year_box_scores.items():
-		print('\ngame_key: ' + str(game_key))
-		print('game_players: ' + str(game_players))
+		#print('\ngame_key: ' + str(game_key))
+		#print('game_players: ' + str(game_players))
 
 		game_data = game_key.split()
 		if len(game_data) > 2:
@@ -2800,12 +2800,12 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 			# if date_obj > reg_season_start_date_obj
 			
 			away_team = game_data[0]
-			print('away_team: ' + str(away_team))
+			#print('away_team: ' + str(away_team))
 			home_team = game_data[1]
-			print('home_team: ' + str(home_team))
+			#print('home_team: ' + str(home_team))
 
 			for loc, game_team_players in game_players.items():
-				print('\nloc: ' + str(loc))
+				#print('\nloc: ' + str(loc))
 				#print('game_team_players: ' + str(game_team_players))
 
 				# team of this player in this game
@@ -2814,14 +2814,14 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 					game_player_team_abbrev = away_team
 					
 				game_player_team_name = game_player_team_abbrev # will be set blank for irreg team and then used to break loop to next team
-				print('game_player_team_name: ' + str(game_player_team_name))
+				#print('game_player_team_name: ' + str(game_player_team_name))
 				
 				for team_part, team_part_players in game_team_players.items():
-					print('\nteam_part: ' + str(team_part))
+					#print('\nteam_part: ' + str(team_part))
 					#print('team_part_players: ' + str(team_part_players))
 					
 					for player_abbrev in team_part_players:
-						print('\nplayer_abbrev: ' + str(player_abbrev))
+						#print('\nplayer_abbrev: ' + str(player_abbrev))
 
 						# if we already stored player abbrev and team, 
 						# then check to make sure this box score is correct
@@ -2835,13 +2835,13 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 						
 						# need to add team abbrev to player abbrev bc tre jones and tyus jones have the same abbrev t jones pg
 						player_abbrev_key = player_abbrev + '-' + game_player_team_abbrev
-						print('player_abbrev_key: ' + str(player_abbrev_key))
+						#print('player_abbrev_key: ' + str(player_abbrev_key))
 
 						if player_abbrev_key not in year_players_abbrevs.keys() and player_abbrev_key not in unknown_names:
 
 							# check if can determine name from saved players teams
 							player_name = determiner.determine_player_full_name(player_abbrev, game_player_team_abbrev, all_players_teams, rosters, game_key, cur_yr)
-							print('player full name: ' + str(player_name))
+							#print('player full name: ' + str(player_name))
 
 
 							if player_name == '': # not saved in all players teams or abbrev not matched?
@@ -2893,7 +2893,7 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 								if player_abbrev_key not in unknown_names:
 									unknown_names.append(player_abbrev_key)
 								# CAUTION: player name blank bc player not on roster
-								print('\n===Warning: Blank Player Name: ' + player_abbrev_key + '===\n')
+								#print('\n===Warning: Blank Player Name: ' + player_abbrev_key + '===\n')
 								#print('unknown_names: ' + str(unknown_names))
 
 
@@ -2901,8 +2901,8 @@ def read_year_players_abbrevs(year, year_box_scores, all_players_teams, init_all
 						# continue to next team
 						break
 						
-					if len(unknown_names) > 0:
-						print('WARNING unknown_names: ' + str(unknown_names))
+	if len(unknown_names) > 0:
+		print('WARNING unknown_names: ' + str(unknown_names))
 								
 	#print('year_players_abbrevs: ' + str(year_players_abbrevs))
 	return (year_players_abbrevs, all_players_espn_ids, all_players_teams)
