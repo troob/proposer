@@ -2996,10 +2996,11 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
     #print('available_prop_dicts: ' + str(available_prop_dicts))
     return available_prop_dicts
 
-def generate_stat_val_probs_cond_refs(game_num, prev_val, player_current_conditions, player_gp_conds, stat_val_probs_dict):
+def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, player_current_conditions, player_gp_conds, stat_val_probs_dict):
     # add more fields for ref
     stat_val_probs_dict['game'] = game_num
     stat_val_probs_dict['prev'] = prev_val
+    stat_val_probs_dict['playtime'] = playtime
 
     for cond_key, cond_val in player_current_conditions.items():
         stat_val_probs_dict[cond_key] = cond_val
@@ -3021,7 +3022,7 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, player_current_conditi
 # conditions prob = b biyombo c starter 2023 regular prob
 # need all_player_stat_dicts to get prev val
 # all_players_teams = {player:year:team:gp}
-def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr=''):
+def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr=''):
     print('\n===Generate All True Prob Dicts===\n')
     print('Input: all_cur_conds_dicts = {p1:{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = {\'nikola jokic\': [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ... = ' + str(all_cur_conds_dicts))
     print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_gp_cur_conds))
@@ -3060,6 +3061,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
         # OR if only 1 allowed still need to see game teams next to each other to place picks on same page of gui
         game_num = determiner.determine_game_num(game_teams, player_team)
 
+        playtime = all_players_playtimes[player]
 
         player_current_conditions = all_cur_conds_dicts[player]
         #print('player_current_conditions: ' + str(player_current_conditions))
@@ -3170,7 +3172,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     # # for game in game_teams:
                     # #     if player_team
                     # stat_val_probs_dict['game'] = game_num
-                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, player_current_conditions, player_gp_conds, stat_val_probs_dict)
+                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, player_current_conditions, player_gp_conds, stat_val_probs_dict)
 
                     # we want per unit probs next to corresponding yr for comparison in table
                     # so add key above when looping thru conditions
@@ -3230,7 +3232,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #             team_part_cond_key = team_part # eg. 'starters'
                         #         stat_val_probs_dict[team_part_cond_key] = team_part_players
                         # stat_val_probs_dict['game'] = game_num
-                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, player_current_conditions, player_gp_conds, stat_val_probs_dict)
+                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, player_current_conditions, player_gp_conds, stat_val_probs_dict)
 
                         # one row for each val which has all conditions
                         #print('stat_val_probs_dict: ' + str(stat_val_probs_dict))
@@ -3969,8 +3971,9 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, part,
                             'time after':3, 
                             'coverage':1,
                             'local':0, # normal conditions so no relative effect
-                            'former':5, # only counts if former=true bc else ~=all. consider change back to 3
+                            'former':6, # only counts if former=true bc else ~=all. consider change back to 3
                             'nf':0, # normal conditions so no relative effect
+                            'role change':5, # starter<->bench, usually one but now other
                             'wos':3, # week of season
                             'wop':3} # week of play
         
@@ -4912,12 +4915,12 @@ def generate_all_stat_probs_dict(all_player_stat_probs, all_player_stat_dicts={}
 
 
 def generate_player_distrib_probs(player_stat_dict, current_conditions, player_prev_vals, player_distrib_models, stats_of_interest, player_name, todays_date, season_years, init_player_playtime, player_playtime, final_all_players_playtimes):
-    # print('\n===Generate Player Distrib Probs: ' + player_name.title() + '===\n')
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    # print('Input: current_conditions = [all, home, t watford f in, ...] = ' + str(current_conditions))
-    # print('Input: player_prev_vals = {stat name:prev val, ...} = ' + str(player_prev_vals))
-    # print('Input: player_distrib_models = {stat name: {model name, sim data}, ...')# = ' + str(player_distrib_models)) # {\'pts\': {\'name\': \'loggamma\', \'data\': array([-4.40556263, ... =  # OR params(a=shape,loc=l,scale=s)}}')
-    # print('\nOutput: player_distrib_probs = {condition: {year: {season part: {stat name: {stat val: prob over, ... = {\'all\': {\'2024\': {\'regular\': {\'pts\': [0.01, ...], ... \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'2023\': {\'regular\': {\'pts\': [0.01, ...], ...\n')
+    print('\n===Generate Player Distrib Probs: ' + player_name.title() + '===\n')
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: current_conditions = [all, home, t watford f in, ...] = ' + str(current_conditions))
+    print('Input: player_prev_vals = {stat name:prev val, ...} = ' + str(player_prev_vals))
+    print('Input: player_distrib_models = {stat name: {model name, sim data}, ...')# = ' + str(player_distrib_models)) # {\'pts\': {\'name\': \'loggamma\', \'data\': array([-4.40556263, ... =  # OR params(a=shape,loc=l,scale=s)}}')
+    print('\nOutput: player_distrib_probs = {condition: {year: {season part: {stat name: {stat val: prob over, ... = {\'all\': {\'2024\': {\'regular\': {\'pts\': [0.01, ...], ... \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'2023\': {\'regular\': {\'pts\': [0.01, ...], ...\n')
 
     player_distrib_probs = {}
 
@@ -5097,7 +5100,7 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                                         if len(stat_vals) > 1 and np.any(stat_vals):
                                             #print('valid')
                                             # formerly: stat_probs[stat_val] = prob_over
-                                            stat_probs = distributor.distribute_all_probs(stat_vals, player_stat_model, player_name, stat_name, condition) # if normal dist, avg_scale)
+                                            stat_probs = distributor.test_distribute_all_probs(stat_vals, player_stat_model, player_name, stat_name, condition) # if normal dist, avg_scale)
 
 
                                             # reformat for user interface display purposes
@@ -5128,7 +5131,9 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
             # writer.write_json_to_file(all_players_conds, all_players_conds_file)
             final_all_players_playtimes[player_name] = player_playtime
             all_players_playtimes_file = 'data/all players playtimes.json'
-            writer.write_json_to_file(final_all_players_playtimes, all_players_playtimes_file)
+            
+            #writer.write_json_to_file(final_all_players_playtimes, all_players_playtimes_file)
+            
             print('wrote playtime to file: ' + player_name + ', ' + str(player_playtime))
             print('final_all_players_playtimes: ' + str(final_all_players_playtimes))
 
@@ -8063,6 +8068,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_player_distrib_models = {}
     all_player_distrib_probs = {}
 
+    all_players_playtimes = {} # display in final table for ref
+
     all_player_weekly_stat_dicts = {} # {player:{week:...}}
     all_player_weekly_stat_records = {}
     all_player_weekly_stat_probs = {}
@@ -8200,7 +8207,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         player_team = determiner.determine_player_current_team(player_name, player_teams, current_year_str, teams_current_rosters)
         
         player_playtime = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, current_year_str, season_part)
-        
+        all_players_playtimes[player_name] = round_half_up(player_playtime)
+
         player_unit_stat_dict = generate_player_unit_stat_dict(player_name, player_team, player_playtime, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, current_year_str, season_part, stats_of_interest)
         all_player_unit_stat_dicts[player_name] = player_unit_stat_dict
         
@@ -8300,7 +8308,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
-    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_cur_conds_dicts, all_game_player_cur_conds, all_player_stat_dicts, game_teams, teams_current_rosters, current_year_str)
+    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_player_stat_dicts, game_teams, teams_current_rosters, current_year_str)
     desired_order = ['player', 'game', 'team', 'stat','val']
     #writer.list_dicts(all_stat_prob_dicts, desired_order)
 
@@ -8334,7 +8342,9 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     # after odds and ev columns if included
     # prev val is unique type of condition
-    desired_order.append('prev')
+    # desired_order.append('playtime')
+    # desired_order.append('prev')
+    desired_order.extend(['playtime', 'prev'])
 
     # show the current conditions so we know which probs are used bc all probs are shown in table of all players
     #conditions = ['loc'] # add all conditions we are using to get true prob or uncertainty

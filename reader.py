@@ -2333,9 +2333,9 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 					for player_element in lineup_list.find_all('li', {'class': 'lineup__player'}):
 						#print('\nplayer_element: ' + str(player_element))
 						player_name = player_element.find('a').decode_contents()
-						#print('player_name: ' + str(player_name))
+						#print('\nplayer_name: ' + str(player_name))
 						player_name = determiner.determine_player_full_name(player_name, lineup_team, all_players_teams, rosters, cur_yr=cur_yr)
-						# print('player_name: ' + str(player_name))
+						#print('player_name: ' + str(player_name))
 						# print('player_num: ' + str(player_num))
 						
 						# if player on team but not yet played for them 

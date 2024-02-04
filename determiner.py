@@ -2390,14 +2390,6 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
 
     full_name = ''
 
-    # if player gone from the league 
-    # AND we did not get their espn id
-    # they do not show up in all players teams
-    # so should we get data for gone players?
-    #if player not in all_players_teams:
-        # get player teams
-    # problem is we cant see if player is in all players teams bc we dont have full name but we have last name
-    # but last name might match wrong player
 
     # player = D. Green -> d green
     # player = Draymond Green -> draymond green
@@ -2407,6 +2399,24 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
 
     player = re.sub('\.','',player).lower()
     player = re.sub('-',' ',player)
+
+    # print('player: ' + str(player))
+    # print('team: ' + str(team))
+    # irreg 2 d smiths on bkn same team
+    # could fix by forcing both last names to match but this is only case for now
+    if player == 'd smith' and team == 'bkn': # no position in abbrev so we know from lineup source
+        return 'dennis smith jr'
+
+    # if player gone from the league 
+    # AND we did not get their espn id
+    # they do not show up in all players teams
+    # so should we get data for gone players?
+    #if player not in all_players_teams:
+        # get player teams
+    # problem is we cant see if player is in all players teams bc we dont have full name but we have last name
+    # but last name might match wrong player
+
+    
     
 
     # if already using only first initial or abbrev?
