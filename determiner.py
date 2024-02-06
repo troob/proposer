@@ -922,6 +922,28 @@ def determine_current_teammates_in_game(game_teammates, current_teammates):
 
     return current_teammates_in_game
 
+
+
+
+
+
+
+
+#if condition in current_conditions or min_prev_stat_val <= cur_prev_stat_val <= max_prev_stat_val:
+def determine_valid_condition(condition, current_conditions, cur_prev_stat_val, min_prev_stat_val, max_prev_stat_val):
+
+    valid = False
+
+    if condition in current_conditions:
+        valid = True
+    elif re.search('prev', condition) and min_prev_stat_val <= cur_prev_stat_val <= max_prev_stat_val: # 0-4 prev
+        valid = True
+
+    return valid
+
+
+
+
 # make list to loop through so we can add all stats to dicts with 1 fcn
 # list order or keys must correspond with all_stats_dicts bc we assign by idx/key
 def determine_game_stats(player_game_log, game_idx):
@@ -1240,7 +1262,7 @@ def determine_week_after_injury(player_cur_season_log, player, todays_games_date
     # then we know injury gap within a week
     # bc teams play up to 4 games per week
     # check if the gap bt any of the last 2-4 games > 10 days!
-    num_restricted_games = 3
+    num_restricted_games = 3 # some players/injuries need more games!
     # game_dates = player_cur_season_log['Date']
     cur_game_date_obj = todays_games_date_obj
 
@@ -1260,7 +1282,8 @@ def determine_week_after_injury(player_cur_season_log, player, todays_games_date
         # prev_game_date_str = game_dates[str(game_idx)]
         # game_gap = (cur_game_date - prev_game_date).days
 
-        if game_gap > 9:
+        # serious_injury_minimum = 12
+        if game_gap > 11:
             #print('Warning: Week After Injury!!! Double Check Playtime Minute Restriction!!! ' + player.title())
             after_injury = True
             break
@@ -1462,6 +1485,35 @@ def determine_all_current_conditions(all_cur_conds_dicts):
 
     #print('all_cur_conds: ' + str(all_cur_conds))
     return all_cur_conds, all_players_cur_conds
+
+
+
+
+def determine_total_sample_size(player_stat_dict, season_part='full'):
+    # print('\n===Determine Total Sample Size===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    sample_size = 0
+    # all yrs
+    for year_stat_dict in player_stat_dict.values():
+        # all stats have same samplesize
+        stat_dict = list(year_stat_dict[season_part].values())[0]['all']
+        #print('stat_dict: ' + str(stat_dict))
+        sample_size += len(stat_dict.keys())
+        #print('sample_size: ' + str(sample_size))
+        
+    #print('sample_size: ' + str(sample_size))
+    return sample_size
+
+# based on sample size and variance
+def determine_player_stat_confidence(player, stat_name, player_stat_dict):
+    # print('\n===Determine Player Stat Confidence: ' + player.title() + ', ' + stat_name.upper() + '===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+
+    # CHANGE to include variance of samples
+    sample_size = determine_total_sample_size(player_stat_dict, season_part='regular')
+
+    #print('sample_size: ' + str(sample_size))
+    return sample_size
 
 # determine game num so we can sort by game
 def determine_game_num(game_teams, player_team):
@@ -2406,6 +2458,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
     # could fix by forcing both last names to match but this is only case for now
     if player == 'd smith' and team == 'bkn': # no position in abbrev so we know from lineup source
         return 'dennis smith jr'
+    elif player == 'g' and team == 'mil': # no position in abbrev so we know from lineup source
+        return 'giannis antetokounmpo'
 
     # if player gone from the league 
     # AND we did not get their espn id

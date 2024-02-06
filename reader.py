@@ -2328,6 +2328,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 					probable = []
 					questionable = []
 					doubtful = []
+					dnp = []
 					# first 5 are always starters, even if injury tag
 					player_num = 0
 					for player_element in lineup_list.find_all('li', {'class': 'lineup__player'}):
@@ -2345,40 +2346,66 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 								#print('starter')
 								starters.append(player_name)
 							else:
+								# if out due to recent trade so not playing yet 
+								# then do not consider out bc never played together?
+								# no, consider dnp
+								# so if player has team this yr but it is not the lineup team
+								# we must allow to pass so they can be checked for out or bench
+
 								# if not dnp status
 								# 1st see if played this yr
 								# then get avg play time this yr from player teams
 								if player_name in all_players_teams.keys():
 									player_teams = all_players_teams[player_name]
-									if cur_yr in player_teams.keys() and lineup_team in player_teams[cur_yr].keys():
-										#cur_team_dict = player_teams[cur_yr][lineup_team]
-										avg_play_time = player_teams[cur_yr][lineup_team]['MIN']
-										if avg_play_time > 11.5: # 48/4 = 12 +/- 0.5
-											# if cur_yr in player_teams.keys():
-											# determine out status
-											# if out
-											# title="Very Unlikely To Play"
-											if re.search('Very Unlikely',str(player_element)):
+
+									if not determiner.determine_dnp_player(player_teams, cur_yr, player_name):
+										
+										
+
+										# if cur_yr in player_teams.keys() and lineup_team in player_teams[cur_yr].keys():
+										# 	#cur_team_dict = player_teams[cur_yr][lineup_team]
+										# 	avg_play_time = player_teams[cur_yr][lineup_team]['MIN']
+										# 	if avg_play_time > 11.5: # 48/4 = 12 +/- 0.5
+												
+										# if cur_yr in player_teams.keys():
+										# determine out status
+										# if out
+										# title="Very Unlikely To Play"
+										if re.search('Very Unlikely',str(player_element)):
+											# if not dnp player on past team but out due to recent trade
+											# then consider dnp not out bc has not played together yet
+											if lineup_team in player_teams[cur_yr].keys():
 												#print('out')
 												out.append(player_name)
-											# if doubtful
-											# title="Unlikely To Play"
-											elif re.search('Unlikely',str(player_element)):
-												#print('doubtful')
-												#doubtful.append(player_name)
-												# change doubt to out bc always ends up being out
+											else:
+												#print('dnp')
+												dnp.append(player_name)
+
+										# if doubtful
+										# title="Unlikely To Play"
+										elif re.search('Unlikely',str(player_element)):
+											#print('doubtful')
+											#doubtful.append(player_name)
+											# change doubt to out bc always ends up being out
+											# if not dnp player on past team but out due to recent trade
+											# then consider dnp not out bc has not played together yet
+											if lineup_team in player_teams[cur_yr].keys():
+												#print('out')
 												out.append(player_name)
-											# if questionable
-											# title="Toss Up To Play"
-											elif re.search('Toss Up',str(player_element)):
-												#print('questionable')
-												questionable.append(player_name)
-											# if probable
-											# title="Likely To Play"
-											# elif re.search('Likely',str(player_element)):
-											# 	#print('probable')
-											# 	probable.append(player_name)
-												# change probable to in bc usually ends up in
+											else:
+												#print('dnp')
+												dnp.append(player_name)
+										# if questionable
+										# title="Toss Up To Play"
+										elif re.search('Toss Up',str(player_element)):
+											#print('questionable')
+											questionable.append(player_name)
+										# if probable
+										# title="Likely To Play"
+										# elif re.search('Likely',str(player_element)):
+										# 	#print('probable')
+										# 	probable.append(player_name)
+											# change probable to in bc usually ends up in
 
 
 							player_num += 1
@@ -2399,6 +2426,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 					all_lineups[lineup_team][probable_key] = probable
 					all_lineups[lineup_team][question_key] = questionable
 					all_lineups[lineup_team][doubt_key] = doubtful
+					all_lineups[lineup_team][dnp_key] = dnp
 
 
 	# determine bench by seeing difference between all teammates, starters, and out
@@ -2462,7 +2490,8 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 				if avg_play_time <= 11.5:
 					dnp.append(player)
 			#print('dnp: ' + str(dnp))
-			lineup[dnp_key] = dnp
+			#lineup[dnp_key] = dnp
+			lineup[dnp_key].extend(dnp)
 
 			# need to add starters and bench to in players separate in case new player on team so cur cond does not match prev conds without player
 			# for starter in starters:

@@ -12,12 +12,13 @@
 import inspect
 from scipy.stats import norm, skewnorm, loggamma, fit
 from scipy._lib._finite_differences import _derivative
+from scipy import integrate
 from math import inf
 from numba import njit
 import numpy as np
-from numpy import asarray
+from numpy import asarray, array, logical_and, place, vectorize, nan, inf
 #import math # for pi to get prob of x in distrib
-
+import time
 # read from csv
 # import pandas as pd
 
@@ -401,60 +402,7 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
 
 
 
-def argsreduce(cond, *args):
-    """Clean arguments to:
 
-    1. Ensure all arguments are iterable (arrays of dimension at least one
-    2. If cond != True and size > 1, ravel(args[i]) where ravel(condition) is
-       True, in 1D.
-
-    Return list of processed arguments.
-
-    Examples
-    --------
-    >>> import numpy as np
-    >>> from scipy.stats._distn_infrastructure import argsreduce
-    >>> rng = np.random.default_rng()
-    >>> A = rng.random((4, 5))
-    >>> B = 2
-    >>> C = rng.random((1, 5))
-    >>> cond = np.ones(A.shape)
-    >>> [A1, B1, C1] = argsreduce(cond, A, B, C)
-    >>> A1.shape
-    (4, 5)
-    >>> B1.shape
-    (1,)
-    >>> C1.shape
-    (1, 5)
-    >>> cond[2,:] = 0
-    >>> [A1, B1, C1] = argsreduce(cond, A, B, C)
-    >>> A1.shape
-    (15,)
-    >>> B1.shape
-    (1,)
-    >>> C1.shape
-    (15,)
-
-    """
-    # some distributions assume arguments are iterable.
-    newargs = np.atleast_1d(*args)
-
-    # np.atleast_1d returns an array if only one argument, or a list of arrays
-    # if more than one argument.
-    if not isinstance(newargs, (list, tuple)):
-        newargs = (newargs,)
-
-    if np.all(cond):
-        # broadcast arrays with cond
-        *newargs, cond = np.broadcast_arrays(*newargs, cond)
-        return [arg.ravel() for arg in newargs]
-
-    s = cond.shape
-    # np.extract returns flattened arrays, which are not broadcastable together
-    # unless they are either the same size or size == 1.
-    return [(arg if np.size(arg) == 1
-            else np.extract(cond, np.broadcast_to(arg, s)))
-            for arg in newargs]
 
 parse_arg_template = """
 def _parse_args(self, %(shape_arg_str)s %(locscale_in)s):
@@ -585,10 +533,122 @@ def _parse_args_stats(self, %(shape_arg_str)s %(locscale_in)s, moments='mv'):
 
 
 
+
+
+
+def _pg_pdf(x, *args):
+    print('\n===PG _PDF===\n')
+    print('x: ' + str(x))
+    print('args: ' + str(args))
+    _pg_pdf = _derivative(_pg_cdf(x, *args), x, dx=1e-5, args=args, order=5)
+    print('_pg_pdf: ' + str(_pg_pdf))
+    return _pg_pdf 
+
+def _pg_cdf_single(x, *args):
+    print('\n===PG _Test _CDF _Single===\n')
+    print('x: ' + str(x))
+    print('args: ' + str(args))
+    _a, _b = pg_get_support(*args)
+    cdf_single = integrate.quad(_pg_pdf(x, *args), _a, x, args=args)[0]
+    print('cdf_single: ' + str(cdf_single))
+    return cdf_single 
+
+def _pg_cdf(x, *args, pg_cdfvec=[]):
+    print('\n===_PG _CDF===\n')
+    print('x: ' + str(x))
+    print('args: ' + str(args))
+
+    # set cdfvec when fitting model
+    # pg_cdfvec = vectorize(_pg_cdf_single(x, *args), otypes='d')
+    # pg_cdfvec.nin = len(args) + 1 #numargs + 1
+    
+    _pg_cdf = pg_cdfvec(x, *args)
+    print('_pg_cdf = pg_cdfvec(x, *args) = ' + str(_pg_cdf))
+    return _pg_cdf
+
+def pg_argsreduce(cond, *args):
+    # print('\n===PG Argsreduce===\n')
+    # print('cond: ' + str(cond))
+    # print('args: ' + str(args))
+
+    """Clean arguments to:
+
+    1. Ensure all arguments are iterable (arrays of dimension at least one
+    2. If cond != True and size > 1, ravel(args[i]) where ravel(condition) is
+       True, in 1D.
+
+    Return list of processed arguments.
+
+    Examples
+    --------
+    >>> import numpy as np
+    >>> from scipy.stats._distn_infrastructure import argsreduce
+    >>> rng = np.random.default_rng()
+    >>> A = rng.random((4, 5))
+    >>> B = 2
+    >>> C = rng.random((1, 5))
+    >>> cond = np.ones(A.shape)
+    >>> [A1, B1, C1] = argsreduce(cond, A, B, C)
+    >>> A1.shape
+    (4, 5)
+    >>> B1.shape
+    (1,)
+    >>> C1.shape
+    (1, 5)
+    >>> cond[2,:] = 0
+    >>> [A1, B1, C1] = argsreduce(cond, A, B, C)
+    >>> A1.shape
+    (15,)
+    >>> B1.shape
+    (1,)
+    >>> C1.shape
+    (15,)
+
+    """
+    # some distributions assume arguments are iterable.
+    newargs = np.atleast_1d(*args)
+
+    # np.atleast_1d returns an array if only one argument, or a list of arrays
+    # if more than one argument.
+    if not isinstance(newargs, (list, tuple)):
+        newargs = (newargs,)
+
+    if np.all(cond):
+        # broadcast arrays with cond
+        *newargs, cond = np.broadcast_arrays(*newargs, cond)
+        argsreduce = [arg.ravel() for arg in newargs]
+        #print('argsreduce = goodargs = ' + str(argsreduce)) 
+        return argsreduce 
+
+    s = cond.shape
+    # np.extract returns flattened arrays, which are not broadcastable together
+    # unless they are either the same size or size == 1.
+    argsreduce = [(arg if np.size(arg) == 1
+            else np.extract(cond, np.broadcast_to(arg, s)))
+            for arg in newargs]
+    
+    #print('argsreduce = goodargs = ' + str(argsreduce)) 
+    return argsreduce 
+
+def pg_open_support_mask(x, *args):
+    # print('\n===PG Open Support Mask===\n')
+    # print('x: ' + str(x))
+    # print('args: ' + str(args))
+
+    a, b = pg_get_support(*args)
+
+    with np.errstate(invalid='ignore'):
+        open_support_mask = (a < x) & (x < b)
+        #print('open_support_mask: ' + str(open_support_mask))
+        return open_support_mask
+
 # These are the methods you must define (standard form functions)
 # NB: generic _pdf, _logpdf, _cdf are different for
 # rv_continuous and rv_discrete hence are defined in there
-def _argcheck(*args):
+def pg_argcheck(*args):
+    # print('\n===PG Argcheck===\n')
+    # print('args: ' + str(args))
+
     """Default check for correct values on args and keywords.
 
     Returns condition array of 1's where arguments are correct and
@@ -597,73 +657,60 @@ def _argcheck(*args):
     """
     cond = 1
     for arg in args:
-        cond = np.logical_and(cond, (asarray(arg) > 0))
+        cond = logical_and(cond, (asarray(arg) > 0))
+
+    #print('argcheck cond: ' + str(cond))
     return cond
 
 def pg_get_support(*args, **kwargs):
-        print('\n===Scipy Get Support===\n')
+    # print('\n===PG Get Support===\n')
+    # print('args: ' + str(args))
+    # print('kwargs: ' + str(kwargs))
 
-        """Return the support of the (unscaled, unshifted) distribution.
+    """Return the support of the (unscaled, unshifted) distribution.
 
-        *Must* be overridden by distributions which have support dependent
-        upon the shape parameters of the distribution.  Any such override
-        *must not* set or change any of the class members, as these members
-        are shared amongst all instances of the distribution.
+    *Must* be overridden by distributions which have support dependent
+    upon the shape parameters of the distribution.  Any such override
+    *must not* set or change any of the class members, as these members
+    are shared amongst all instances of the distribution.
 
-        Parameters
-        ----------
-        arg1, arg2, ... : array_like
-            The shape parameter(s) for the distribution (see docstring of the
-            instance object for more information).
+    Parameters
+    ----------
+    arg1, arg2, ... : array_like
+        The shape parameter(s) for the distribution (see docstring of the
+        instance object for more information).
 
-        Returns
-        -------
-        a, b : numeric (float, or int or +/-np.inf)
-            end-points of the distribution's support for the specified
-            shape parameters.
-        """
+    Returns
+    -------
+    a, b : numeric (float, or int or +/-np.inf)
+        end-points of the distribution's support for the specified
+        shape parameters.
+    """
 
-        # based on dist???
-        a = -inf
-        b = inf
-        print('a: ' + str(a))
-        print('b: ' + str(b))
+    # based on dist???
+    a = -inf
+    b = inf
 
-        return a, b
-
-def _open_support_mask(self, x, *args):
-        print('\n===PG Open Support Mask===\n')
-        a, b = self._get_support(*args)
-        print('a: ' + str(a))
-        print('b: ' + str(b))
-        with np.errstate(invalid='ignore'):
-            return (a < x) & (x < b)
-
-
-def _pdf(x, *args):
-    return _derivative(_cdf, x, dx=1e-5, args=args, order=5)
-def _cdf_single(x, *args):
-    _a, _b = _get_support(*args)
-    return np.integrate.quad(_pdf, _a, x, args=args)[0]
-def _cdf(x, *args):
-    _cdfvec = np.vectorize(_cdf_single, otypes='d')
-    return _cdfvec(x, *args)
+    # print('a: ' + str(a))
+    # print('b: ' + str(b))
+    return a, b
 
 # figure out how to use njit for strict types
 # @njit = nopython=True
 # cache=fastmath=parallel=True made no difference
-#cache=True, fastmath=True, parallel=True
+#@njit(cache=True, fastmath=True, parallel=True)
 # @jit()
-def skewnorm_cdf(x, shape, loc, scale, badvalue=np.nan):
+def skewnorm_cdf(x, shape, loc, scale):
 #def skewnorm_cdf(x, *args, **kwds):
     print('\n===PG Skewnorm CDF===\n')
-    print('vals: ' + str(x))
-    print('sample_shape: ' + str(shape))
-    print('sample_loc: ' + str(loc))
-    print('sample_scale: ' + str(scale))
     # print('x: ' + str(x))
+    # print('shape: ' + str(shape))
+    # print('loc: ' + str(loc))
+    # print('scale: ' + str(scale))
+    # print('x: ' + str(x))
+    # args = (shape, loc, scale)
     # print('args: ' + str(args))
-    # print('kwds: ' + str(kwds))
+    # print('kwds: {}')
 
     """
     Cumulative distribution function of the given RV.
@@ -688,49 +735,65 @@ def skewnorm_cdf(x, shape, loc, scale, badvalue=np.nan):
     """
     #args, loc, scale = _parse_args(*args, **kwds)
     args = (shape,)
-    print('parsed args: ' + str(args))
-    print('parsed loc: ' + str(loc))
-    print('parsed scale: ' + str(scale))
+    # print('\nparsed args: ' + str(args))
+    # print('parsed loc: ' + str(loc))
+    # print('parsed scale: ' + str(scale))
 
     x, loc, scale = map(asarray, (x, loc, scale))
-    print('mapped x: ' + str(x))
-    print('mapped loc: ' + str(loc))
-    print('mapped scale: ' + str(scale))
+    # print('mapped x: ' + str(x))
+    # print('mapped loc: ' + str(loc))
+    # print('mapped scale: ' + str(scale))
 
     args = tuple(map(asarray, args))
-    print('final args: ' + str(args))
+    #print('\nfinal args: ' + str(args))
 
     _a, _b = pg_get_support(*args)
 
     dtyp = np.promote_types(x.dtype, np.float64)
     x = asarray((x - loc)/scale, dtype=dtyp)
-    print('x: ' + str(x))
-    cond0 = _argcheck(*args) & (scale > 0)
-    print('cond0: ' + str(cond0))
-    cond1 = _open_support_mask(x, *args) & (scale > 0)
-    print('cond1: ' + str(cond1))
+    #print('\nx: ' + str(x))
+    
+    cond0 = pg_argcheck(*args) & (scale > 0)
+    #print('\ncond0: ' + str(cond0))
+
+    cond1 = pg_open_support_mask(x, *args) & (scale > 0)
+    #print('\ncond1: ' + str(cond1))
+
     cond2 = (x >= asarray(_b)) & cond0
-    print('cond2: ' + str(cond2))
+    #print('\ncond2: ' + str(cond2))
+
     cond = cond0 & cond1
-    print('cond: ' + str(cond))
+    #print('\ncond: ' + str(cond))
+
     output = np.zeros(np.shape(cond), dtyp)
-    print('badvalue: ' + str(badvalue))
-    np.place(output, (1-cond0)+np.isnan(x), badvalue)
-    np.place(output, cond2, 1.0)
+    #print('\ninit output: ' + str(output))
+    
+    badvalue = nan # should this be fcn param?
+    #print('\nself.badvalue: ' + str(badvalue))
+    
+    place(output, (1-cond0)+np.isnan(x), badvalue)
+    place(output, cond2, 1.0)
+    #print('\noutput: ' + str(output))
+
     if np.any(cond):  # call only if at least 1 entry
-        goodargs = argsreduce(cond, *((x,)+args))
-        np.place(output, cond, _cdf(*goodargs))
+        goodargs = pg_argsreduce(cond, *((x,)+args))
+        place(output, cond, _pg_cdf(x, *goodargs, cdf_vec))
     if output.ndim == 0:
+        print('final output[()]: ' + str(output[()]))
         return output[()]
     
-    print('output: ' + str(output))
+    print('final output: ' + str(output))
     return output
 
 def norm_cdf(x, loc, scale):
     print('\n===PG Norm CDF===\n')
-    print('vals: ' + str(x))
-    print('sample_loc: ' + str(loc))
-    print('sample_scale: ' + str(scale))
+    # print('x: ' + str(x))
+    # print('loc: ' + str(loc))
+    # print('scale: ' + str(scale))
+    # print('x: ' + str(x))
+    # args = (loc, scale)
+    # print('args: ' + str(args))
+    # print('kwds: {}')
 
     """
     Cumulative distribution function of the given RV.
@@ -755,33 +818,54 @@ def norm_cdf(x, loc, scale):
     """
     #args, loc, scale = _parse_args(*args, **kwds)
     args = ()
-    print('parsed args: ' + str(args))
+    # print('\nparsed args: ' + str(args))
+    # print('parsed loc: ' + str(loc))
+    # print('parsed scale: ' + str(scale))
+
     x, loc, scale = map(asarray, (x, loc, scale))
+    # print('\nmapped x: ' + str(x))
+    # print('mapped loc: ' + str(loc))
+    # print('mapped scale: ' + str(scale))
+
     args = tuple(map(asarray, args))
-    print('args: ' + str(args))
-    _a, _b = _get_support(*args)
-    print('_b: ' + str(_b))
+    #print('\nfinal args: ' + str(args))
+
+    _a, _b = pg_get_support(*args)
+
     dtyp = np.promote_types(x.dtype, np.float64)
     x = asarray((x - loc)/scale, dtype=dtyp)
-    cond0 = _argcheck(*args) & (scale > 0)
-    print('cond0: ' + str(cond0))
-    cond1 = _open_support_mask(x, *args) & (scale > 0)
-    print('cond1: ' + str(cond1))
+    #print('\nx: ' + str(x))
+    
+    cond0 = pg_argcheck(*args) & (scale > 0)
+    #print('\ncond0: ' + str(cond0))
+
+    cond1 = pg_open_support_mask(x, *args) & (scale > 0)
+    #print('\ncond1: ' + str(cond1))
+
     cond2 = (x >= asarray(_b)) & cond0
-    print('cond2: ' + str(cond2))
+    #print('\ncond2: ' + str(cond2))
+
     cond = cond0 & cond1
-    print('cond: ' + str(cond))
+    #print('\ncond: ' + str(cond))
+
     output = np.zeros(np.shape(cond), dtyp)
-    badvalue = np.nan
-    np.place(output, (1-cond0)+np.isnan(x), badvalue)
-    np.place(output, cond2, 1.0)
+    #print('\ninit output: ' + str(output))
+    
+    badvalue = nan # should this be fcn param?
+    #print('\nself.badvalue: ' + str(badvalue))
+    
+    place(output, (1-cond0)+np.isnan(x), badvalue)
+    place(output, cond2, 1.0)
+    #print('\noutput: ' + str(output))
+
     if np.any(cond):  # call only if at least 1 entry
-        goodargs = argsreduce(cond, *((x,)+args))
-        np.place(output, cond, _cdf(*goodargs))
+        goodargs = pg_argsreduce(cond, *((x,)+args))
+        place(output, cond, _pg_cdf(*goodargs))
     if output.ndim == 0:
+        print('final output[()]: ' + str(output[()]))
         return output[()]
     
-    print('output: ' + str(output))
+    print('final output: ' + str(output))
     return output
 
 #@njit
@@ -797,7 +881,9 @@ def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
     # CHANGE so we get prob cdf (<=) and then get 1-cdf_prev to get prob over (eg 5+)
     vals = vals + 0.499999 # <0.5
 
-    
+    # test single val
+    # val = 0
+    # print('val: ' + str(val))
 
     prob_less_or_equal = 0
 
@@ -840,8 +926,8 @@ def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
 
         # specific fcn call depends on dist
         # so to speed up write fcns here and use jit
-        if model_name == 'skewnorm':
-            prob_less_or_equal = skewnorm_cdf(vals, sample_shape, sample_loc, sample_scale)
+        # if model_name == 'skewnorm':
+        #     prob_less_or_equal = skewnorm_cdf(vals, sample_shape, sample_loc, sample_scale)
 
 
 
@@ -859,11 +945,12 @@ def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
     else:
         #sample_mean = sample_fit_dict[mean_key] ???
 
+        
         prob_less_or_equal = dist.test_cdf(vals, sample_loc, sample_scale)
         #print(inspect.getsource(dist.cdf))
 
-        if model_name == 'norm':
-            prob_less_or_equal = norm_cdf(vals, sample_loc, sample_scale)
+        # if model_name == 'norm':
+        #     prob_less_or_equal = norm_cdf(vals, sample_loc, sample_scale)
 
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?
@@ -914,6 +1001,9 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
     print('condition: ' + str(condition))
     print('Input: player_stat_model = {model name, sim data, sim avg, sim max}')# = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
     print('\nOutput: all_probs = [p1,...]\n')
+
+    # time at start of dist all probs
+    start_dist_probs = time.time()
 
     probs = [] # 1 to N, list all vals in range in order. or val:prob
 
@@ -1076,6 +1166,11 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
         #print('vals: ' + str(vals))
         # probs_less_or_equal = round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
         # probs = 1 - probs_less_or_equal
+
+        # time before gen cdf over
+        before_gen_cdf_over = time.time()
+        duration = before_gen_cdf_over - start_dist_probs
+        print('duration: ' + str(duration))
 
         probs = test_generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()
 
