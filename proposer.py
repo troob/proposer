@@ -122,12 +122,12 @@ find_players = True # if true, read all players in game box scores to see prob w
 read_new_game_ids = False
 
 # === TEST ===
-test = True
+test = False
 # run dist probs with prints/comments
 prints_on = False
 # force probs to reload even if already saved
 # so we dont have to erase each test
-test_probs = True
+test_probs = False
 
 # === READ ODDS ===
 # set false to save time if observing all probs
@@ -167,7 +167,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # so make setting, test performance
 # [('min','chi')]#
 
-game_teams = [('hou','ind'), ('dal','bkn'), ('orl','mia'), ('mem','nyk'), ('min','chi'), ('okc','uta'), ('mil','phx')]#, ('nop','lal')
+game_teams = [('tor','cha'), ('cle','wsh'), ('gsw','phi'), ('atl','bos'), ('sas','mia'), ('nop','lac'), ('det','sac')]#, ('nop','lal')
 if test:
     game_teams = [('hou','ind')]
 # if not test_performance:
