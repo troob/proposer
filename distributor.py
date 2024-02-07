@@ -12,11 +12,12 @@
 import inspect
 from scipy.stats import norm, skewnorm, loggamma, fit
 from scipy._lib._finite_differences import _derivative
+from scipy.stats import rv_continuous
 from scipy import integrate
 from math import inf
 from numba import njit
 import numpy as np
-from numpy import asarray, array, logical_and, place, vectorize, nan, inf
+from numpy import asarray, array, logical_and, place, vectorize, nan, inf, mean, atleast_1d, broadcast_arrays, broadcast_to, promote_types
 #import math # for pi to get prob of x in distrib
 import time
 # read from csv
@@ -83,7 +84,7 @@ def plot_cdf(data):
 
     datasort = sorted(data)
 
-    dist = ss.norm
+    dist = norm
 
     #calculate probability that random value is less than or equal to v=1.96 in normal CDF
     v = 1.96
@@ -534,33 +535,33 @@ def _parse_args_stats(self, %(shape_arg_str)s %(locscale_in)s, moments='mv'):
 
 
 
-
-
 def _pg_pdf(x, *args):
     print('\n===PG _PDF===\n')
     print('x: ' + str(x))
     print('args: ' + str(args))
-    _pg_pdf = _derivative(_pg_cdf(x, *args), x, dx=1e-5, args=args, order=5)
-    print('_pg_pdf: ' + str(_pg_pdf))
-    return _pg_pdf 
+    
+    test_pdf = _derivative(_pg_cdf, x, dx=1e-5, args=args, order=5)
+    
+    print('test_pdf: ' + str(test_pdf))
+    return test_pdf 
 
 def _pg_cdf_single(x, *args):
     print('\n===PG _Test _CDF _Single===\n')
     print('x: ' + str(x))
     print('args: ' + str(args))
     _a, _b = pg_get_support(*args)
-    cdf_single = integrate.quad(_pg_pdf(x, *args), _a, x, args=args)[0]
+    #cdf_single = integrate.quad(rv_continuous._pdf, _a, x, args=args)[0]
+    cdf_single = integrate.quad(_pg_pdf, _a, x, args=args)[0]
     print('cdf_single: ' + str(cdf_single))
     return cdf_single 
 
-def _pg_cdf(x, *args, pg_cdfvec=[]):
+#pg_cdfvec = vectorize(_pg_cdf_single, otypes='d')
+#pg_cdfvec.nin = len(args) + 1 #numargs + 1    
+def _pg_cdf(x, pg_cdfvec, *args):
     print('\n===_PG _CDF===\n')
     print('x: ' + str(x))
     print('args: ' + str(args))
 
-    # set cdfvec when fitting model
-    # pg_cdfvec = vectorize(_pg_cdf_single(x, *args), otypes='d')
-    # pg_cdfvec.nin = len(args) + 1 #numargs + 1
     
     _pg_cdf = pg_cdfvec(x, *args)
     print('_pg_cdf = pg_cdfvec(x, *args) = ' + str(_pg_cdf))
@@ -606,7 +607,7 @@ def pg_argsreduce(cond, *args):
 
     """
     # some distributions assume arguments are iterable.
-    newargs = np.atleast_1d(*args)
+    newargs = atleast_1d(*args)
 
     # np.atleast_1d returns an array if only one argument, or a list of arrays
     # if more than one argument.
@@ -615,7 +616,7 @@ def pg_argsreduce(cond, *args):
 
     if np.all(cond):
         # broadcast arrays with cond
-        *newargs, cond = np.broadcast_arrays(*newargs, cond)
+        *newargs, cond = broadcast_arrays(*newargs, cond)
         argsreduce = [arg.ravel() for arg in newargs]
         #print('argsreduce = goodargs = ' + str(argsreduce)) 
         return argsreduce 
@@ -624,7 +625,7 @@ def pg_argsreduce(cond, *args):
     # np.extract returns flattened arrays, which are not broadcastable together
     # unless they are either the same size or size == 1.
     argsreduce = [(arg if np.size(arg) == 1
-            else np.extract(cond, np.broadcast_to(arg, s)))
+            else np.extract(cond, broadcast_to(arg, s)))
             for arg in newargs]
     
     #print('argsreduce = goodargs = ' + str(argsreduce)) 
@@ -695,6 +696,9 @@ def pg_get_support(*args, **kwargs):
     # print('b: ' + str(b))
     return a, b
 
+pg_cdfvec = vectorize(_pg_cdf_single, otypes='d')
+
+
 # figure out how to use njit for strict types
 # @njit = nopython=True
 # cache=fastmath=parallel=True made no difference
@@ -749,7 +753,7 @@ def skewnorm_cdf(x, shape, loc, scale):
 
     _a, _b = pg_get_support(*args)
 
-    dtyp = np.promote_types(x.dtype, np.float64)
+    dtyp = promote_types(x.dtype, np.float64)
     x = asarray((x - loc)/scale, dtype=dtyp)
     #print('\nx: ' + str(x))
     
@@ -775,9 +779,12 @@ def skewnorm_cdf(x, shape, loc, scale):
     place(output, cond2, 1.0)
     #print('\noutput: ' + str(output))
 
+    pg_cdfvec = vectorize(_pg_cdf_single, otypes='d')
+    pg_cdfvec.nin = len(args) + 1 #numargs + 1
+
     if np.any(cond):  # call only if at least 1 entry
         goodargs = pg_argsreduce(cond, *((x,)+args))
-        place(output, cond, _pg_cdf(x, *goodargs, cdf_vec))
+        place(output, cond, _pg_cdf(*goodargs))
     if output.ndim == 0:
         print('final output[()]: ' + str(output[()]))
         return output[()]
@@ -832,7 +839,7 @@ def norm_cdf(x, loc, scale):
 
     _a, _b = pg_get_support(*args)
 
-    dtyp = np.promote_types(x.dtype, np.float64)
+    dtyp = promote_types(x.dtype, np.float64)
     x = asarray((x - loc)/scale, dtype=dtyp)
     #print('\nx: ' + str(x))
     
@@ -869,12 +876,12 @@ def norm_cdf(x, loc, scale):
     return output
 
 #@njit
-def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
-    print('\n===Test Generate CDF Over===\n')
-    print('vals: ' + str(vals))
-    #print('dist: ' + str(dist))
-    print('model_name: ' + str(model_name))
-    print('sample_fit_params: ' + str(sample_fit_params))
+def generate_cdf_over(vals, dist, sample_fit_params, model_name):
+    # print('\n===Generate CDF Over===\n')
+    # print('vals: ' + str(vals))
+    # #print('dist: ' + str(dist))
+    # print('model_name: ' + str(model_name))
+    # print('sample_fit_params: ' + str(sample_fit_params))
 
     cdf_over = [] # prob over includes val, just shorthand for over and equal bc we dont need strict over (prob greater would be strict over bc >)
         
@@ -890,130 +897,63 @@ def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
     sample_loc = sample_fit_params[0] #sample_fit_dict['loc']
     sample_scale = sample_fit_params[1] #sample_fit_dict['scale']
 
-    # shape_key = 'shape'
-    # shape_1_key = 'shape 1'
-    # shape_2_key = 'shape 2'
-    # shape_3_key = 'shape 3'
-    #mean_key = 'mean'
-    #sample_shape = ''
-    #sample_mean = ''
-    #print('\n===Inspect===\n')
-    # if shape_key in sample_fit_dict.keys():
-    #     sample_shape = sample_fit_dict[shape_key]
 
-    # if len(sample_fit_params) > 4:
-    #     sample_shape_1 = sample_fit_params[2]
-    #     sample_shape_2 = sample_fit_params[3]
-    #     sample_shape_3 = sample_fit_params[4]
-
-    #     prob_less_or_equal = dist.cdf(vals, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale)
-    #     #print(inspect.getsource(dist.cdf))
-
-
-    if len(sample_fit_params) > 3:
-        print('Warning: Unknown dist! ' + model_name)
-    #     sample_shape_1 = sample_fit_params[2]
-    #     sample_shape_2 = sample_fit_params[3]
-
-    #     prob_less_or_equal = dist.cdf(vals, sample_shape_1, sample_shape_2, sample_loc, sample_scale)
+    if len(sample_fit_params) == 2:
+        prob_less_or_equal = dist.cdf(vals, sample_loc, sample_scale)
         #print(inspect.getsource(dist.cdf))
-    elif len(sample_fit_params) > 2:
+
+        # if model_name == 'norm':
+        #     prob_less_or_equal = norm_cdf(vals, sample_loc, sample_scale)
+    
+    elif len(sample_fit_params) == 3:
         sample_shape = sample_fit_params[2]
 
-        #prob_less_or_equal = dist.cdf(vals, sample_shape, sample_loc, sample_scale)
-        prob_less_or_equal = dist.test_cdf(vals, sample_shape, sample_loc, sample_scale)
+        prob_less_or_equal = dist.cdf(vals, sample_shape, sample_loc, sample_scale)
         #print(inspect.getsource(dist.cdf))
 
         # specific fcn call depends on dist
         # so to speed up write fcns here and use jit
         # if model_name == 'skewnorm':
         #     prob_less_or_equal = skewnorm_cdf(vals, sample_shape, sample_loc, sample_scale)
-
-
-
-            # scipy.stats.norm.cdf()
-            # class norm_gen(rv_continuous):
-            # def _cdf(self, x):
-            #   return _norm_cdf(x)
-
-            # def _norm_cdf(x):
-            #     return sc.ndtr(x)
-            # import scipy.special as sc
-
-            #prob_less_or_equal = skewnorm_cdf(vals, sample_shape, sample_loc, sample_scale)
     
     else:
-        #sample_mean = sample_fit_dict[mean_key] ???
+        print('Warning: Unknown dist! ' + model_name)
 
-        
-        prob_less_or_equal = dist.test_cdf(vals, sample_loc, sample_scale)
-        #print(inspect.getsource(dist.cdf))
 
-        # if model_name == 'norm':
-        #     prob_less_or_equal = norm_cdf(vals, sample_loc, sample_scale)
-
-    #print('prob_less_or_equal: ' + str(prob_less_or_equal))
-    # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?
-    # NO bc P(1) should include P(>0.5)? 
-
-    # ASSUME normal distrib for now bc most examples
-    # THEN determine best fit distrib (see quantile charts and best fit libs)
-
-    # if val=0 we get prob exactly 0
-    # AND we also get the prob over for the next val
-    # bc cdf returns <= but we want >=
-    
-    # we want prob over to include val
-    # but cdf returns <= val so take 1-cdf to get over
-    # if we take 1-cdf for val we get 
     
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
-    # bc nothing actually 100% or 0 and we dont need more accuracy than 1%???
-    # NO actually we need accuracy up to 0.1% to diff extremely likely vs very likely
-    # if prob_less_or_equal > 0.999:
-    #     prob_less_or_equal = 0.999
-    # elif prob_less_or_equal < 0.001:
-    #     prob_less_or_equal = 0.001
-    # else:
-    #     prob_less_or_equal = round_half_up(prob_less_or_equal, 3)
-
+    
     prob_less_or_equal[prob_less_or_equal > 0.999] = 0.999
     prob_less_or_equal[prob_less_or_equal < 0.001] = 0.001
-    print('prob_less_or_equal: ' + str(prob_less_or_equal))
+    #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     
     cdf_over = 1 - prob_less_or_equal
 
-
-
-
-    # probs_less_or_equal = dist.cdf(vals, sample_loc, sample_scale)
-    # probs = 1 - probs_less_or_equal
-
-    print('cdf_over: ' + str(cdf_over))
+    #print('cdf_over: ' + str(cdf_over))
     return cdf_over
 
 
-def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
-    print('\n===Test Distribute All Probs===\n')
-    print('cond_data: ' + str(cond_data))
-    print('player: ' + str(player))
-    print('stat: ' + str(stat))
-    print('condition: ' + str(condition))
-    print('Input: player_stat_model = {model name, sim data, sim avg, sim max}')# = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
-    print('\nOutput: all_probs = [p1,...]\n')
+def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
+    # print('\n===Test Distribute All Probs===\n')
+    # print('cond_data: ' + str(cond_data))
+    # print('player: ' + str(player))
+    # print('stat: ' + str(stat))
+    # print('condition: ' + str(condition))
+    # print('Input: player_stat_model = {model name, sim data, sim avg, sim max}')# = ' + str(player_stat_model)) # {name:pareto, data:sim_all_data, avg:a, max:m} = 
+    # print('\nOutput: all_probs = [p1,...] = [0.92,...]\n')
 
     # time at start of dist all probs
-    start_dist_probs = time.time()
+    #start_dist_probs = time.time()
 
     probs = [] # 1 to N, list all vals in range in order. or val:prob
 
 
     if 'data' in player_stat_model.keys():
-        sim_all_data = np.array(player_stat_model['data']) # np array or round???
+        sim_all_data = array(player_stat_model['data']) # np array or round???
         all_avg = player_stat_model['avg'] #sim_all_data.mean #np.mean(sim_all_data) # ??? should be = all avg but could change to actually = avg?
         #print('all_avg: ' + str(all_avg))
 
-        cond_avg = np.mean(cond_data)#ss.fit(dist, data, bounds).params.mu
+        cond_avg = mean(cond_data)#ss.fit(dist, data, bounds).params.mu
         #print('cond_avg: ' + str(cond_avg))
 
         # round 2-6?
@@ -1029,125 +969,46 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
         #dist_str = 'ss.' + model_name
         dist = eval(model_name)
 
-        params_dict = {'gamma':'a',
-                        'erlang':'a',
-                        'powerlaw':'a',
-                        'skewcauchy':'a', 
-                        'skewnorm':'a', 
-                        'pareto':'b', # problem with pareto
-                        'exponpow':'b',
-                        'rice':'b',
-                        'loggamma':'c',
-                        'genextreme':'c',
-                        'powernorm':'c',
-                        'dweibull':'c',
-                        'exponnorm':'K',
-                        'lognorm':'s',
-                        't':'df',
-                        'chi':'df',
-                        'chi2':'df',
-                        'recipinvgauss':'mu',
-                        'pearson3':'skew'}
+        params_dict = {'skewnorm':'a',
+                        'loggamma':'c'}
         
-        two_params_dict = {'beta':['a', 'b'], 
-                           'norminvgauss':['a', 'b'], 
-                           'exponweib':['a', 'c'],
-                           'burr':['c', 'd'],
-                           'powerlognorm':['c', 's'],
-                           'f':['dfn', 'dfd'],
-                           'nct':['df', 'nc']} # takes extra long to load
-                           #'ncx':['df', 'nc']}
-        three_params_dict = {'ncf':['dfn','dfd','nc']}
-
         # CONSIDER change back to 100 bounds bc worked that way
         # even tho all data bounds were set to 200 at the time
         # so the mismatched bounds shouldve cause errors
         # CONSIDER increase bounds to 250 bc noted pat bev bounds=200 so past limit
 
-        # bounds = [(-100, 100), (-100, 100)]
-        # #bounds = [(-200, 200), (-200, 200)]
-        # if model_name in params_dict.keys():
-        #     bounds = [(-100, 100), (-100, 100), (-100, 100)]
-        # elif model_name in two_params_dict.keys():
-        #     bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100)]
-        # elif model_name in three_params_dict.keys():
-        #     bounds = [(-100, 100), (-100, 100), (-100, 100), (-100, 100), (-100, 100)]
         bounds = [(-250, 250), (-250, 250)]
-        if model_name in params_dict.keys():
+        if model_name != 'norm': # or in params dict
             bounds = [(-250, 250), (-250, 250), (-250, 250)]
-        elif model_name in two_params_dict.keys():
-            bounds = [(-250, 250), (-250, 250), (-250, 250), (-250, 250)]
-        elif model_name in three_params_dict.keys():
-            bounds = [(-250, 250), (-250, 250), (-250, 250), (-250, 250), (-250, 250)]
         #print('bounds: ' + str(bounds))
+            
+        #before_fit = time.time()
         sample_fit_results = fit(dist, sample_data, bounds)
+        #print(inspect.getsource(fit))
+        # time after gen cdf over
+        # after_fit = time.time()
+        # duration = round(after_fit - before_fit, 5)
+        # print('\nbefore fit -> after fit: ' + str(duration) + ' s')
+
         sample_fit_params = sample_fit_results.params
         #print('sample_fit_params: ' + str(sample_fit_params))
 
-
-        
-        dist_param = ''
+        #dist_param = ''
         #sample_fit_dict = {}
         final_sample_fit_params = ()
-        if model_name in params_dict.keys():
-            dist_param = params_dict[model_name]
 
+        #shape_models = ['skewnorm', 'loggamma'] # models with shape param
+        # since only 3 valid models and 1 has no shape just check for model w/o shape
+        if model_name == 'norm':
+            final_sample_fit_params = (sample_fit_params.loc, sample_fit_params.scale)
+        
+        else:
+            dist_param = params_dict[model_name]
             sample_shape_param = 'sample_fit_params.' + dist_param
             sample_shape = eval(sample_shape_param) #fit_params.c
-            sample_loc = sample_fit_params.loc
-            sample_scale = sample_fit_params.scale
 
-            #sample_fit_dict = {'shape':sample_shape, 'loc':sample_loc, 'scale':sample_scale}
-            final_sample_fit_params = (sample_loc, sample_scale, sample_shape)
-
-        elif model_name in two_params_dict.keys():
-            dist_params = two_params_dict[model_name]
-
-            shape_param_1 = 'sample_fit_params.' + dist_params[0]
-            shape_param_2 = 'sample_fit_params.' + dist_params[1]
-            sample_shape_1 = eval(shape_param_1) #fit_params.c
-            sample_shape_2 = eval(shape_param_2)
-            sample_loc = sample_fit_params.loc
-            sample_scale = sample_fit_params.scale
-
-            #sample_fit_dict = {'shape 1':sample_shape_1, 'shape 2':sample_shape_2, 'loc':sample_loc, 'scale':sample_scale}
-            final_sample_fit_params = (sample_loc, sample_scale, sample_shape_1, sample_shape_2)
-
-        elif model_name in three_params_dict.keys():
-            dist_params = three_params_dict[model_name]
-
-            shape_param_1 = 'sample_fit_params.' + dist_params[0]
-            shape_param_2 = 'sample_fit_params.' + dist_params[1]
-            shape_param_3 = 'sample_fit_params.' + dist_params[2]
-            sample_shape_1 = eval(shape_param_1) #fit_params.c
-            sample_shape_2 = eval(shape_param_2)
-            sample_shape_3 = eval(shape_param_3)
-            sample_loc = sample_fit_params.loc
-            sample_scale = sample_fit_params.scale
-
-            #sample_fit_dict = {'shape 1':sample_shape_1, 'shape 2':sample_shape_2, 'shape 3':sample_shape_3, 'loc':sample_loc, 'scale':sample_scale}
-            final_sample_fit_params = (sample_loc, sample_scale, sample_shape_1, sample_shape_2, sample_shape_3)
-
-        elif model_name == 'poisson':
-            sample_mu = sample_fit_params.mu
-            sample_loc = sample_fit_params.loc
-
-            #sample_fit_dict = {'mu':sample_mu, 'loc':sample_loc}
-            final_sample_fit_params = (sample_loc, sample_mu)
-
-        elif model_name == 'binom':
-            sample_n = sample_fit_params.n
-            sample_p = sample_fit_params.p
-            sample_loc = sample_fit_params.loc
-
-            #sample_fit_dict = {'n':sample_n, 'p':sample_p, 'loc':sample_loc}
-            final_sample_fit_params = (sample_loc, sample_n, sample_p)
-        else:
-            sample_loc = sample_fit_params.loc
-            sample_scale = sample_fit_params.scale
-
-            #sample_fit_dict = {'loc':sample_loc, 'scale':sample_scale}
-            final_sample_fit_params = (sample_loc, sample_scale)
+            final_sample_fit_params = (sample_fit_params.loc, sample_fit_params.scale, sample_shape)
+    
         
 
         # NEED highest val from all data
@@ -1168,20 +1029,24 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
         # probs = 1 - probs_less_or_equal
 
         # time before gen cdf over
-        before_gen_cdf_over = time.time()
-        duration = before_gen_cdf_over - start_dist_probs
-        print('duration: ' + str(duration))
+        # before_gen_cdf_over = time.time()
+        # duration = round(before_gen_cdf_over - start_dist_probs, 2)
+        # print('start dist probs -> gen cdf over: ' + str(duration) + ' s')
 
-        probs = test_generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()
-
+        probs = generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()
         #probs = [generate_prob_over_from_distrib(val, dist, sample_fit_dict) for val in range(highest_val)]
+
+        # time after gen cdf over
+        # after_gen_cdf_over = time.time()
+        # duration = round(after_gen_cdf_over - before_gen_cdf_over, 5)
+        # print('before gen cdf over -> after gen cdf over: ' + str(duration) + ' s')
 
     #print('final probs: ' + str(probs))
     return probs
 
 
 #@njit
-def generate_cdf_over(vals, dist, sample_fit_params, model_name):
+def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
     # print('\n===Generate CDF Over===\n')
     # print('vals: ' + str(vals))
     # #print('dist: ' + str(dist))
@@ -1301,7 +1166,7 @@ def generate_cdf_over(vals, dist, sample_fit_params, model_name):
     return cdf_over
 
 
-def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
+def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
     # print('\n===Distribute All Probs===\n')
     # print('cond_data: ' + str(cond_data))
     # print('player: ' + str(player))
@@ -1314,11 +1179,11 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
 
     if 'data' in player_stat_model.keys():
-        sim_all_data = np.array(player_stat_model['data']) # np array or round???
+        sim_all_data = array(player_stat_model['data']) # np array or round???
         all_avg = player_stat_model['avg'] #sim_all_data.mean #np.mean(sim_all_data) # ??? should be = all avg but could change to actually = avg?
         #print('all_avg: ' + str(all_avg))
 
-        cond_avg = np.mean(cond_data)#ss.fit(dist, data, bounds).params.mu
+        cond_avg = mean(cond_data)#ss.fit(dist, data, bounds).params.mu
         #print('cond_avg: ' + str(cond_avg))
 
         # round 2-6?
@@ -1472,7 +1337,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
         # probs_less_or_equal = round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
         # probs = 1 - probs_less_or_equal
 
-        probs = generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()
+        probs = test_generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()
 
         #probs = [generate_prob_over_from_distrib(val, dist, sample_fit_dict) for val in range(highest_val)]
 

@@ -1282,8 +1282,8 @@ def determine_week_after_injury(player_cur_season_log, player, todays_games_date
         # prev_game_date_str = game_dates[str(game_idx)]
         # game_gap = (cur_game_date - prev_game_date).days
 
-        # serious_injury_minimum = 12
-        if game_gap > 11:
+        # serious_injury_minimum = 12-14
+        if game_gap > 14:
             #print('Warning: Week After Injury!!! Double Check Playtime Minute Restriction!!! ' + player.title())
             after_injury = True
             break

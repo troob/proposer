@@ -119,14 +119,22 @@ find_players = True # if true, read all players in game box scores to see prob w
 # === GAME IDs === 
 # if error 429 too many requests then we need to stop reading new game ids for 1hr
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
-read_new_game_ids = True
+read_new_game_ids = False
+
+# === TEST ===
+test = True
+# run dist probs with prints/comments
+prints_on = False
+# force probs to reload even if already saved
+# so we dont have to erase each test
+test_probs = True
 
 # === READ ODDS ===
 # set false to save time if observing all probs
 # make list of sources with different odds 
-read_odds = False # set false to test other features
-
-
+read_odds = True # set false to test other features
+if test:
+    read_odds = False
 
 
 settings = {'find matchups': find_matchups, 
@@ -143,7 +151,10 @@ settings = {'find matchups': find_matchups,
             'read new player ids': read_new_player_ids,
             'stats of interest': stats_of_interest,
             'control conditions': control_conds,
-            'ofs players': ofs_players}
+            'ofs players': ofs_players,
+            'test': test,
+            'test probs': test_probs,
+            'prints on': prints_on}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -154,7 +165,11 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [('hou','ind')]#, ('nop','lal')
+# [('min','chi')]#
+
+game_teams = [('hou','ind'), ('dal','bkn'), ('orl','mia'), ('mem','nyk'), ('min','chi'), ('okc','uta'), ('mil','phx')]#, ('nop','lal')
+if test:
+    game_teams = [('hou','ind')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -162,8 +177,10 @@ game_teams = [('hou','ind')]#, ('nop','lal')
 # we can make read new teams var false at first bc the file has not been created yet so we will write for the first time
 # we make it true to read new teams after trades, which tells it to overwrite existing file or make a new file with the date in the title
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
-#players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
-players_names = ['myles turner'] # 'jacob gilyard', use for testing
+players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
+
+# if test:
+#     players_names = ['tj mcconnell'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
