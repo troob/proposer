@@ -10,7 +10,7 @@
 #!/Users/m/repos/proposer/.venv/bin/python3
 
 
-import generator, reader, writer
+import generator, reader#, writer
 
 print('\n===Proposer===\n')
 
@@ -27,7 +27,7 @@ print('\n===Proposer===\n')
 # get from injury report site
 #players_out = ['nikola jokic', 'jamal murray', 'kevin durant', 'bradley beal']
 # determine irreg play time from players out
-irreg_play_times = {}#{'immanuel quickley': 40}
+irreg_play_times = {}#{'dennis schroder': 22}
 # need to know what injury players are back from 
 # to know if they will play restricted minutes
 # search player news to see what injury
@@ -100,14 +100,6 @@ find_matchups = False # if we want to read matchup data from box scores, which m
 # if true, compare all props to actual outcomes
 test_performance = False
 
-# === NEW TEAMS ===
-# read new teams after trades and acquisitions new players
-read_new_teams = False
-# === NEW ROSTERS ===
-# read new rosters after trades and acquisitions new players
-# but before they actually played on new team
-read_new_rosters = False
-
 # === PLAYER IDs ===
 # need all players ids but halt if error too many requests
 read_new_player_ids = False
@@ -116,12 +108,20 @@ read_new_player_ids = False
 find_players = True # if true, read all players in game box scores to see prob with teammates out
 
 
-# === GAME IDs === 
-# if error 429 too many requests then we need to stop reading new game ids for 1hr
-# could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
-read_new_game_ids = False
+
+
+# === NEW TEAMS ===
+# read new teams after trades and acquisitions new players
+read_new_teams = False
+# === NEW ROSTERS ===
+# read new rosters after trades and acquisitions new players
+# but before they actually played on new team
+read_new_rosters = False
+
+
 
 # === TEST ===
+# set single team and player w/o having to erase and rewrite
 test = False
 # run dist probs with prints/comments
 prints_on = False
@@ -135,6 +135,11 @@ test_probs = False
 read_odds = True # set false to test other features
 if test:
     read_odds = False
+
+# === GAME IDs === 
+# if error 429 too many requests then we need to stop reading new game ids for 1hr
+# could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
+read_new_game_ids = True
 
 
 settings = {'find matchups': find_matchups, 
@@ -154,7 +159,8 @@ settings = {'find matchups': find_matchups,
             'ofs players': ofs_players,
             'test': test,
             'test probs': test_probs,
-            'prints on': prints_on}
+            'prints on': prints_on, 
+            'single conds': single_conds}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -167,9 +173,9 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # so make setting, test performance
 # [('min','chi')]#
 
-game_teams = [('tor','cha'), ('cle','wsh'), ('gsw','phi'), ('atl','bos'), ('sas','mia'), ('nop','lac'), ('det','sac')]#, ('nop','lal')
+game_teams = [('atl', 'phi'), ('wsh','bos'), ('hou','tor'), ('cha','mil'), ('den','sac'), ('nop','lal')]#, ('nop','lal')
 if test:
-    game_teams = [('hou','ind')]
+    game_teams = [('den', 'lal')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -179,8 +185,8 @@ if test:
 teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_teams, read_new_rosters, all_teams) # {team:roster,...}
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
-# if test:
-#     players_names = ['tj mcconnell'] # 'jacob gilyard', use for testing
+if test:
+    players_names = ['jamal murray'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

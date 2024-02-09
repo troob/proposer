@@ -1904,6 +1904,8 @@ def read_react_website(url, timeout=10, max_retries=3):
 						#print("stat_btn: " + stat_btn_text)
 					stat_btn.click()
 
+
+				# get each players stat vals
 				# not all dropdowns are open so program must click each one
 				# click player dropdown btn
 				# could use find elements to get number of lazy renders and then loop thru that number
@@ -1935,6 +1937,9 @@ def read_react_website(url, timeout=10, max_retries=3):
 					for player_btn in player_btns:
 						#player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
 						#print("player_btn: " + player_btn.get_attribute('innerHTML'))
+
+						# scroll to btn before attempting click or it will skip
+						driver.execute_script("arguments[0].scrollIntoView(true);", player_btn)
 
 						# need to know which type of market it is bc there are 2: O/U and over only (OO)
 						# button header: 'Player Name Stat Name', eg 'Bam Adebayo Assists', excluding 'O/U'
@@ -4357,7 +4362,7 @@ def read_team_from_internet(player_name, player_id, read_new_teams=False, cur_yr
 		
 	site = 'https://www.espn.com/nba/player/gamelog/_/id/' + player_id + '/type/nba/year/' + cur_yr
 
-	soup = read_website(site, timeout=10, max_retries=3)
+	soup = read_website(site)
 
 		# req = Request(site, headers={
 		# 	'User-Agent': 'Mozilla/5.0',

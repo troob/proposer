@@ -8,8 +8,10 @@
 # multinomial distribution
 
 # library still works even though warning
+#from cython import cdef, double
+#cimport cython
 #import scipy.stats as ss
-import inspect
+#import inspect
 from scipy.stats import norm, skewnorm, loggamma, fit
 from scipy._lib._finite_differences import _derivative
 from scipy.stats import rv_continuous
@@ -932,6 +934,22 @@ def generate_cdf_over(vals, dist, sample_fit_params, model_name):
     #print('cdf_over: ' + str(cdf_over))
     return cdf_over
 
+# def fit_dist(dist, data, bounds):
+
+#     cdef 
+
+#     # create a cython wrapper for the fit fcn
+#     cdef double[:] fit_cython(double[:] data, object dist):
+#         cdef double[:] params
+#         params = fit(dist, data, bounds)
+#         return params
+
+#     # call cython wrapper fcn
+#     params = fit_cython(data, dist)
+
+#     return params
+
+
 
 def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
     # print('\n===Test Distribute All Probs===\n')
@@ -983,7 +1001,9 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
         #print('bounds: ' + str(bounds))
             
         #before_fit = time.time()
-        sample_fit_results = fit(dist, sample_data, bounds)
+        # use cython wrapper for fit fcn bc takes the longest
+        sample_fit_results = fit(dist, sample_data, bounds) 
+        #sample_fit_results = fit_dist(dist, sample_data, bounds)
         #print(inspect.getsource(fit))
         # time after gen cdf over
         # after_fit = time.time()
