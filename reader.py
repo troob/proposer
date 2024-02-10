@@ -372,6 +372,19 @@ def read_player_prev_stat_vals(season_log_of_interest):
 
 	return prev_stat_vals
 
+def read_player_last_stat_vals(season_log_of_interest):
+
+	prev_stat_vals = {}
+	
+	stats_of_interest = ['pts','ast','reb']
+
+	for stat_name in stats_of_interest:
+	#for stat_name, stat_log in season_log_of_interest.items():
+		prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
+		prev_stat_vals[stat_name] = prev_stat_val
+
+	return prev_stat_vals
+
 # read along with current conditions
 def read_all_prev_stat_vals(all_players_season_logs, season_year):
 	print('\n===Read All Prev Stat Vals===\n')
@@ -395,6 +408,30 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 
 	#print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 	return all_prev_stat_vals
+
+# read along with current conditions
+def read_all_last_stat_vals(all_players_season_logs, season_year):
+	print('\n===Read All Last Stat Vals===\n')
+	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+	print('\nOutput: all_last_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
+
+	all_last_stat_vals = {}
+
+	for player, player_season_logs in all_players_season_logs.items():
+		# print('\nPlayer: ' + player.title())
+		# print('player_season_logs: ' + str(player_season_logs))
+		player_last_stat_vals = {}
+		# dict goes from recent to distant so take first 1
+		if len(player_season_logs.keys()) > 0:
+			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
+			#print('season_log_of_interest: ' + str(season_log_of_interest))
+
+			player_last_stat_vals = read_player_last_stat_vals(season_log_of_interest)
+			
+		all_last_stat_vals[player] = player_last_stat_vals
+
+	#print('all_last_stat_vals: ' + str(all_last_stat_vals))
+	return all_last_stat_vals
 
 # get team season schedule from espn.com
 def read_team_season_schedule(team_name, season_year=2024, team_url='', team_id=''):

@@ -614,7 +614,7 @@ def determine_all_player_names(raw_projected_lines):
 
 # may come in format away: [record] so split and convert string to list
 def determine_record_score(record):
-    print('\n===Determime Record Score===\n')
+    print('\n===Determine Record Score===\n')
     print('record: ' + str(record))
     score = 0
     
@@ -2460,6 +2460,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'dennis smith jr'
     elif player == 'g' and team == 'mil': # no position in abbrev so we know from lineup source
         return 'giannis antetokounmpo'
+    elif player == 'kj martin':
+        return 'kenyon martin jr'
 
     # if player gone from the league 
     # AND we did not get their espn id

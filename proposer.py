@@ -173,9 +173,9 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # so make setting, test performance
 # [('min','chi')]#
 
-game_teams = [('atl', 'phi'), ('wsh','bos'), ('hou','tor'), ('cha','mil'), ('den','sac'), ('nop','lal')]#, ('nop','lal')
+game_teams = [('okc', 'dal'), ('det','lac'), ('sas','bkn'), ('mem','cha'), ('chi','orl'), ('phi','wsh'), ('hou','atl'), ('ind','nyk'), ('cle','tor'), ('phx','gsw'), ('nop','por')]#, ('nop','lal')
 if test:
-    game_teams = [('den', 'lal')]
+    game_teams = [('den','sac')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:

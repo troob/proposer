@@ -3751,9 +3751,9 @@ def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats, pri
         weighted_stats.append(ws)
 
         if prints_on:
-            print('weight: ' + str(weight))
             print('\ncond: ' + str(cond))
             print('stat: ' + str(stat))
+            print('weight: ' + str(weight))
             #print('ws: ' + str(ws))
 
     #if prints_on:
@@ -3993,7 +3993,7 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, singl
         
         #if len(cond_weights) == 0:
         cond_weights = {'all': 0, # reflected by specific cur conds 
-                        'loc':4, # consider lowering to 3
+                        'loc':3, # consider lowering to 3 or 4?
                         'city':1,
                         'audience':0, # reflected by city
                         'dow':1, # no more than timelag weight. consider change back to 3
@@ -4390,29 +4390,132 @@ def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, p
     #print('game_players_conditions: ' + str(game_players_conditions))
     return game_players_conditions
 
-def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals):
+# cats of rare prev vals:
+# rare over
+# rare under
+# ultra rare over/under
+# double rare over/under
+# double ultra rare
+# triple rare/ultra rare
+# 3/4 rare
+# after 4 prev games we lose value of pattern???
+def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals):#, all_players_season_logs):
     print('\n===Generate Rare Prev Val Players===\n')
     print('Input: all_true_probs_dict = {player: {stat: {val: {true prob:prob, condition1:prob1, ... = {\'nikola jokic\': {\'pts\': {1: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ..., \'true prob\': 1.0}')
-    print('Input: all_prev_vals = {player:{stat name:prev val,...}, ... = {jalen brunson:{pts:20,...},...')
+    print('Input: all_prev_vals = {player:{stat name:[prev val 1,...}, ... = {jalen brunson:{pts:[20,23,...},...')
 
-    rare_prev_val_players = {}
+    rare_over_key = 'rare over'
+    rare_under_key = 'rare under'
+    ultra_rare_over_key = 'ultra rare over'
+    ultra_rare_under_key = 'ultra rare under'
+    rare_prev_val_players = {rare_over_key:[], rare_under_key:[], ultra_rare_over_key:[], ultra_rare_under_key:[]}
 
-    # for each player each stat, determine if rare prev val
+    likely_prob = 0.8
+    ultra_likely_prob = 0.9
+
+    # for each player each stat, determine if rare prev vals
     for player, player_true_probs_dict in all_true_probs_dict.items():
+        print('\nplayer: ' + player.title())
+        player_prev_vals = all_prev_vals[player]
+        print('player_prev_vals: ' + str(player_prev_vals))
         for stat, stat_true_probs_dict in player_true_probs_dict.items():
+            print('\nstat: ' + stat.upper())
 
+            # if prev val < likely val, then rare prev val
+            prev_stat_val = player_prev_vals[stat]
+
+            # get likely vals for each category
             # find lowest val above 80% true prob
             # see if prev val less than 80% val
             # and if more than 20% val
+            # player went under where usual over
+            print('\nUltra Rare Under')
             likely_val = 0
             for val, val_true_probs_dict in stat_true_probs_dict.items():
+                print('val: ' + str(val))
                 true_prob = val_true_probs_dict['true prob']
-                if true_prob >= 0.8:
-                    likely_val = val
+                print('true_prob: ' + str(true_prob))
+                if true_prob < ultra_likely_prob:
+                    #likely_val = lower_val
+                    #rare_cat = ultra_rare_over_key
+                    print('prev_stat_val: ' + str(prev_stat_val))
+                    if prev_stat_val < likely_val:
+                        rare_prev_val = player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
+                        rare_prev_val_players[ultra_rare_over_key].append(rare_prev_val)
+                        print('Found ultra rare under: ' + rare_prev_val)
+                    
                     break
-
+                likely_val = val # val from prev loop
+            print('likely_val: ' + str(likely_val))
+            
             # if prev val < likely val, then rare prev val
+            #
+                
+            print('\n2+ Rare Under')
+            likely_val = 0
+            for val, val_true_probs_dict in stat_true_probs_dict.items():
+                print('val: ' + str(val))
+                true_prob = val_true_probs_dict['true prob']
+                print('true_prob: ' + str(true_prob))
+                if true_prob < likely_prob:
+                    #likely_val = lower_val
+                    #rare_cat = ultra_rare_over_key
+                    print('prev_stat_val: ' + str(prev_stat_val))
+                    if prev_stat_val < likely_val:
+                        rare_prev_val = player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
+                        rare_prev_val_players[rare_over_key].append(rare_prev_val)
+                        print('Found rare under: ' + rare_prev_val)
 
+                    break
+                likely_val = val # val from prev loop
+            print('likely_val: ' + str(likely_val))
+
+
+            # repeat for unders
+            # find highest val below 20% true prob
+            # player went over where usual under
+            print('\nUltra Rare Over')
+            likely_under = 0
+            for val, val_true_probs_dict in stat_true_probs_dict.items():
+                print('val: ' + str(val))
+                true_prob = val_true_probs_dict['true prob']
+                print('true_prob: ' + str(true_prob))
+                if true_prob < 1 - ultra_likely_prob:
+                    likely_under = val
+                    #rare_cat = ultra_rare_under_key
+                    print('prev_stat_val: ' + str(prev_stat_val))
+                    if prev_stat_val > likely_under:
+                        rare_prev_val = player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
+                        rare_prev_val_players[ultra_rare_under_key].append(rare_prev_val)
+                        print('Found ultra rare over: ' + rare_prev_val)
+
+                    break
+            print('ultra likely_under: ' + str(likely_under))
+
+            # if prev val > likely under, then rare prev val
+            #
+
+            print('\n2+ Rare Over')
+            likely_under = 0
+            for val, val_true_probs_dict in stat_true_probs_dict.items():
+                print('val: ' + str(val))
+                true_prob = val_true_probs_dict['true prob']
+                print('true_prob: ' + str(true_prob))
+                if true_prob < 1 - likely_prob:
+                    likely_under = val
+                    #rare_cat = ultra_rare_under_key
+                    print('prev_stat_val: ' + str(prev_stat_val))
+                    if prev_stat_val > likely_under:
+                        rare_prev_val = player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
+                        rare_prev_val_players[rare_under_key].append(rare_prev_val)
+                        print('Found rare over: ' + rare_prev_val)
+
+                    break
+            print('likely_under: ' + str(likely_under))
+                
+            
+
+    #print('rare_prev_val_players: ' + str(rare_prev_val_players))
     return rare_prev_val_players
 
 
@@ -5126,10 +5229,10 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
         print('init_player_playtime: ' + str(init_player_playtime))
         print('player_playtime: ' + str(player_playtime))
         #player_playtime = all_players_playtimes[player_name]
-        print('init_player_conds: ' + str(init_player_conds))
-        print('player_conds: ' + str(current_conditions))
+        # print('init_player_conds: ' + str(init_player_conds))
+        # print('player_conds: ' + str(current_conditions))
         new_conds = list(set(init_player_conds) - set(current_conditions))
-        print('new_conds: ' + str(new_conds))
+        #print('new_conds: ' + str(new_conds))
 
         #dist = ss.poisson
 
@@ -5368,6 +5471,7 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
         # yes probs file changes each day and only potential lineups cond changes and only teammates lineup affects
         elif init_player_conds != current_conditions:
             print('Add Probs for New Conditions')
+            print('new_conds: ' + str(new_conds))
             # V2
             #new_conds = generate_new_conds(init_player_conds, current_conditions, player_stat_dict)
 
@@ -8758,7 +8862,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # we can tell rare prev val
     # by taking prev val w/ <20% chance
     # and then add special class for 2 rare prev vals in a row
-    #rare_prev_val_players = generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals)
+    rare_prev_val_players = generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals)
 
 
     # flatten nested dicts into one level and list them
@@ -8832,9 +8936,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # display all after injury players so we can double check
     writer.display_list(after_injury_players, title='after injury players')
 
-    # if len(ultra_rare_prev_val_players) > 0:
-    #     writer.display_list(ultra_rare_prev_val_players, title='ultra rare prev val players')
-    #writer.display_list(rare_prev_val_players, title='rare prev val players')
+    for rare_cat, rare_cat_players in rare_prev_val_players.items():
+        # if len(ultra_rare_prev_val_players) > 0:
+        #     writer.display_list(ultra_rare_prev_val_players, title='ultra rare prev val players')
+        writer.display_list(rare_cat_players, title=rare_cat)
 
     # strategy 1: high prob +ev (balance prob with ev)
     # 1. iso tru prob >= 90
