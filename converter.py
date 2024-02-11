@@ -376,6 +376,20 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
     #print('game_player_abbrevs: ' + str(game_player_abbrevs))
     return game_player_abbrevs
 
+def convert_irregular_player_name(player_name):
+
+    player_name = re.sub('−|-',' ',player_name)
+    player_name = re.sub('\.','',player_name)
+
+    if player_name == 'nicolas claxton':
+        player_name = 'nic claxton'
+    elif player_name == 'cameron thomas':
+        player_name = 'cam thomas'
+    elif player_name == 'gregory jackson':
+        player_name = 'gg jackson'
+
+    return player_name
+
 # CHANGE to get list of all abbrevs
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?

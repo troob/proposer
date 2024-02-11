@@ -926,6 +926,23 @@ def write_cur_and_prev(init_dict, final_dict, cur_file, prev_file, cur_yr, subje
 
 
 
+def display_game_info(after_injury_players, rare_prev_val_players):
+    print('\n===Display Game Info===\n')
+
+
+    title = 'after injury players'
+    print('\n===' + title.title() + '===\n')
+
+    print(tabulate([after_injury_players], headers=['Player'])) # game, days after, injury type, restricted playtime
+
+    for rare_cat, rare_cat_players in rare_prev_val_players.items():
+        title = rare_cat
+        print('\n===' + title.title() + '===\n')
+        #header_row = ['Player', 'Stat', 'Norm', 'Prev']
+        #rare_cat_players = header_row + rare_cat_players
+        print(tabulate(rare_cat_players, headers=['Game', 'Player', 'Stat', 'Norm', 'Prev', 'Cnt']))
+
+
 def display_list(list, title):
     print('\n===' + title.title() + '===\n')
 

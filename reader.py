@@ -367,8 +367,7 @@ def read_player_prev_stat_vals(season_log_of_interest):
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
-		prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
-		prev_stat_vals[stat_name] = prev_stat_val
+		prev_stat_vals[stat_name] = list(season_log_of_interest[stat_name.upper()].values())
 
 	return prev_stat_vals
 
@@ -406,7 +405,7 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
-	#print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+	print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 	return all_prev_stat_vals
 
 # read along with current conditions
@@ -2013,8 +2012,9 @@ def read_react_website(url, timeout=10, max_retries=3):
 							#print("player_element: " + player_element.get_attribute('innerHTML'))
 
 							player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_btn_header).strip().lower()
-							player_name = re.sub('−|-',' ',player_name)
-							player_name = re.sub('\.','',player_name)
+							player_name = converter.convert_irregular_player_name(player_name)
+							# player_name = re.sub('−|-',' ',player_name)
+							# player_name = re.sub('\.','',player_name)
 							#print('player_name: ' + player_name)
 
 							if player_name not in web_dict[stat_name].keys():

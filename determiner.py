@@ -1515,6 +1515,70 @@ def determine_player_stat_confidence(player, stat_name, player_stat_dict):
     #print('sample_size: ' + str(sample_size))
     return sample_size
 
+# if >1 prev games < likely val
+def determine_rare_under(prev_stat_vals, likely_val):
+
+    rare_under = 0
+
+    for val in prev_stat_vals:
+
+        if val < likely_val:
+            rare_under += 1
+        else:
+            break
+
+    return rare_under
+
+# if >1 prev games > likely under
+# or missed likely val last 3/4 games or more
+# rare over in a row
+# and rare over pattern eg 3/4 not necessarily 3 in a row, but 2 in a row
+# return no. games rare over in a row
+def determine_rare_over(prev_stat_vals, likely_under):
+
+    rare_over = 0
+
+    for val in prev_stat_vals:
+
+        if val > likely_under:
+            rare_over += 1
+        else:
+            break
+
+    return rare_over
+
+def determine_rare_under_pattern(prev_stat_vals, likely_val):
+
+    rare_under = ''
+
+    num_rare_under = 0
+
+    for val in prev_stat_vals[:4]:
+
+        if val < likely_val:
+            num_rare_under += 1
+
+    if num_rare_under > 2:  
+        rare_under = '3/4'
+
+    return rare_under
+
+def determine_rare_over_pattern(prev_stat_vals, likely_under):
+
+    rare_over = ''
+
+    num_rare_over = 0
+
+    for val in prev_stat_vals[:4]:
+
+        if val > likely_under:
+            num_rare_over += 1
+
+    if num_rare_over > 2:  
+        rare_over = '3/4'
+
+    return rare_over
+
 # determine game num so we can sort by game
 def determine_game_num(game_teams, player_team):
     #print('\n===Determine Game Num===\n')
@@ -1657,7 +1721,7 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
     return need_box_score
 
 def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur_yr):
-    #print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
+    print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
 
     teammate_abbrev_key = teammate_abbrev + '-' + player_team
     player_name = ''
@@ -1676,11 +1740,16 @@ def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur
                 teammate_abbrev += ' ' + name
             teammate_abbrev_key = teammate_abbrev + '-' + player_team
 
-            player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
+            # if teammate traded but not played on team yet then no abbrev key
+            # bc abbrevs got from box scores
+            # it is ok to leave name blank bc no teammate data yet
+            # until we advance to extrapolate from past teammates effect
+            if teammate_abbrev_key in all_players_abbrevs[cur_yr].keys():
+                player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
 
     
-    # print('player_name: ' + str(player_name))
-    # print('teammate_abbrev: ' + str(teammate_abbrev))
+    print('player_name: ' + str(player_name))
+    print('teammate_abbrev: ' + str(teammate_abbrev))
     return player_name, teammate_abbrev
 
 # cur avg playtime is weight of player condition
@@ -2462,6 +2531,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'giannis antetokounmpo'
     elif player == 'kj martin':
         return 'kenyon martin jr'
+    elif player == 'marvin bagley':
+        return 'marvin bagley iii'
 
     # if player gone from the league 
     # AND we did not get their espn id
