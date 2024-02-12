@@ -1170,7 +1170,9 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # so we can compute true prob weighted avg
 # player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
 # cur_conds = {year:year, part:part, cond:cond}
-def determine_sample_size(player_stat_dict, cur_conds, stat_name):
+# all stats have same sample size 
+# but stat name needed for prev val bc different depending on stat
+def determine_sample_size(player_stat_dict, cur_conds, stat_name=''):
     # print('\n===Determine Sample Size===\n')
     # print('cur_conds: ' + str(cur_conds))
     # print('stat_name: ' + str(stat_name))
@@ -1184,7 +1186,12 @@ def determine_sample_size(player_stat_dict, cur_conds, stat_name):
 
     
     if year in player_stat_dict.keys() and part in player_stat_dict[year].keys():
-        stat_dict = player_stat_dict[year][part][stat_name]
+        # all stats have same sample size unless prev val cond
+        stat_dict = {}
+        if stat_name in player_stat_dict[year][part].keys():
+            stat_dict = player_stat_dict[year][part][stat_name]
+        else:
+            stat_dict = list(player_stat_dict[year][part].values())[0]
         if condition in stat_dict.keys():
             # cannot take first stat dict bc prev val depends on which stat
             #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
@@ -1551,15 +1558,20 @@ def determine_rare_under_pattern(prev_stat_vals, likely_val):
 
     rare_under = ''
 
-    num_rare_under = 0
+    # last game must be rare under or we cannot say this game
+    prev_val = prev_stat_vals[0]
+    if prev_val < likely_val:
 
-    for val in prev_stat_vals[:4]:
+        num_rare_under = 1
 
-        if val < likely_val:
-            num_rare_under += 1
+        # we know first prev val rare so check next few for pattern
+        for val in prev_stat_vals[1:4]:
 
-    if num_rare_under > 2:  
-        rare_under = '3/4'
+            if val < likely_val:
+                num_rare_under += 1
+
+        if num_rare_under > 2:  
+            rare_under = '3/4'
 
     return rare_under
 
@@ -1567,15 +1579,19 @@ def determine_rare_over_pattern(prev_stat_vals, likely_under):
 
     rare_over = ''
 
-    num_rare_over = 0
+    # last game must be rare over or we cannot say this game
+    prev_val = prev_stat_vals[0]
+    if prev_val > likely_under:
 
-    for val in prev_stat_vals[:4]:
+        num_rare_over = 1
 
-        if val > likely_under:
-            num_rare_over += 1
+        for val in prev_stat_vals[1:4]:
 
-    if num_rare_over > 2:  
-        rare_over = '3/4'
+            if val > likely_under:
+                num_rare_over += 1
+
+        if num_rare_over > 2:  
+            rare_over = '3/4'
 
     return rare_over
 
@@ -1721,7 +1737,7 @@ def determine_need_box_score(season_year, cur_yr, season_part, init_player_stat_
     return need_box_score
 
 def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur_yr):
-    print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
+    #print('\n====Determine Player Name: ' + teammate_abbrev + '===\n')
 
     teammate_abbrev_key = teammate_abbrev + '-' + player_team
     player_name = ''
@@ -1748,8 +1764,8 @@ def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur
                 player_name = all_players_abbrevs[cur_yr][teammate_abbrev_key]
 
     
-    print('player_name: ' + str(player_name))
-    print('teammate_abbrev: ' + str(teammate_abbrev))
+    # print('player_name: ' + str(player_name))
+    # print('teammate_abbrev: ' + str(teammate_abbrev))
     return player_name, teammate_abbrev
 
 # cur avg playtime is weight of player condition

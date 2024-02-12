@@ -251,6 +251,32 @@ def isolate_highest_ev_prop(sg_props):
 
 
 
+def isolate_rare_cat_games(rare_cat_players):
+    # print('\n===Isolate Rare Cat Games===\n')
+    # print('Input: rare_cat_players = [(...), ...] = ' + str(rare_cat_players))
+    # print('\nOutput: rare_cat_games = [[(...), ...], ...]\n')
+
+    rare_cat_games = []
+    game = []
+    prev_game_num = 1
+    for player in rare_cat_players:
+
+        game_num = player[0]
+        # print('prev_game_num: ' + str(prev_game_num))
+        # print('game_num: ' + str(game_num))
+
+        if game_num == prev_game_num:
+            game.append(player)
+        else:
+            rare_cat_games.append(game)
+            game = [player]
+
+        prev_game_num = game_num
+
+    rare_cat_games.append(game)
+
+    #print('rare_cat_games: ' + str(rare_cat_games))
+    return rare_cat_games
 
 
 def isolate_team_part_conds(team_part, team_gp_conds):

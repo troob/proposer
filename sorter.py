@@ -2,6 +2,37 @@
 # sorting fcns like sorting dictionaries by one common key
 # eg sort predictions by degree of belief
 
+import isolator
+
+
+
+
+
+def sort_rare_prev_val_players(rare_prev_val_players):
+    # print('\n===Sort Rare Prev Val Players===\n')
+    # print('Input: rare_prev_val_players = {rare under:[(...), ...], ...}')
+    # print('\nOutput: rare_prev_val_players = {rare under:[(...), ...], ...}\n')
+
+    for rare_cat, rare_cat_players in rare_prev_val_players.items():
+        # rare_cat_players = [(...), ...]
+        # sort tuples by prob val
+        # total prob idx
+        # split by game
+        rare_cat_games = isolator.isolate_rare_cat_games(rare_cat_players)
+        #rare_prev_val_players[rare_cat] = sorted(rare_cat_players, key=lambda x: x[7]) #sort_tuples_by_idx(rare_cat_players, idx=7)
+        sorted_rare_cat_players = []
+        for game in rare_cat_games:
+            sorted_game_players = sorted(game, key=lambda x: x[7])
+
+            for player in sorted_game_players:
+                sorted_rare_cat_players.append(player)
+
+        rare_prev_val_players[rare_cat] = sorted_rare_cat_players
+
+    return rare_prev_val_players
+
+
+
 # predictions = { 'prediction':'','overall record':[],..,'degree of belief':0 }
 def sort_predictions_by_deg_of_bel(predictions):
     sorted_predictions = sorted(predictions, key=lambda d: d['degree of belief']) 
