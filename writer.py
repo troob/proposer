@@ -940,7 +940,7 @@ def display_game_info(after_injury_players, rare_prev_val_players):
         print('\n===' + title.title() + '===\n')
         #header_row = ['Player', 'Stat', 'Norm', 'Prev']
         #rare_cat_players = header_row + rare_cat_players
-        print(tabulate(rare_cat_players, headers=['Game', 'Player', 'Stat', 'Norm', 'Prev', 'Cnt', 'P', 'Tot']))
+        print(tabulate(rare_cat_players, headers=['G', 'Name', 'S', 'N', 'Pre', 'Ct', 'P', 'Tot']))
 
 
 def display_list(list, title):

@@ -1330,7 +1330,7 @@ def determine_all_after_injury_players(all_players_season_logs, all_players_team
                 if cur_yr in player_season_logs.keys():
                     player_cur_season_log = player_season_logs[cur_yr]
                     if determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
-                        after_injury_players.append(player)
+                        after_injury_players.append([player])
                         print(player.title())
 
     print('\n==============================\n')
@@ -1356,7 +1356,7 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
 
 def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
     print('\n===Determine All Current GP Conds===\n')
-    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ... = ' + str(all_game_player_cur_conds))
+    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_game_player_cur_conds))
     print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
 
     all_cur_conds = []
@@ -1831,7 +1831,11 @@ def determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players
 
 # only reg season
 def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player):
-    #print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
+    # print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
+    # print('Settings: Current Year = ' + current_year_str)
+    # print('\nInput: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    # print('Input: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+
 
     gp_cur_team = 0
 
@@ -1839,17 +1843,27 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         cur_season_log = player_season_logs[current_year_str]
         cur_season_log_df = pd.DataFrame(cur_season_log)
         cur_reg_season_log = determine_season_part_games(cur_season_log_df)
+        #print('cur_reg_season_log: ' + str(cur_reg_season_log))
         gp_cur_season = len(cur_reg_season_log.index)
+        #print('gp_cur_season: ' + str(gp_cur_season))
         
         team_stats_dict = player_teams[current_year_str]
 
         teams = list(reversed(team_stats_dict.keys()))
         all_teams_stats = list(reversed(team_stats_dict.values()))
+        # print('teams: ' + str(teams))
+        # print('all_teams_stats: ' + str(all_teams_stats))
         
         gp_other_teams = 0
         if len(teams) > 0:
             for team_stats in all_teams_stats[1:]: 
                 gp_other_teams += team_stats['GP']
+
+        # if typo, no way to know what number so case irregular
+        # case found after player played 1 game with new team so maybe corrected next game???
+        if gp_other_teams > gp_cur_season:
+            gp_other_teams = gp_cur_season - 1
+            print('Warning: ESPN typo in games played stats page! Check actual games played. ' + player.title())
 
         gp_cur_team = gp_cur_season - gp_other_teams
 
@@ -2199,7 +2213,7 @@ def determine_out_player(player_name, player_gp_cur_conds):
 
 def determine_dnp_player(player_teams, cur_yr, player_name):
     # print('\n===Determine DNP Player: ' + player_name.title() + '===\n')
-    # print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...')
+    # print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ... = ' + str(player_teams))
 
     dnp = False
 
@@ -2207,10 +2221,19 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
     if cur_yr in player_teams.keys():
         # player may have been recently traded and not played yet (eg theo maledon)
         # ordered from distant to recent
-        cur_yr_teams_dicts = list(player_teams[cur_yr].values()) # {team:{min:m, gp:gp}, ...}
+        cur_yr_teams_dicts = reversed(player_teams[cur_yr].values()) # {team:{min:m, gp:gp}, ...}
+        #print('cur_yr_teams_dicts: ' + str(cur_yr_teams_dicts))
         #if team in cur_yr_teams_dict.keys():
-        cur_team_dict = cur_yr_teams_dicts[-1] # {min:m, gp:gp}
-        player_mean_minutes = cur_team_dict['MIN']
+        # if played this yr then team dict will not be blank
+        # they will still have team but the data will be blank
+        # if they have another team this yr then use those minutes to see if dnp
+        # from recent to distant
+        for team_dict in cur_yr_teams_dicts:
+            #print('team_dict: ' + str(team_dict))
+            if len(team_dict.keys()) > 0:
+                #cur_team_dict = cur_yr_teams_dicts[0] # {min:m, gp:gp}
+                player_mean_minutes = team_dict['MIN']
+                break
 
     #print('player_mean_minutes: ' + str(player_mean_minutes))
     if player_mean_minutes < 11.5:
@@ -2419,6 +2442,12 @@ def determine_player_season_teams(player, game_key, player_teams):
     #print('teams: ' + str(teams))
     return teams
 
+def determine_cur_team_from_rosters(player, rosters):
+    #print('\n===Determine Current Team from Rosters: ' + player.title() + '===\n')
+    for team, roster in rosters.items():
+        if player in roster:
+            return team
+
 #list(player_teams[player][cur_yr].keys())[-1] # current team
 # can we take first year in teams list instead of cur yr?
 # player_teams = {year:{team:gp,...},...
@@ -2436,13 +2465,9 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
 
     # more reliable to take from rosters 
     # bc player teams will only show if they actually played this season
-    if len(rosters.keys()) > 0:
-        for team, roster in rosters.items():
-            if player in roster:
-                cur_team = team
-                break
+    cur_team = determine_cur_team_from_rosters(player, rosters)
 
-    if cur_team == '': # could not find player in rosters so maybe not player of interest but maybe player of comparison
+    if cur_team is None: # could not find player in rosters so maybe not player of interest but maybe player of comparison
         if len(player_teams.keys()) > 0:
             if cur_yr in player_teams.keys():
                 cur_team = list(player_teams[cur_yr].keys())[-1]
@@ -2461,7 +2486,7 @@ def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
     #     print('cur_yr: ' + str(cur_yr))
     #     print('rosters: ' + str(rosters))
 
-    #print('cur_team: ' + cur_team)
+    #print('cur_team: ' + str(cur_team))
     return cur_team
 
 # jaylen brown -> j brown
@@ -2907,6 +2932,8 @@ def determine_player_team_idx(player, player_team_idx, game_idx, row, games_play
 
 
 def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player):
+    #print('\n===Determine Teams Reg + Playoff Games Played: ' + player.title() + '===\n')
+    
     # read all box scores if postseason to get more samples and compare to reg season
     if season_part == 'postseason':
         season_part = 'full'
@@ -2939,12 +2966,14 @@ def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log
 
     games_played = []#list(reversed(team_gp_dict.values()))
     for team_stats in all_teams_stats:
-        games_played.append(team_stats['GP'])
+        if len(team_stats.keys()) > 0:
+            games_played.append(team_stats['GP'])
     # get games played w/ current team from season log bc updates each day
     games_played = []
     if season_year != cur_yr:
         for team_stats in all_teams_stats:
-            games_played.append(team_stats['GP'])
+            if len(team_stats.keys()) > 0:
+                games_played.append(team_stats['GP'])
     else:
         # if more than 1 team this yr then get prev teams gp from player teams
         # then get cur team gp from season log
@@ -2958,7 +2987,8 @@ def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log
 
         if len(teams) > 0:
             for team_stats in all_teams_stats[1:]: 
-                games_played.append(team_stats['GP'])
+                if len(team_stats.keys()) > 0:
+                    games_played.append(team_stats['GP'])
 
 
 
@@ -2972,8 +3002,12 @@ def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log
     #print('num_recent_reg_games: ' + str(num_recent_reg_games))
     reg_and_playoff_games_played = [num_recent_reg_games + num_playoff_games] + games_played[1:]
     teams_reg_and_playoff_games_played = int(reg_and_playoff_games_played[player_team_idx])
-    #print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+    
 
+    # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+    # #print('season_part_game_log: ' + str(season_part_game_log))
+    # print('teams: ' + str(teams))
+    # print('games_played: ' + str(games_played))
     return (teams_reg_and_playoff_games_played, season_part_game_log, teams, games_played)
 
 def determine_regular_season_games(player_game_log):
