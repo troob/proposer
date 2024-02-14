@@ -1846,6 +1846,8 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         #print('cur_reg_season_log: ' + str(cur_reg_season_log))
         gp_cur_season = len(cur_reg_season_log.index)
         #print('gp_cur_season: ' + str(gp_cur_season))
+
+        
         
         team_stats_dict = player_teams[current_year_str]
 
@@ -1853,18 +1855,45 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         all_teams_stats = list(reversed(team_stats_dict.values()))
         # print('teams: ' + str(teams))
         # print('all_teams_stats: ' + str(all_teams_stats))
+
+        # if gp cur season teams > gp cur season log
+        # type on teams stats page
+        # so take cur team gp as correct
+        gp_cur_yr_teams = 0
+        for team_stats in all_teams_stats:
+            if 'GP' in team_stats.keys():
+                gp_cur_yr_teams += team_stats['GP']
+        if gp_cur_yr_teams > gp_cur_season: # espn typo
+            print('Warning: ESPN typo in games played stats page! Check actual games played. ' + player.title())
+            if len(all_teams_stats[0].keys()) > 0:
+                # assume cur team correct bc new team small samplesize???
+                if 'GP' in all_teams_stats[0].keys():
+                    return all_teams_stats[0]['GP']
+
         
         gp_other_teams = 0
-        if len(teams) > 0:
+        if len(teams) > 1:
             for team_stats in all_teams_stats[1:]: 
                 gp_other_teams += team_stats['GP']
 
         # if typo, no way to know what number so case irregular
         # case found after player played 1 game with new team so maybe corrected next game???
         if gp_other_teams > gp_cur_season:
-            gp_other_teams = gp_cur_season - 1
             print('Warning: ESPN typo in games played stats page! Check actual games played. ' + player.title())
+            # check if blank team stats to see if played on new team
+            # if not played on team then all season games are other teams
+            # so gp cur team = 0
+            gp_other_teams = gp_cur_season
+            if len(all_teams_stats[0].keys()) > 0:
+                # assume cur team correct bc new team small samplesize???
+                if 'GP' in all_teams_stats[0].keys():
+                    return all_teams_stats[0]['GP']
 
+                gp_other_teams = gp_cur_season - 1 # assumption must check
+            
+
+        # print('gp_cur_season: ' + str(gp_cur_season))
+        # print('gp_other_teams: ' + str(gp_other_teams))
         gp_cur_team = gp_cur_season - gp_other_teams
 
     #print('gp_cur_team: ' + str(gp_cur_team))

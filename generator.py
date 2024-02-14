@@ -2852,7 +2852,8 @@ def generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds,
         #print('player_conditions_list: ' + str(player_conditions_list))
         all_cur_conds_lists[player].extend(player_conditions_list)
 
-    #print('all_cur_conds_lists: ' + str(all_cur_conds_lists))
+    print('all_cur_conds_lists: ' + str(all_cur_conds_lists))
+    print('all_players_gp_conds: ' + str(all_players_gp_conds))
     return all_cur_conds_lists, all_players_gp_conds
 
 # conditions = list(list(all_current_conditions.values())[0].keys()) ['loc']
@@ -3044,16 +3045,44 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, 
 
     return stat_val_probs_dict
 
+# get low sample sizes for this player cur conds
+# format string: 'cond:size,...'
+def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_year, season_part):
+    print('\n===Generate Low Sample Sizes===\n')
+    print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
+
+    low_sample_sizes = ''
+
+    low_cond_idx = 0
+    for condition in player_cur_conds_list:
+
+        cur_conds = {'condition':condition, 'year':season_year, 'part':season_part}
+
+        cond_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds)
+
+        if cond_sample_size < 5:
+            if low_cond_idx == 0:
+                low_sample_sizes = condition + ': ' + str(cond_sample_size)
+            else:
+                low_sample_sizes += ' | ' + condition + ': ' + str(cond_sample_size)
+
+            low_cond_idx += 1
+
+    print('low_sample_sizes: ' + str(low_sample_sizes))
+    return low_sample_sizes
+
 # flatten nested dicts into one level and list them
 # from all_stat_probs_dict: {'luka doncic': {'pts': {1: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...
 # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
 # conditions prob = b biyombo c starter 2023 regular prob
 # need all_player_stat_dicts to get prev val
 # all_players_teams = {player:year:team:gp}
-def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr=''):
+def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr='', season_year='', season_part=''):
     print('\n===Generate All True Prob Dicts===\n')
-    print('Input: all_cur_conds_dicts = {p1:{\'p1, p2 out\':\'out\', \'away\':\'loc\', ...},... = {\'nikola jokic\': [\'away\':\'loc\', \'V Cancar SF, J Murray PG,... out\':\'out\', ... = ' + str(all_cur_conds_dicts))
-    print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_gp_cur_conds))
+    print('Input: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
+    print('Input: all_gp_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_gp_cur_conds))
     print('Input: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
@@ -3076,7 +3105,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
     true_prob_key = 'true prob' # if val only in postseason then no true prob for reg season YET
 
     for player, player_stat_probs_dict in all_true_probs_dict.items():
-        #print('\n===Player: ' + player.title() + '===\n')
+        print('\n===Player: ' + player.title() + '===\n')
         #stat_val_probs_dict = {'player': player}
         # player_teams = {year:{team:gp,...},...
         player_teams = all_players_teams[player]
@@ -3096,16 +3125,21 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
         #print('player_current_conditions: ' + str(player_current_conditions))
         player_gp_conds = all_gp_cur_conds[player]
 
+        player_cur_conds_list = all_cur_conds_lists[player]
+
         player_stat_dict = all_player_stat_dicts[player]
         #print('player_stat_dict: ' + str(player_stat_dict))
 
-        low_sample_sizes = ''
+        # get low sample sizes for this player cur conds
+        # format string: 'cond:size,...'
+        # all except prev val bc depends on stat, so add in stat loop
+        low_sample_sizes = generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_year, season_part)
 
         
         
         #stat_probs_dict: {1: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
         for stat_name, stat_probs_dict in player_stat_probs_dict.items():
-            #print('\n===Stat: ' + str(stat_name) + '===\n')
+            
             #stat_val_probs_dict['stat'] = stat_name
             #consistent_stat_dict = {'player': player_name, 'team': player_team, 'stat': stat_name}
             # for condition, condition_consistent_stat_dict in stat_probs_dict.items():
@@ -3115,6 +3149,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
             #                 consistent_stat_dict[key] = val
             
             if stat_name in stats_of_interest:
+                print('\n===Stat: ' + str(stat_name) + '===\n')
                 condition = 'all' # all conds match all
                 part = 'regular' # get current part from time of year mth
                 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
@@ -3130,6 +3165,21 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 
                 confidence = determiner.determine_player_stat_confidence(player, stat_name, player_stat_dict)#all_players_confidences[player] # based on sample size
 
+                # add to existing string with conds that dont depend on stat
+                # only if low sample size
+                prev_val_cond = ''
+                for cond_val, cond_key in player_current_conditions.items():
+                    if cond_key == 'prev':
+                        prev_val_cond = cond_val
+                        break
+
+                cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':part}
+                prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, stat_name) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
+                #if prev_stat_low_sample_size != '':
+                if prev_stat_sample_size < 5:
+                    #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
+                    low_sample_sizes += ' | ' + prev_val_cond + ': ' + str(prev_stat_sample_size)
+                print('low_sample_sizes: ' + str(low_sample_sizes))
 
                 # integrate overs and unders in same loop
                 #val_probs_dict: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
@@ -5016,7 +5066,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, read_new_game_ids):#, read_lineups):
     print('\n===Generate All Current Conditions===\n')
     print('Settings: Find Players')
-    print('\nInput: Players of Interest')
+    print('\nInput: Players of Interest = ' + str(players))
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
@@ -8253,7 +8303,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                             player_mean_minutes = 0
                             if year in all_players_teams[player].keys():
                                 # player may have been recently traded and not played yet (eg theo maledon)
-                                if team in all_players_teams[player][year].keys():
+                                if team in all_players_teams[player][year].keys() and len(all_players_teams[player][year][team].keys()) > 0:
                                     player_mean_minutes = all_players_teams[player][year][team]['MIN']
                             # if year not in all players teams then do we need player abbrev?
                             # possibly to put as dnp player preferred abbrev if available but if they never played ever then they have no established abbrev
@@ -8463,7 +8513,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # we prefer to input user variables from main file bc it is short and easy to use and will eventually be UI page
     print('Settings: find/read new data, read certain seasons and time periods, irregular play time and other vars')
     print('\nInput: default = all players in upcoming games today')
-    print('Input: players_names = [p1, ...] = [\'jalen brunson\', ...]')
+    print('Input: players_names = [p1, ...] = [\'jalen brunson\', ...] = ' + str(players_names))
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
     print('\nOutput: all_players_props = [{strategy x:{player:p1,...},...},...]\n')
@@ -8754,6 +8804,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
         all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, read_new_game_ids)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        #print('players_names after cur conds: ' + str(players_names))
         #all_current_conditions = all_cur_conds_data[0]
         #all_lineups = all_cur_conds_data[1]
         # all_cur_conds_lists = {p1:[m fultz pg out, j ingles sg out, away, ...],...}
@@ -8809,6 +8860,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     #             players_names.append(player_name)
 
     #for team, roster in teams_current_rosters.items():
+    print('final_players_names: ' + str(players_names))
     for player_name in players_names:
         player_name = player_name.lower()
 
@@ -9051,7 +9103,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
-    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_player_stat_dicts, game_teams, teams_current_rosters, current_year_str)
+    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_player_stat_dicts, game_teams, teams_current_rosters, current_year_str, season_year, season_part)
     desired_order = ['player', 'game', 'team', 'stat','val']
     #writer.list_dicts(all_stat_prob_dicts, desired_order)
 

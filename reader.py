@@ -3623,6 +3623,7 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 				# for reg season, idx starts after first playoff game
 				for game_idx, row in season_part_game_log.iterrows():
 					#print('\ngame_idx: ' + str(game_idx))
+					#print('row: ' + str(row))
 
 					# determine player team for game
 					player_team_idx = determiner.determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
@@ -3939,6 +3940,7 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 
 def read_all_players_positions(players_names, all_players_espn_ids):
 	print("\n===Read All Players Positions===\n")
+	print('Input: players_names = [p1,...] = ' + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('\nOutput: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')
 
@@ -4375,16 +4377,18 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players
 	# and get all logs from all 
 	# if given game teams, we can simply get players on game teams
 	# what if given specific players? they should still be in game teams players unless error
+	# here do we want to alter global player names so we get all players stat dicts and probs???
+	all_players_names = copy.deepcopy(players_names)
 	if len(game_teams) > 0:
 		#players_names = []
 		for game in game_teams:
 			for team in game:
 				team_roster = rosters[team]
 				for player in team_roster:
-					if player not in players_names:
-						players_names.append(player)
+					if player not in all_players_names:
+						all_players_names.append(player)
 
-	for player_name in players_names:
+	for player_name in all_players_names:
 		# {player:season:log}
 		if player_name in all_players_teams.keys():
 			player_teams = all_players_teams[player_name]
@@ -4403,6 +4407,7 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players
 	#init_all_game_logs: {'bruce brown': {'2023': {'Player': {'0': 
 	#final_all_game_logs: {'bruce brown': {2023: {'Player': {'0': 'br
 	#print('all_players_season_logs: ' + str(all_players_season_logs))
+	print('players_names after read season logs: ' + str(players_names))
 	return all_players_season_logs
 
 # return team abbrev lowercase bc used as key
@@ -4631,6 +4636,7 @@ def read_player_teams(player_name, player_id, player_cur_team, cur_yr, read_new_
 def read_all_players_teams(players_names, all_players_espn_ids, rosters, cur_yr, read_new_teams=False, find_players=False):
 	print("\n===Read All Players Teams===\n")
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
+	print('Input: players_names = [p1, ...] = ' + str(players_names))
 	print('\nOutput: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...\n')
 
 	all_players_teams_file = 'data/all players teams.json'
@@ -4640,12 +4646,13 @@ def read_all_players_teams(players_names, all_players_espn_ids, rosters, cur_yr,
 
 	all_players_teams = copy.deepcopy(init_all_players_teams) # need to init as saved teams so we can see difference at end
 
+	all_players_names = players_names #copy.deepcopy(players_names)
 	try:
 		#for player_name, player_id in all_players_espn_ids.items():
 		if find_players:
-			players_names = all_players_espn_ids.keys()
+			all_players_names = all_players_espn_ids.keys()
 		#print('players_names: ' + str(players_names))
-		for player_name in players_names:
+		for player_name in all_players_names:
 			#print('\nplayer_name: ' + str(player_name))
 			# read player teams
 			player_id = all_players_espn_ids[player_name]
@@ -4669,6 +4676,7 @@ def read_all_players_teams(players_names, all_players_espn_ids, rosters, cur_yr,
 	if not init_all_players_teams == all_players_teams:
 		writer.write_json_to_file(all_players_teams, all_players_teams_file)
 
+	print("players_names: " + str(players_names))
 	# all_players_teams = {player:{year:{team:gp,...},...}}
 	#print("all_players_teams: " + str(all_players_teams))
 	return all_players_teams
@@ -4891,7 +4899,7 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 # pass all bc we need teammates and opponents
 def read_all_players_espn_ids(players_names, player_of_interest=''):
 	print('\n===Read All Players ESPN IDs===\n')
-	print('Input: players_names: [p1, ...] = [\'jalen brunson\', ...]')
+	print('Input: players_names: [p1, ...] = [jalen brunson, ...] = ' + str(players_names))
 	print('\nOutput: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}\n')
 	
 	all_players_espn_ids = {}
