@@ -1173,10 +1173,10 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # all stats have same sample size 
 # but stat name needed for prev val bc different depending on stat
 def determine_sample_size(player_stat_dict, cur_conds, stat_name=''):
-    # print('\n===Determine Sample Size===\n')
-    # print('cur_conds: ' + str(cur_conds))
-    # print('stat_name: ' + str(stat_name))
-    #print('player_stat_dict: ' + str(player_stat_dict))
+    print('\n===Determine Sample Size===\n')
+    print('cur_conds: ' + str(cur_conds))
+    print('stat_name: ' + str(stat_name))
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     sample_size = 0
 
     condition = cur_conds['condition']
@@ -1199,7 +1199,7 @@ def determine_sample_size(player_stat_dict, cur_conds, stat_name=''):
             #print('cond_stat_dict: ' + str(cond_stat_dict))
             sample_size = len(cond_stat_dict.keys())
 
-    #print('sample_size: ' + str(sample_size))
+    print('sample_size: ' + str(sample_size))
     return sample_size
 
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
@@ -2027,10 +2027,14 @@ def determine_player_team_by_game(player, game_key, player_teams):
 # allowed player same stat but one over other under!
 # so if same player and stat, check val field for +/-
 # so we need a special field that looks for part of the values to match, in this case the +/- part
-def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='', num_vals=2):
-    #print('\n===Determine Multiple Dicts with Vals===\n')
-    #print('main_dict: ' + str(main_dict))
-    #print('keys: ' + str(keys))
+def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='', num_vals=2, prints_on=True):
+    #if prints_on:
+    print('\n===Determine Multiple Dicts with Vals===\n')
+    print('main_dict: ' + str(main_dict))
+    print('keys: ' + str(keys))
+    print('dict_list: ' + str(dict_list))
+    print('partial_key: ' + str(partial_key))
+    print('num_vals: ' + str(num_vals))
 
     multiple = False
 
@@ -2046,6 +2050,8 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
             # if matches, check next key
             # if does not match, check next dict
             if main_val != dict_val:
+                #if prints_on:
+                print('key_match = False')
                 key_match = False
                 break
 
@@ -2057,6 +2063,8 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
             main_val_sign = re.sub('\d+', '', main_dict[partial_key])
             if main_val_sign not in dict[partial_key]:
                 key_match = False
+                #if prints_on:
+                print('key_match = False')
                 break
 
         # if made it through all keys with all matching
@@ -2065,10 +2073,15 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
             count += 1
             if count >= num_vals:
                 multiple = True
+                #if prints_on:
+                print('count >= num_vals: ' + str(count) + ' >= ' + str(num_vals))
+                print('multiple = True')
                 break
 
     # if checked all dicts without match, then multiple false
 
+    #if prints_on:
+    print('multiple: ' + str(multiple))
     return multiple
 
 # given main prop and fields, find vals in those fields

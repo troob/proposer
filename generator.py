@@ -2087,13 +2087,16 @@ def generate_valid_props(props):
 
     return valid_props
 
-def generate_valid_top_prob_props(plus_ev_props):
-    print('\n===Generate Valid Top Prob Props===\n')
+def generate_valid_top_prob_props(plus_ev_props, prints_on):
+    if prints_on:
+        print('\n===Generate Valid Top Prob Props===\n')
+        print('Input: plus_ev_props = [{...}, ...]')# = ' + str(plus_ev_props))
+        print('\nOutput: valid_top_prob_props = [{...}, ...]\n')
 
     top_prob_props = []
     
-    # p1 = {'player':'kyrie', 'game':'3', 'stat':'pts', 'ev':3}
-    # p2 = {'player':'kobe', 'game':'1', 'stat':'pts', 'ev':3}
+    # p1 = {'player':'trey', 'game':'1', 'stat':'pts', 'ev':3}
+    # p2 = {'player':'trey', 'game':'1', 'stat':'pts', 'ev':3}
     # p3 = {'player':'kobe', 'game':'1', 'stat':'pts', 'ev':2}
     # p4 = {'player':'dame', 'game':'2', 'stat':'pts', 'ev':2}
     # p5 = {'player':'trae', 'game':'4', 'stat':'pts', 'ev':1}
@@ -2101,7 +2104,8 @@ def generate_valid_top_prob_props(plus_ev_props):
     # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1}
 
     for main_prop in plus_ev_props:
-        #print('\nmain_prop: ' + str(main_prop))
+        if prints_on:
+            print('\nmain_prop: ' + str(main_prop))
         
         # ensure at least 2 picks from this game
         # remove if only 1
@@ -2114,7 +2118,7 @@ def generate_valid_top_prob_props(plus_ev_props):
         # val = x+ or x-
         partial_key = 'val' # part of val must match to be duplicate, the +/- bc we are allowed both over and under
         # if determine duplicate, take highest prob of duplicates
-        if determiner.determine_multiple_dicts_with_vals(main_prop, fields, plus_ev_props, partial_key):
+        if determiner.determine_multiple_dicts_with_vals(main_prop, fields, plus_ev_props, partial_key, prints_on=prints_on):
             # if highest prob of the duplicates
             duplicate_props = isolator.isolate_duplicate_dicts(main_prop, fields, plus_ev_props)
             # determine highest prob prop
@@ -2131,7 +2135,8 @@ def generate_valid_top_prob_props(plus_ev_props):
 
     valid_top_prob_props = generate_stat_order(valid_top_prob_props)
 
-    #print('valid_top_prob_props: ' + str(valid_top_prob_props))
+    if prints_on:
+        print('valid_top_prob_props: ' + str(valid_top_prob_props))
     return valid_top_prob_props
 
 def generate_valid_top_ev_props(plus_ev_props):
@@ -2404,6 +2409,38 @@ def generate_part_season_logs(player_season_logs, part):
 
 
 
+def generate_rare_prev_dicts(rare_prev_val_players):
+    print('\n===Generate Rare Prev Dicts===\n')
+    print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...}')
+    print('\nOutput: rare_prev_dicts = [{...}, ...]')
+
+    rare_prev_dicts = []
+
+    headers=['G', 'Name', 'S', 'N', 'Pre', 'Ct', 'P', 'Tot']
+
+    for rare_cat, rare_cat_players in rare_prev_val_players.items():
+        # add title row to begin each section
+        title_row = {'G':'', 'Name':rare_cat}
+        #title = rare_cat
+        rare_prev_dicts.append(title_row)
+
+        
+        for rare_player_data in rare_cat_players:
+            rare_row = {}
+            for header_idx in range(len(headers)):
+                header = headers[header_idx]
+                rare_row[header] = rare_player_data[header_idx]
+
+
+        # add blank row for space bt sections after each
+        blank_row = {}#{'G':''}
+        # for header in headers:
+        #     blank_row[header] = ''
+        rare_prev_dicts.append(blank_row)
+
+    print('rare_prev_dicts: ' + str(rare_prev_dicts))
+    return rare_prev_dicts
+
 
 # strategy 1: high prob +ev (balance prob with ev)
 # 1. iso tru prob >= 90
@@ -2421,9 +2458,13 @@ def generate_part_season_logs(player_season_logs, part):
 
 # desired order: key = S Curry Pg, B Podziemski G, K Thompson Sg, J Kuminga Pf, K Looney F Starters 2024 Regular Prob
 # available_prop_dicts: key = 
-def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet_name='Joints'):
-    #print('\n===Generate Prop Table Data===\n')
-    #print('available_prop_dicts before: ' + str(available_prop_dicts))
+def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet_name='Joints', rare_prev_val_players={}, prints_on=False):
+    print('\n===Generate Prop Table Data===\n')
+    print('Input: available_prop_dicts before = [{player: james harden, ...}, ...')# = ' + str(available_prop_dicts))
+    print('Input: desired_order = [] = ' + str(desired_order))
+    print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...}')
+    print('\nOutput: prop tables = []')
+    print('Output: sheet names = []\n')
 
     # fill in NA for props available for 1 yr but not others
     # D Rose PG out 2023 regular prob blank bc did not play with players of interest last yr
@@ -2439,8 +2480,10 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
 
     #print('available_prop_dicts after: ' + str(available_prop_dicts))
 
-    prop_tables = [available_prop_dicts]
-    sheet_names = ['All']
+    rare_prev_dicts = generate_rare_prev_dicts(rare_prev_val_players)
+
+    prop_tables = [rare_prev_dicts, available_prop_dicts]
+    sheet_names = ['Rare', 'All']
 
     #print('prop_tables: ' + str(prop_tables))
 
@@ -2471,19 +2514,20 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
     if len(high_prob_props) > 0:
         final_prop_dicts = high_prob_props
 
-    #print('\n===Generate Prop Combos===\n')
+    print('\n===Generate Prop Combos===\n')
     # if ev, read odds
     # final_prop_dicts = [{player:p, game:g, ...},...]
-    # p1 = {'player':'kyrie', 'game':'3', 'stat':'pts', 'ev':3, 'odds':'100', 'true prob':100}
-    # p2 = {'player':'kobe', 'game':'1', 'stat':'pts', 'ev':3, 'odds':'100', 'true prob':100}
+    # p1 = {'player':'trey', 'game':'1', 'stat':'pts', 'ev':3, 'odds':'100', 'true prob':100, 'val':'5-'}
+    # p2 = {'player':'trey', 'game':'1', 'stat':'pts', 'ev':3, 'odds':'100', 'true prob':100, 'val':'6+'}
     # p3 = {'player':'kobe', 'game':'1', 'stat':'pts', 'ev':2, 'odds':'100', 'true prob':100}
     # p4 = {'player':'dame', 'game':'2', 'stat':'pts', 'ev':2, 'odds':'100', 'true prob':100}
     # p5 = {'player':'trae', 'game':'4', 'stat':'pts', 'ev':1, 'odds':'100', 'true prob':100}
     # p6 = {'player':'trae', 'game':'4', 'stat':'ast', 'ev':1, 'odds':'100', 'true prob':100}
     # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1, 'odds':'100', 'true prob':100}
-    # final_prop_dicts = [p1, p2, p3, p4, p5, p6, p7]
+    # final_prop_dicts = [p1, p2]
+    # print('final_prop_dicts: ' + str(final_prop_dicts))
     if len(final_prop_dicts) > 0 and 'ev' in final_prop_dicts[0].keys():
-        #print('ev found')
+        print('ev found')
         plus_ev_props = isolator.isolate_plus_ev_props(final_prop_dicts)
         
         # 3. out of remaining options, sort by ev
@@ -2508,7 +2552,7 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
         # so sort lus ev probs by prob
         sort_keys = ['true prob']
         plus_ev_props = sorter.sort_dicts_by_keys(plus_ev_props, sort_keys)
-        valid_top_prob_props = generate_valid_top_prob_props(plus_ev_props)
+        valid_top_prob_props = generate_valid_top_prob_props(plus_ev_props, prints_on)
 
 
         dk_max_allowed = 20
@@ -2562,122 +2606,7 @@ def generate_prop_table_data(available_prop_dicts, desired_order=[], joint_sheet
         # 3. max picks
         #print('\n===Max Picks===\n')
         #max_picks_top_ev_props = generate_max_picks_top_ev_props(top_ev_props, dk_max_allowed)
-        #test_num_props = 2 # dk_max_allowed
-        # p1 = {'player':'kyrie', 'game':'3', 'stat':'pts', 'ev':3}
-        # p5 = {'player':'trae', 'game':'4', 'stat':'pts', 'ev':1}
-        # max_picks_top_ev_props = valid_top_ev_props[0:dk_max_allowed]
-        # # p6 = {'player':'trae', 'game':'4', 'stat':'ast', 'ev':1}
-        # # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1}
-        # remaining_top_ev_props = valid_top_ev_props[dk_max_allowed:] # after cutoff by platform limit, include all picks just split in 2
-        # # in top remaining picks, ensure >1 per game
-        # # add here if only prop available for game 
-        # # so we can see if we should keep this and remove another one 
-        # # or remove this and add one to another game that already has >1 prop
-        # individual_props = [] 
-        # replacement_props = []
-        # # max_picks_top_ev_props = [{},...]
-        # for main_prop_idx in range(len(max_picks_top_ev_props)):
-        #     main_prop = max_picks_top_ev_props[main_prop_idx]
-
-        #     # if not multiple props from same game, only prop in game
-        #     # if only prop in game, individual prop, so need to determine which prop to replace
-        #     if not determiner.determine_multiple_dicts_with_val(main_prop, 'game', max_picks_top_ev_props):
-        #         # remaining_top_ev_props =
-        #         # p6 = {'player':'trae', 'game':'4', 'stat':'ast', 'ev':1}
-        #         # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1}
-        #         top_ev_remaining_prop = {}
-        #         if len(remaining_top_ev_props) > 0:
-        #             top_ev_remaining_prop = remaining_top_ev_props[0]
-                
-        #         # add to separate group individ props
-        #         # and remove from max  picks
-        #         individual_props.append(main_prop)
-                
-        #         # replace with next highest ev
-        #         # first look in remaining props to see if same game prop available
-        #         # if not, replace with highest ev in remaining props (idx=0)
-        #         #if determiner.determine_same_game_prop(main_prop, remaining_top_ev_props):
-        #         # main_game = main_prop['game']
-        #         # if main_game in remaining_top_ev_props.values():
-        #         # if same game prop in remaining top ev props
-        #         if determiner.determine_val_in_dicts(main_prop, 'game', remaining_top_ev_props):
-                
-        #             #print('\n===Same Game Props===\n')
-        #             # consider next highest evs
-        #             # get joint ev and compare to other option
-        #             # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1}
-        #             sg_props = isolator.isolate_sg_props(main_prop, remaining_top_ev_props)
-        #             sg_prop = isolator.isolate_highest_ev_prop(sg_props) # next highest same game prop if available
-                    
-        #             #multiplied_evs = main_prop['ev'] * sg_prop['ev']
-        #             #print('main multiplied_evs: ' + str(multiplied_evs))
-        #             joint_odds = generate_joint_odds([main_prop['odds'], sg_prop['odds']])
-        #             joint_prob = generate_joint_prob([main_prop['true prob'], sg_prop['true prob']])
-        #             main_prop_joint_ev = generate_joint_ev(joint_prob, joint_odds) #main_prop['ev'] * sg_prop['ev']
-        #             #print('main_prop_joint_ev: ' + str(main_prop_joint_ev))
-
-        #             #print('\n===Next Highest Props===\n')
-        #             # find lowest available to take out from a game with >2 picks
-        #             # if next highest sg prop +*? main prop > sum/product? of 2 lowest top ev props
-        #             # then use sg prop instead of overall prop
-        #             # max_picks_top_ev_props = 
-        #             # p1 = {'player':'kyrie', 'game':'3', 'stat':'pts', 'ev':3}
-        #             # p5 = {'player':'trae', 'game':'4', 'stat':'pts', 'ev':1}
-        #             #valid_low_top_ev_prop_idx = 0 # work backwards from lowest to highest until find one with >2 per game so it can be removed without invalidating other prop
-        #             #low_ev_top_prop = max_picks_top_ev_props[-1]
-        #             # if no game has more than 2 props, then must remove single prop (or consider pairing with a 0 ev prop)
-        #             low_ev_top_prop = {}
-        #             for prop in reversed(max_picks_top_ev_props):
-        #                 # if >2 in game
-        #                 if determiner.determine_multiple_dicts_with_val(prop, 'game', max_picks_top_ev_props, num_vals=3):
-        #                     low_ev_top_prop = prop
-        #                     break
-
-        #             if len(low_ev_top_prop.keys()) > 0:
-        #                 #multiplied_evs = low_ev_top_prop['ev'] * top_ev_remaining_prop['ev']
-        #                 #print('replacement multiplied_evs: ' + str(multiplied_evs))
-        #                 joint_odds = generate_joint_odds([low_ev_top_prop['odds'], top_ev_remaining_prop['odds']])
-        #                 joint_prob = generate_joint_prob([low_ev_top_prop['true prob'], top_ev_remaining_prop['true prob']]) #low_ev_top_prop['true prob'] * top_ev_remaining_prop['true prob']
-        #                 replacement_prop_joint_ev = generate_joint_ev(joint_prob, joint_odds)
-        #                 #print('replacement_prop_joint_ev: ' + str(replacement_prop_joint_ev))
-
-        #                 # >= bc prefer to keep picks across different games
-        #                 if main_prop_joint_ev >= replacement_prop_joint_ev:
-        #                     # keep main prop and sgp
-        #                     # remove bottom of max picks
-        #                     max_picks_top_ev_props = max_picks_top_ev_props[:-1]
-        #                     max_picks_top_ev_props.append(sg_prop)
-
-        #                     # add low ev top prop to remaining props so it can be added back if needed?
-                        
-        #                     # and remove main prop from inidiv props list since no longer individ?
-
-        #                 else: #
-        #                     # replace main prop with top ev remaining prop
-        #                     #replacement_prop = remaining_top_ev_props[0]
-        #                     max_picks_top_ev_props = max_picks_top_ev_props[:main_prop_idx] + max_picks_top_ev_props[main_prop_idx+1:]
-        #                     max_picks_top_ev_props.append(top_ev_remaining_prop)
-
-        #             else: # if no props in top ev picks have >2 games, they cant be taken out, so replace single prop with top remaining prop
-        #                 # replace main prop with top ev remaining prop
-        #                 #replacement_prop = remaining_top_ev_props[0]
-        #                 max_picks_top_ev_props = max_picks_top_ev_props[:main_prop_idx] + max_picks_top_ev_props[main_prop_idx+1:]
-        #                 max_picks_top_ev_props.append(top_ev_remaining_prop)
-
-        #         # prop should have at least 1 other prop from same game
-        #         # either in top ev props or remaining props bc it had to pass thru validation first
-        #         # but we could remove preprocess if this step is here
-        #         else: # no sg props available so replace with top of remaining props
-        #             # replace main prop with top ev remaining prop
-        #             max_picks_top_ev_props = max_picks_top_ev_props[:main_prop_idx] + max_picks_top_ev_props[main_prop_idx+1:]
-        #             max_picks_top_ev_props.append(top_ev_remaining_prop)
-
-                
-
-                # compare same game next highest if available to next highest remaining overall
-                    # if next highest in game = next highest overall, replace
-                    # if next highest in game < next highest overall, need to compute joint ev
-                    # OR just set an acceptable range difference
+    
 
         max_picks_top_ev_props = generate_max_picks_top_ev_props(valid_top_ev_props)
         #print('max_picks_top_ev_props: ' + str(max_picks_top_ev_props))
@@ -3023,13 +2952,16 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
     #print('available_prop_dicts: ' + str(available_prop_dicts))
     return available_prop_dicts
 
-def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, low_sample_sizes):
+def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, gp_low_sample_sizes, rare_prev):
     # add more fields for ref
     stat_val_probs_dict['game'] = game_num
     stat_val_probs_dict['prev'] = prev_val
+    stat_val_probs_dict['rare prev'] = rare_prev
     stat_val_probs_dict['playtime'] = playtime
     stat_val_probs_dict['confidence'] = confidence
-    stat_val_probs_dict['warning'] = low_sample_sizes # 't herro pg out: 2, ...'
+    stat_val_probs_dict['cond warning'] = cond_low_sample_sizes # 't herro pg out: 2, ...'
+    stat_val_probs_dict['gp warning'] = gp_low_sample_sizes
+    
 
     for cond_key, cond_val in player_current_conditions.items():
         stat_val_probs_dict[cond_key] = cond_val
@@ -3045,33 +2977,71 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, 
 
     return stat_val_probs_dict
 
+def generate_rare_prev_cond(rare_prev_val_players, player):
+
+    # add most rare
+    rare_prev_cond = 'No'
+
+    for rare_cat, rare_cat_players in rare_prev_val_players.items():
+        for rare_player in rare_cat_players:
+            if rare_player == player:
+                rare_prev_cond = rare_cat
+                break
+
+        if rare_prev_cond != 'No':
+            break
+
+    return rare_prev_cond
+
 # get low sample sizes for this player cur conds
 # format string: 'cond:size,...'
-def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_year, season_part):
+def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_years, season_part, single_conds):
     print('\n===Generate Low Sample Sizes===\n')
     print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
 
-    low_sample_sizes = ''
+    cond_low_sample_sizes = ''
+    gp_low_sample_sizes = ''
 
     low_cond_idx = 0
+    gp_low_cond_idx = 0
     for condition in player_cur_conds_list:
+        print('\ncondition: ' + str(condition))
 
-        cur_conds = {'condition':condition, 'year':season_year, 'part':season_part}
+        # all opp conds are low sample size so make sep list but no warning here
+        if re.search('opp', condition) or condition in single_conds:
+            continue
 
-        cond_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds)
 
+        # get total samples over all yrs
+        cur_conds = {'condition':condition, 'part':season_part}
+        cond_sample_size = 0
+        for year in season_years:
+            cur_conds['year'] = str(year)
+            cond_sample_size += determiner.determine_sample_size(player_stat_dict, cur_conds)
+
+        
+
+        print('cond_sample_size: ' + str(cond_sample_size))
         if cond_sample_size < 5:
-            if low_cond_idx == 0:
-                low_sample_sizes = condition + ': ' + str(cond_sample_size)
+            if re.search('start|bench|out', condition):
+                if gp_low_cond_idx == 0:
+                    gp_low_sample_sizes = condition + ': ' + str(cond_sample_size)
+                else:
+                    gp_low_sample_sizes += '\n' + condition + ': ' + str(cond_sample_size)
+
+                gp_low_cond_idx += 1
             else:
-                low_sample_sizes += ' | ' + condition + ': ' + str(cond_sample_size)
+                if low_cond_idx == 0:
+                    cond_low_sample_sizes = condition + ': ' + str(cond_sample_size)
+                else:
+                    cond_low_sample_sizes += '\n' + condition + ': ' + str(cond_sample_size)
 
-            low_cond_idx += 1
+                low_cond_idx += 1
 
-    print('low_sample_sizes: ' + str(low_sample_sizes))
-    return low_sample_sizes
+    print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+    return cond_low_sample_sizes, gp_low_sample_sizes
 
 # flatten nested dicts into one level and list them
 # from all_stat_probs_dict: {'luka doncic': {'pts': {1: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...
@@ -3079,21 +3049,22 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_ye
 # conditions prob = b biyombo c starter 2023 regular prob
 # need all_player_stat_dicts to get prev val
 # all_players_teams = {player:year:team:gp}
-def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_player_stat_dicts={}, game_teams=[], rosters={}, cur_yr='', season_year='', season_part=''):
+def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_last_vals={}, all_player_stat_dicts={}, game_teams=[], rosters={}, rare_prev_val_players={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[]):
     print('\n===Generate All True Prob Dicts===\n')
-    print('Input: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
+    print('Setting: Current Year to get current team = ' + cur_yr)
+    print('\nInput: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
     print('Input: all_gp_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_gp_cur_conds))
     print('Input: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...')
     print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: all_player_stat_dicts = {player: {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'kyle kuzma\': {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
     print('Input: teams_current_rosters = {team:[players],..., {\'nyk\': [jalen brunson, ...], ...}')
-    print('Input: Current Year to get current team')
+    print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...}')
     print('\nOutput: all_true_prob_dicts = [{player:p1, team:t1, stat:s1, val:v1, condition prob:prob1, ... = [{\'player\': \'nikola jokic\', \'team\': \'den\', \'stat\': \'pts\', \'val\': \'0\', \'all 2024 regular prob\': 0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0, ...\n')
 
     all_true_prob_dicts = []
 
-    stats_of_interest = ['pts','ast','reb']
+    #stats_of_interest = ['pts','ast','reb']
 
     # we need to get all conditions for all players
     # so table lines up if players did not all play in same conditions
@@ -3133,8 +3104,12 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
         # get low sample sizes for this player cur conds
         # format string: 'cond:size,...'
         # all except prev val bc depends on stat, so add in stat loop
-        low_sample_sizes = generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_year, season_part)
+        low_sample_size_data = generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, season_years, season_part, single_conds)
+        cond_low_sample_sizes = low_sample_size_data[0]
+        gp_low_sample_sizes = low_sample_size_data[1]
 
+
+        player_last_vals = all_last_vals[player]
         
         
         #stat_probs_dict: {1: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
@@ -3167,19 +3142,30 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
 
                 # add to existing string with conds that dont depend on stat
                 # only if low sample size
-                prev_val_cond = ''
-                for cond_val, cond_key in player_current_conditions.items():
-                    if cond_key == 'prev':
-                        prev_val_cond = cond_val
-                        break
+                print('\n===Add Prev Val Low Sample Size===\n')
+                prev_val_range = determiner.determine_stat_range(prev_val, stat_name)
+                prev_val_cond = prev_val_range + ' prev'
+                # for cond_key, cond_val in player_current_conditions.items():
+                #     if cond_key == 'prev':
+                #         prev_val_cond = cond_val
+                #         break
 
+                
                 cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':part}
+                print('cur_conds: ' + str(cur_conds))
                 prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, stat_name) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
                 #if prev_stat_low_sample_size != '':
                 if prev_stat_sample_size < 5:
                     #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
-                    low_sample_sizes += ' | ' + prev_val_cond + ': ' + str(prev_stat_sample_size)
-                print('low_sample_sizes: ' + str(low_sample_sizes))
+                    cond_low_sample_sizes += ' | ' + prev_val_cond + ': ' + str(prev_stat_sample_size)
+                print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+
+
+                # add cond if rare prev which can only be added after true prob done for all other conds
+                # although technically could just take all prob and see if rare compared to that
+                # but getting true prob first with all other is more accurate
+                # default: no, options: rare to ultra rare over/under
+                rare_prev = generate_rare_prev_cond(rare_prev_val_players, player)
 
                 # integrate overs and unders in same loop
                 #val_probs_dict: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
@@ -3258,7 +3244,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     # # for game in game_teams:
                     # #     if player_team
                     # stat_val_probs_dict['game'] = game_num
-                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, low_sample_sizes)
+                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, gp_low_sample_sizes, rare_prev)
 
                     # we want per unit probs next to corresponding yr for comparison in table
                     # so add key above when looping thru conditions
@@ -3318,7 +3304,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #             team_part_cond_key = team_part # eg. 'starters'
                         #         stat_val_probs_dict[team_part_cond_key] = team_part_players
                         # stat_val_probs_dict['game'] = game_num
-                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, low_sample_sizes)
+                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, gp_low_sample_sizes, rare_prev)
 
                         # one row for each val which has all conditions
                         #print('stat_val_probs_dict: ' + str(stat_val_probs_dict))
@@ -4462,6 +4448,7 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
     print('\n===Generate Rare Prev Val Players===\n')
     print('Input: all_true_probs_dict = {player: {stat: {val: {true prob:prob, condition1:prob1, ... = {\'nikola jokic\': {\'pts\': {1: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ..., \'true prob\': 1.0}')
     print('Input: all_prev_vals = {player:{stat name:[prev val 1,...}, ... = {jalen brunson:{pts:[20,23,...},...')
+    print('\nOutput: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...}\n')
 
     # rare_over_key = 'rare over'
     # rare_under_key = 'rare under'
@@ -9103,7 +9090,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
-    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_player_stat_dicts, game_teams, teams_current_rosters, current_year_str, season_year, season_part)
+    # add warnings to row in table
+    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_last_vals, all_player_stat_dicts, game_teams, teams_current_rosters, rare_prev_val_players, current_year_str, season_years, season_part, single_conds, stats_of_interest)
     desired_order = ['player', 'game', 'team', 'stat','val']
     #writer.list_dicts(all_stat_prob_dicts, desired_order)
 
@@ -9140,7 +9128,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # prev val is unique type of condition
     # desired_order.append('playtime')
     # desired_order.append('prev')
-    desired_order.extend(['warning', 'confidence', 'playtime', 'prev'])
+    # 'warning', 
+    desired_order.extend(['rare prev', 'cond warning', 'gp warning', 'confidence', 'playtime', 'prev'])
 
     # show the current conditions so we know which probs are used bc all probs are shown in table of all players
     #conditions = ['loc'] # add all conditions we are using to get true prob or uncertainty
@@ -9151,19 +9140,19 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         conditions = list(list(all_current_conditions.values())[0].keys())
         desired_order.extend(conditions)
 
-        # add columns in order of conditions used, by weight high to low
-        # given current conditions used to determine true prob
-        # take current conditions for each year
-        # here we show conditions values eg away, b biyombo c out, ...
-        # get season part from time of yr
-        season_part = 'regular'
-        # add condition prob titles to desired order after condition val columns showing the current cond vals
-        conditions_order = generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
-        #conditions_order = ['m fultz pg out prob', 'all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
-        desired_order.extend(conditions_order)
+    #     # add columns in order of conditions used, by weight high to low
+    #     # given current conditions used to determine true prob
+    #     # take current conditions for each year
+    #     # here we show conditions values eg away, b biyombo c out, ...
+    #     # get season part from time of yr
+    #     season_part = 'regular'
+    #     # add condition prob titles to desired order after condition val columns showing the current cond vals
+    #     conditions_order = generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, season_years, season_part)
+    #     #conditions_order = ['m fultz pg out prob', 'all 2024 regular prob', 'all 2023 regular prob per unit', 'all 2023 regular prob'] # 'home 2024 regular prob', 'home 2023 regular prob'
+    #     desired_order.extend(conditions_order)
     
-    else:
-        print('Warning: No current conditions!')
+    # else:
+    #     print('Warning: No current conditions!')
     
     #print('desired_order: ' + str(desired_order))
     #writer.list_dicts(available_prop_dicts, desired_order)#, output='excel')
@@ -9177,9 +9166,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     #     #     writer.display_list(ultra_rare_prev_val_players, title='ultra rare prev val players')
     #     writer.display_list(rare_cat_players, title=rare_cat)
 
-    # display conds for manual review
-    # eg rare prev vals
-    writer.display_game_info(after_injury_players, rare_prev_val_players)
+    
 
     # strategy 1: high prob +ev (balance prob with ev)
     # 1. iso tru prob >= 90
@@ -9196,7 +9183,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # strategy 4: combine +ev picks into multiple ~+100 parlays
     
     joint_sheet_name = 'Joints'
-    prop_table_data = generate_prop_table_data(available_prop_dicts, desired_order, joint_sheet_name)
+    prop_table_data = generate_prop_table_data(available_prop_dicts, desired_order, joint_sheet_name, rare_prev_val_players, prints_on)
 
     prop_tables = prop_table_data[0]
     sheet_names = prop_table_data[1]
@@ -9213,6 +9200,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     writer.write_prop_tables(prop_tables, sheet_names, desired_order, joint_sheet_name, todays_date)
 
     
+    # display conds for manual review
+    # eg rare prev vals
+    writer.display_game_info(after_injury_players, rare_prev_val_players)
+
 
     # pass player outcomes to another fcn to compute cumulative joint prob and ev?
     # do we need to return anything? we can always return whatever the final print is

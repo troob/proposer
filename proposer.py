@@ -66,7 +66,7 @@ stats_of_interest = ['pts','reb','ast']
 #===CONTROL CONDITIONs===
 # test a condition or group of conditions by itself
 control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
-single_conds = ['nf', 'local', 'weekend']
+single_conds = ['nf', 'local', 'weekday']
 
 #===OUT FOR SEASON PLAYERS===
 # players out for season not listed on report
@@ -172,10 +172,10 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-
-game_teams = [('atl','cha'), ('nyk','orl'), ('mia','phi'), ('bkn','bos'), ('chi','cle'), ('ind','tor'), ('hou','mem'), ('wsh','nop'), ('sas','dal'), ('sac','den'), ('det','phx'), ('lal','uta'), ('lac','gsw')]#, ('nop','lal')
+#('bkn','bos'), ('chi','cle'), ('ind','tor'), ('hou','mem'), ('wsh','nop'), ('sas','dal'), ('sac','den'), ('det','phx'), ('lal','uta'), 
+game_teams = [('mil','mem'), ('gsw','uta'), ('min','por')]#, ('nop','lal')
 if test:
-    game_teams = [('det','lal')]
+    game_teams = [('mil','mem')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -186,7 +186,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['lebron james'] # 'jacob gilyard', use for testing
+    players_names = ['malik beasley'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

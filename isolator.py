@@ -139,7 +139,7 @@ def isolate_keys_in_dict(regex, dict):
 
 
 def isolate_high_prob_props(prop_dicts):
-    #print('\n===Isolate High Prob Props===\n')
+    print('\n===Isolate High Prob Props===\n')
 
     high_prob_props = []
 
@@ -150,12 +150,12 @@ def isolate_high_prob_props(prop_dicts):
         if true_prob >= 90:
             high_prob_props.append(prop)
 
-    #print('high_prob_props: ' + str(high_prob_props))
+    print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
 # arbitrary uncertainty +/- 0.05???
 def isolate_plus_ev_props(prop_dicts):
-    #print('\n===Isolate +EV Props===\n')
+    print('\n===Isolate +EV Props===\n')
 
     plus_ev_props = []
 
@@ -165,7 +165,7 @@ def isolate_plus_ev_props(prop_dicts):
         if float(prop['ev']) >= -uncertainty:
             plus_ev_props.append(prop)
 
-    #print('plus_ev_props: ' + str(plus_ev_props))
+    print('plus_ev_props: ' + str(plus_ev_props))
     return plus_ev_props
 
 def isolate_duplicate_dicts(main_dict, keys, dict_list):
