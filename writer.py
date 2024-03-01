@@ -792,7 +792,7 @@ def write_all_player_stat_probs(all_player_stat_probs):
 # AND write 1 sheet for all 0 ev props, sorted by true prob
 # AND write 1 sheet for all -ev props, sorted by true prob
 # AND write 1 sheet for each strategy
-def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='Joints', todays_date=datetime.today().strftime('%m-%d-%y')):
+def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='Joints', rare_sheet_name='Rare', todays_date=datetime.today().strftime('%m-%d-%y')):
     print('\n===Write Prop Tables===\n')
     #print('prop_dicts: ' + str(prop_dicts))
     # print('sheet_names: ' + str(sheet_names))
@@ -813,6 +813,8 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
 
         if sheet_name == joint_sheet_name:
             desired_order = ['joint', 'min risk', 'max picks top ev', 'max picks top prob']
+        elif sheet_name == rare_sheet_name:
+            desired_order = ['Game', 'Name', 'Stat', 'Norm', 'Prev', 'Cnt', 'Prob', 'Total']
         else:
             desired_order = init_desired_order
 
@@ -933,14 +935,19 @@ def display_game_info(after_injury_players, rare_prev_val_players):
     title = 'after injury players'
     print('\n===' + title.title() + '===\n')
 
-    print(tabulate([after_injury_players], headers=['Player'])) # game, days after, injury type, restricted playtime
+    print(tabulate(after_injury_players, headers=['Player'])) # game, days after, injury type, restricted playtime
 
     for rare_cat, rare_cat_players in rare_prev_val_players.items():
         title = rare_cat
         print('\n===' + title.title() + '===\n')
         #header_row = ['Player', 'Stat', 'Norm', 'Prev']
         #rare_cat_players = header_row + rare_cat_players
-        print(tabulate(rare_cat_players, headers=['G', 'Name', 'S', 'N', 'Pre', 'Ct', 'P', 'Tot']))
+        # remove last idx from all lists
+        final_rare_cat_players = []
+        for rare_player_data in rare_cat_players:
+            final_rare_cat_players.append(rare_player_data[:-1])
+
+        print(tabulate(final_rare_cat_players, headers=['G', 'Name', 'S', 'N', 'Pre', 'Ct', 'P', 'Tot']))
 
 
 def display_list(list, title):

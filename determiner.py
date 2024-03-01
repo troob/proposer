@@ -1172,11 +1172,17 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # cur_conds = {year:year, part:part, cond:cond}
 # all stats have same sample size 
 # but stat name needed for prev val bc different depending on stat
-def determine_sample_size(player_stat_dict, cur_conds, stat_name=''):
-    print('\n===Determine Sample Size===\n')
-    print('cur_conds: ' + str(cur_conds))
-    print('stat_name: ' + str(stat_name))
-    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player=''):
+    # if prints_on:
+    #     print('\n===Determine Sample Size: ' + player.title() + '===\n')
+    #     print('cur_conds: ' + str(cur_conds))
+    #     print('stat_name: ' + str(stat_name))
+    #     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    #     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
+    #     print('Input: player_cur_team = ' + player_cur_team.upper())
+    #     print('Input: opp_team = ' + opp_team.upper())
+    #     print('\nOutput: sample_size = x\n')
+    
     sample_size = 0
 
     condition = cur_conds['condition']
@@ -1192,14 +1198,154 @@ def determine_sample_size(player_stat_dict, cur_conds, stat_name=''):
             stat_dict = player_stat_dict[year][part][stat_name]
         else:
             stat_dict = list(player_stat_dict[year][part].values())[0]
-        if condition in stat_dict.keys():
-            # cannot take first stat dict bc prev val depends on which stat
-            #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
-            cond_stat_dict = stat_dict[condition]
-            #print('cond_stat_dict: ' + str(cond_stat_dict))
-            sample_size = len(cond_stat_dict.keys())
 
-    print('sample_size: ' + str(sample_size))
+
+        # V2: Enable Combos of Abbrevs to get all samples
+        # if gp cond then check all versions of abbrev
+        # eg og anunoby vs o anunoby
+        # only check o anunoby if no og anunoby found???
+        # need to check both to find all samples
+        # but what if another player is strictly 1 version so rule cannot be generalized
+        # so must track irregular abbrevs
+            
+        # start blank and add all versions of abbrev or combos of abbrevs
+        conditions = []
+        
+        if re.search('starters|bench|out', condition): # single or multi player cond
+            
+            
+            gp_abbrev = re.sub('starters|bench|out|opp', '', condition).strip()
+            
+            # if prints_on:
+            #     print('Found player cond: ' + condition)
+            #     print('gp_abbrev: ' + gp_abbrev)
+
+            opp_key = 'opp'
+
+            team_part = condition.split()[-1]
+
+            gp_team = player_cur_team
+            if re.search(opp_key, condition):
+                gp_team = opp_team
+
+            # multi player conds need to get all combos of abbrevs
+            if re.search(',', condition):
+                gp_abbrevs = gp_abbrev.split(',')
+
+                # if prints_on:
+                #     print('Multiplayer cond')
+                #     print('gp_abbrevs before strip: ' + str(gp_abbrevs))
+
+                game_part_players = {}
+                for abbrev in gp_abbrevs:
+                    #abbrev = abbrev.strip()
+                    abbrev_key = abbrev.strip() + '-' + gp_team
+                    if abbrev_key in all_players_abbrevs[year].keys():
+                        game_player = all_players_abbrevs[year][abbrev_key]
+                        # if prints_on:
+                        #     print('game_player: ' + game_player)
+                        game_part_players[game_player] = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team)
+                
+                combos_of_abbrevs = generator.generate_combos_of_abbrevs(game_part_players)#, all_game_players_abbrevs)
+                # if prints_on:
+                #     print('combos_of_abbrevs: ' + str(combos_of_abbrevs))
+
+                # need a string for each combo
+                
+                for abbrev_combo in combos_of_abbrevs:
+
+                    game_part_players_str = converter.convert_to_game_players_str(abbrev_combo)
+                    
+                    # game part players, where part = starters or bench or out
+                    game_part_players_cond_val = game_part_players_str
+                    
+                    if re.search(opp_key, condition):
+                        game_part_players_cond_val += ' ' + opp_key 
+                    game_part_players_cond_val += ' ' + team_part
+
+                    # if prints_on:
+                    #     print('abbrev_combo: ' + str(abbrev_combo))
+                    #     print('game_part_players_str: ' + str(game_part_players_str))
+                    #     print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
+                    
+                    conditions.append(game_part_players_cond_val)
+
+            else: # single player cond
+                # if prints_on:
+                #     print('Single player cond')
+                # get player abbrev from cond
+                # by removing group and position from end of cond
+                # remove group
+                abbrev_key = gp_abbrev + '-' + gp_team
+                if abbrev_key in all_players_abbrevs[year].keys():
+                    game_player = all_players_abbrevs[year][abbrev_key]
+                    # use cur team bc cur conds
+                    game_player_abbrevs = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team)
+                    # if prints_on:
+                    #     print('game_player: ' + game_player)
+                    #     print('game_player_abbrevs: ' + str(game_player_abbrevs))
+                    for abbrev in game_player_abbrevs:
+                        gp_cond = abbrev
+                        if re.search(opp_key, condition):
+                            gp_cond += ' ' + opp_key 
+                        gp_cond += ' ' + team_part
+                        # if prints_on:
+                        #     print('gp_cond: ' + str(gp_cond))
+                        conditions.append(gp_cond)
+
+
+
+                # irregular_abbrevs = ['og anunoby']
+                
+                # # remove position
+                # #gp_abbrev_data = condition.split()[:-2]
+                # gp_abbrev = gp_abbrev.rsplit(' ', 1)[0]#.strip()
+                # print('gp_abbrev: ' + gp_abbrev)
+                # if gp_abbrev in irregular_abbrevs:
+                #     # try all versions of abbrev
+                    
+                #     # if 2 letters in first name, try version with 1 letter
+                #     cond_data = condition.split()
+                #     if len(cond_data[0]) > 1:
+                #         alt_cond = cond_data[0][0]
+                #         for data in cond_data[1:]:
+                #             alt_cond += ' ' + data
+                #         conditions.append(alt_cond)
+                #     print('conditions: ' + str(conditions))
+        
+            # if prints_on:
+            #     print('conditions: ' + str(conditions))
+            #sample_size = 0
+            for cond in conditions:
+                if cond in stat_dict.keys():
+                    # cannot take first stat dict bc prev val depends on which stat
+                    #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+                    cond_stat_dict = stat_dict[cond]
+                    #print('cond_stat_dict: ' + str(cond_stat_dict))
+                    sample_size += len(cond_stat_dict.keys())
+
+        else: # normal cond only has 1 version
+            if condition in stat_dict.keys():
+                # cannot take first stat dict bc prev val depends on which stat
+                #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+                cond_stat_dict = stat_dict[condition]
+                #print('cond_stat_dict: ' + str(cond_stat_dict))
+                sample_size = len(cond_stat_dict.keys())
+
+        
+        
+        # V1: normal cond only has 1 version
+        # if condition in stat_dict.keys():
+        #     # cannot take first stat dict bc prev val depends on which stat
+        #     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+        #     cond_stat_dict = stat_dict[condition]
+        #     #print('cond_stat_dict: ' + str(cond_stat_dict))
+        #     v1_sample_size = len(cond_stat_dict.keys())
+            # if prints_on:
+            #     print('v1_sample_size: ' + str(v1_sample_size))
+
+    # if prints_on:
+    #     print('sample_size: ' + str(sample_size))
     return sample_size
 
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
@@ -1354,7 +1500,7 @@ def determine_unit_time_period(all_player_stat_probs, all_player_stat_dicts={}, 
     #print('unit_time_period: ' + str(unit_time_period))
     return unit_time_period
 
-def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs):
+def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrevs, rosters, game_teams):
     print('\n===Determine All Current GP Conds===\n')
     print('Input: all_game_player_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_game_player_cur_conds))
     print('\nOutput: all_cur_conds = [\'all\',\'teammates\',\'opp\',\'J Giddey F, C Wallace G,... starters\',...]\n')
@@ -1371,6 +1517,9 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
 
         player_gp_conds = []
 
+        cur_team = determine_player_current_team(player, rosters=rosters)
+        opp_team = determine_opponent_team(player, cur_team, game_teams)
+
         # {teammates: {starters:[],...}, opp: {...}}, ...
         for team_condition, team_parts in gp_cur_conds.items():
             #print('\nteam_condition: ' + team_condition)
@@ -1382,11 +1531,19 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
             if team_condition not in all_cur_conds:
                 all_cur_conds.append(team_condition)
 
+           
+            if team_condition == 'opp':
+                gp_team = opp_team
+            else:
+                gp_team = cur_team
+
             # 3or4 team parts per team, or 1 per player weighted by playtime
             for team_part, team_part_players in team_parts.items():
                 if len(team_part_players) > 0:
                     # remove team name from abbrev for display
-                    team_part_players_abbrevs = converter.convert_all_players_name_to_abbrevs(team_part_players, all_players_abbrevs)
+                    # CHANGE to gen players abbrevs dict
+                    
+                    team_part_players_abbrevs = converter.convert_all_players_names_to_abbrevs(team_part_players, all_players_abbrevs, gp_team)
                     
                     # add single player conds
                     for player_abbrev in team_part_players_abbrevs:
@@ -1403,16 +1560,17 @@ def determine_all_current_gp_conds(all_game_player_cur_conds, all_players_abbrev
                     
                     # add group conds
                     gp_cond_str = generator.generate_players_string(team_part_players_abbrevs)
-                    # add team cond bc diff if teammates or opp
-                    # and not directly from sample, instead from avg of subsamples
-                    if team_condition == 'opp':
-                        gp_cond_str += ' ' + team_condition
-                    gp_cond_str += ' ' + team_part
+                    if gp_cond_str != '': # blank if new team for player so cant confirm abbrev from box score
+                        # add team cond bc diff if teammates or opp
+                        # and not directly from sample, instead from avg of subsamples
+                        if team_condition == 'opp':
+                            gp_cond_str += ' ' + team_condition
+                        gp_cond_str += ' ' + team_part
 
-                    if gp_cond_str not in all_cur_conds:
-                        all_cur_conds.append(gp_cond_str)
-                    if gp_cond_str not in player_gp_conds:
-                        player_gp_conds.append(gp_cond_str)
+                        if gp_cond_str not in all_cur_conds:
+                            all_cur_conds.append(gp_cond_str)
+                        if gp_cond_str not in player_gp_conds:
+                            player_gp_conds.append(gp_cond_str)
 
         
         all_players_gp_conds[player] = player_gp_conds
@@ -1831,10 +1989,10 @@ def determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players
 
 # only reg season
 def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player):
-    # print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
-    # print('Settings: Current Year = ' + current_year_str)
-    # print('\nInput: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    # print('Input: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
+    print('Settings: Current Year = ' + current_year_str)
+    print('\nInput: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ... = ' + str(player_teams))
+    print('Input: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 
 
     gp_cur_team = 0
@@ -1845,7 +2003,7 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         cur_reg_season_log = determine_season_part_games(cur_season_log_df)
         #print('cur_reg_season_log: ' + str(cur_reg_season_log))
         gp_cur_season = len(cur_reg_season_log.index)
-        #print('gp_cur_season: ' + str(gp_cur_season))
+        print('gp_cur_season: ' + str(gp_cur_season))
 
         
         
@@ -1853,8 +2011,8 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
 
         teams = list(reversed(team_stats_dict.keys()))
         all_teams_stats = list(reversed(team_stats_dict.values()))
-        # print('teams: ' + str(teams))
-        # print('all_teams_stats: ' + str(all_teams_stats))
+        print('teams: ' + str(teams))
+        print('all_teams_stats: ' + str(all_teams_stats))
 
         # if gp cur season teams > gp cur season log
         # type on teams stats page
@@ -1874,7 +2032,8 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         gp_other_teams = 0
         if len(teams) > 1:
             for team_stats in all_teams_stats[1:]: 
-                gp_other_teams += team_stats['GP']
+                if 'GP' in team_stats.keys():
+                    gp_other_teams += team_stats['GP']
 
         # if typo, no way to know what number so case irregular
         # case found after player played 1 game with new team so maybe corrected next game???
@@ -1896,7 +2055,7 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
         # print('gp_other_teams: ' + str(gp_other_teams))
         gp_cur_team = gp_cur_season - gp_other_teams
 
-    #print('gp_cur_team: ' + str(gp_cur_team))
+    print('gp_cur_team: ' + str(gp_cur_team))
     return gp_cur_team
 
 # if missing season yr or missing condition in season yr
@@ -2038,6 +2197,8 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
 
     multiple = False
 
+    same_val_props = [] # show list of matching props
+
     # need list of all vals in dicts at each key
     # so we can compare vals
     count = 0 # list includes main dict so we need to find 2
@@ -2070,6 +2231,8 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
         # if made it through all keys with all matching
         # then multiple = true
         if key_match == True:
+            same_val_props.append(dict)
+
             count += 1
             if count >= num_vals:
                 multiple = True
@@ -2082,6 +2245,7 @@ def determine_multiple_dicts_with_vals(main_dict, keys, dict_list, partial_key='
 
     #if prints_on:
     print('multiple: ' + str(multiple))
+    print('same_val_props: ' + str(same_val_props))
     return multiple
 
 # given main prop and fields, find vals in those fields
@@ -2283,6 +2447,92 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
 
     #print('dnp: ' + str(dnp))
     return dnp
+
+
+def determine_teammates_out_at_position(player_team_lineup, all_players_positions, player_name):
+    print('\n===Determine Teammates Out At Position: ' + player_name.title() + '===\n')
+    print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
+    print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')
+    print('\nOutput: tiap = x\n')
+
+    toap = 0
+
+    player_position = all_players_positions[player_name]
+
+    # Condition: teammates in/out at position
+    #print('\n===Condition: Teammates At Position: ' + player_name.title() + '===\n')
+    # when no samples of lineup to get playtime, 
+    # we need to predict based on teammates at position
+    #print('player_position: ' + str(player_position))
+    position_groups = {'pg':['pg','sg','g','sf'], 
+                        'sg':['pg','sg','g','sf'],
+                        'g':['pg','sg','g','sf'],
+                        'sf':['sg','g','sf','f','pf'],
+                        'f':['sf','f','pf','c'],
+                        'pf':['sf','f','pf','c'],
+                        'c':['sf','f','pf','c']}
+    player_position_group = position_groups[player_position]
+
+    out = player_team_lineup['out']
+
+    for teammate_name in out:
+        teammate_position = all_players_positions[teammate_name]
+        if teammate_position in player_position_group:
+            toap += 1
+
+    toap_str = str(toap) + ' toap'
+
+    print('toap_str: ' + str(toap_str))   
+    return toap_str
+
+def determine_teammates_in_at_position(player_team_lineup, all_players_positions, player_name):
+    print('\n===Determine Teammates In At Position: ' + player_name.title() + '===\n')
+    print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
+    print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')# = ' + str(all_players_positions))
+    print('\nOutput: tiap = x\n')
+
+    tiap = 0
+
+    player_position = all_players_positions[player_name]
+
+    # Condition: teammates in/out at position
+    #print('\n===Condition: Teammates At Position: ' + player_name.title() + '===\n')
+    # when no samples of lineup to get playtime, 
+    # we need to predict based on teammates at position
+    #print('player_position: ' + str(player_position))
+    position_groups = {'pg':['pg','sg','g','sf'], 
+                        'sg':['pg','sg','g','sf'],
+                        'g':['pg','sg','g','sf'],
+                        'sf':['sg','g','sf','f','pf'],
+                        'f':['sf','f','pf','c'],
+                        'pf':['sf','f','pf','c'],
+                        'c':['sf','f','pf','c']}
+    player_position_group = position_groups[player_position]
+
+    starters = player_team_lineup['starters']
+    bench = player_team_lineup['bench']
+
+    for teammate_name in starters:
+        teammate_position = all_players_positions[teammate_name]
+        if teammate_position in player_position_group:
+            tiap += 1
+    for teammate_name in bench:
+        teammate_position = all_players_positions[teammate_name]
+        if teammate_position in player_position_group:
+            tiap += 1
+
+    # subtract 1 for cur player bc not his own teammate
+    # OR just count all players including cur player???
+    # simpler to consider relative to teammates
+    # bc otherwise need to specify team players and opp players and all game players separately
+    # also bc out teammates never includes cur player so keep uniformly relative to teammates
+    tiap -= 1
+
+    tiap_str = str(tiap) + ' tiap'
+        
+    print('tiap_str: ' + str(tiap_str))   
+    return tiap_str
+
 
 
 # given todays date find next game date
@@ -2495,7 +2745,7 @@ def determine_cur_team_from_rosters(player, rosters):
 # player_teams = {year:{team:gp,...},...
 # do we always want to return the team, even if they are only practice players?
 # that may lead to wrong results if we only want to consider game players
-def determine_player_current_team(player, player_teams, cur_yr='', rosters={}):
+def determine_player_current_team(player, player_teams={}, cur_yr='', rosters={}):
     # print('\n===Determine Player Current Team: ' + player.title() + '===\n')
     # print('Input: players_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     # print('\nOutput: player_current_team = \'cha\'\n')

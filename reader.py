@@ -1915,6 +1915,9 @@ def read_react_website(url, timeout=10, max_retries=3):
 				# click pts btn
 				epath = 'button[' + str(stat_key+relative_key) + ']'
 
+				# problem: sometimes fails to find sgp element, so must manually click sgp button and then it finds the stats btn
+				# is it bc searched before loaded? if so, how to wait until loaded before search?
+
 				if stat_name == 'reb':
 					# first need to click right arrow to move so ast btn visible
 					side_btn = driver.find_element('class name','side-arrow--right')
@@ -1940,6 +1943,9 @@ def read_react_website(url, timeout=10, max_retries=3):
 						stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
 						stat_btn_text = stat_btn.get_attribute('innerHTML')
 						#print("stat_btn: " + stat_btn_text)
+					# does scroll help problem of no sgp element???
+					# scroll to btn before attempting click or it will skip
+					#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
 					stat_btn.click()
 
 
@@ -2071,8 +2077,10 @@ def read_react_website(url, timeout=10, max_retries=3):
 							# print('odds_vals: ' + str(odds_vals))
 
 							#print('collected player data')
-							time.sleep(0.2)
-							player_btn.click() # close dropdown
+							# 0.1 is too fast to close dropown
+							# tested 0.1: seems like it gets all data without skipping
+							time.sleep(0.1) # 0.1 or 2 is arbitrary, so need to minimize to save time
+							#player_btn.click() # close dropdown
 						except:
 							print('Warning: player btn unclickable!')
 
@@ -2096,12 +2104,18 @@ def read_react_website(url, timeout=10, max_retries=3):
 	return None
 
 #all_players_odds: {'mia': {'pts': {'Bam Adebayo': {'18+': '−650',...
+# get single odds separate bc they can be placed solo
+# single bets can also be combined with parlay bets 
+# but the diff is parlay bets must be combined
 def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
 	print('\n===Read All Players Odds===\n')
-	#print('game_teams: ' + str(game_teams))
+	print('Setting: Current Year = ' + cur_yr)
+	print('\nInput: game_teams = ' + str(game_teams))
 	#print('player_teams: ' + str(player_teams))
+	print('\nOutput: all_players_odds = {\'mia\': {\'pts\': {\'Bam Adebayo\': {\'18+\': \'−650\',\'17-\': \'x\',...\n')
+
 	all_players_odds = {}
-	odds = '?' # if we dont see name then they might be added later so determine if it is worth waiting
+	#odds = '?' # if we dont see name then they might be added later so determine if it is worth waiting
 
 	# use pd df
 	# like for reading roster and box score and game log
@@ -2111,6 +2125,8 @@ def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
 	#all_players_odds = [] # all players in game
 	#player_stat_odds = [] # from +2 to +n depending on stat
 
+	# for draftkings parlays now work both combining single bets and specific parlay only bets
+	# so loop through games to get specific parlay only bets, which must be combined
 	# should loop thru games instead of teams bc 2 teams on same page
 	# see which teams are playing together and group them
 	#game_teams = read_opponent()
@@ -2170,6 +2186,12 @@ def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
 			print('Success')
 		else:
 			print('Warning: website has no soup!')
+
+
+
+	# Get Single Odds
+	# https://sportsbook.draftkings.com/leagues/basketball/nba?category=player-points
+	
 
 	#writer.write_json_to_file(all_players_odds, filepath, write_param)
 
@@ -3128,7 +3150,7 @@ def read_player_teammates(player, player_season_logs, all_box_scores, init_all_p
 # read teammates using box score data in all players in games dict
 # which gives away home teams players
 def read_year_teammates(player, season_year, player_season_log, year_box_scores):
-	# print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
+	#print('\n===Read Season Teammates for ' + player.title() + ', ' + season_year + '===\n')
 	# print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
 	# print('Input: year_box_scores = {game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
 	# print('\nOutput: season_teammates = [p1,...] =  [\'J Randle PF\', ...\n')
@@ -3206,7 +3228,7 @@ def read_year_teammates(player, season_year, player_season_log, year_box_scores)
 											game_teammates_dict = game_players['away']
 											break
 						else:
-							print('Warning: Box score blank when reading teammates! ' + game_key)
+							print('Warning: Box score blank! ' + game_key + ', ' + player.title())
 
 					if player_team != '':
 						# print('player_team: ' + str(player_team))
@@ -3556,7 +3578,7 @@ def read_game_key(season_year, team_abbrev, game_row):
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
 # use init_player_stat_dict to see saved stats
 # init_player_stat_dicts = {player: {"2023": {"regular": {"pts": {"all": {"0": 14,...
-def read_all_box_scores(all_players_season_logs, all_players_teams, season_years, season_part, cur_yr, read_new_game_ids=True):#, season_year=2024):
+def read_all_box_scores(all_players_season_logs, all_players_teams, season_years, season_part, cur_yr, read_new_game_ids=True, prints_on=False):#, season_year=2024):
 	print('\n===Read All Box Scores===\n')
 	print('Setting: season years = ' + str(season_years))
 	print('Setting: season part = ' + season_part)
@@ -3592,7 +3614,8 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 
 
 	for player, player_season_logs in all_players_season_logs.items():
-		#print('\nplayer: ' + player)
+		if prints_on:
+			print('\nplayer: ' + player)
 
 		player_teams = all_players_teams[player]
 		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr, player)
@@ -3622,20 +3645,24 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 
 				# for reg season, idx starts after first playoff game
 				for game_idx, row in season_part_game_log.iterrows():
-					#print('\ngame_idx: ' + str(game_idx))
-					#print('row: ' + str(row))
+					
 
 					# determine player team for game
 					player_team_idx = determiner.determine_player_team_idx(player, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
 					team_abbrev = ''
 					if len(teams) > player_team_idx:
 						team_abbrev = teams[player_team_idx]
-					#print('team_abbrev: ' + team_abbrev)
+					
 
 					
 						
 					game_key = read_game_key(season_year, team_abbrev, row)
-					#print('game_key: ' + game_key)
+					
+					if prints_on:
+						print('\ngame_idx: ' + str(game_idx))
+						print('row: ' + str(row))
+						print('team_abbrev: ' + team_abbrev)
+						print('game_key: ' + game_key)
 					if game_key == '':
 						print('Warning: Blank Game Key! ' + player.title() + ', ' + season_year + ', Game ' + str(game_idx) + ', ' + team_abbrev)
 						continue
@@ -3938,11 +3965,11 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 	#print("position: " + position)
 	return position
 
-def read_all_players_positions(players_names, all_players_espn_ids):
+def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[], rosters={}):
 	print("\n===Read All Players Positions===\n")
 	print('Input: players_names = [p1,...] = ' + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
-	print('\nOutput: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')
+	print('\nOutput: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}\n')
 
 	all_players_positions = {}
 
@@ -3958,11 +3985,21 @@ def read_all_players_positions(players_names, all_players_espn_ids):
 		init_all_players_positions[player_name] = player_position
 	#print('init_all_players_positions: ' + str(init_all_players_positions))
 
+	all_players_names = []
+	if len(game_teams) > 0:
+		for game in game_teams:
+			for team in game:
+				#team_roster = rosters[team]
+				for player in rosters[team]:
+					all_players_names.append(player)
+	else:
+		all_players_names = players_names
+
 	# not all espn ids bc need all ids for teammates and opps
 	# but only need pos for player of interest? 
 	# here yes bc we can get pos of teams from box scores
 	#for name, id in all_players_espn_ids.items():
-	for name in players_names:
+	for name in all_players_names:
 		id = all_players_espn_ids[name]
 		pos = read_player_position(name, id, init_all_players_positions)
 		all_players_positions[name] = pos
@@ -4790,7 +4827,6 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Fal
 # sometimes given abbrev if only available
 def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_team='', filepath='data/all players ids.csv', year=''):
 	#print('\n===Read Player ESPN ID: ' + init_player_name + '===\n')
-	#print('init_player_name: ' + init_player_name) 
 
 	espn_id = ''
 
@@ -4800,6 +4836,7 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 		espn_id = init_all_players_espn_ids[player_name]
 
 	else:
+		print('\n===Read New Player ESPN ID: ' + init_player_name + '===\n')
 		#print('read id from internet')
 		# spell out position to be more specific to ensure correct search
 		#player_names = player_name.split()
@@ -4892,6 +4929,7 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 				else:
 					print('Warning: Search returned no results! ' + player_search_term)
 		
+		print("espn_id: " + espn_id)
 
 	#print("espn_id: " + espn_id)
 	return espn_id

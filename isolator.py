@@ -184,6 +184,8 @@ def isolate_duplicate_dicts(main_dict, keys, dict_list):
     return duplicate_dicts
 
 def isolate_sg_props(main_prop, props):
+    print('\n===Isolate SG Props===\n')
+
     sg_props = []
 
     main_game = main_prop['game']
@@ -192,10 +194,11 @@ def isolate_sg_props(main_prop, props):
         if main_game == prop_game:
             sg_props.append(prop)
 
-    #print('sg_props: ' + str(sg_props))
+    print('sg_props: ' + str(sg_props))
     return sg_props
 
 def isolate_highest_prob_prop(sg_props, field_key=''):
+    print('\n===Isolate Highest Prob Prop===\n')
     
     # Iso by auto sort
     if field_key == '':
@@ -203,7 +206,7 @@ def isolate_highest_prob_prop(sg_props, field_key=''):
     
     highest_prop = sorter.sort_dicts_by_key(sg_props, field_key, reverse=True)[0]
     
-    #print('highest_prop: ' + str(highest_prop))
+    print('highest_prop: ' + str(highest_prop))
     return highest_prop
 
 def isolate_highest_ev_prop(sg_props):

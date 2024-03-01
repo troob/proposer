@@ -331,8 +331,8 @@ def convert_team_abbrev_to_name(team_abbrev):
 # how to tell if different players have same name so are actually meant to have separate abbrevs?
 # will they be on team different teams?
 # what if players have same name on same team? then it would incorrectly take both players abbrevs as 1 players abbrevs
-# i think odds are low enough to treat main case and flag when 2 players on same team have same namw
-def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
+# i think odds are low enough to treat main case and flag when 2 players on same team have same name
+def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', player_teams={}, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
     # print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
     # print('Input: game_player_team = ' + game_player_team)
     # print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# + str(all_players_abbrevs))
@@ -358,10 +358,24 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
             # print('game_player: ' + str(game_player))
             # print('team: ' + str(team))
             # print('game_player_team: ' + str(game_player_team))
-            if name == game_player and team == game_player_team:
-                #print('found abbrev')
-                game_player_abbrevs.append(abbrev)
-                #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+            # loop thru teams played this yr to ensure correct abbrev or else might find same abbrev for diff player
+            if game_player_team != '' :
+                if name == game_player and team == game_player_team:
+                    #print('found abbrev')
+                    game_player_abbrevs.append(abbrev)
+                    #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+            
+            elif len(player_teams.keys()) > 0:
+                # should always have year in teams bc abbrev from box score which also gets player teams
+                #if year in player_teams.keys():
+                year_teams_dict = player_teams[year]
+                year_teams = list(year_teams_dict.keys())#convert_player_teams_dict_to_list(year_teams_dict)
+                for gp_team in year_teams:
+                    if name == game_player and team == gp_team:
+                        #print('found abbrev')
+                        game_player_abbrevs.append(abbrev_key)
+                        #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+            
 
         # we only add abbrevs from year of interest?
         # keep yrs separate
@@ -390,29 +404,57 @@ def convert_irregular_player_name(player_name):
 
     return player_name
 
+# CHANGED to get list of all abbrevs
+# Convert Player Name to Abbrev: damion lee
+# what is the diff bt this and determine player abbrevs?
+# determine abbrev simply truncates name
+# def convert_player_name_to_abbrevs(game_player, all_players_abbrevs):
+#     # print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
+#     # print('all_players_abbrevs: ' + str(all_players_abbrevs))
+
+#     game_player_abbrevs = []
+
+#     # some players w/ jr/sr have 2 entries
+#     for year_players_abbrev in all_players_abbrevs.values():
+#         for abbrev_key, name in year_players_abbrev.items():
+#             abbrev_data = abbrev_key.split('-')
+#             abbrev = abbrev_data[0]
+
+#             # CAUTION: does this cause mismatch
+#             # we want kelly oubre to match kelly oubre jr
+#             # but are there any irregular cases where 1 players name fits in another players name???
+#             #if name == game_player:
+#             if re.search(game_player, name) and abbrev not in game_player_abbrevs:
+#                 game_player_abbrevs.append(abbrev)
+
+
+
+#     #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+#     return game_player_abbrevs
+
 # CHANGE to get list of all abbrevs
 # Convert Player Name to Abbrev: damion lee
 # what is the diff bt this and determine player abbrev?
-def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    # print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+# determine abbrev simply truncates name
+def convert_player_name_to_abbrev(game_player, all_players_abbrevs, gp_team):
+    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    print('Input: gp_team = ' + gp_team.upper())
     # print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
 
     # some players w/ jr/sr have 2 entries
-
-
-
     for year_players_abbrev in all_players_abbrevs.values():
         for abbrev_key, name in year_players_abbrev.items():
             abbrev_data = abbrev_key.split('-')
             abbrev = abbrev_data[0]
+            team = abbrev_data[1]
 
             # CAUTION: does this cause mismatch
             # we want kelly oubre to match kelly oubre jr
             # but are there any irregular cases where 1 players name fits in another players name???
             #if name == game_player:
-            if re.search(game_player, name):
+            if re.search(game_player, name) and team == gp_team:
                 game_player_abbrev = abbrev#all_players_abbrevs[game_player]#convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_teams, all_box_scores, season_years, cur_yr)
                 break
 
@@ -456,26 +498,30 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, all_players_
     #         if game_player_abbrev != '':
     #             break
 
-    #print('game_player_abbrev: ' + str(game_player_abbrev))
+    print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
 # CHANGE to get list of all abbrevs bc each player may have multiple
-def convert_all_players_name_to_abbrevs(players, all_players_abbrevs):
-    # print('\n===Convert All Players Names to Abbrevs===\n')
-    # print('players: ' + str(players))
+# we know all players on same team bc called from in team part loop
+def convert_all_players_names_to_abbrevs(players, all_players_abbrevs, gp_team):
+    print('\n===Convert All Players Names to Abbrevs===\n')
+    print('Input: players = ' + str(players))
+    print('Input: gp_team = ' + gp_team.upper())
+    print('\nOutput: abbrevs = [abbrev1,...]\n')
     
     abbrevs = []
     
     for player in players:
         # check both forms of name
-        abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
+        abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs, gp_team)
         if abbrev == '' and re.search('\'', player):
             player = re.sub('\'','',player).strip()
-            abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs)
+            abbrev = convert_player_name_to_abbrev(player, all_players_abbrevs, gp_team)
         
-        abbrevs.append(abbrev)
+        if abbrev != '': # blank if not played on team yet bc abbrev got from box score
+            abbrevs.append(abbrev)
 
-    #print('abbrevs: ' + str(abbrevs))
+    print('abbrevs: ' + str(abbrevs))
     return abbrevs
 
 # combine all names into single string condition, alphabet order

@@ -73,7 +73,7 @@ single_conds = ['nf', 'local', 'weekday']
 # they played this season so they are included in all teammates 
 # but are now out for the rest of season
 # 'cha':['kyle lowry'], 
-ofs_players = {'chi':['zach lavine'], 'mem':['ja morant'], 'mia':['dru smith'], 'por':['robert williams iii'], 'sas':['charles bassey']}
+ofs_players = {'bkn':['dariq whitehead'], 'chi':['zach lavine'], 'mem':['ja morant'], 'mia':['dru smith'], 'por':['robert williams iii'], 'sas':['charles bassey']}
 
 
 #===READ LINEUPS===
@@ -122,9 +122,10 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = False
+test = True
 # run dist probs with prints/comments
-prints_on = False
+prints_on = True
+
 # force probs to reload even if already saved
 # so we dont have to erase each test
 test_probs = False
@@ -172,10 +173,9 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-#('bkn','bos'), ('chi','cle'), ('ind','tor'), ('hou','mem'), ('wsh','nop'), ('sas','dal'), ('sac','den'), ('det','phx'), ('lal','uta'), 
-game_teams = [('mil','mem'), ('gsw','uta'), ('min','por')]#, ('nop','lal')
+game_teams = [('mil','cha'), ('uta','orl'), ('atl','bkn'), ('gsw','nyk'), ('okc','sas'), ('hou','phx'), ('mia','den'), ('wsh','lal')]#, ('nop','lal')
 if test:
-    game_teams = [('mil','mem')]
+    game_teams = [('wsh','lal')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -186,7 +186,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['malik beasley'] # 'jacob gilyard', use for testing
+    players_names = ['jordan poole'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
