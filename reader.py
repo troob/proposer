@@ -1882,7 +1882,8 @@ def read_react_web_data(url):
 # but unusual error may occur
 # .ElementClickInterceptedException: Message: element click intercepted: Element <button role="tab" class="rj-market__group" aria-selected="false" data-testid="button-market-group">...</button> is not clickable at point (763, 135). Other element would receive the click: 
 # return {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-def read_react_website(url, timeout=10, max_retries=3):
+# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
+def read_react_website(url, team_name, timeout=10, max_retries=3):
 	# print('\n===Read React Website===\n')
 	# print('url: ' + url)
 
@@ -1890,6 +1891,8 @@ def read_react_website(url, timeout=10, max_retries=3):
 	web_dict = {}
 
 	driver = webdriver.Chrome(ChromeDriverManager().install())
+	# default 3 does not seem long enough bc often fails to find element that should be there
+	# change to 30 makes no diff
 	driver.implicitly_wait(3)
 
 	driver.get(url) # Open the URL on a google chrome window
@@ -2092,10 +2095,46 @@ def read_react_website(url, timeout=10, max_retries=3):
 			return web_dict
 
 		except Exception as e:
-			print('Warning: No SGP element! ', e)
+			
 			retries += 1
-			print(f"Exception error occurred. Retrying {retries}/{max_retries}...", e)#, e.getheaders(), e.gettext(), e.getcode())
-			time.sleep(10)
+			print(f"Exception occurred. Retrying {retries}/{max_retries}...")#\n", e)#, e.getheaders(), e.gettext(), e.getcode())
+			print('Warning: No SGP element!\n', e)
+
+			# e_msg = str(e)
+			# print('e msg: ' + e_msg)
+			# if e == Message: no such element: Unable to locate element: {"method":"css selector","selector":".rj-market__groups"}
+			# click on sgp btn for correct game
+			# python selenium find element by href
+			# https://sportsbook.draftkings.com/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true
+			# href="/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true"
+			# sgp_url = ''
+			# sgp_btn = driver.find_element_by_xpath('//a[@href="'+sgp_url+'"]')
+			# need to loop thru links to find 1 with keywords, bc url has unknown code
+			# game teams or is 1 team enough?
+			# get team name from url
+			# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
+			# see if known team name is in url
+			# take last word of team name to simplify so we dont need to remove dashes
+			# add dash bc always preceded by city
+			team_name = '-' + team_name.split()[-1]
+			print('team_name: ' + str(team_name))
+			# title = Open game in SGP mode
+			# class = toggle-sgp-badge__nav-link
+			sgp_btns = driver.find_elements('class name', 'toggle-sgp-badge__nav-link')
+			print('sgp_btns: ' + str(sgp_btns))
+			for sgp_btn in sgp_btns:
+				print('sgp_btn: ' + str(sgp_btn))
+				#sgp_key = team_name
+				sgp_url = sgp_btn.get_attribute('href')
+				print('sgp_url: ' + str(sgp_url))
+				if re.search(team_name, sgp_url):
+					print('found sgp btn: ' + str(sgp_btn) + ', ' + str(sgp_url))
+					driver.execute_script("arguments[0].scrollIntoView(true);", sgp_btn)
+					sgp_btn.click()
+					break
+
+			# default 10s seems too long
+			time.sleep(5)
 
 	
 	# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
@@ -2138,16 +2177,16 @@ def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
 
 		all_players_odds[game_team] = {} # loops for both teams in game?
 
-		team_name = re.sub(' ','-', determiner.determine_team_name(game_team))
+		team_name = determiner.determine_team_name(game_team)
 		#print("team_name: " + str(team_name))
 
 		# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
-		game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + team_name + '--odds?sgpmode=true'
+		game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds?sgpmode=true'
 		#print('game_odds_url: ' + game_odds_url)
 
 		# return dictionary results for a url
 		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-		game_players_odds_dict = read_react_website(game_odds_url)
+		game_players_odds_dict = read_react_website(game_odds_url, team_name)
 
 		if game_players_odds_dict is not None:
 			#print('game_players_odds_dict:\n' + str(game_players_odds_dict))

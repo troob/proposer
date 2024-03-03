@@ -2799,6 +2799,167 @@ def generate_prop_table_data(multi_prop_dicts, desired_order=[], joint_sheet_nam
 
     return (prop_tables, sheet_names)
 
+
+# loop thru season logs like for stat dict
+# bc we need to get all instances of tiap conds to get median
+# and then for stat dict we use median to get offset for each game
+def generate_player_median_tiaps(player_name, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, cur_yr):
+    print('\n===Generate Player Median TIAPs: ' + player_name.title() + '===\n')
+    print('Setting: Season Part = ' + season_part)
+    print('Setting: Current Year = ' + cur_yr)
+    print('\nInput: player_position = ' + player_position)
+    print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: gp_cur_team = ' + str(gp_cur_team))
+    print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+    print('\nOutput: player_median_tiaps = {year:tiap, ...\n')
+
+    player_median_tiaps = {}
+
+    position_groups = {'pg':['pg','sg','g','sf'], 
+                        'sg':['pg','sg','g','sf'],
+                        'g':['pg','sg','g','sf'],
+                        'sf':['sg','g','sf','f','pf'],
+                        'f':['sf','f','pf','c'],
+                        'pf':['sf','f','pf','c'],
+                        'c':['sf','f','pf','c']}
+    player_position_group = position_groups[player_position]
+    print('player_position_group: ' + str(player_position_group))
+
+
+    for season_year, player_game_log in player_season_logs.items():
+        print('\nSeason_year: ' + season_year)
+        
+
+        season_tiaps = []
+
+        player_game_log = pd.DataFrame(player_game_log)#.from_dict(player_game_log) #pd.DataFrame(player_game_log)
+        player_game_log.index = player_game_log.index.map(str)
+        print("player_game_log:\n" + str(player_game_log))
+
+        season_part_game_log = determiner.determine_season_part_games(player_game_log, season_part)
+
+        season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_game_log, season_part, season_year, cur_yr, gp_cur_team, player_name)
+        teams_reg_and_playoff_games_played = season_games_played_data[0]
+        season_part_game_log = season_games_played_data[1]
+        teams = season_games_played_data[2]
+        games_played = season_games_played_data[3]
+
+        player_team_idx = 0
+        
+        for game_idx, row in season_part_game_log.iterrows():
+
+            player_team_idx = determiner.determine_player_team_idx(player_name, player_team_idx, game_idx, row, games_played, teams_reg_and_playoff_games_played)
+            player_team = ''
+            if len(teams) > player_team_idx:
+                player_team = teams[player_team_idx]
+            print('player_team: ' + player_team)
+                
+            away_abbrev = player_team
+
+            game_opp_str = row['OPP'] #player_game_log.loc[game_idx, 'OPP']
+            game_opp_abbrev = reader.read_team_abbrev(game_opp_str) # remove leading characters and change irregular abbrevs
+            home_abbrev = game_opp_abbrev
+
+            if re.search('vs',game_opp_str):
+                away_abbrev = game_opp_abbrev
+                home_abbrev = player_team
+
+            # game date used to get game key
+            # which is used to get game info and box score
+            init_game_date_string = row['Date'].lower().split()[1] # 'wed 2/15'[1]='2/15'
+            game_mth = init_game_date_string.split('/')[0]
+            final_season_year = season_year
+            if int(game_mth) > 9:
+                final_season_year = str(int(season_year) - 1)
+            game_date_string = init_game_date_string + "/" + final_season_year
+            #print("game_date_string: " + str(game_date_string))
+
+            if season_year in all_box_scores.keys() and len(all_box_scores[season_year].keys()) > 0:
+                # if game key not in dict then we dont have info about it
+                # but if we have dict but missing this game then it is error bc we already read all players in games
+                game_key = away_abbrev + ' ' + home_abbrev + ' ' + game_date_string
+                print('game_key: ' + str(game_key))
+                if game_key in all_box_scores[season_year].keys():
+                    # no stats needed bc no game recorded? no we still go thru each stat for other conds
+
+                    game_players = all_box_scores[season_year][game_key] # {away:{starters:[],bench:[]},home:{starters:[],bench:[]}}
+                    
+                    if len(game_players.keys()) > 0:
+                        player_loc = 'away'
+                        #game_teammates = game_players[loc_key] # teammates includes main player of interest in loop
+                        if player_team == home_abbrev:
+                            player_loc = 'home'
+                        game_teammates = game_players[player_loc]
+
+                        starters_key = 'starters'
+                        bench_key = 'bench'
+                        if starters_key in game_teammates.keys():
+                            starters = game_teammates[starters_key]
+                            bench = game_teammates[bench_key]
+
+    
+                            tiap = 0
+                            print('starters: ' + str(starters))
+                            # teammate_abbrev = B Miller F
+                            for teammate_abbrev in starters:
+                                teammate_position = teammate_abbrev.split()[-1].lower()#all_players_positions[teammate]
+                                print('teammate_abbrev: ' + teammate_abbrev + ', ' + teammate_position)
+                                if teammate_position in player_position_group:
+                                    tiap += 1
+                            print('bench: ' + str(bench))
+                            for teammate_abbrev in bench:
+                                teammate_position = teammate_abbrev.split()[-1].lower()
+                                print('teammate_abbrev: ' + teammate_abbrev + ', ' + teammate_position)
+                                #print('teammate_position: ' + str(teammate_position))
+                                if teammate_position in player_position_group:
+                                    tiap += 1
+                            # subtract 1 for cur player bc not his own teammate
+                            # OR just count all players including cur player???
+                            # simpler to consider relative to teammates
+                            # bc otherwise need to specify team players and opp players and all game players separately
+                            # also bc out teammates never includes cur player so keep uniformly relative to teammates
+                            tiap -= 1
+                            print('tiap: ' + str(tiap))
+
+                            season_tiaps.append(tiap)
+                            
+                            
+
+        # now that we have list of all tiaps in season, get median          
+        player_median_tiaps[season_year] = int(np.median(season_tiaps))
+
+
+    print('player_median_tiaps: ' + str(player_median_tiaps))
+    return player_median_tiaps
+
+def generate_all_players_median_tiaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str):
+
+    all_players_median_tiaps = {}
+
+    for player in players_names:
+
+        player_position = all_players_positions[player]
+        player_teams = all_players_teams[player]
+        gp_cur_team = all_players_gp_cur_teams[player]
+        player_season_logs = all_players_season_logs[player]
+
+        all_players_median_tiaps[player] = generate_player_median_tiaps(player, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, current_year_str)
+
+    return all_players_median_tiaps
+
+def generate_all_players_gp_cur_teams(all_players_teams, all_players_season_logs, current_year_str, players_names):
+
+    all_players_gp_cur_teams = {}
+
+    for player in players_names:
+        player_teams = all_players_teams[player]
+        player_season_logs = all_players_season_logs[player]
+        all_players_gp_cur_teams[player] = determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player)
+
+    return all_players_gp_cur_teams
+
+
 def generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds, all_players_abbrevs, rosters, game_teams):
     print('\n===Generate All Cur Conds Lists===\n')
     print('Input: all_cur_conds_dicts = {player: {cond_key:cond_val, ...')# = ' + str(all_cur_conds_dicts))
@@ -3054,9 +3215,9 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, 
     return stat_val_probs_dict
 
 def generate_rare_prev_cond(rare_prev_val_players, stat_name, player):
-    print('\n===Generate Rare Prev Val Cond: ' + stat_name.upper() + ', ' + player.title() + '===\n')
-    print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...} = ' + str(rare_prev_val_players))
-    print('\nOutput: rare_prev_cond = rare cat or No')
+    # print('\n===Generate Rare Prev Val Cond: ' + stat_name.upper() + ', ' + player.title() + '===\n')
+    # print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...} = ' + str(rare_prev_val_players))
+    # print('\nOutput: rare_prev_cond = rare cat or No')
 
     # add most rare
     rare_prev_cond = 'No'
@@ -3074,7 +3235,7 @@ def generate_rare_prev_cond(rare_prev_val_players, stat_name, player):
         if rare_prev_cond != 'No':
             break
 
-    print('rare_prev_cond: ' + rare_prev_cond)
+    #print('rare_prev_cond: ' + rare_prev_cond)
     return rare_prev_cond
 
 # get low sample sizes for this player cur conds
@@ -4934,10 +5095,10 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # player_teams = {year:team:gp}
-def generate_player_current_conditions(player, game_teams, player_teams, all_lineups={}, player_cur_season_log={}, init_game_ids_dict={}, all_teams_schedules={}, all_cur_games_info={}, all_players_positions={}, cur_yr='', rosters={}, cur_date='', read_new_game_ids=True, todays_games_date_obj=datetime.today()):
-    #print('\n===Generate Player Current Conditions: ' + player.title() + '===\n')
-    #print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-    #print('Input: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
+def generate_player_current_conditions(player, game_teams, player_teams, all_lineups={}, player_cur_season_log={}, player_stat_dict={}, init_game_ids_dict={}, all_teams_schedules={}, all_cur_games_info={}, all_players_positions={}, player_cur_median_tiap=0, cur_yr='', rosters={}, cur_date='', read_new_game_ids=True, todays_games_date_obj=datetime.today()):
+    print('\n===Generate Player Current Conditions: ' + player.title() + '===\n')
+    print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')# = ' + str(all_teams_schedules))
 
     player_current_conditions = {}
 
@@ -4963,6 +5124,28 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
     if opp_team in former_teams:
         player_current_conditions[cur_former_team_cond] = cur_former_team_cond
     
+    # game info conditions
+    # cur_tod
+    # cur_coverage
+    # cur_city
+    # cur_audience
+    # read game info from espn
+    away_team = player_team
+    home_team = opp_team
+    if cur_loc == 'home':
+        away_team = opp_team
+        home_team = player_team
+
+    # for now assuming today but accept any date of interest
+    cur_date = datetime.today().strftime('%m/%d/%Y')
+    game_key = away_team + ' ' + home_team + ' ' + cur_date
+    cur_game_info = {}
+    if game_key in all_cur_games_info.keys():
+        cur_game_info = all_cur_games_info[game_key]
+    else:
+        cur_game_info = reader.read_game_info(game_key, init_game_ids_dict, player=player, read_new_game_ids=read_new_game_ids)
+        all_cur_games_info[game_key] = cur_game_info
+
     # move coverage as close to front as possible
     # bc national games star players step up
     # show conds in order of weight/importance
@@ -4985,27 +5168,9 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
     
     
     
-    # game info conditions
-    # cur_tod
-    # cur_coverage
-    # cur_city
-    # cur_audience
-    # read game info from espn
-    away_team = player_team
-    home_team = opp_team
-    if cur_loc == 'home':
-        away_team = opp_team
-        home_team = player_team
+    
 
-    # for now assuming today but accept any date of interest
-    cur_date = datetime.today().strftime('%m/%d/%Y')
-    game_key = away_team + ' ' + home_team + ' ' + cur_date
-    cur_game_info = {}
-    if game_key in all_cur_games_info.keys():
-        cur_game_info = all_cur_games_info[game_key]
-    else:
-        cur_game_info = reader.read_game_info(game_key, init_game_ids_dict, player=player, read_new_game_ids=read_new_game_ids)
-        all_cur_games_info[game_key] = cur_game_info
+    
 
     if len(cur_game_info.keys()) > 0:
 
@@ -5146,9 +5311,14 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
     
 
         # teammates in/out at position
-        player_current_conditions['tiap'] = determiner.determine_teammates_in_at_position(player_team_lineup, all_players_positions, player)
-        player_current_conditions['toap'] = determiner.determine_teammates_out_at_position(player_team_lineup, all_players_positions, player)
+        tiap = determiner.determine_teammates_in_at_position(player_team_lineup, all_players_positions, player)
+        player_current_conditions['tiap'] = str(tiap) + ' tiap'
+        # need stat dict to get median tiap bc shows samples for each cond
+        #player_current_conditions['offset tiap'] = determiner.determine_offset_tiap(tiap_str, player_stat_dict, player)
+        player_current_conditions['toap'] = str(determiner.determine_teammates_out_at_position(player_team_lineup, all_players_positions, player)) + ' toap'
     
+        player_current_conditions['off tiap'] = str(player_cur_median_tiap - tiap) + ' off'
+
     else:
         print('Warning: Player team not in all lineups! ' + player_team.upper() + ', ' + player.title())
 
@@ -5160,7 +5330,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # if player on new team but has not yet played (eg injury) then only consider current conditions if they are specifically noted as playing? 
 # cant bc only lists starters and out
-def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, all_players_positions):#, read_lineups):
+def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps):#, read_lineups):
     print('\n===Generate All Current Conditions===\n')
     print('Settings: Find Players')
     print('\nInput: Players of Interest = ' + str(players))
@@ -5222,10 +5392,12 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
                 if cur_yr in player_season_logs.keys():
                     player_cur_season_log = player_season_logs[cur_yr]
 
-                player_position = all_players_positions[player]
-                
+                player_cur_median_tiap = all_players_median_tiaps[player][cur_yr]
+
+                #player_position = all_players_positions[player]
+                player_stat_dict = {}#all_players_stats_dicts[player]
                 # need to pass all lineups bc opponent lineups matter too
-                player_cur_conds_data = generate_player_current_conditions(player, game_teams, player_teams, all_lineups, player_cur_season_log, init_game_ids_dict, all_teams_schedules, all_cur_games_info, all_players_positions, cur_yr=cur_yr, rosters=rosters)
+                player_cur_conds_data = generate_player_current_conditions(player, game_teams, player_teams, all_lineups, player_cur_season_log, player_stat_dict, init_game_ids_dict, all_teams_schedules, all_cur_games_info, all_players_positions, player_cur_median_tiap, cur_yr=cur_yr, rosters=rosters)
                 player_cur_conds = player_cur_conds_data[0]
                 # updates game ids when it reads new game
                 init_game_ids_dict = player_cur_conds_data[1]
@@ -6394,7 +6566,7 @@ def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
 # like gen true prob
 # use cond of player of interest starter/bench
 # and use out conds
-def generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, cur_yr, season_part, prints_on):
+def generate_player_playtime(player_name, player_team, player_gp_conds, player_cur_tiap, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, cur_yr, season_part, prints_on):
     if prints_on:
         print('\n===Generate Player Playtime: ' + player_name.title() + '===\n')
         print('Settings: Current Year = ' + cur_yr)
@@ -6507,10 +6679,16 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                 # cond weight = avg playtime on cur team
                 if teammate in all_players_cur_avg_playtimes.keys():
 
+                    # get all multicond weights bc used to get playtime with accurate lineups
+                    # adjust weights based on sample size??? probably
+                    teammate_weight = all_players_cur_avg_playtimes[teammate]#generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
+                        
+                    # add teammate weights bc then multiplied by sample size to get total weight
+                    # add weight even if no samples directly bc used to get weight of teammates at position
+                    multi_cond_weights[cond_key] += teammate_weight # OR cond_weight???
+
                     if teammate == player_name or cond_key == 'out':
 
-                        # adjust weights based on sample size??? probably
-                        teammate_weight = all_players_cur_avg_playtimes[teammate]#generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
                         
                         
                         sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, prints_on=prints_on)
@@ -6536,7 +6714,7 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                                 all_cond_weights[cond] = cond_weight
                                 #all_cond_weights.append(cond_weight)
                             
-                            multi_cond_weights[cond_key] += cond_weight
+                        
 
                         if prints_on:
                             print('\ncond: ' + str(cond))
@@ -6548,10 +6726,11 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                     print('Warning: Teammate not in playtimes dict! ' + init_teammmate_abbrev + ', ' + teammate + ', ' + player_team)
 
             for cond_key, cond in multi_conds.items():
-                #print('\ncond: ' + cond)
+                
 
                 #cond_weight = generate_multi_cond_weight(teammate_cur_season_log, teammate_gp_cur_team)
                 teammates_weight = multi_cond_weights[cond_key]
+                
 
                 cur_conds = {'condition':cond, 'year':cur_yr, 'part':season_part}
                 sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, prints_on=prints_on)
@@ -6572,8 +6751,45 @@ def generate_player_playtime(player_name, player_team, player_gp_conds, player_s
                         all_cond_weights[cond] = cond_weight
                         #all_cond_weights.append(cond_weight)
 
+                # if low samples then use teammate positions
+                else:
+                    
+                    cond = player_cur_tiap
+                    
+                    cur_conds = {'condition':cond, 'year':cur_yr, 'part':season_part}
+                    sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, prints_on=prints_on)
+                    
+                    if sample_size > 1:
+                        sample_weight = math.log(sample_size) / 2 # 1/2 bc sample loss in quality bc of position not specific player
+                        
+                        cond_weight = round_half_up(teammates_weight * sample_weight, 2)
+                        
+                        # get weighted avg bt all season yrs, like gen all conds weights?
+                        # no just get this yr bc minutes change drastically each yr
+                        cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict)
+                        
+                        if cond_playtime is not None:
+                            all_cond_playtimes[cond] = cond_playtime
+                            all_cond_weights[cond] = cond_weight
+
+                    # if tiap has low samples too then check for offset tiap or toap
+
+                    if prints_on:
+                        print('Low Samples: ' + cond + ', ' + str(sample_size))
+                        print('player_cur_tiap: ' + player_cur_tiap)
+                        print('sample_weight: ' + str(sample_weight))
+
+                        # print('sample_size: ' + str(sample_size))
+                        # print('teammates_weight: ' + str(teammates_weight))
+                        # print('cond_weight: ' + str(cond_weight))
+                        # print('cond_playtime: ' + str(cond_playtime))
+
+
+
                 if prints_on:
                     print('\ncond: ' + str(cond))
+                    print('cond_key: ' + cond_key)
+                    print('teammates_weight: ' + str(teammates_weight))
                     print('cond_playtime: ' + str(cond_playtime))
                     print('sample_size: ' + str(sample_size))
                     print('cond_weight: ' + str(cond_weight))
@@ -7195,7 +7411,7 @@ def generate_player_abbrev(player_name, player_position='', num_letters=1):
 # run separately for each part of each season
 # need cur_yr for teammates out only care about them if cur teammate
 # but also need to look thru past seasons and not count cur teammates as out last season
-def generate_player_all_stats_dicts(player_name, player_game_log, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, cur_yr='', gp_cur_team='', season_years=[], stats_of_interest=[]):
+def generate_player_all_stats_dicts(player_name, player_game_log, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiaps, cur_yr='', gp_cur_team='', season_years=[], stats_of_interest=[]):
     print('\n===Generate Player All Stats Dicts: ' + player_name.title() + ', ' + str(season_year) + ', ' + season_part + '===\n')
     # print('season_year: ' + str(season_year))
     # print('season_part: ' + str(season_part))
@@ -7208,7 +7424,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
     player_abbrev = ''
     if season_year in all_box_scores.keys() and len(all_box_scores[season_year].keys()) > 0:
         player_abbrev = generate_player_abbrev(player_name, player_position)
-    #print('player_abbrev: ' + str(player_abbrev))
+    print('player_abbrev: ' + str(player_abbrev))
     # better to read saved abbrev from all abbrevs rather than guessing abbrev
     #player_abbrevs = converter.convert_player_name_to_abbrevs(player_name, all_players_abbrevs, player_team)
 
@@ -7248,7 +7464,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
     # for season in all seasons
     if len(player_game_log) > 0:
         #season_year = '23'
-        #print("player_game_log:\n" + str(player_game_log))
+        print("player_game_log:\n" + str(player_game_log))
         # we pulled game log from internet
         
         
@@ -7264,6 +7480,8 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
         # elif season_part == 'full':
         #print("season_part_game_log:\n" + str(season_part_game_log) + '\n')
 
+        print('season_year: ' + str(season_year))
+        print('season_years: ' + str(season_years))
         if season_year not in season_years: # just get all cond for sim fit
 
             for game_idx, row in season_part_game_log.iterrows():
@@ -7375,6 +7593,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
             weekends = ['sat','sun'] # separate cond bc anomalies, especially top players stepping down and lower players stepping up
             weekend_key = 'weekend'
+
 
             #prev_stat_vals = []
             for game_idx, row in season_part_game_log.iterrows():
@@ -8003,6 +8222,15 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                         stat_dict[tiap_str] = {}
                                     stat_dict[tiap_str][game_idx] = stat
 
+                                    # get offset = median - tiap
+                                    # need to count instances of cond from game logs
+                                    # if offset is +, then increase minutes (- = decrease)
+                                    offset_tiap = player_median_tiaps[season_year] - tiap
+                                    offset_tiap_str = str(offset_tiap) + ' offset tiap'
+                                    if not offset_tiap_str in stat_dict.keys():
+                                        stat_dict[offset_tiap_str] = {}
+                                    stat_dict[offset_tiap_str][game_idx] = stat
+
 
                                     toap = 0
                                     #print('out_teammates: ' + str(out_teammates))
@@ -8219,19 +8447,20 @@ def generate_full_season_stat_dict(player_stat_dict):
 # player_teams = {'2018': {'mia': 69}, '2019...
 # game_teams: [('mem', 'okc'), ('dal', 'den')...
 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
-def generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores={}, all_games_info={}, player_teams={}, current_year_str='', game_teams=[], init_player_stat_dict={}, find_players=False, player_position='', player_teammates={}, rosters={}, cur_season_part='', season_years=[], stats_of_interest=[]):#, gp_cur_team=0):
+def generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores={}, all_games_info={}, player_teams={}, current_year_str='', game_teams=[], init_player_stat_dict={}, find_players=False, player_position='', player_median_tiap=0, player_teammates={}, rosters={}, cur_season_part='', season_years=[], stats_of_interest=[], gp_cur_team=0):
     print('\n===Generate Player Stat Dict: ' + player_name.title() + '===\n')
     print('Settings: find players, todays date to get day conditions, current year to get changing stat dicts file')
-    print('\nInput: Player of Interest')
-    print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Setting: Season Part = ' + cur_season_part)
+    print('Setting: Current Year = ' + current_year_str)
+    print('\nInput: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
     print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
     print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
     print('Input: game_teams = [(away team, home team), ...] = [(\'nyk\', \'bkn\'), ...]')
-    print('Input: init_player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = \n')
+    print('Input: init_player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     print('Input: player_position = \'position\' = ' + player_position)
     print('Input: player_teammates = {year:[teammates],... = {2024: [J Randle PF, ... = ' + str(player_teammates))
     print('Input: rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
-    print('Input: gp_cur_team = x')
+    print('Input: gp_cur_team = ' + str(gp_cur_team))
     print('\nOutput: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...\n')
 
 
@@ -8330,7 +8559,8 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
 
     all_seasons_stats_dicts = {'pts':all_seasons_pts_dicts, 'reb':all_seasons_rebs_dicts, 'ast':all_seasons_asts_dicts, 'w score':all_seasons_winning_scores_dicts, 'l score':all_seasons_losing_scores_dicts, 'min':all_seasons_minutes_dicts, 'fgm':all_seasons_fgms_dicts, 'fga':all_seasons_fgas_dicts, 'fg%':all_seasons_fg_rates_dicts, '3pm':all_seasons_threes_made_dicts, '3pa':all_seasons_threes_attempts_dicts, '3p%':all_seasons_threes_rates_dicts, 'ftm':all_seasons_ftms_dicts, 'fta':all_seasons_ftas_dicts, 'ft%':all_seasons_ft_rates_dicts, 'blk':all_seasons_bs_dicts, 'stl':all_seasons_ss_dicts, 'pf':all_seasons_fs_dicts, 'to':all_seasons_tos_dicts} # loop through to add all new stats with 1 fcn
 
-    gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player_name)
+    # changed to input param bc used in other fcns to get median tiaps
+    #gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player_name)
 
     for season_year, player_game_log in player_season_logs.items():
 
@@ -8393,7 +8623,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
             
 
             for season_part in season_parts:
-                player_stat_dict[season_year][season_part] = generate_player_all_stats_dicts(player_name, player_game_log_df, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, current_year_str, gp_cur_team, season_years, stats_of_interest) #generate_full_season_stat_dict(player_stat_dict)
+                player_stat_dict[season_year][season_part] = generate_player_all_stats_dicts(player_name, player_game_log_df, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiap, current_year_str, gp_cur_team, season_years, stats_of_interest) #generate_full_season_stat_dict(player_stat_dict)
 
 
         #season_year -= 1
@@ -8401,11 +8631,11 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
         #print('player_stat_dict: ' + str(player_stat_dict))
 
     if not init_player_stat_dict == player_stat_dict:
-        data_type = 'stat dicts'
+        #data_type = 'stat dicts'
         writer.write_cur_and_prev(init_player_stat_dict, player_stat_dict, player_cur_stat_dict_filename, player_prev_stat_dicts_filename, current_year_str, player_name, todays_date, data_type='stat dicts')
 
     # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
-    #print('player_stat_dict: ' + str(player_stat_dict))
+    print('player_stat_dict: ' + str(player_stat_dict))
     return player_stat_dict
 
 # -first take dnp players (avg <10min) off current conditions bench
@@ -8981,6 +9211,11 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     final_all_players_playtimes = copy.deepcopy(init_all_players_playtimes) # keep separate bc update after saving probs and overwrite
     #print('init_all_players_playtimes: ' + str(init_all_players_playtimes))
 
+    all_players_gp_cur_teams = generate_all_players_gp_cur_teams(all_players_teams, all_players_season_logs, current_year_str, players_names)
+
+    # need all players median tiaps to get cur offset tiap for cur conds
+    all_players_median_tiaps = generate_all_players_median_tiaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str)
+
     # need to know current conditions to determine true prob
     # AND which condition probs to read and compute
     # and also later we order spreadsheet based on current conditions used to get true prob
@@ -8993,7 +9228,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_prev_vals = {}
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
-        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, all_players_positions)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
         #print('players_names after cur conds: ' + str(players_names))
         #all_current_conditions = all_cur_conds_data[0]
         #all_lineups = all_cur_conds_data[1]
@@ -9098,6 +9333,23 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         #print(player_name.title() + ' position: ' + player_position)
 
         player_teammates = all_players_teammates[player_name]
+
+        gp_cur_team = all_players_gp_cur_teams[player_name] #determiner.determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player_name)
+
+        # get player offset tiap from median tiap
+        # cant get offset tiap cur cond until we get stat dict
+        # OR if we need offset in stat dict then get all medians first to pass to stat dict
+        # only need for cur yr bc most accurate to playtime and adding more yrs reduces accuracy???
+        # then need a value for each yr???
+        # it is ok to make 1 number for all yrs bc even if diff teams and playtimes the tiap still applies to the player
+        # OR we can just get median for cur yr and get offset of past yrs relative to cur yr median
+        # seems most accurate to get a diff median each yr bc tiap applies to yr rotation lineup
+        # BUT also tiap affects player no matter what team so seeing how it differs from overall median could be more accurate
+        # since we are using offset to adjust cur playtime we need to see offset relative to cur yr only
+        # SO each yr has diff median
+        player_median_tiaps = all_players_median_tiaps[player_name] #generate_player_median_tiaps(player_name, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, current_year_str)#all_median_tiaps[player_name]
+
+
         
         # need gp cur team for stat dict and unit stat dict
         # bc used to get avg minutes cur team from game log
@@ -9108,7 +9360,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # dont need player abbrevs bc simply subtract 1 from team players for cur player to get teammates
         #player_abbrevs = converter.convert_player_name_to_abbrevs(player_name, all_players_abbrevs, player_teams=player_teams)
         # need all players positions to get teammates in/out at position bc affects playtime (also used to get playtime so double factored)
-        player_stat_dict = generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores, all_games_info, player_teams, current_year_str, game_teams, init_player_stat_dict, find_players, player_position, player_teammates, teams_current_rosters, season_part, season_years, stats_of_interest)#, gp_cur_team)
+        player_stat_dict = generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores, all_games_info, player_teams, current_year_str, game_teams, init_player_stat_dict, find_players, player_position, player_median_tiaps, player_teammates, teams_current_rosters, season_part, season_years, stats_of_interest, gp_cur_team)
         all_player_stat_dicts[player_name] = player_stat_dict # save for later outside loop
 
         # same week number for each year, over all years
@@ -9177,8 +9429,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # prob for each stat over and under, from prob distrib instead of direct measure
         # include per unit adjustment, by estimating minutes according to teammates in/out and only conditions affecting minutes such as week of season
         player_team = determiner.determine_player_current_team(player_name, player_teams, current_year_str, teams_current_rosters)
-        
-        player_playtime = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, current_year_str, season_part, prints_on=True)
+        player_cur_tiap = all_cur_conds_dicts[player_name]['tiap']
+        player_playtime = generate_player_playtime(player_name, player_team, player_gp_conds, player_cur_tiap, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, current_year_str, season_part, prints_on=True)
         all_players_playtimes[player_name] = round_half_up(player_playtime)
 
         player_unit_stat_dict = generate_player_unit_stat_dict(player_name, player_team, player_playtime, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, current_year_str, season_part, stats_of_interest)
@@ -9215,6 +9467,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # print('init_player_conds: ' + str(init_player_conds))
         # print('player_conds: ' + str(player_cur_conds_list))
 
+        
+
         # only get probs if cur lineup diff than prev lineup
         # init_team_lineup = {}
         # if player_team in init_all_lineups.keys():
@@ -9247,7 +9501,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     #test_distrib_models(all_player_distrib_models)
         
 
-
+    # after getting stat dict we can get median tiap
+    # use median tiap to get offset tiap
+    # actually instead need median tiap to get offset for stat dict
+    #all_offset_tiaps = generate_all_offset_tiaps(all_player_stat_dicts, all_current_conditions)
     
 
     # each player gets a table separate sheet 

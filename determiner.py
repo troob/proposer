@@ -1406,8 +1406,8 @@ def determine_player_benched(player_names, lineup):
 
 # affects playtime
 def determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
-    # print('\n===Determine Week After Injury: ' + player.title() + '===\n')
-    # print('Input: player_cur_season_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('\n===Determine Week After Injury: ' + player.title() + '===\n')
+    print('Input: player_cur_season_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_cur_season_log))
 
     after_injury = False
 
@@ -1421,6 +1421,9 @@ def determine_week_after_injury(player_cur_season_log, player, todays_games_date
 
     for game_idx in range(num_restricted_games):
         # datetime.strptime(date_str, date_format)
+        # new players dont have 3 games in log yet to look at so end early
+        if len(player_cur_season_log['Date'].keys()) == game_idx:
+            break
         prev_game_date = player_cur_season_log['Date'][str(game_idx)].split()[1] # dow mm/dd
         game_mth = prev_game_date.split('/')[0]
         prev_game_yr = determine_game_year(game_mth, cur_yr)
@@ -2480,10 +2483,32 @@ def determine_teammates_out_at_position(player_team_lineup, all_players_position
         if teammate_position in player_position_group:
             toap += 1
 
-    toap_str = str(toap) + ' toap'
+    # toap_str = str(toap) + ' toap'
 
-    print('toap_str: ' + str(toap_str))   
-    return toap_str
+    # print('toap_str: ' + str(toap_str))   
+    return toap
+
+def determine_median_tiap(player_stat_dict):
+
+    median_tiap = 0
+    return median_tiap
+
+def determine_offset_tiap(tiap_str, player_stat_dict, player_name):
+    print('\n===Determine Offset TIAP: ' + player_name.title() + '===\n')
+    print('Input: tiap_str = ' + tiap_str)
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('\nOutput: offset tiap = x\n')
+
+    #offset_tiap = 0
+
+    tiap = int(tiap_str.split()[0])
+
+    median_tiap = determine_median_tiap(player_stat_dict)
+
+    offset_tiap = median_tiap - tiap
+
+    return offset_tiap
+
 
 def determine_teammates_in_at_position(player_team_lineup, all_players_positions, player_name):
     print('\n===Determine Teammates In At Position: ' + player_name.title() + '===\n')
@@ -2528,10 +2553,10 @@ def determine_teammates_in_at_position(player_team_lineup, all_players_positions
     # also bc out teammates never includes cur player so keep uniformly relative to teammates
     tiap -= 1
 
-    tiap_str = str(tiap) + ' tiap'
+    #tiap_str = str(tiap) + ' tiap'
         
-    print('tiap_str: ' + str(tiap_str))   
-    return tiap_str
+    #print('tiap_str: ' + str(tiap_str))   
+    return tiap
 
 
 
