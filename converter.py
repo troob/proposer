@@ -437,8 +437,8 @@ def convert_irregular_player_name(player_name):
 # what is the diff bt this and determine player abbrev?
 # determine abbrev simply truncates name
 def convert_player_name_to_abbrev(game_player, all_players_abbrevs, gp_team):
-    print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
-    print('Input: gp_team = ' + gp_team.upper())
+    # print('\n===Convert Player Name to Abbrev: ' + game_player.title() + '===\n')
+    # print('Input: gp_team = ' + gp_team.upper())
     # print('all_players_abbrevs: ' + str(all_players_abbrevs))
 
     game_player_abbrev = ''
@@ -498,16 +498,16 @@ def convert_player_name_to_abbrev(game_player, all_players_abbrevs, gp_team):
     #         if game_player_abbrev != '':
     #             break
 
-    print('game_player_abbrev: ' + str(game_player_abbrev))
+    #print('game_player_abbrev: ' + str(game_player_abbrev))
     return game_player_abbrev
 
 # CHANGE to get list of all abbrevs bc each player may have multiple
 # we know all players on same team bc called from in team part loop
 def convert_all_players_names_to_abbrevs(players, all_players_abbrevs, gp_team):
-    print('\n===Convert All Players Names to Abbrevs===\n')
-    print('Input: players = ' + str(players))
-    print('Input: gp_team = ' + gp_team.upper())
-    print('\nOutput: abbrevs = [abbrev1,...]\n')
+    # print('\n===Convert All Players Names to Abbrevs===\n')
+    # print('Input: players = ' + str(players))
+    # print('Input: gp_team = ' + gp_team.upper())
+    # print('\nOutput: abbrevs = [abbrev1,...]\n')
     
     abbrevs = []
     
@@ -521,7 +521,7 @@ def convert_all_players_names_to_abbrevs(players, all_players_abbrevs, gp_team):
         if abbrev != '': # blank if not played on team yet bc abbrev got from box score
             abbrevs.append(abbrev)
 
-    print('abbrevs: ' + str(abbrevs))
+    #print('abbrevs: ' + str(abbrevs))
     return abbrevs
 
 # combine all names into single string condition, alphabet order

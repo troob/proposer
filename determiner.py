@@ -1406,8 +1406,8 @@ def determine_player_benched(player_names, lineup):
 
 # affects playtime
 def determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
-    print('\n===Determine Week After Injury: ' + player.title() + '===\n')
-    print('Input: player_cur_season_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_cur_season_log))
+    # print('\n===Determine Week After Injury: ' + player.title() + '===\n')
+    # print('Input: player_cur_season_log = {stat name: {game idx: stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_cur_season_log))
 
     after_injury = False
 
@@ -2453,10 +2453,10 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
 
 
 def determine_teammates_out_at_position(player_team_lineup, all_players_positions, player_name):
-    print('\n===Determine Teammates Out At Position: ' + player_name.title() + '===\n')
-    print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
-    print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')
-    print('\nOutput: tiap = x\n')
+    # print('\n===Determine Teammates Out At Position: ' + player_name.title() + '===\n')
+    # print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
+    # print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')
+    # print('\nOutput: tiap = x\n')
 
     toap = 0
 
@@ -2510,11 +2510,59 @@ def determine_offset_tiap(tiap_str, player_stat_dict, player_name):
     return offset_tiap
 
 
+def determine_opp_in_at_position(opp_team_lineup, all_players_positions, player_name):
+    # print('\n===Determine Opponents In At Position: ' + player_name.title() + '===\n')
+    # print('Input: opp_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(opp_team_lineup))
+    # print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')# = ' + str(all_players_positions))
+    # print('\nOutput: tiap = x\n')
+
+    oiap = 0
+
+    player_position = all_players_positions[player_name]
+
+    # Condition: teammates in/out at position
+    #print('\n===Condition: Teammates At Position: ' + player_name.title() + '===\n')
+    # when no samples of lineup to get playtime, 
+    # we need to predict based on teammates at position
+    #print('player_position: ' + str(player_position))
+    position_groups = {'pg':['pg','sg','g','sf'], 
+                        'sg':['pg','sg','g','sf'],
+                        'g':['pg','sg','g','sf'],
+                        'sf':['sg','g','sf','f','pf'],
+                        'f':['sf','f','pf','c'],
+                        'pf':['sf','f','pf','c'],
+                        'c':['sf','f','pf','c']}
+    player_position_group = position_groups[player_position]
+
+    starters = opp_team_lineup['starters']
+    bench = opp_team_lineup['bench']
+
+    for opp_name in starters:
+        opp_position = all_players_positions[opp_name]
+        if opp_position in player_position_group:
+            oiap += 1
+    for opp_name in bench:
+        opp_position = all_players_positions[opp_name]
+        if opp_position in player_position_group:
+            oiap += 1
+
+    # subtract 1 for cur player bc not his own teammate
+    # OR just count all players including cur player???
+    # simpler to consider relative to teammates
+    # bc otherwise need to specify team players and opp players and all game players separately
+    # also bc out teammates never includes cur player so keep uniformly relative to teammates
+    oiap -= 1
+
+        
+    #print('oiap: ' + str(oiap))   
+    return oiap
+
+
 def determine_teammates_in_at_position(player_team_lineup, all_players_positions, player_name):
-    print('\n===Determine Teammates In At Position: ' + player_name.title() + '===\n')
-    print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
-    print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')# = ' + str(all_players_positions))
-    print('\nOutput: tiap = x\n')
+    # print('\n===Determine Teammates In At Position: ' + player_name.title() + '===\n')
+    # print('Input: player_team_lineup = {\'starters\': [\'donovan mitchell\', ... = ' + str(player_team_lineup))
+    # print('Input: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}')# = ' + str(all_players_positions))
+    # print('\nOutput: tiap = x\n')
 
     tiap = 0
 
