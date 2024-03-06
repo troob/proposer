@@ -401,6 +401,8 @@ def convert_irregular_player_name(player_name):
         player_name = 'cam thomas'
     elif player_name == 'gregory jackson':
         player_name = 'gg jackson'
+    elif player_name == 'kelly oubre':
+        player_name = 'kelly oubre jr'
 
     return player_name
 

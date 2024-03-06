@@ -1172,16 +1172,16 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # cur_conds = {year:year, part:part, cond:cond}
 # all stats have same sample size 
 # but stat name needed for prev val bc different depending on stat
-def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player=''):
-    # if prints_on:
-    #     print('\n===Determine Sample Size: ' + player.title() + '===\n')
-    #     print('cur_conds: ' + str(cur_conds))
-    #     print('stat_name: ' + str(stat_name))
-    #     print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    #     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
-    #     print('Input: player_cur_team = ' + player_cur_team.upper())
-    #     print('Input: opp_team = ' + opp_team.upper())
-    #     print('\nOutput: sample_size = x\n')
+def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player='', gp_cur_team=None):
+    if prints_on:
+        print('\n===Determine Sample Size: ' + player.title() + '===\n')
+        print('cur_conds: ' + str(cur_conds))
+        print('stat_name: ' + str(stat_name))
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+        print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
+        print('Input: player_cur_team = ' + player_cur_team.upper())
+        print('Input: opp_team = ' + opp_team.upper())
+        print('\nOutput: sample_size = x\n')
     
     sample_size = 0
 
@@ -1313,8 +1313,8 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                 #         conditions.append(alt_cond)
                 #     print('conditions: ' + str(conditions))
         
-            # if prints_on:
-            #     print('conditions: ' + str(conditions))
+            if prints_on:
+                print('conditions: ' + str(conditions))
             #sample_size = 0
             for cond in conditions:
                 if cond in stat_dict.keys():
@@ -1322,7 +1322,19 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
                     cond_stat_dict = stat_dict[cond]
                     #print('cond_stat_dict: ' + str(cond_stat_dict))
-                    sample_size += len(cond_stat_dict.keys())
+                    # if given gp cur team then cut off before prev team
+                    if gp_cur_team is not None:
+                        print('gp cur team: ' + str(gp_cur_team))
+                        # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
+                        for game_idx in cond_stat_dict.keys():
+                            #print('game idx: ' + game_idx)
+                            # first instance of cond may already be > gp cur team
+                            if int(game_idx) >= gp_cur_team:
+                                break
+
+                            sample_size += 1
+                    else:
+                        sample_size += len(cond_stat_dict.keys())
 
         else: # normal cond only has 1 version
             if condition in stat_dict.keys():
@@ -1330,7 +1342,20 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                 #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
                 cond_stat_dict = stat_dict[condition]
                 #print('cond_stat_dict: ' + str(cond_stat_dict))
-                sample_size = len(cond_stat_dict.keys())
+                # take only up to index < gp cur team, if given
+                #sample_size = 0
+                if gp_cur_team is not None:
+                    print('gp cur team: ' + str(gp_cur_team))
+                    # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
+                    for game_idx in cond_stat_dict.keys():
+                        #print('game idx: ' + game_idx)
+                        if int(game_idx) >= gp_cur_team:
+                            break
+
+                        sample_size += 1
+
+                else:
+                    sample_size = len(cond_stat_dict.keys())
 
         
         
@@ -1344,8 +1369,8 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
             # if prints_on:
             #     print('v1_sample_size: ' + str(v1_sample_size))
 
-    # if prints_on:
-    #     print('sample_size: ' + str(sample_size))
+    if prints_on:
+        print('sample_size: ' + str(sample_size))
     return sample_size
 
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
@@ -2903,7 +2928,7 @@ def determine_player_abbrev(player_name):
 # use game_key to get player team at game time
 # the team passed here is the team of the player at game time 
 # but we need to connect his full name to his stats page where he may not be listed if he did play yet this season
-def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr=''):
+def determine_player_full_name(init_player, team, all_players_teams, rosters={}, game_key='', cur_yr='', position=''):
     # print('\n===Determine Player Full Name: ' + init_player + '===\n')
     # print('Input: team of player of interest in game of interest = ' + team)
     # print('Input: game_key = away home date = ' + game_key)
@@ -2939,6 +2964,10 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'kenyon martin jr'
     elif player == 'marvin bagley':
         return 'marvin bagley iii'
+    elif player == 'kelly oubre':
+        return 'kelly oubre jr'
+    elif player == 'j williams' and team == 'okc' and position == 'c':
+        return 'jaylin williams'
 
     # if player gone from the league 
     # AND we did not get their espn id

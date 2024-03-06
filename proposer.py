@@ -122,9 +122,9 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = False
+test = True
 # run dist probs with prints/comments
-prints_on = False
+prints_on = True
 
 # force probs to reload even if already saved
 # so we dont have to erase each test
@@ -173,9 +173,9 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('mem','bkn'), ('lac','mil'), ('por','min'), ('wsh','uta'), ('chi','sac'), ('okc','lal')]#, ('nop','lal')
+game_teams = [('orl','cha'), ('bos','cle'), ('phi','bkn'), ('det','mia'), ('atl','nyk'), ('nop','tor'), ('sas','hou'), ('ind','dal'), ('phx','den')]#, ('nop','lal')
 if test:
-    game_teams = [('okc','phx')]
+    game_teams = [('atl','nyk')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -186,7 +186,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['kevin durant'] # 'jacob gilyard', use for testing
+    players_names = ['donte divincenzo'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

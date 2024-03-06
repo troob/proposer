@@ -2117,18 +2117,18 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 			# take last word of team name to simplify so we dont need to remove dashes
 			# add dash bc always preceded by city
 			team_name = '-' + team_name.split()[-1]
-			print('team_name: ' + str(team_name))
+			#print('team_name: ' + str(team_name))
 			# title = Open game in SGP mode
 			# class = toggle-sgp-badge__nav-link
 			sgp_btns = driver.find_elements('class name', 'toggle-sgp-badge__nav-link')
-			print('sgp_btns: ' + str(sgp_btns))
+			#print('sgp_btns: ' + str(sgp_btns))
 			for sgp_btn in sgp_btns:
-				print('sgp_btn: ' + str(sgp_btn))
+				#print('sgp_btn: ' + str(sgp_btn))
 				#sgp_key = team_name
 				sgp_url = sgp_btn.get_attribute('href')
-				print('sgp_url: ' + str(sgp_url))
+				#print('sgp_url: ' + str(sgp_url))
 				if re.search(team_name, sgp_url):
-					print('found sgp btn: ' + str(sgp_btn) + ', ' + str(sgp_url))
+					#print('found sgp btn: ' + str(sgp_btn) + ', ' + str(sgp_url))
 					driver.execute_script("arguments[0].scrollIntoView(true);", sgp_btn)
 					sgp_btn.click()
 					break
@@ -2439,8 +2439,10 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 					for player_element in lineup_list.find_all('li', {'class': 'lineup__player'}):
 						#print('\nplayer_element: ' + str(player_element))
 						player_name = player_element.find('a').decode_contents()
-						#print('\nplayer_name: ' + str(player_name))
-						player_name = determiner.determine_player_full_name(player_name, lineup_team, all_players_teams, rosters, cur_yr=cur_yr)
+						#print('player_name: ' + str(player_name))
+						player_pos = player_element.find('div').decode_contents().lower()
+						#print('player_pos: ' + str(player_pos))
+						player_name = determiner.determine_player_full_name(player_name, lineup_team, all_players_teams, rosters, cur_yr=cur_yr, position=player_pos)
 						#print('player_name: ' + str(player_name))
 						# print('player_num: ' + str(player_num))
 						
@@ -2449,6 +2451,8 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 						if player_name != '':
 							if player_num < 5:
 								#print('starter')
+								# no need to convert bc already formatted when determining player full name
+								#player_name = converter.convert_irregular_player_name(player_name)
 								starters.append(player_name)
 							else:
 								# if out due to recent trade so not playing yet 
@@ -2683,29 +2687,29 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 		#print('game_box_scores: ' + str(game_box_scores))
 		# if we find this team in this game
 		if re.search(team, game_key):
-			#print('found team ' + team.upper() + ' in game ' + game_key)
+			print('found team ' + team.upper() + ' in game ' + game_key)
 			game_data = game_key.split()
 			if len(game_data) > 2:
 				away_team = game_data[0]
-				#print('away_team: ' + str(away_team))
+				print('away_team: ' + str(away_team))
 				#home_team = game_data[1]
 				#print('home_team: ' + str(home_team))
 
 				loc = 'home'
 				if team == away_team:
 					loc = 'away'
-				#print('loc: ' + str(loc))
+				print('loc: ' + str(loc))
 
 				# always current team of interest
 				# game_team_players = {starters:[],bench:[]}
 				game_team_box_score = game_box_scores[loc]
 				#game_team_players = game_players[loc]
-				#print('game_team_box_score: ' + str(game_team_box_score))
+				print('game_team_box_score: ' + str(game_team_box_score))
 				for team_part in game_team_box_score.values():
 					# team_part = {player:play time, ...}
-					#print('team_part: ' + str(team_part))
+					print('team_part: ' + str(team_part))
 					for player_abbrev in team_part.keys():
-						#print('\nplayer_abbrev: ' + player_abbrev)
+						print('\nplayer_abbrev: ' + player_abbrev)
 						# here we consider avg play time, not play time this game
 						# bc we want to exclude practice players?
 						# but are they practice players if they played a game more than 10min? 
@@ -2736,27 +2740,30 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 									#print('found name ' + name)
 									player_name = name
 									break
-						#print('player_name: ' + str(player_name))
+						print('init player_name: ' + str(player_name))
 						if player_name == '':
 							player_name = determiner.determine_player_full_name(player_abbrev, team, all_players_teams, rosters, game_key, cur_yr)#converter.convert_player_abbrev_to_name(player)
 						# now we have both full name and abbrevs from players in games dict
 						# if not already added, then add
-						#print('player_name: ' + str(player_name))
+						print('full player_name: ' + str(player_name))
 						player_teams = all_players_teams[player_name]
 						# added dnp check so make sure it is ok to exclude dnp players here
 						if not determiner.determine_dnp_player(player_teams, cur_yr, player_name) and player_name not in team_players and player_name != '': # blank if player gone and never read
 							team_players.append(player_name)
-							#print('team_players: ' + str(team_players))
+							print('team_players: ' + str(team_players))
+						
 						# elif player_name == '':
 						# 	print('Warning: player name not found! ' + player)
+							
+				print('team_players after game: ' + str(team_players))
 
-	#print('final team_players: ' + str(team_players))
+	print('final team_players: ' + str(team_players))
 	return team_players
 
 # all_teams_players = {year:{team:[players],...},...}
 # season_teams_players = {team:[players],...}
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
-def read_season_teams_players(year, teams, year_box_scores, init_all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams, cur_yr='', rosters={}):
+def read_season_teams_players(year, teams, year_box_scores, init_all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams=True, cur_yr='', rosters={}):
 	print('\n===Read Season Teams Players: ' + str(year) + '===\n')
 	print('Input: teams = [teams]')
 	print('Input: year_box_scores = {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
@@ -2815,7 +2822,7 @@ def read_season_teams_players(year, teams, year_box_scores, init_all_teams_playe
 # players they played with at any point in the season, each season
 # all_teams_players = {year:{team:[players],...},...}
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
-def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_players_abbrevs, cur_yr, read_new_teams, teams=[]):
+def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_players_abbrevs, cur_yr, teams=[], read_new_teams=True):
 	print('\n===Read All Teams Players===\n')
 	print('Input: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
 	print('Input: all_teams_rosters = {team:[players],... = {\'nyk\':[\'jalen brunson\',...],...')
