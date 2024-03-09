@@ -55,6 +55,10 @@ read_season_year = 2024 # user can choose year. read x seasons previous
 # here we get more samples from distant seasons and scale them to make a simulated model so it is smoothed out
 model_x_seasons = 2
 
+# === SEASONS START DAYS ===
+# so we can tell if preseason game
+all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
+
 # === STATS OF INTEREST === 
 stats_of_interest = ['pts','reb','ast']
 
@@ -73,7 +77,7 @@ single_conds = ['nf', 'local', 'weekday', 'night']
 # they played this season so they are included in all teammates 
 # but are now out for the rest of season
 # 'cha':['kyle lowry'], 
-ofs_players = {'bkn':['dariq whitehead'], 'chi':['zach lavine'], 'mem':['ja morant'], 'mia':['dru smith'], 'por':['robert williams iii'], 'sas':['charles bassey']}
+ofs_players = {'bkn':['dariq whitehead'], 'chi':['zach lavine'], 'hou':['tari eason'], 'mem':['ja morant'], 'mia':['dru smith'], 'por':['robert williams iii'], 'sas':['charles bassey'], 'wsh':['isaiah livers']}
 
 
 #===READ LINEUPS===
@@ -122,9 +126,9 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = True
+test = False
 # run dist probs with prints/comments
-prints_on = True
+prints_on = False
 
 # force probs to reload even if already saved
 # so we dont have to erase each test
@@ -161,7 +165,8 @@ settings = {'find matchups': find_matchups,
             'test': test,
             'test probs': test_probs,
             'prints on': prints_on, 
-            'single conds': single_conds}
+            'single conds': single_conds,
+            'seasons start days': all_seasons_start_days}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -173,9 +178,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('orl','cha'), ('bos','cle'), ('phi','bkn'), ('det','mia'), ('atl','nyk'), ('nop','tor'), ('sas','hou'), ('ind','dal'), ('phx','den')]#, ('nop','lal')
+game_teams = [('chi','lac'), ('bkn','cha'), ('dal','det'), ('bos','phx'), ('sas','gsw'), ('uta','den'), ('tor','por')]#, ('nop','lal')
 if test:
-    game_teams = [('atl','nyk')]
+    # when we run with empty game teams, it will run for all teams
+    # so all teams players gets filled???
+    # no actually it will fill if we set read new teams
+    # but to automate that instead of manual set
+    # simply check for new players if new box score
+    game_teams = [('chi','lac')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -186,7 +196,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['donte divincenzo'] # 'jacob gilyard', use for testing
+    players_names = ['demar derozan'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

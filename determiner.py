@@ -180,6 +180,16 @@ def determine_col_name(keyword,data):
 
 
 
+def determine_cur_team(year, cur_yr, team_idx):
+
+    cur_team = False
+
+    if year == cur_yr and team_idx == 0:
+        cur_team = True
+
+    return cur_team 
+
+
 
 # 1 falls in range 0-4 bc includes 4
 def determine_stat_range(val, stat):
@@ -1172,7 +1182,7 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # cur_conds = {year:year, part:part, cond:cond}
 # all stats have same sample size 
 # but stat name needed for prev val bc different depending on stat
-def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player='', gp_cur_team=None):
+def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player='', gp_cur_team=None, max_samples=None):
     if prints_on:
         print('\n===Determine Sample Size: ' + player.title() + '===\n')
         print('cur_conds: ' + str(cur_conds))
@@ -1329,7 +1339,7 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                         for game_idx in cond_stat_dict.keys():
                             #print('game idx: ' + game_idx)
                             # first instance of cond may already be > gp cur team
-                            if int(game_idx) >= gp_cur_team:
+                            if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
                                 break
 
                             sample_size += 1
@@ -1349,7 +1359,7 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                     # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
                     for game_idx in cond_stat_dict.keys():
                         #print('game idx: ' + game_idx)
-                        if int(game_idx) >= gp_cur_team:
+                        if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
                             break
 
                         sample_size += 1
@@ -2020,8 +2030,8 @@ def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, pl
     print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
     print('Settings: Current Year = ' + current_year_str)
     print('\nInput: player_teams = {year:{team:{gp:gp, min:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ... = ' + str(player_teams))
-    print('Input: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-
+    print('Input: player_season_logs = {year:{stat name:{game idx:stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_season_logs))
+    print('\nOutput: gp cur team = x\n')
 
     gp_cur_team = 0
 
@@ -2503,6 +2513,8 @@ def determine_teammates_out_at_position(player_team_lineup, all_players_position
 
     out = player_team_lineup['out']
 
+    # sometimes name given in lineup does not include suffix like ii or jr
+    # so if first pass not found, check without suffix
     for teammate_name in out:
         teammate_position = all_players_positions[teammate_name]
         if teammate_position in player_position_group:
@@ -2962,7 +2974,7 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'giannis antetokounmpo'
     elif player == 'kj martin':
         return 'kenyon martin jr'
-    elif player == 'marvin bagley':
+    elif player == 'marvin bagley' or player == 'm bagley':
         return 'marvin bagley iii'
     elif player == 'kelly oubre':
         return 'kelly oubre jr'

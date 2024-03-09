@@ -6,6 +6,26 @@ import reader # read player abbrevs
 
 import math
 
+
+
+# from fri 1/12 to 1/12/2024
+def convert_game_date_to_full_date(init_game_date, season_year):
+    # print('\n===Convert Game Date to Full Date===\n')
+    # print('init_game_date: ' + str(init_game_date))
+    # print('season_year: ' + str(season_year))
+
+    game_date = init_game_date.split()[1]
+    game_mth = game_date.split('/')[0]
+    final_season_year = str(season_year)
+    if int(game_mth) in range(10,13):
+        final_season_year = str(int(season_year) - 1)
+    full_date = game_date + "/" + final_season_year
+
+    #print('full_date: ' + str(full_date))
+    return full_date
+
+
+
 def convert_dict_to_list(dict, desired_order=[]):
 
     dict_list = []
