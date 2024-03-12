@@ -2520,6 +2520,10 @@ def determine_teammates_out_at_position(player_team_lineup, all_players_position
         if teammate_position in player_position_group:
             toap += 1
 
+    # subtract 1 for cur player bc not his own teammate
+    # BUT not needed bc out player has no cur conds so given player never in out list
+    #toap -= 1
+
     # toap_str = str(toap) + ' toap'
 
     # print('toap_str: ' + str(toap_str))   
@@ -2583,12 +2587,7 @@ def determine_opp_in_at_position(opp_team_lineup, all_players_positions, player_
         if opp_position in player_position_group:
             oiap += 1
 
-    # subtract 1 for cur player bc not his own teammate
-    # OR just count all players including cur player???
-    # simpler to consider relative to teammates
-    # bc otherwise need to specify team players and opp players and all game players separately
-    # also bc out teammates never includes cur player so keep uniformly relative to teammates
-    oiap -= 1
+    # do not subtract 1 like for tiap bc player not on opp team
 
         
     #print('oiap: ' + str(oiap))   

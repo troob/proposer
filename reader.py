@@ -5454,3 +5454,58 @@ def read_game_teams(read_season_year):
 	game_teams = [] # read todays schedule if cur yr
 
 	return game_teams
+
+# https://www.espn.com/nba/injuries
+def read_ofs_players(ofs_players):
+	print('\n===Read OFS Players===\n')
+	print('ofs_players = {\'bkn\':[\'ben simmons\', ...\n')
+
+	injuries_url = 'https://www.espn.com/nba/injuries'
+
+	# get team names from soup bc not in table data
+	soup = read_website(injuries_url)
+	if soup is not None:
+
+		teams = []
+		for team_span in soup.find_all('span', {'class': 'injuries__teamName'}): #.encode_contents()
+			
+			team = converter.convert_team_name_to_abbrev(team_span.decode_contents().lower())
+			teams.append(team)
+
+		#print('teams: ' + str(teams))
+
+	# rare but could be no injuries so check order lines up
+	# no blank tables so if no inj then no table
+	# if len(teams) != 30:
+	# 	print('Warning: Team with no injuries??? Wrong no. teams! ' + str(len(teams)))
+
+	# get table data
+	# look for est return date oct 1 for ofs players
+	html_results = read_web_data(injuries_url)
+
+	if html_results is not None:
+		len_html_results = len(html_results) # each element is a dataframe/table so we loop thru each table
+
+		out_all_season = ['lonzo ball', 'steven adams']
+
+		for order in range(len_html_results):
+			#print("order: " + str(order))
+
+			html_result_df = html_results[order]
+			# print('html_result: ' + str(html_result_df))
+			# print("no. columns: " + str(len(html_result_df.columns.tolist())))
+
+			team = teams[order]
+			#print('team: ' + str(team))
+			for idx, row in html_result_df.iterrows():
+				#print('row[EST. RETURN DATE]: ' + str(row['EST. RETURN DATE']))
+				if row['EST. RETURN DATE'] == 'Oct 1':
+					ofs_player = converter.convert_irregular_player_name(row['NAME'])
+					#print('ofs_player: ' + str(ofs_player))
+					if team not in ofs_players.keys():
+						ofs_players[team] = []
+					if ofs_player not in ofs_players[team] and ofs_player not in out_all_season:
+						ofs_players[team].append(ofs_player)
+
+	print('ofs_players: ' + str(ofs_players))
+	return ofs_players

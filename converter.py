@@ -302,6 +302,51 @@ def convert_box_score_to_dict(box_score_df):
     #print('box_score_dict: ' + str(box_score_dict))
     return box_score_dict
 
+def convert_team_name_to_abbrev(team_name):
+    #print('\n===Convert Team Name to Abbrev: ' + team_name + '===\n')
+    
+    abbrev = ''
+
+    team_abbrevs = {'atlanta hawks':'atl', 
+                    'boston celtics':'bos', 
+                    'brooklyn nets':'bkn', 
+                    'charlotte hornets':'cha', 
+                    'chicago bulls':'chi',
+                    'cleveland cavaliers':'cle',
+                    'dallas mavericks':'dal',
+                    'denver nuggets':'den',
+                    'detroit pistons':'det',
+                    'golden state warriors':'gsw',
+                    'houston rockets':'hou',
+                    'indiana pacers':'ind',
+                    'la clippers':'lac',
+                    'los angeles lakers':'lal',
+                    'memphis grizzlies':'mem',
+                    'miami heat':'mia',
+                    'milwaukee bucks':'mil',
+                    'minnesota timberwolves':'min',
+                    'new orleans pelicans':'nop',
+                    'new york knicks':'nyk',
+                    'oklahoma city thunder':'okc',
+                    'orlando magic':'orl',
+                    'philadelphia 76ers':'phi',
+                    'phoenix suns':'phx',
+                    'portland trail blazers':'por',
+                    'sacramento kings':'sac',
+                    'san antonio spurs':'sas',
+                    'toronto raptors':'tor',
+                    'utah jazz':'uta',
+                    'washington wizards':'wsh'} # could get from fantasy pros table but simpler to make once bc only 30 immutable vals
+
+    # hard fail so we can correct name
+    #if team_name in team_abbrevs.keys():
+    abbrev = team_abbrevs[team_name]
+    # else:
+    #     print('Warning: Unknown team name! ' + team_name)
+
+    #print('abbrev: ' + abbrev)
+    return abbrev
+
 def convert_team_abbrev_to_name(team_abbrev):
     #print('\n===Convert Team Abbrev to Name: ' + team_abbrev + '===\n')
     
@@ -412,7 +457,7 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
 
 def convert_irregular_player_name(player_name):
 
-    player_name = re.sub('−|-',' ',player_name)
+    player_name = re.sub('−|-',' ',player_name).lower()
     player_name = re.sub('\.','',player_name)
 
     if player_name == 'nicolas claxton':
