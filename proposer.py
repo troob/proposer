@@ -78,8 +78,8 @@ single_conds = ['nf', 'local', 'weekday', 'night']
 # but are now out for the rest of season
 # 'cha':['kyle lowry'], 
 # need fcn to check for news of ofs players bc not listed in lineup
-ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['dru smith', 'josh richardson'], 'por':['robert williams iii'], 'sas':['charles bassey'], 'wsh':['isaiah livers']}
-ofs_players = reader.read_ofs_players(ofs_players)
+#ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['dru smith', 'josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
+ofs_players = reader.read_ofs_players()
 
 #===READ LINEUPS===
 # CANNOT work bc needs lineups to get projected minutes to get unit stats
@@ -117,11 +117,11 @@ find_players = True # if true, read all players in game box scores to see prob w
 
 # === NEW TEAMS ===
 # read new teams after trades and acquisitions new players
-read_new_teams = True
+read_new_teams = False
 # === NEW ROSTERS ===
 # read new rosters after trades and acquisitions new players
 # but before they actually played on new team
-read_new_rosters = True
+read_new_rosters = False
 
 
 
@@ -182,14 +182,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('cha','det'), ('phx','cle'), ('dal','chi'), ('gsw','sas'), ('tor','den'), ('bos','por')]#, ('nop','lal')
+game_teams = [('phx','bos'), ('lac','chi'), ('wsh','hou'), ('phi','mil'), ('dal','okc'), ('nyk','por')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('tor','den')]
+    game_teams = [('chi','ind')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -200,7 +200,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['rj barrett'] # 'jacob gilyard', use for testing
+    players_names = ['jalen smith'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

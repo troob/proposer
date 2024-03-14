@@ -3781,8 +3781,8 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 
 
 	for player, player_season_logs in all_players_season_logs.items():
-		if prints_on:
-			print('\nplayer: ' + player)
+		# if prints_on:
+		# 	print('\nplayer: ' + player)
 
 		player_teams = all_players_teams[player]
 		gp_cur_team = determiner.determine_gp_cur_team(player_teams, player_season_logs, cur_yr, player)
@@ -3822,11 +3822,11 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 					
 				game_key = read_game_key(season_year, team_abbrev, row)
 				
-				if prints_on:
-					print('\ngame_idx: ' + str(game_idx))
-					print('row: ' + str(row))
-					print('team_abbrev: ' + team_abbrev)
-					print('game_key: ' + game_key)
+				# if prints_on:
+				# 	print('\ngame_idx: ' + str(game_idx))
+				# 	print('row: ' + str(row))
+				# 	print('team_abbrev: ' + team_abbrev)
+				# 	print('game_key: ' + game_key)
 				if game_key == '':
 					print('Warning: Blank Game Key! ' + player.title() + ', ' + season_year + ', Game ' + str(game_idx) + ', ' + team_abbrev)
 					continue
@@ -4135,7 +4135,7 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 
 def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[], rosters={}):
 	print("\n===Read All Players Positions===\n")
-	print('Input: players_names = [p1,...] = ' + str(players_names))
+	print('Input: players_names = [p1,...]')# = ' + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('\nOutput: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}\n')
 
@@ -4158,6 +4158,10 @@ def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[
 		for game in game_teams:
 			for team in game:
 				#team_roster = rosters[team]
+				# need all players teammates in season, 
+				# not just cur roster bc we still want to say out if no longer on team? 
+				# no they are not considered out if no longer on team bc they are replaced by another player 
+				# so them being out does not affect playtime as much
 				for player in rosters[team]:
 					all_players_names.append(player)
 	else:
@@ -4172,7 +4176,7 @@ def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[
 		pos = read_player_position(name, id, init_all_players_positions)
 		all_players_positions[name] = pos
 
-	#print("all_players_positions: " + str(all_players_positions))
+	print("all_players_positions: " + str(all_players_positions))
 	return all_players_positions
 
 # get game log from espn.com
@@ -4846,7 +4850,7 @@ def read_player_teams(player_name, player_id, player_cur_team, cur_yr, read_new_
 def read_all_players_teams(players_names, all_players_espn_ids, rosters, cur_yr, read_new_teams=False, find_players=False):
 	print("\n===Read All Players Teams===\n")
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
-	print('Input: players_names = [p1, ...] = ' + str(players_names))
+	print('Input: players_names = [p1, ...]')# = ' + str(players_names))
 	print('\nOutput: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ...\n')
 
 	all_players_teams_file = 'data/all players teams.json'
@@ -5456,7 +5460,7 @@ def read_game_teams(read_season_year):
 	return game_teams
 
 # https://www.espn.com/nba/injuries
-def read_ofs_players(ofs_players):
+def read_ofs_players(ofs_players={}):
 	print('\n===Read OFS Players===\n')
 	print('ofs_players = {\'bkn\':[\'ben simmons\', ...\n')
 
@@ -5499,7 +5503,14 @@ def read_ofs_players(ofs_players):
 			#print('team: ' + str(team))
 			for idx, row in html_result_df.iterrows():
 				#print('row[EST. RETURN DATE]: ' + str(row['EST. RETURN DATE']))
-				if row['EST. RETURN DATE'] == 'Oct 1':
+				# could be >oct 1 so convert to date
+				#season_start_str = 'Oct 1'
+				season_start_date = datetime.strptime('Oct 1', '%b %d')
+				#print('season_start_date: ' + str(season_start_date))
+				est_return_date = datetime.strptime(row['EST. RETURN DATE'], '%b %d')
+				#print('est_return_date: ' + str(est_return_date))
+				#if row['EST. RETURN DATE'] == 'Oct 1':
+				if est_return_date >= season_start_date:
 					ofs_player = converter.convert_irregular_player_name(row['NAME'])
 					#print('ofs_player: ' + str(ofs_player))
 					if team not in ofs_players.keys():

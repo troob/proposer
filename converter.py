@@ -397,10 +397,11 @@ def convert_team_abbrev_to_name(team_abbrev):
 # will they be on team different teams?
 # what if players have same name on same team? then it would incorrectly take both players abbrevs as 1 players abbrevs
 # i think odds are low enough to treat main case and flag when 2 players on same team have same name
-def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', player_teams={}, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr=''):
-    # print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
-    # print('Input: game_player_team = ' + game_player_team)
-    # print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# + str(all_players_abbrevs))
+def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player_team='', player_teams={}, all_players_teams={}, all_box_scores={}, season_years=[], cur_yr='', prints_on=True):
+    # if prints_on:
+    #     print('\n===Convert Player Name to Abbrevs: ' + game_player.title() + '===\n')
+    #     print('Input: game_player_team = ' + game_player_team)
+    #     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# + str(all_players_abbrevs))
 
     game_player_abbrevs = []
 
@@ -413,16 +414,19 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
     for year, year_players_abbrev in all_players_abbrevs.items():
         #print('\nyear: ' + year)
         for abbrev_key, name in year_players_abbrev.items():
-            #print('\nabbrev_key: ' + abbrev_key)
+            
             abbrev_data = abbrev_key.split('-')
             abbrev = abbrev_data[0]
-            #print('abbrev: ' + str(abbrev))
+            
             team = abbrev_data[1]
 
-            # print('name: ' + str(name))
-            # print('game_player: ' + str(game_player))
-            # print('team: ' + str(team))
-            # print('game_player_team: ' + str(game_player_team))
+            # if prints_on:
+            #     print('\nabbrev_key: ' + abbrev_key)
+            #     print('abbrev: ' + str(abbrev))
+            #     print('name: ' + str(name))
+            #     print('game_player: ' + str(game_player))
+            #     print('team: ' + str(team))
+            #     print('game_player_team: ' + str(game_player_team))
             # loop thru teams played this yr to ensure correct abbrev or else might find same abbrev for diff player
             if game_player_team != '' :
                 if name == game_player and team == game_player_team:
@@ -431,15 +435,17 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
                     #print('game_player_abbrevs: ' + str(game_player_abbrevs))
             
             elif len(player_teams.keys()) > 0:
+                #print('Not given game player team of interest so check all teams.')
                 # should always have year in teams bc abbrev from box score which also gets player teams
                 #if year in player_teams.keys():
                 year_teams_dict = player_teams[year]
                 year_teams = list(year_teams_dict.keys())#convert_player_teams_dict_to_list(year_teams_dict)
                 for gp_team in year_teams:
                     if name == game_player and team == gp_team:
-                        #print('found abbrev')
+                        
                         game_player_abbrevs.append(abbrev_key)
-                        #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+                        # print('found abbrev')
+                        # print('game_player_abbrevs: ' + str(game_player_abbrevs))
             
 
         # we only add abbrevs from year of interest?
@@ -451,8 +457,8 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
 
         # look for all abbrevs in all yrs so we can find current player in past yrs with different abbrevs
 
-
-    #print('game_player_abbrevs: ' + str(game_player_abbrevs))
+    # if prints_on:
+    #     print('game_player_abbrevs: ' + str(game_player_abbrevs))
     return game_player_abbrevs
 
 def convert_irregular_player_name(player_name):
