@@ -1288,13 +1288,14 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                     conditions.append(game_part_players_cond_val)
 
             else: # single player cond
-                if prints_on:
-                    print('Single player cond')
+                
                 # get player abbrev from cond
                 # by removing group and position from end of cond
                 # remove group
                 abbrev_key = gp_abbrev + '-' + gp_team
-                print('abbrev_key: ' + abbrev_key)
+                if prints_on:
+                    print('Single player cond')
+                    print('abbrev_key: ' + abbrev_key)
                 if abbrev_key in all_players_abbrevs[year].keys():
                     game_player = all_players_abbrevs[year][abbrev_key]
                     # use cur team bc cur conds
@@ -1309,6 +1310,8 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                         gp_cond += ' ' + team_part
                         if prints_on:
                             print('gp_cond: ' + str(gp_cond))
+                        
+                        # append string to list
                         conditions.append(gp_cond)
 
 
@@ -1335,14 +1338,20 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                 print('conditions: ' + str(conditions))
             #sample_size = 0
             for cond in conditions:
+                # if prints_on:
+                #     print('cond: ' + cond)
+                #     print('cond keys: ' + str(list(stat_dict.keys())))
                 if cond in stat_dict.keys():
+                    if prints_on:
+                        print('found cond in stat dict: ' + cond)
                     # cannot take first stat dict bc prev val depends on which stat
                     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
                     cond_stat_dict = stat_dict[cond]
                     #print('cond_stat_dict: ' + str(cond_stat_dict))
                     # if given gp cur team then cut off before prev team
                     if gp_cur_team is not None:
-                        print('gp cur team: ' + str(gp_cur_team))
+                        if prints_on:
+                            print('gp cur team: ' + str(gp_cur_team))
                         # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
                         prev_minutes = 0
                         for game_idx in cond_stat_dict.keys():
@@ -1371,7 +1380,8 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                 # take only up to index < gp cur team, if given
                 #sample_size = 0
                 if gp_cur_team is not None:
-                    print('gp cur team: ' + str(gp_cur_team))
+                    if prints_on:
+                        print('gp cur team: ' + str(gp_cur_team))
                     # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
                     prev_minutes = 0
                     for game_idx in cond_stat_dict.keys():
@@ -2646,13 +2656,19 @@ def determine_teammates_in_at_position(player_team_lineup, all_players_positions
 
     starters = player_team_lineup['starters']
     bench = player_team_lineup['bench']
+    # print('starters: ' + str(starters))
+    # print('bench: ' + str(bench))
 
     for teammate_name in starters:
         teammate_position = all_players_positions[teammate_name]
+        # print('teammate_name: ' + str(teammate_name))
+        # print('teammate_position: ' + str(teammate_position))
         if teammate_position in player_position_group:
             tiap += 1
     for teammate_name in bench:
         teammate_position = all_players_positions[teammate_name]
+        # print('teammate_name: ' + str(teammate_name))
+        # print('teammate_position: ' + str(teammate_position))
         if teammate_position in player_position_group:
             tiap += 1
 
@@ -2665,7 +2681,7 @@ def determine_teammates_in_at_position(player_team_lineup, all_players_positions
 
     #tiap_str = str(tiap) + ' tiap'
         
-    #print('tiap_str: ' + str(tiap_str))   
+    #print('tiap: ' + str(tiap))
     return tiap
 
 

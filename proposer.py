@@ -72,14 +72,7 @@ stats_of_interest = ['pts','reb','ast']
 control_conds = ['coverage','city','tod'] #'info' # info contains coverage, city, tod
 single_conds = ['nf', 'local', 'weekday', 'night']
 
-#===OUT FOR SEASON PLAYERS===
-# players out for season not listed on report
-# they played this season so they are included in all teammates 
-# but are now out for the rest of season
-# 'cha':['kyle lowry'], 
-# need fcn to check for news of ofs players bc not listed in lineup
-#ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['dru smith', 'josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
-ofs_players = reader.read_ofs_players()
+
 
 #===READ LINEUPS===
 # CANNOT work bc needs lineups to get projected minutes to get unit stats
@@ -150,6 +143,17 @@ if test:
 # could save time since error in file request_time.txt = '1740 12/12/23' (1740=540pm)
 read_new_game_ids = True
 
+#===OUT FOR SEASON PLAYERS===
+# players out for season not listed on report
+# they played this season so they are included in all teammates 
+# but are now out for the rest of season
+# 'cha':['kyle lowry'], 
+# need fcn to check for news of ofs players bc not listed in lineup
+ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
+# dont waste time read from internet if not needed
+if not test:
+    ofs_players = reader.read_ofs_players()
+
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -182,14 +186,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('phx','bos'), ('lac','chi'), ('wsh','hou'), ('phi','mil'), ('dal','okc'), ('nyk','por')]#, ('nop','lal')
+game_teams = [('mia','cle'), ('ind','det'), ('mil','bos'), ('sac','tor'), ('uta','okc'), ('mem','gsw'), ('phi','phx'), ('lac','por')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('chi','ind')]
+    game_teams = [('lac','por')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -200,7 +204,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['jalen smith'] # 'jacob gilyard', use for testing
+    players_names = ['kawhi leonard'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

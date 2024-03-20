@@ -4112,10 +4112,12 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 				for word in words:
 					pos_abbrev += word[0].lower()
 
-				if pos_abbrev == 'f': # some just say forward so make it small forward but actually better to use height to determine bc if over 6'6 then pf maybe?
-					pos_abbrev = 'sf'
-				elif pos_abbrev == 'g':
-					pos_abbrev = 'sg'
+				# Why should we simply sf to f, and sg to g???
+				# Better to differentiate bc not all f are sf (see jaylin williams okc)
+				# if pos_abbrev == 'f': # some just say forward so make it small forward but actually better to use height to determine bc if over 6'6 then pf maybe?
+				# 	pos_abbrev = 'sf'
+				# elif pos_abbrev == 'g':
+				# 	pos_abbrev = 'sg'
 				position = pos_abbrev
 
 			#print('Success', position.upper(), player_name.title())
@@ -4176,7 +4178,7 @@ def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[
 		pos = read_player_position(name, id, init_all_players_positions)
 		all_players_positions[name] = pos
 
-	print("all_players_positions: " + str(all_players_positions))
+	#print("all_players_positions: " + str(all_players_positions))
 	return all_players_positions
 
 # get game log from espn.com
@@ -4617,7 +4619,7 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players
 	#init_all_game_logs: {'bruce brown': {'2023': {'Player': {'0': 
 	#final_all_game_logs: {'bruce brown': {2023: {'Player': {'0': 'br
 	#print('all_players_season_logs: ' + str(all_players_season_logs))
-	print('players_names after read season logs: ' + str(players_names))
+	#print('players_names after read season logs: ' + str(players_names))
 	return all_players_season_logs
 
 # return team abbrev lowercase bc used as key
