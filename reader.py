@@ -1878,6 +1878,261 @@ def read_react_web_data(url):
 	#print('web_data:\n' + str(web_data))
 	return web_data
 
+def read_dk_solo(driver):
+	print('\n===Read DK Solo Pages===\n')
+
+	web_dict = {}
+			
+	pts_key = 4
+	stat_key = pts_key
+	stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	#web_dict[key] = read_lazy_elements(key)
+	#for key in data_table_keys:#.keys():
+	for stat_name, relative_key in stats_of_interest.items():
+		print("stat_name: " + stat_name)
+		web_dict[stat_name] = {}
+
+		# click pts btn
+		epath = 'a[' + str(stat_key+relative_key) + ']'
+
+		# problem: sometimes fails to find sgp element, so must manually click sgp button and then it finds the stats btn
+		# is it bc searched before loaded? if so, how to wait until loaded before search?
+
+		if stat_name == 'ast':
+			# first need to click right arrow to move so ast btn visible
+			side_btn = driver.find_element('class name','side-arrow--right')
+			#print("side_btn: " + side_btn.get_attribute('innerHTML'))
+			try:
+				while True:
+					side_btn.click()
+			except:
+				#web_dict['ast'] = {}
+				# click ast btn
+				# rj-market__groups for sgp
+				stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
+				#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
+				stat_btn.click()
+
+		else:
+			stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
+			stat_btn_text = stat_btn.get_attribute('innerHTML')
+			#print("stat_btn: " + stat_btn_text)
+			# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
+			if stat_btn_text == 'Threes': # gone too far
+				stat_key -= 1
+				epath = 'a[' + str(stat_key) + ']'
+				stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
+				stat_btn_text = stat_btn.get_attribute('innerHTML')
+				#print("stat_btn: " + stat_btn_text)
+			# does scroll help problem of no sgp element???
+			# scroll to btn before attempting click or it will skip
+			#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
+			stat_btn.click()
+
+
+		# Now on stat page, read tables
+		# outer container: sportsbook-responsive-card-container
+		table_elements = driver.find_elements('class name','sportsbook-event-accordion__wrapper')
+		for e in table_elements:
+			print("table: " + e.get_attribute('innerHTML'))
+
+
+	print('final web_dict:\n' + str(web_dict))
+	return web_dict
+
+
+def read_dk_sgp(driver):
+	print('\n===Read DK SGP Pages===\n')
+
+	web_dict = {}
+			
+	pts_key = 5 # sometimes 4 if missing quick hits section
+	stat_key = pts_key
+	stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	#web_dict[key] = read_lazy_elements(key)
+	#for key in data_table_keys:#.keys():
+	for stat_name, relative_key in stats_of_interest.items():
+		print("stat_name: " + stat_name)
+		web_dict[stat_name] = {}
+
+		# click pts btn
+		epath = 'button[' + str(stat_key+relative_key) + ']'
+
+		# problem: sometimes fails to find sgp element, so must manually click sgp button and then it finds the stats btn
+		# is it bc searched before loaded? if so, how to wait until loaded before search?
+
+		if stat_name == 'reb':
+			# first need to click right arrow to move so ast btn visible
+			side_btn = driver.find_element('class name','side-arrow--right')
+			#print("side_btn: " + side_btn.get_attribute('innerHTML'))
+			try:
+				while True:
+					side_btn.click()
+			except:
+				#web_dict['ast'] = {}
+				# click ast btn
+				stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
+				#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
+				stat_btn.click()
+
+		else:
+			stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
+			stat_btn_text = stat_btn.get_attribute('innerHTML')
+			#print("stat_btn: " + stat_btn_text)
+			# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
+			if stat_btn_text == 'Threes': # gone too far
+				stat_key -= 1
+				epath = 'button[' + str(stat_key) + ']'
+				stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
+				stat_btn_text = stat_btn.get_attribute('innerHTML')
+				#print("stat_btn: " + stat_btn_text)
+			# does scroll help problem of no sgp element???
+			# scroll to btn before attempting click or it will skip
+			#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
+			stat_btn.click()
+
+
+		# get each players stat vals
+		# not all dropdowns are open so program must click each one
+		# click player dropdown btn
+		# could use find elements to get number of lazy renders and then loop thru that number
+		# lazy_element = driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render')
+		# print("lazy_element: " + lazy_element.get_attribute('innerHTML'))
+
+		# collapsible_element = lazy_element.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
+		# print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
+
+		# player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
+		# print("player_btn: " + player_btn.get_attribute('innerHTML'))
+		# player_btn.click()
+
+		
+		#print('get all lazy elements and loop thru')
+		lazy_elements = driver.find_element('class name','rj-markerboard-markets').find_elements('xpath','sb-lazy-render')
+		for e in lazy_elements:
+			#print("lazy_element: " + e.get_attribute('innerHTML'))
+
+			#collapsible_element = e.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
+			#print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
+
+			# multiple (3 always?) players in each lazy element
+			player_btns = e.find_elements('class name','rj-market-collapsible__trigger')
+			# print('player_btns: ')
+			# for player_btn in player_btns:
+			# 	print("player_btn: " + player_btn.get_attribute('innerHTML'))
+
+			for player_btn in player_btns:
+				#player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
+				#print("player_btn: " + player_btn.get_attribute('innerHTML'))
+
+				# scroll to btn before attempting click or it will skip
+				driver.execute_script("arguments[0].scrollIntoView(true);", player_btn)
+
+				# need to know which type of market it is bc there are 2: O/U and over only (OO)
+				# button header: 'Player Name Stat Name', eg 'Bam Adebayo Assists', excluding 'O/U'
+				player_btn_header = player_btn.find_element('xpath','h2').get_attribute('innerHTML')
+				#print('player_btn_header: ' + player_btn_header)
+
+				# ignore quarter stats for now
+				if re.search('Quarter',player_btn_header):
+					break # can break bc list ends with quarter stats
+
+				# old version: as long as we can click all markets we need to open then we dont need to click o/u btns but we may we need to close o/u btns to see the oo btns
+				# new version we need to click all btns
+				player_btn_arrow = player_btn.find_element('class name','rj-market-collapsible-arrow').get_attribute('innerHTML')
+				#print('player_btn_arrow: ' + player_btn_arrow)
+				# old version: if o/u and open then close dropdown permanently
+				# new version: get odds from all sections so get data 
+				# and then close if already open, or open and then close
+				# if re.search('O/U',player_btn_header) and re.search('up',player_btn_arrow):
+				# 	player_btn.click() # close dropdown
+				# 	print('closed unused market')
+				# 	time.sleep(0.1)
+				# elif not re.search('O/U',player_btn_header):
+				# first section already open so arrow up and no need to open but close after reading data
+				# arrow down means section closed
+				try: # button might be out of window bottom bc long list and we cannot scroll
+					if re.search('down',player_btn_arrow):
+						player_btn.click() # open dropdown
+
+						#print('clicked player btn')
+
+					# opened data so now collect it and then close it so other data visible
+
+					player_element = player_btn.find_element('xpath','..') 
+					#print("player_element: " + player_element.get_attribute('innerHTML'))
+
+					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_btn_header).strip().lower()
+					player_name = converter.convert_irregular_player_name(player_name)
+					# player_name = re.sub('−|-',' ',player_name)
+					# player_name = re.sub('\.','',player_name)
+					#print('player_name: ' + player_name)
+
+					if player_name not in web_dict[stat_name].keys():
+						web_dict[stat_name][player_name] = {}
+
+					stat_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-title')
+					odds_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-odds')
+
+					# stat_vals = []
+					# odds_vals = []
+					for idx in range(len(stat_val_elements)):
+						stat_element = stat_val_elements[idx]
+						#print("stat_element: " + stat_element.get_attribute('innerHTML'))
+						odds_element = odds_val_elements[idx]
+						#print("odds_element: " + odds_element.get_attribute('innerHTML'))
+
+						stat = stat_element.get_attribute('innerHTML')
+						odds = odds_element.get_attribute('innerHTML')
+
+						# if header is just <stat> without 'alt' and 'o/u'
+						# then format is 'Over 24.5 -120'
+						# Over <stat> <odds>
+						if not re.search('\sAlt\s',player_btn_header):
+							# old: stat = re.sub('\+','',stat)
+							if re.search('Over',stat):
+								stat = re.sub('[a-zA-Z]','',stat).strip()
+								stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
+							else: #under
+								stat = re.sub('[a-zA-Z]','',stat).strip()
+								stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
+						elif re.search('O/U',player_btn_header):
+							# start with over and then take every other value as over
+							if idx % 2 == 0:
+								stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
+							else: #under
+								stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
+
+						odds = re.sub('−','-',odds) # change abnormal '-' char
+						#odds = re.sub('\+','',odds) # prefer symbol to differentiate odds from probs, prefer no + symbol for +odds bc implied so not to confuse with val over under
+
+						#stat_vals.append(e.get_attribute('innerHTML'))
+
+						#print('stat: ' + str(stat))
+						#print('odds: ' + str(odds))
+						#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
+						web_dict[stat_name][player_name][stat] = odds # { stat : odds, ... }
+						#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
+					# for e in odds_val_elements:
+					# 	odds_vals.append(e.get_attribute('innerHTML'))
+
+					# print('stat_vals: ' + str(stat_vals))
+					# print('odds_vals: ' + str(odds_vals))
+
+					#print('collected player data')
+					# 0.1 is too fast to close dropown
+					# tested 0.1: seems like it gets all data without skipping
+					time.sleep(0.1) # 0.1 or 2 is arbitrary, so need to minimize to save time
+					#player_btn.click() # close dropdown
+				except:
+					print('Warning: player btn unclickable!')
+
+			#time.sleep(5)
+
+	print('final web_dict:\n' + str(web_dict))
+	return web_dict
+
+
 # finding element by class name will return 1st instance of class
 # but unusual error may occur
 # .ElementClickInterceptedException: Message: element click intercepted: Element <button role="tab" class="rj-market__group" aria-selected="false" data-testid="button-market-group">...</button> is not clickable at point (763, 135). Other element would receive the click: 
@@ -1904,190 +2159,17 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 		try:
 			#sgp_element = driver.find_element('id','dom_SameGameParlayWeb').get_attribute('outerHTML')	
 			#soup = BeautifulSoup(page, features='lxml')
-		
+
+			# look for sgp in url to tell if sgp mode bc diff key nums
 			# instead of needing keys input just click each btn until find stat of interest
-			pts_key = 5 # sometimes 4 if missing quick hits section
-			stat_key = pts_key
-			stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
-			#web_dict[key] = read_lazy_elements(key)
-			#for key in data_table_keys:#.keys():
-			for stat_name, relative_key in stats_of_interest.items():
-				print("stat_name: " + stat_name)
-				web_dict[stat_name] = {}
-
-				# click pts btn
-				epath = 'button[' + str(stat_key+relative_key) + ']'
-
-				# problem: sometimes fails to find sgp element, so must manually click sgp button and then it finds the stats btn
-				# is it bc searched before loaded? if so, how to wait until loaded before search?
-
-				if stat_name == 'reb':
-					# first need to click right arrow to move so ast btn visible
-					side_btn = driver.find_element('class name','side-arrow--right')
-					#print("side_btn: " + side_btn.get_attribute('innerHTML'))
-					try:
-						while True:
-							side_btn.click()
-					except:
-						#web_dict['ast'] = {}
-						# click ast btn
-						stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
-						#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
-						stat_btn.click()
-
-				else:
-					stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
-					stat_btn_text = stat_btn.get_attribute('innerHTML')
-					#print("stat_btn: " + stat_btn_text)
-					# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
-					if stat_btn_text == 'Threes': # gone too far
-						stat_key -= 1
-						epath = 'button[' + str(stat_key) + ']'
-						stat_btn = driver.find_element('class name','rj-market__groups').find_element('xpath',epath)
-						stat_btn_text = stat_btn.get_attribute('innerHTML')
-						#print("stat_btn: " + stat_btn_text)
-					# does scroll help problem of no sgp element???
-					# scroll to btn before attempting click or it will skip
-					#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
-					stat_btn.click()
-
-
-				# get each players stat vals
-				# not all dropdowns are open so program must click each one
-				# click player dropdown btn
-				# could use find elements to get number of lazy renders and then loop thru that number
-				# lazy_element = driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render')
-				# print("lazy_element: " + lazy_element.get_attribute('innerHTML'))
-
-				# collapsible_element = lazy_element.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
-				# print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
-
-				# player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
-				# print("player_btn: " + player_btn.get_attribute('innerHTML'))
-				# player_btn.click()
-
+			if re.search('sgp', url):
+				# Read DraftKings SGP pages
+				web_dict = read_dk_sgp(driver)
 				
-				#print('get all lazy elements and loop thru')
-				lazy_elements = driver.find_element('class name','rj-markerboard-markets').find_elements('xpath','sb-lazy-render')
-				for e in lazy_elements:
-					#print("lazy_element: " + e.get_attribute('innerHTML'))
+			else: 
+				# Draftkings Solo Props
+				web_dict = read_dk_solo(driver)
 
-					#collapsible_element = e.find_element('class name','rj-market-collapsible') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[1]').find_element('class name','rj-market')
-					#print("collapsible_element: " + collapsible_element.get_attribute('innerHTML'))
-
-					# multiple (3 always?) players in each lazy element
-					player_btns = e.find_elements('class name','rj-market-collapsible__trigger')
-					# print('player_btns: ')
-					# for player_btn in player_btns:
-					# 	print("player_btn: " + player_btn.get_attribute('innerHTML'))
-
-					for player_btn in player_btns:
-						#player_btn = collapsible_element.find_element('xpath','button') #driver.find_element('class name','rj-markerboard-markets').find_element('xpath','sb-lazy-render/div[2]/button')
-						#print("player_btn: " + player_btn.get_attribute('innerHTML'))
-
-						# scroll to btn before attempting click or it will skip
-						driver.execute_script("arguments[0].scrollIntoView(true);", player_btn)
-
-						# need to know which type of market it is bc there are 2: O/U and over only (OO)
-						# button header: 'Player Name Stat Name', eg 'Bam Adebayo Assists', excluding 'O/U'
-						player_btn_header = player_btn.find_element('xpath','h2').get_attribute('innerHTML')
-						#print('player_btn_header: ' + player_btn_header)
-
-						# ignore quarter stats for now
-						if re.search('Quarter',player_btn_header):
-							break # can break bc list ends with quarter stats
-
-						# old version: as long as we can click all markets we need to open then we dont need to click o/u btns but we may we need to close o/u btns to see the oo btns
-						# new version we need to click all btns
-						player_btn_arrow = player_btn.find_element('class name','rj-market-collapsible-arrow').get_attribute('innerHTML')
-						#print('player_btn_arrow: ' + player_btn_arrow)
-						# old version: if o/u and open then close dropdown permanently
-						# new version: get odds from all sections so get data 
-						# and then close if already open, or open and then close
-						# if re.search('O/U',player_btn_header) and re.search('up',player_btn_arrow):
-						# 	player_btn.click() # close dropdown
-						# 	print('closed unused market')
-						# 	time.sleep(0.1)
-						# elif not re.search('O/U',player_btn_header):
-						# first section already open so arrow up and no need to open but close after reading data
-						# arrow down means section closed
-						try: # button might be out of window bottom bc long list and we cannot scroll
-							if re.search('down',player_btn_arrow):
-								player_btn.click() # open dropdown
-
-								#print('clicked player btn')
-
-							# opened data so now collect it and then close it so other data visible
-
-							player_element = player_btn.find_element('xpath','..') 
-							#print("player_element: " + player_element.get_attribute('innerHTML'))
-
-							player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_btn_header).strip().lower()
-							player_name = converter.convert_irregular_player_name(player_name)
-							# player_name = re.sub('−|-',' ',player_name)
-							# player_name = re.sub('\.','',player_name)
-							#print('player_name: ' + player_name)
-
-							if player_name not in web_dict[stat_name].keys():
-								web_dict[stat_name][player_name] = {}
-
-							stat_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-title')
-							odds_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-odds')
-
-							# stat_vals = []
-							# odds_vals = []
-							for idx in range(len(stat_val_elements)):
-								stat_element = stat_val_elements[idx]
-								#print("stat_element: " + stat_element.get_attribute('innerHTML'))
-								odds_element = odds_val_elements[idx]
-								#print("odds_element: " + odds_element.get_attribute('innerHTML'))
-
-								stat = stat_element.get_attribute('innerHTML')
-								odds = odds_element.get_attribute('innerHTML')
-
-								# if header is just <stat> without 'alt' and 'o/u'
-								# then format is 'Over 24.5 -120'
-								# Over <stat> <odds>
-								if not re.search('\sAlt\s',player_btn_header):
-									# old: stat = re.sub('\+','',stat)
-									if re.search('Over',stat):
-										stat = re.sub('[a-zA-Z]','',stat).strip()
-										stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
-									else: #under
-										stat = re.sub('[a-zA-Z]','',stat).strip()
-										stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
-								elif re.search('O/U',player_btn_header):
-									# start with over and then take every other value as over
-									if idx % 2 == 0:
-										stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
-									else: #under
-										stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
-
-								odds = re.sub('−','-',odds) # change abnormal '-' char
-								#odds = re.sub('\+','',odds) # prefer symbol to differentiate odds from probs, prefer no + symbol for +odds bc implied so not to confuse with val over under
-
-								#stat_vals.append(e.get_attribute('innerHTML'))
-
-								#print('stat: ' + str(stat))
-								#print('odds: ' + str(odds))
-								#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
-								web_dict[stat_name][player_name][stat] = odds # { stat : odds, ... }
-								#print('player web dict ' + player_name + ': ' + str(web_dict[key][player_name]))
-							# for e in odds_val_elements:
-							# 	odds_vals.append(e.get_attribute('innerHTML'))
-
-							# print('stat_vals: ' + str(stat_vals))
-							# print('odds_vals: ' + str(odds_vals))
-
-							#print('collected player data')
-							# 0.1 is too fast to close dropown
-							# tested 0.1: seems like it gets all data without skipping
-							time.sleep(0.1) # 0.1 or 2 is arbitrary, so need to minimize to save time
-							#player_btn.click() # close dropdown
-						except:
-							print('Warning: player btn unclickable!')
-
-					#time.sleep(5)
 
 			print("Request successful.")
 			# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
@@ -2119,18 +2201,20 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 			team_name = '-' + team_name.split()[-1]
 			#print('team_name: ' + str(team_name))
 			# title = Open game in SGP mode
-			# class = toggle-sgp-badge__nav-link
-			sgp_btns = driver.find_elements('class name', 'toggle-sgp-badge__nav-link')
+			class_name = 'event-cell-link'
+			if re.search('sgp', url):
+				class_name = 'toggle-sgp-badge__nav-link'
+			event_btns = driver.find_elements('class name', class_name)
 			#print('sgp_btns: ' + str(sgp_btns))
-			for sgp_btn in sgp_btns:
+			for event_btn in event_btns:
 				#print('sgp_btn: ' + str(sgp_btn))
 				#sgp_key = team_name
-				sgp_url = sgp_btn.get_attribute('href')
+				event_url = event_btn.get_attribute('href')
 				#print('sgp_url: ' + str(sgp_url))
-				if re.search(team_name, sgp_url):
+				if re.search(team_name, event_url):
 					#print('found sgp btn: ' + str(sgp_btn) + ', ' + str(sgp_url))
-					driver.execute_script("arguments[0].scrollIntoView(true);", sgp_btn)
-					sgp_btn.click()
+					driver.execute_script("arguments[0].scrollIntoView(true);", event_btn)
+					event_btn.click()
 					break
 
 			# default 10s seems too long
@@ -2146,8 +2230,114 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 # get single odds separate bc they can be placed solo
 # single bets can also be combined with parlay bets 
 # but the diff is parlay bets must be combined
-def read_all_players_odds(game_teams, player_teams={}, players=[], cur_yr=''):
-	print('\n===Read All Players Odds===\n')
+# multi odds are those which must be combined to be used
+def read_all_players_solo_odds(game_teams, player_teams, cur_yr, players=[]):
+	print('\n===Read All Players Solo Odds===\n')
+	print('Setting: Current Year = ' + cur_yr)
+	print('\nInput: game_teams = ' + str(game_teams))
+	#print('player_teams: ' + str(player_teams))
+	print('\nOutput: all_players_odds = {\'mia\': {\'pts\': {\'Bam Adebayo\': {\'18+\': \'−650\',\'17-\': \'x\',...\n')
+
+	all_players_odds = {}
+	#odds = '?' # if we dont see name then they might be added later so determine if it is worth waiting
+
+	# use pd df
+	# like for reading roster and box score and game log
+	# display player game box scores in readable format
+	pd.set_option('display.max_columns', None)
+
+	#all_players_odds = [] # all players in game
+	#player_stat_odds = [] # from +2 to +n depending on stat
+
+	# for draftkings parlays now work both combining single bets and specific parlay only bets
+	# so loop through games to get specific parlay only bets, which must be combined
+	# should loop thru games instead of teams bc 2 teams on same page
+	# see which teams are playing together and group them
+	#game_teams = read_opponent()
+	for game in game_teams:
+		print('game: ' + str(game))
+
+		game_team = game[0] # only read 1 page bc bth teams same page
+		#print('game_team: ' + str(game_team))
+
+		all_players_odds[game_team] = {} # loops for both teams in game?
+
+		team_name = determiner.determine_team_name(game_team)
+		#print("team_name: " + str(team_name))
+
+		# only diff in url bt solo/multi is sgp mode=true at end
+		# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds
+		game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
+		#print('game_odds_url: ' + game_odds_url)
+		# points_url = game_odds_url + '?category=odds&subcategory=player-points'
+		# print('points_url: ' + points_url)
+
+		# return dictionary results for a url
+		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
+		# need to use react reader bc dynamic btn pages
+		# fcn reads url to tell what page so it can click correct btns and read correct classes
+		game_players_odds_dict = read_react_website(game_odds_url, team_name)
+
+		# first get dict for all players in game page
+		# which is mix of teams
+		# then separate by team
+		# web_dict[stat_name][player_name][stat] = odds
+		# game_players_odds_dict = {}
+		# if points_odds_soup is not None:
+		# 	#print('soup: ' + str(soup))
+
+		# 	# sportsbook-event-accordion__wrapper
+		# 	for section in points_odds_soup.find_all('div', {'class': 'sportsbook-event-accordion__wrapper'}):
+		# 		print('section: ' + str(section))
+
+
+		# separate teams in games so each team gets a key
+		if game_players_odds_dict is not None:
+			#print('game_players_odds_dict:\n' + str(game_players_odds_dict))
+
+			for stat_name, stat_odds_dict in game_players_odds_dict.items():
+				#print('stat_name: ' + str(stat_name))
+				for player, player_odds_dict in stat_odds_dict.items():
+					#print('player: ' + str(player))
+					player_team = ''
+					if player in player_teams.keys():
+						player_team = list(player_teams[player][cur_yr].keys())[-1]
+					else:
+						print('Warning: player not in teams list! ' + player)
+					#print('player_team: ' + str(player_team))
+					if player_team not in all_players_odds.keys():
+						all_players_odds[player_team] = {}
+
+					if stat_name not in all_players_odds[player_team].keys():
+						all_players_odds[player_team][stat_name] = {}
+
+					all_players_odds[player_team][stat_name][player] = player_odds_dict
+
+			
+
+			print('Success')
+		else:
+			print('Warning: website has no soup!')
+
+
+
+	# Get Single Odds
+	# https://sportsbook.draftkings.com/leagues/basketball/nba?category=player-points
+	
+
+	#writer.write_json_to_file(all_players_odds, filepath, write_param)
+
+	#all_players_odds: {'mia': {'pts': {'Bam Adebayo': {'18+': '−650','17-': 'x',...
+	#print('all_players_odds: ' + str(all_players_odds))
+	return all_players_odds
+
+#all_players_odds: {'mia': {'pts': {'Bam Adebayo': {'18+': '−650',...
+# get single odds separate bc they can be placed solo
+# single bets can also be combined with parlay bets 
+# but the diff is parlay bets must be combined
+# multi odds are those which must be combined to be used
+def read_all_players_multi_odds(game_teams, player_teams, cur_yr, players=[]):
+	print('\n===Read All Players Multi Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
 	#print('player_teams: ' + str(player_teams))
