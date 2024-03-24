@@ -1898,43 +1898,150 @@ def read_dk_solo(driver):
 		# problem: sometimes fails to find sgp element, so must manually click sgp button and then it finds the stats btn
 		# is it bc searched before loaded? if so, how to wait until loaded before search?
 
-		if stat_name == 'ast':
-			# first need to click right arrow to move so ast btn visible
-			side_btn = driver.find_element('class name','side-arrow--right')
-			#print("side_btn: " + side_btn.get_attribute('innerHTML'))
-			try:
-				while True:
-					side_btn.click()
-			except:
-				#web_dict['ast'] = {}
-				# click ast btn
-				# rj-market__groups for sgp
-				stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
-				#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
-				stat_btn.click()
+		# REMOVE bc seems like all btns in view so no need to scroll right
+		# if stat_name == 'ast':
+		# 	# first need to click right arrow to move so ast btn visible
+		# 	side_btn = driver.find_element('class name','side-arrow--right')
+		# 	#print("side_btn: " + side_btn.get_attribute('innerHTML'))
+		# 	try:
+		# 		while True:
+		# 			side_btn.click()
+		# 	except:
+		# 		#web_dict['ast'] = {}
+		# 		# click ast btn
+		# 		# rj-market__groups for sgp
+		# 		stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
+		# 		#print("stat_btn: " + stat_btn.get_attribute('innerHTML'))
+		# 		stat_btn.click()
 
-		else:
+		# else:
+		stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
+		stat_btn_text = stat_btn.get_attribute('innerHTML')
+		#print("stat_btn: " + stat_btn_text)
+		# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
+		if stat_btn_text == 'Threes': # gone too far
+			stat_key -= 1
+			epath = 'a[' + str(stat_key) + ']'
 			stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
 			stat_btn_text = stat_btn.get_attribute('innerHTML')
 			#print("stat_btn: " + stat_btn_text)
-			# if title is 'threes', then subtract 1 from key and try again bc it means the list is missing a tab
-			if stat_btn_text == 'Threes': # gone too far
-				stat_key -= 1
-				epath = 'a[' + str(stat_key) + ']'
-				stat_btn = driver.find_element('class name','sportsbook-tabbed-subheader__tabs').find_element('xpath',epath)
-				stat_btn_text = stat_btn.get_attribute('innerHTML')
-				#print("stat_btn: " + stat_btn_text)
-			# does scroll help problem of no sgp element???
-			# scroll to btn before attempting click or it will skip
-			#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
-			stat_btn.click()
+		# does scroll help problem of no sgp element???
+		# scroll to btn before attempting click or it will skip
+		#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
+		stat_btn.click()
 
 
 		# Now on stat page, read tables
 		# outer container: sportsbook-responsive-card-container
 		table_elements = driver.find_elements('class name','sportsbook-event-accordion__wrapper')
 		for e in table_elements:
-			print("table: " + e.get_attribute('innerHTML'))
+			section_html_str = e.get_attribute('innerHTML')
+			#print("section: " + section_html_str)
+
+			# sportsbook-event-accordion__title
+			section_name = e.find_element('class name', 'sportsbook-event-accordion__title').get_attribute('innerHTML')
+			print("section_name: " + section_name)
+
+			# ignore quarter stats for now
+			if re.search('Quarter',section_name):
+				break # can break bc list ends with quarter stats
+
+			# read diff if table vs component list
+			# check for table element tag
+			if re.search('table', section_html_str):
+				# table_tag = e.find_element('class name', 'sportsbook-table')
+				# print("table_tag: " + table_tag.get_attribute('innerHTML'))
+
+				# skip header row
+				player_rows = e.find_element('class name', 'sportsbook-table').find_elements('tag name', 'tr')[1:]
+				#print("player_comps: " + player_comps.get_attribute('innerHTML'))
+
+				# skip header row
+				for player_row in player_rows:
+					#print("player_row: " + player_row.get_attribute('innerHTML'))
+
+					player_name = player_row.find_element('class name', 'sportsbook-row-name').get_attribute('innerHTML').lower()
+					player_name = converter.convert_irregular_player_name(player_name)
+					#print('player_name: ' + player_name)
+
+					if player_name not in web_dict[stat_name].keys():
+						web_dict[stat_name][player_name] = {}
+
+					# for table just 1 over, 1 under
+					table_data = player_row.find_elements('tag name', 'td')
+					over_data = table_data[0]
+					under_data = table_data[1]
+					# print('over_data: ' + over_data)
+					# print('under_data: ' + under_data)
+
+					over_line = over_data.find_element('class name', 'sportsbook-outcome-cell__line').get_attribute('innerHTML')
+					over_odds = over_data.find_element('class name', 'sportsbook-odds').get_attribute('innerHTML')
+					# print('over_line: ' + over_line)
+					# print('over_odds: ' + over_odds)
+
+					under_line = under_data.find_element('class name', 'sportsbook-outcome-cell__line').get_attribute('innerHTML')
+					under_odds = under_data.find_element('class name', 'sportsbook-odds').get_attribute('innerHTML')
+					# print('under_line: ' + under_line)
+					# print('under_odds: ' + under_odds)
+
+					# table format is always X.5 so need to round up/down
+					over_stat = str(converter.round_half_up(float(over_line) + 0.5)) + '+'
+					under_stat = str(converter.round_half_up(float(under_line) - 0.5)) + '-'
+					# print('over_stat: ' + over_stat)
+					# print('under_stat: ' + under_stat)
+
+					over_odds = re.sub('−','-',over_odds)
+					under_odds = re.sub('−','-',under_odds)
+					# print('over_odds: ' + over_odds)
+					# print('under_odds: ' + under_odds)
+
+					web_dict[stat_name][player_name][over_stat] = over_odds
+					web_dict[stat_name][player_name][under_stat] = under_odds
+
+
+			else: # read list of components
+				
+				player_comps = e.find_element('class name', 'sportsbook-event-accordion__children-wrapper').find_elements('xpath', '*') #('tag name', 'div')
+				#print("player_comps: " + player_comps.get_attribute('innerHTML'))
+
+				for player_comp in player_comps:
+					#print("player_comp: " + player_comp.get_attribute('innerHTML'))
+
+					player_name = player_comp.find_element('class name', 'participants').get_attribute('innerHTML')
+					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_name).strip().lower()
+					player_name = converter.convert_irregular_player_name(player_name)
+					#print('player_name: ' + player_name)
+
+					if player_name not in web_dict[stat_name].keys():
+						web_dict[stat_name][player_name] = {}
+
+					# get element for each stat-odd pair in list for given player
+					stat_class = 'sportsbook-outcome-cell__line'
+					if re.search('X', section_name):
+						stat_class = 'sportsbook-outcome-cell__label'
+
+					stat_vals = player_comp.find_elements('class name', stat_class)
+					#print('stat_vals: ' + str(stat_vals))
+					odds_vals = player_comp.find_elements('class name','sportsbook-odds')
+					#print('odds_vals: ' + str(odds_vals))
+
+					for idx in range(len(stat_vals)):
+						stat = stat_vals[idx].get_attribute('innerHTML')
+						#print('stat: ' + stat)
+						odds = odds_vals[idx].get_attribute('innerHTML')
+						#print('odds: ' + odds)
+
+						# X+ Points section has format 10+ so leave as is
+						if not re.search('X',section_name):
+							# start with over and then take every other value as over
+							if idx % 2 == 0:
+								stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
+							else: #under
+								stat = str(converter.round_half_up(float(stat) - 0.5)) + '-'
+
+						odds = re.sub('−','-',odds)
+
+						web_dict[stat_name][player_name][stat] = odds
 
 
 	print('final web_dict:\n' + str(web_dict))
@@ -2071,6 +2178,7 @@ def read_dk_sgp(driver):
 					if player_name not in web_dict[stat_name].keys():
 						web_dict[stat_name][player_name] = {}
 
+					# get element for each stat-odd pair in list for given player
 					stat_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-title')
 					odds_val_elements = player_element.find_elements('class name','rj-market__button-yourbet-odds')
 
@@ -2082,6 +2190,7 @@ def read_dk_sgp(driver):
 						odds_element = odds_val_elements[idx]
 						#print("odds_element: " + odds_element.get_attribute('innerHTML'))
 
+						# format 10+ if alt val so leave as is
 						stat = stat_element.get_attribute('innerHTML')
 						odds = odds_element.get_attribute('innerHTML')
 

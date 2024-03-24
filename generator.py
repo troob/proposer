@@ -2547,10 +2547,10 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     # 1. iso tru prob >= 90
     # define high prob eg >=90
     # we use isolator for strictly isolating parts of existing data when there is no processing or computation between input output
-    high_prob_props = isolator.isolate_high_prob_props(multi_prop_dicts)
+    high_prob_multi_props = isolator.isolate_high_prob_props(multi_prop_dicts)
     #print('high_prob_props: ' + str(high_prob_props))
-    if len(high_prob_props) > 0:
-        prop_tables.append(high_prob_props)
+    if len(high_prob_multi_props) > 0:
+        prop_tables.append(high_prob_multi_props)
         sheet_names.append('HP Multi')
         # sort all high prob props by ev so we can potentially see 0 and -ev options incorrectly calculated due to irregular circumstance
         # sort_keys = ['ev']
@@ -2567,9 +2567,9 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     # really only use if only 1 +ev pick per game happens to be high ev and the other -ev is only slightly low
     # also in reality the ev calculation is imperfect 
     # so we must take a range including some -ev that might be miscalculated and are truly +ev
-    final_prop_dicts = multi_prop_dicts
-    if len(high_prob_props) > 0:
-        final_prop_dicts = high_prob_props
+    final_multi_prop_dicts = multi_prop_dicts
+    if len(high_prob_multi_props) > 0:
+        final_multi_prop_dicts = high_prob_multi_props
 
     print('\n===Generate Prop Combos===\n')
     # if ev, read odds
@@ -2583,9 +2583,9 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     # p7 = {'player':'luka', 'game':'3', 'stat':'pts', 'ev':1, 'odds':'100', 'true prob':100}
     # final_prop_dicts = [p1, p2]
     # print('final_prop_dicts: ' + str(final_prop_dicts))
-    if len(final_prop_dicts) > 0 and 'ev' in final_prop_dicts[0].keys():
+    if len(final_multi_prop_dicts) > 0 and 'ev' in final_multi_prop_dicts[0].keys():
         print('ev found')
-        plus_ev_props = isolator.isolate_plus_ev_props(final_prop_dicts)
+        plus_ev_props = isolator.isolate_plus_ev_props(final_multi_prop_dicts)
         
         # 3. out of remaining options, sort by ev
         # plus_ev_props = [{field:val,...},...]
@@ -2768,42 +2768,66 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
         prop_tables.append(joints)
         sheet_names.append(joint_sheet_name)
 
-        # Put Solo Props at front bc priority
-        # Put after review props bc review applies to solo/multi
-        prop_tables.append(prop_dicts)
-        sheet_names.append('All')
-
-        # review props
-        #review_sheet_name = 'Review'
-        prop_tables.append(review_props)
-        sheet_names.append('Review')
-
-        top_prob_props = []
-
-        # max profit props makes a combo of max allowed props
-        # how does it pick the max profit, while keeping +ev?
-        # sort by profit only after remaining +ev props with no other distinguishing factors
-        # need to get actual odds of joint combo props
-        # to make sure it is +ev max profit
-        # in theory, max profit = max ev
-        # BUT if we account for bet spread, it may be worth putting a very small amount on a low prob, high return
-        max_profit_props = []
 
 
-        # 5. sort by game and team and stat
-        # OR game, stat, player
-        # sort_keys = ['game', 'stat', 'player']#['game', 'team', 'stat']
-        # top_options = sorter.sort_dicts_by_str_keys(top_options, sort_keys)
-        # #writer.list_dicts(top_options, desired_order)
-        # prop_tables.append(top_options)
-        # sheet_names.append('Top')
+    # Put Solo Props at front bc priority
+    # Put after review props bc review applies to solo/multi
+    prop_tables.append(prop_dicts)
+    sheet_names.append('HP')
 
-        #s1_props = top_options
+    sort_keys = ['dp']
+    prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
+    prop_tables.append(prop_dicts)
+    sheet_names.append('DP')
+    
+    sort_keys = ['ev']
+    prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
+    prop_tables.append(prop_dicts)
+    sheet_names.append('EV')
 
-        #print('prop_tables before reverse: ' + str(prop_tables))
+    # former and national coverage conditions tend toward overs???
+    sort_keys = ['former', 'coverage']
+    prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys)
+    prop_tables.append(prop_dicts)
+    sheet_names.append('FC')
 
-        prop_tables = list(reversed(prop_tables))#.reverse() #[top_options, plus_ev_props, high_prob_props, available_prop_dicts]
-        sheet_names = list(reversed(sheet_names))#.reverse() #['Top', '+EV', 'High Prob', 'All'] #, 'Rare' # rare shows those where prev val is anomalous so unlikely to repeat anomaly (eg player falls in bottom 10% game)
+    sort_keys = ['rare prev']
+    prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
+    prop_tables.append(prop_dicts)
+    sheet_names.append('RP')
+
+    # review props
+    #review_sheet_name = 'Review'
+    review_props = generate_review_props(prop_dicts)
+    prop_tables.append(review_props)
+    sheet_names.append('Review')
+
+    top_prob_props = []
+
+    # max profit props makes a combo of max allowed props
+    # how does it pick the max profit, while keeping +ev?
+    # sort by profit only after remaining +ev props with no other distinguishing factors
+    # need to get actual odds of joint combo props
+    # to make sure it is +ev max profit
+    # in theory, max profit = max ev
+    # BUT if we account for bet spread, it may be worth putting a very small amount on a low prob, high return
+    max_profit_props = []
+
+
+    # 5. sort by game and team and stat
+    # OR game, stat, player
+    # sort_keys = ['game', 'stat', 'player']#['game', 'team', 'stat']
+    # top_options = sorter.sort_dicts_by_str_keys(top_options, sort_keys)
+    # #writer.list_dicts(top_options, desired_order)
+    # prop_tables.append(top_options)
+    # sheet_names.append('Top')
+
+    #s1_props = top_options
+
+    #print('prop_tables before reverse: ' + str(prop_tables))
+
+    prop_tables = list(reversed(prop_tables))#.reverse() #[top_options, plus_ev_props, high_prob_props, available_prop_dicts]
+    sheet_names = list(reversed(sheet_names))#.reverse() #['Top', '+EV', 'High Prob', 'All'] #, 'Rare' # rare shows those where prev val is anomalous so unlikely to repeat anomaly (eg player falls in bottom 10% game)
             
 
     return (prop_tables, sheet_names)
@@ -3176,10 +3200,10 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
     # so we can read page once and use for all teammates
     # CHANGE all players odds to be more specific to only parlay odds which must be combined with at least 1 other pick
     #all_players_odds: {'platform/source':{'mia': {'pts': {'Bam Adebayo': {'18': '−650','20': '+500',...
+    # IN PROGRESS
     all_players_solo_odds = reader.read_all_players_solo_odds(game_teams, player_teams, cur_yr)
     
-    # IN PROGRESS
-    #all_players_multi_odds = reader.read_all_players_multi_odds(game_teams, player_teams, cur_yr) # {team: stat: { player: odds,... }}
+    all_players_multi_odds = reader.read_all_players_multi_odds(game_teams, player_teams, cur_yr) # {team: stat: { player: odds,... }}
 
     
 
@@ -3310,7 +3334,8 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
         
     #available_prop_dicts = available_prop_dicts + maybe_available_props
 
-    #print('available_prop_dicts: ' + str(available_prop_dicts))
+    print('available_prop_dicts: ' + str(available_prop_dicts))
+    print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
     return available_prop_dicts, available_multi_prop_dicts
 
 def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev):
@@ -3475,6 +3500,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
     true_prob_key = 'true prob' # if val only in postseason then no true prob for reg season YET
     # get delta prob to compare
     dp_key = 'dp'
+    # get all prob to ref
+    ap_key = 'ap'
 
     for player, player_stat_probs_dict in all_true_probs_dict.items():
         print('\n===Player: ' + player.title() + '===\n')
@@ -3606,6 +3633,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     
                     if true_prob_key in val_probs_dict.keys(): # and it is cur cond for this player
                         prob = val_probs_dict[true_prob_key]
+                        #ap = val_probs_dict[ap_key]
                         dp = val_probs_dict[dp_key]
                         # already going thru all conditions which includes per unit conditions
                         #per_unit_conditions = conditions + ' per unit'
@@ -3614,6 +3642,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #print('prob: ' + str(prob))
                         if prob is not None:
                             stat_val_probs_dict[true_prob_key] = round_half_up(prob * 100)
+                            #stat_val_probs_dict[ap_key] = round_half_up(ap * 100)
                             stat_val_probs_dict[dp_key] = round_half_up(dp * 100)
                     #     else:
                     #         stat_val_probs_dict[true_prob_key] = 'NA'
@@ -3688,10 +3717,12 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         # only need to calculate true prob for under here bc true prob for over already computed in val probs dict
                         if true_prob_key in val_probs_dict.keys():
                             prob = val_probs_dict[true_prob_key]
+                            #ap = val_probs_dict[ap_key]
                             dp = val_probs_dict[dp_key]
                             #print('over prob: ' + str(prob))
                             if prob is not None:
                                 stat_val_probs_dict[true_prob_key] = 100 - round_half_up(prob * 100)
+                                #stat_val_probs_dict[ap_key] = 100 - round_half_up(ap * 100)
                                 # ap = prob - dp
                                 # if prob over goes up, then prob under goes down by same amount
                                 stat_val_probs_dict[dp_key] = -round_half_up(dp * 100)
@@ -4703,7 +4734,10 @@ def generate_all_conditions_weights(player_current_conditions, all_gp_conds, pla
         #print('lineup_team: ' + str(lineup_team))
 
         player_cur_tiap = player_current_conditions['tiap']
-        player_cur_diff_piap = player_current_conditions['diff']
+        # player on new team not played yet does not have median so cannot get diff
+        player_cur_diff_piap = None
+        if 'diff' in player_current_conditions.keys():
+            player_cur_diff_piap = player_current_conditions['diff']
         
         # gen overall team gp cond weight, before getting team part weights
         # generate player condition mean weights before passing to generate condition sample weight
@@ -5351,16 +5385,18 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
                     # show true prob next to delta/diff prob to see if favorable conditions
                     # dp = all prob - true prob
                     #all_cond = 'all ' + year + ' ' + part + ' prob' # val_probs_dict[all_cond]
-                    dp = None
+                    all_prob = dp = None
                     if true_prob is not None:
                         all_prob = generate_condition_mean_prob('all', val_probs_dict, player_stat_dict, season_years, season_part, stat)
                         
                         dp = converter.round_half_up(true_prob - all_prob, 2)
                         if prints_on:
-                            print('all_prob: ' + str(all_prob))
                             print('true_prob: ' + str(true_prob))
+                            print('all_prob: ' + str(all_prob))
                             print('dp: ' + str(dp))
-                        
+
+                    # all prob not needed bc dp shows diff/relative prob 
+                    #val_probs_dict['ap'] = all_prob
                     val_probs_dict['dp'] = dp
 
                     # # add keys to dict not used for ref but not yet to gen true prob
@@ -10374,10 +10410,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     sort_keys = ['true prob']
     available_prop_dicts = sorter.sort_dicts_by_keys(available_prop_dicts, sort_keys)
-    #print('available_prop_dicts: ' + str(available_prop_dicts))
+    print('available_prop_dicts: ' + str(available_prop_dicts))
 
     available_multi_prop_dicts = sorter.sort_dicts_by_keys(available_multi_prop_dicts, sort_keys)
-    #print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
+    print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
 
     # add ref vars to headers
     # after odds and ev columns if included
