@@ -2768,6 +2768,12 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
         prop_tables.append(joints)
         sheet_names.append(joint_sheet_name)
 
+        # review multi props
+        #review_sheet_name = 'Review'
+        # review_props = generate_review_multi_props(prop_dicts)
+        # prop_tables.append(review_props)
+        # sheet_names.append('Review Multi')
+
 
 
     # Put Solo Props at front bc priority
@@ -2775,12 +2781,12 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     prop_tables.append(prop_dicts)
     sheet_names.append('HP')
 
-    sort_keys = ['dp']
+    sort_keys = ['dp', 'ev']
     prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
     prop_tables.append(prop_dicts)
     sheet_names.append('DP')
     
-    sort_keys = ['ev']
+    sort_keys = ['ev', 'dp']
     prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
     prop_tables.append(prop_dicts)
     sheet_names.append('EV')
@@ -2791,18 +2797,18 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     prop_tables.append(prop_dicts)
     sheet_names.append('FC')
 
-    sort_keys = ['rare prev']
+    sort_keys = ['rare prev', 'ev', 'dp']
     prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
     prop_tables.append(prop_dicts)
     sheet_names.append('RP')
 
     # review props
     #review_sheet_name = 'Review'
-    review_props = generate_review_props(prop_dicts)
-    prop_tables.append(review_props)
-    sheet_names.append('Review')
+    # review_props = generate_review_props(prop_dicts)
+    # prop_tables.append(review_props)
+    # sheet_names.append('Review')
 
-    top_prob_props = []
+    # top_prob_props = []
 
     # max profit props makes a combo of max allowed props
     # how does it pick the max profit, while keeping +ev?
@@ -3174,7 +3180,7 @@ def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, al
 
 # NEED to return separate available as single picks vs multi picks which must be combined
 # stat_dict: {'player name': 'Trevelin Queen', 'stat name': 'ast', 'prob val': 0, 'prob': 100...
-def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cur_yr=''):
+def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, stats_of_interest):
     print('\n===Generate Available Prop Dicts===\n')
     print('Input: stat_dicts = [{...}, ...]')
     print('\nOutput: available_prop_dicts = [{...}, ...]\n')
@@ -3201,11 +3207,15 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
     # CHANGE all players odds to be more specific to only parlay odds which must be combined with at least 1 other pick
     #all_players_odds: {'platform/source':{'mia': {'pts': {'Bam Adebayo': {'18': '−650','20': '+500',...
     # IN PROGRESS
-    all_players_solo_odds = reader.read_all_players_solo_odds(game_teams, player_teams, cur_yr)
+    # all_players_solo_odds = reader.read_all_players_solo_odds(game_teams, player_teams, cur_yr)
     
-    all_players_multi_odds = reader.read_all_players_multi_odds(game_teams, player_teams, cur_yr) # {team: stat: { player: odds,... }}
+    # all_players_multi_odds = reader.read_all_players_multi_odds(game_teams, player_teams, cur_yr) # {team: stat: { player: odds,... }}
 
-    
+    # read solo first, then click sgp btn, then read sgp/multi
+    # bc much faster than loading twice separately!
+    all_players_odds = reader.read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest)
+    all_players_solo_odds = all_players_odds[0]
+    all_players_multi_odds = all_players_odds[1]
 
     #for team in teams:
         #all_players_odds = reader.read_all_stat_odds(stat_dict, all_players_odds)
@@ -3334,8 +3344,8 @@ def generate_available_prop_dicts(stat_dicts, game_teams=[], player_teams={}, cu
         
     #available_prop_dicts = available_prop_dicts + maybe_available_props
 
-    print('available_prop_dicts: ' + str(available_prop_dicts))
-    print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
+    # print('available_prop_dicts: ' + str(available_prop_dicts))
+    # print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
     return available_prop_dicts, available_multi_prop_dicts
 
 def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev):
@@ -4059,7 +4069,7 @@ def generate_game_players_condition_mean_prob(team_condition, player_team, opp_t
 # Why does 1 sample return prob=None?
 def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, season_years, part, stat_name, single_conds=[], prints_on=False, all_players_abbrevs={}, player_team='', opp_team=''):
     if prints_on:
-        print('\n===Generate Condition Mean Prob: ' + condition + '===\n')
+        print('\n===Generate Condition Mean Prob: ' + str(condition) + '===\n')
         print('Settings: Season Years, Season Part')
         print('\nInput: val_probs_dict = {\'condition year part\': prob, ... = {\'all 2024 regular prob\': 0.0, ..., \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters 2023 regular prob\': 0.0, ...')# = ' + str(val_probs_dict))
         print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
@@ -4068,7 +4078,7 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
     condition_mean_prob = None # need samples or prob distrib?
 
     #single_conds = ['nf', 'local', 'weekday']
-    if condition not in single_conds:
+    if condition is not None and condition not in single_conds:
 
         probs = []
         # in this fcn it is for 1 condition and part of season so the conditions will just be different years, so 1 for each year
@@ -5412,6 +5422,63 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
     #print('all_true_probs_dict: ' + str(all_true_probs_dict))
     return all_true_probs_dict
 
+# Hi-Lo Count
+# 1/52-20/52: -1
+# 21/52-32/52: 0
+# 33/52-1: +1
+# easiest to take avg and 
+# then see if stat val is in 12/52 (+/- 6/52) of {half range} = {avg}
+# so if avg pts=10, 10(6/52) = 15/13 = 1+2/13
+def generate_player_stat_counts(player, player_season_log, todays_date):
+    print('\n===Generate Player Stat Counts: ' + player.title() + '===\n')
+
+    player_stat_counts = {}
+
+    
+    # loop thru each game before cur game, each stat val
+    # and determine which range it is in
+    
+
+
+    # save the current count for each player 
+    # so it does not need to be recounted each run
+    # bc it only changes after new game
+    # so save file with date in name
+        
+
+
+    return player_stat_counts
+
+# count based on cur yr bc deck shuffled each yr at start
+def generate_all_counts(all_players_season_logs, cur_yr, todays_date):
+    print('\n===Generate All Counts===\n')
+
+    all_counts = {}
+
+    # is it actually faster to save count?
+    # yes for same day
+    # count_file = 'data/all players counts ' + todays_date + '.json'
+    init_all_counts = {}#reader.read_json(count_file)
+
+
+    for player, player_season_logs in all_players_season_logs.items():
+        print('\nPlayer: ' + player.title())
+
+        if player in init_all_counts.keys():
+            all_counts[player] = init_all_counts[player]
+
+        elif cur_yr in player_season_logs.keys():
+
+            player_cur_season_log = player_season_logs[cur_yr]
+            all_counts[player] = generate_player_stat_counts(player, player_cur_season_log, todays_date)
+
+
+    # if init_all_counts != all_counts:
+    #     writer.write_json_to_file(all_counts, count_file)
+
+    return all_counts
+
+
 # player_current_conditions = {out:[p1,...], starters:[p1,...], loc:l1, city:c1, dow:d1, tod:t1,...}
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
@@ -5660,6 +5727,14 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 
     else:
         print('Warning: Player team not in all lineups! ' + player_team.upper() + ', ' + player.title())
+
+
+    # Now that we have all basic conditions
+    # Get the current advantage count for each stat of each player
+    # like prev val bc diff for each stat
+    # so gen in separate fcn
+    #player_current_conditions['cnt'] = generate_advantage_count()
+
 
     # player_current_conditions = {out:[p1,...], starters:[p1,...], loc:l1, city:c1, dow:d1, tod:t1,...}
     print('player_current_conditions: ' + str(player_current_conditions))
@@ -10060,6 +10135,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, season_year)
         all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, season_year)
 
+        #all_counts = generate_all_counts(all_players_season_logs, season_year, todays_date)
+
         # list all changed lineups since last run
         # init lineups != all lineups
         #determiner.determine_changed_lineups(init_all_lineups, all_lineups)
@@ -10397,7 +10474,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     if 'read odds' in settings.keys():
         read_odds = settings['read odds']
     if read_odds:
-        available_prop_data = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str)
+        available_prop_data = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
         available_prop_dicts = available_prop_data[0]
         available_multi_prop_dicts = available_prop_data[1]
         desired_order.extend(['odds','ev']) # is there another way to ensure odds comes after true prob
@@ -10410,10 +10487,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     sort_keys = ['true prob']
     available_prop_dicts = sorter.sort_dicts_by_keys(available_prop_dicts, sort_keys)
-    print('available_prop_dicts: ' + str(available_prop_dicts))
+    #print('available_prop_dicts: ' + str(available_prop_dicts))
 
     available_multi_prop_dicts = sorter.sort_dicts_by_keys(available_multi_prop_dicts, sort_keys)
-    print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
+    #print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
 
     # add ref vars to headers
     # after odds and ev columns if included

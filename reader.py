@@ -1878,18 +1878,26 @@ def read_react_web_data(url):
 	#print('web_data:\n' + str(web_data))
 	return web_data
 
-def read_dk_solo(driver):
+def read_dk_solo(driver, stats_of_interest):
 	print('\n===Read DK Solo Pages===\n')
 
 	web_dict = {}
 			
 	pts_key = 4
 	stat_key = pts_key
-	stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	stats_keys = {'pts':0,'3pm':1,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	#for stat in stats_of_interest:
+	# for dk, pts+reb+ast in combo section, key 2
+	# for dk, stl+blk in defense section, key 5
+
 	#web_dict[key] = read_lazy_elements(key)
 	#for key in data_table_keys:#.keys():
-	for stat_name, relative_key in stats_of_interest.items():
+	#for stat_name, relative_key in stats_keys.items():
+	for stat_name in stats_of_interest:
 		print("stat_name: " + stat_name)
+
+		relative_key = stats_keys[stat_name]
+
 		web_dict[stat_name] = {}
 
 		# click pts btn
@@ -1927,7 +1935,7 @@ def read_dk_solo(driver):
 			#print("stat_btn: " + stat_btn_text)
 		# does scroll help problem of no sgp element???
 		# scroll to btn before attempting click or it will skip
-		#driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
+		driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
 		stat_btn.click()
 
 
@@ -1940,7 +1948,7 @@ def read_dk_solo(driver):
 
 			# sportsbook-event-accordion__title
 			section_name = e.find_element('class name', 'sportsbook-event-accordion__title').get_attribute('innerHTML')
-			print("section_name: " + section_name)
+			#print("section_name: " + section_name)
 
 			# ignore quarter stats for now
 			if re.search('Quarter',section_name):
@@ -1960,7 +1968,8 @@ def read_dk_solo(driver):
 				for player_row in player_rows:
 					#print("player_row: " + player_row.get_attribute('innerHTML'))
 
-					player_name = player_row.find_element('class name', 'sportsbook-row-name').get_attribute('innerHTML').lower()
+					# strip in case source typo added space
+					player_name = player_row.find_element('class name', 'sportsbook-row-name').get_attribute('innerHTML').strip().lower()
 					player_name = converter.convert_irregular_player_name(player_name)
 					#print('player_name: ' + player_name)
 
@@ -2044,22 +2053,25 @@ def read_dk_solo(driver):
 						web_dict[stat_name][player_name][stat] = odds
 
 
-	print('final web_dict:\n' + str(web_dict))
+	#print('final web_dict:\n' + str(web_dict))
 	return web_dict
 
 
-def read_dk_sgp(driver):
+def read_dk_sgp(driver, stats_of_interest):
 	print('\n===Read DK SGP Pages===\n')
 
 	web_dict = {}
 			
 	pts_key = 5 # sometimes 4 if missing quick hits section
 	stat_key = pts_key
-	stats_of_interest = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	stats_keys = {'pts':0,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
 	#web_dict[key] = read_lazy_elements(key)
 	#for key in data_table_keys:#.keys():
-	for stat_name, relative_key in stats_of_interest.items():
+	for stat_name in stats_of_interest:
 		print("stat_name: " + stat_name)
+
+		relative_key = stats_keys[stat_name]
+
 		web_dict[stat_name] = {}
 
 		# click pts btn
@@ -2238,7 +2250,7 @@ def read_dk_sgp(driver):
 
 			#time.sleep(5)
 
-	print('final web_dict:\n' + str(web_dict))
+	#print('final web_dict:\n' + str(web_dict))
 	return web_dict
 
 
@@ -2247,7 +2259,7 @@ def read_dk_sgp(driver):
 # .ElementClickInterceptedException: Message: element click intercepted: Element <button role="tab" class="rj-market__group" aria-selected="false" data-testid="button-market-group">...</button> is not clickable at point (763, 135). Other element would receive the click: 
 # return {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 # https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
-def read_react_website(url, team_name, timeout=10, max_retries=3):
+def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retries=3):
 	# print('\n===Read React Website===\n')
 	# print('url: ' + url)
 
@@ -2271,19 +2283,33 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 
 			# look for sgp in url to tell if sgp mode bc diff key nums
 			# instead of needing keys input just click each btn until find stat of interest
-			if re.search('sgp', url):
-				# Read DraftKings SGP pages
-				web_dict = read_dk_sgp(driver)
+			# if re.search('sgp', url):
+			# 	# Read DraftKings SGP pages
+			# 	web_dict = read_dk_sgp(driver)
 				
-			else: 
-				# Draftkings Solo Props
-				web_dict = read_dk_solo(driver)
+			# else: 
+			# 	# Draftkings Solo Props
+			# 	web_dict = read_dk_solo(driver)
 
 
-			print("Request successful.")
+
+			# Read Solo Odds
+			solo_dict = read_dk_solo(driver, stats_of_interest)
+
+			# DK changed so all bets on solo page but not always allowed solo
+			# BUT no need to read both
+			# Click SGP Button
+			# sgp_btn = driver.find_element('class name','event-page-sgp-button')
+			# sgp_btn.click()
+
+			# # Read SGP Odds
+			multi_dict = {}#read_dk_sgp(driver, stats_of_interest)
+
+
+			print("Read React Website Success")
 			# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 			#print('final web_dict:\n' + str(web_dict))
-			return web_dict
+			return solo_dict, multi_dict
 
 		except Exception as e:
 			
@@ -2327,7 +2353,7 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 					break
 
 			# default 10s seems too long
-			time.sleep(5)
+			time.sleep(1)
 
 	
 	# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
@@ -2340,7 +2366,7 @@ def read_react_website(url, team_name, timeout=10, max_retries=3):
 # single bets can also be combined with parlay bets 
 # but the diff is parlay bets must be combined
 # multi odds are those which must be combined to be used
-def read_all_players_solo_odds(game_teams, player_teams, cur_yr, players=[]):
+def read_all_players_solo_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[]):
 	print('\n===Read All Players Solo Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
@@ -2385,7 +2411,7 @@ def read_all_players_solo_odds(game_teams, player_teams, cur_yr, players=[]):
 		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 		# need to use react reader bc dynamic btn pages
 		# fcn reads url to tell what page so it can click correct btns and read correct classes
-		game_players_odds_dict = read_react_website(game_odds_url, team_name)
+		game_players_odds_dict = read_react_website(game_odds_url, team_name, stats_of_interest)
 
 		# first get dict for all players in game page
 		# which is mix of teams
@@ -2445,7 +2471,7 @@ def read_all_players_solo_odds(game_teams, player_teams, cur_yr, players=[]):
 # single bets can also be combined with parlay bets 
 # but the diff is parlay bets must be combined
 # multi odds are those which must be combined to be used
-def read_all_players_multi_odds(game_teams, player_teams, cur_yr, players=[]):
+def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[]):
 	print('\n===Read All Players Multi Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
@@ -2536,6 +2562,135 @@ def read_all_players_multi_odds(game_teams, player_teams, cur_yr, players=[]):
 	#all_players_odds: {'mia': {'pts': {'Bam Adebayo': {'18+': '−650','17-': 'x',...
 	#print('all_players_odds: ' + str(all_players_odds))
 	return all_players_odds
+
+def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
+	print('\n===Read All Players Odds===\n')
+	print('Setting: Current Year = ' + cur_yr)
+	print('\nInput: game_teams = ' + str(game_teams))
+	#print('player_teams: ' + str(player_teams))
+	print('\nOutput: all_players_odds = {\'mia\': {\'pts\': {\'Bam Adebayo\': {\'18+\': \'−650\',\'17-\': \'x\',...\n')
+
+
+	all_players_solo_odds = {}
+	all_players_multi_odds = {}
+
+	pd.set_option('display.max_columns', None)
+
+	# Read Solo Odds
+
+	# Click SGP Button
+
+	# Read SGP Odds
+
+
+	for game in game_teams:
+		print('\ngame: ' + str(game))
+
+		game_team = game[0] # only read 1 page bc bth teams same page
+		#print('game_team: ' + str(game_team))
+
+		all_players_solo_odds[game_team] = {} # loops for both teams in game?
+		all_players_multi_odds[game_team] = {}
+
+		team_name = determiner.determine_team_name(game_team)
+		#print("team_name: " + str(team_name))
+
+		# only diff in url bt solo/multi is sgp mode=true at end
+		# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds
+		game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
+		#print('game_odds_url: ' + game_odds_url)
+		# points_url = game_odds_url + '?category=odds&subcategory=player-points'
+		# print('points_url: ' + points_url)
+
+		# return dictionary results for a url
+		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
+		# need to use react reader bc dynamic btn pages
+		# fcn reads url to tell what page so it can click correct btns and read correct classes
+		retries = 0
+		max_retries = 3
+		# check if no tables found
+		game_players_odds_data = gp_solo_odds = gp_multi_odds = None
+		while game_players_odds_data is None and retries < max_retries:
+			game_players_odds_data = read_react_website(game_odds_url, team_name, stats_of_interest)
+			# if glitch returns none, try again bc seems to work second try
+			if game_players_odds_data is None:
+				retries += 1
+				print(f"Glitch occurred. Retry {retries}/{max_retries}...")
+
+		if game_players_odds_data is not None:
+			gp_solo_odds = game_players_odds_data[0]
+			gp_multi_odds = game_players_odds_data[1]
+
+		# first get dict for all players in game page
+		# which is mix of teams
+		# then separate by team
+		# web_dict[stat_name][player_name][stat] = odds
+		# game_players_odds_dict = {}
+		# if points_odds_soup is not None:
+		# 	#print('soup: ' + str(soup))
+
+		# 	# sportsbook-event-accordion__wrapper
+		# 	for section in points_odds_soup.find_all('div', {'class': 'sportsbook-event-accordion__wrapper'}):
+		# 		print('section: ' + str(section))
+
+
+		# separate teams in games so each team gets a key
+		if gp_solo_odds is not None:
+			#print('gp_solo_odds:\n' + str(gp_solo_odds))
+
+			for stat_name, stat_odds_dict in gp_solo_odds.items():
+				#print('stat_name: ' + str(stat_name))
+				for player, player_odds_dict in stat_odds_dict.items():
+					#print('player: ' + str(player))
+					player_team = ''
+					if player in player_teams.keys():
+						player_team = list(player_teams[player][cur_yr].keys())[-1]
+					else:
+						print('Warning: player not in teams list! ' + player)
+					#print('player_team: ' + str(player_team))
+					if player_team not in all_players_solo_odds.keys():
+						all_players_solo_odds[player_team] = {}
+
+					if stat_name not in all_players_solo_odds[player_team].keys():
+						all_players_solo_odds[player_team][stat_name] = {}
+
+					all_players_solo_odds[player_team][stat_name][player] = player_odds_dict
+
+			print('Solo Success')
+		else:
+			print('Warning: website has no soup!')
+
+
+		if gp_multi_odds is not None:
+			#print('gp_multi_odds:\n' + str(gp_multi_odds))
+
+			for stat_name, stat_odds_dict in gp_multi_odds.items():
+				#print('stat_name: ' + str(stat_name))
+				for player, player_odds_dict in stat_odds_dict.items():
+					#print('player: ' + str(player))
+					player_team = ''
+					if player in player_teams.keys():
+						player_team = list(player_teams[player][cur_yr].keys())[-1]
+					else:
+						print('Warning: player not in teams list! ' + player)
+					#print('player_team: ' + str(player_team))
+					if player_team not in all_players_multi_odds.keys():
+						all_players_multi_odds[player_team] = {}
+
+					if stat_name not in all_players_multi_odds[player_team].keys():
+						all_players_multi_odds[player_team][stat_name] = {}
+
+					all_players_multi_odds[player_team][stat_name][player] = player_odds_dict
+
+			print('Multi Success')
+		else:
+			print('Warning: website has no soup!')
+	
+	# print('all_players_solo_odds: ' + str(all_players_solo_odds))
+	# print('all_players_multi_odds: ' + str(all_players_multi_odds))
+	return all_players_solo_odds, all_players_multi_odds
+
+
 
 # stat_dict: {'player name': 'Trevelin Queen', 'stat name': 'ast', 'prob val': 0, 'prob': 100
 # all_players_odds = {team:{stat:{player:odds...}

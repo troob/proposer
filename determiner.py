@@ -3015,12 +3015,16 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'giannis antetokounmpo'
     elif player == 'kj martin':
         return 'kenyon martin jr'
+    elif player == 'p baldwin':
+        return 'patrick baldwin jr'
     elif player == 'marvin bagley' or player == 'm bagley':
         return 'marvin bagley iii'
-    elif player == 'kelly oubre':
-        return 'kelly oubre jr'
     elif player == 'j williams' and team == 'okc' and position == 'c':
         return 'jaylin williams'
+    # add jr to end of name in irreg cases
+    # cannot simply look for jr in all case bc maybe diff players, 1 jr and other not
+    elif player == 'kelly oubre':
+        return player + ' jr'
 
     # if player gone from the league 
     # AND we did not get their espn id

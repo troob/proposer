@@ -60,7 +60,7 @@ model_x_seasons = 2
 all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 
 # === STATS OF INTEREST === 
-stats_of_interest = ['pts','reb','ast']
+stats_of_interest = ['pts','reb','ast']#, '3pm']
 
 # if we want to see how it would perform for previous years
 # we need to know the exact game (or even specific prop) that we want to evaluate
@@ -136,7 +136,7 @@ test_probs = False
 # make list of sources with different odds 
 read_odds = True # set false to test other features
 if test:
-    read_odds = True # change to true if testing read odds feature so true for tests with single player
+    read_odds = False # change to true if testing read odds feature so true for tests with single player
 
 # === GAME IDs === 
 # if error 429 too many requests then we need to stop reading new game ids for 1hr
@@ -186,14 +186,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('phi','lac')] #[('sac','orl'), ('cha','atl'), ('tor','wsh'), ('bos','chi'), ('uta','hou'), ('phx','sas'), ('den','por')]#, ('nop','lal')
+game_teams = [('cle','cha'), ('gsw','orl'), ('bkn','wsh'), ('por','atl'), ('lac','phi'), ('nyk','tor'), ('ind','chi'), ('lal','mem'), ('det','min'), ('hou','okc'), ('sas','uta'), ('phx','den')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('phi','lac')]
+    game_teams = [('ind','lac')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
