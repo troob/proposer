@@ -23,6 +23,8 @@ import time # halt code to retry website request, # need to read dynamic webpage
 
 from selenium import webdriver # need to read html5 webpages
 from webdriver_manager.chrome import ChromeDriverManager # need to access dynamic webpages
+from selenium.webdriver.common.action_chains import ActionChains
+#import undetected_chromedriver as uc
 #from selenium.webdriver.chrome.options import Options # block ads
 
 from urllib.error import URLError
@@ -1878,6 +1880,57 @@ def read_react_web_data(url):
 	#print('web_data:\n' + str(web_data))
 	return web_data
 
+def read_fd_solo(driver, stats_of_interest, team_name):
+	print('\n===Read FD Solo Pages===\n')
+	print('team_name: ' + team_name)
+
+	web_dict = {}
+
+	# start at nba page
+
+	# if captcha, <div id=px-captcha
+	# captcha = driver.find_element('id', 'px-captcha')
+
+	# # Create an ActionChains object
+	# action_chains = ActionChains(driver)
+
+	# # Move the mouse to the center of the div
+	# action_chains.move_to_element(captcha)
+
+	# # Press and hold the left mouse button
+	# action_chains.click_and_hold(captcha)
+
+	# # Release the left mouse button
+	# action_chains.release()
+
+	# captcha = driver.find_element('id', 'px-captcha')
+	# action = ActionChains(driver)
+	# action.move_to_element(captcha)
+	# action.click_and_hold(captcha)
+	# action.perform()
+	# time.sleep(10)
+	# action.release(captcha)
+	# action.perform()
+	# time.sleep(0.2)
+	# action.release(captcha)
+
+
+	# click game link
+	# like when error direct on dk
+	links = driver.find_elements('tag name', 'a')
+	for link in links:
+		link_title = link.get_attribute('title').lower()
+		print('link_title: ' + link_title)
+
+		if re.search(team_name, link_title):
+			driver.execute_script("arguments[0].scrollIntoView(true);", link)
+			link.click()
+			break
+
+	time.sleep(1000)
+
+	return web_dict
+
 def read_dk_solo(driver, stats_of_interest):
 	print('\n===Read DK Solo Pages===\n')
 
@@ -2260,18 +2313,49 @@ def read_dk_sgp(driver, stats_of_interest):
 # return {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 # https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
 def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retries=3):
-	# print('\n===Read React Website===\n')
-	# print('url: ' + url)
+	print('\n===Read React Website===\n')
+	print('url: ' + url)
 
 	#web_data = [] # web_data = [dataframe1,...] or [dict1,...] or {}
-	web_dict = {}
+	#web_dict = {}
 
-	driver = webdriver.Chrome(ChromeDriverManager().install())
+	# service = webdriver.ChromeService(executable_path = '/usr/bin/chromedriver')
+	# driver = webdriver.Chrome(service=service)
+	# cService = webdriver.ChromeService(executable_path='/Users/[...]binaries(117)/chromedriver')
+	# driver = webdriver.Chrome(service = cService)
+	# after testing undetected driver and failing suddenly normal driver also failed
+	# with attribute error str not browser name in options???
+	# fixed by removing params install
+	driver = webdriver.Chrome()#ChromeDriverManager().install())
+	print('done init driver')
 	# default 3 does not seem long enough bc often fails to find element that should be there
 	# change to 30 makes no diff
 	driver.implicitly_wait(3)
 
+	# Create Chromeoptions instance 
+	options = webdriver.ChromeOptions() 
+	
+	# Adding argument to disable the AutomationControlled flag 
+	options.add_argument("--disable-blink-features=AutomationControlled") 
+	
+	# Exclude the collection of enable-automation switches 
+	options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+	
+	# Turn-off userAutomationExtension 
+	options.add_experimental_option("useAutomationExtension", False) 
+	
+	# Setting the driver path and requesting a page 
+	driver = webdriver.Chrome(options=options) 
+	
+	# Changing the property of the navigator value for webdriver to undefined 
+	driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
+
 	driver.get(url) # Open the URL on a google chrome window
+
+	# udriver failed
+	# udriver = uc.Chrome(headless=True,use_subprocess=False)
+	# udriver.get(url)
+	# print('got udriver')
 
 	retries = 0
 
@@ -2294,7 +2378,11 @@ def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retrie
 
 
 			# Read Solo Odds
-			solo_dict = read_dk_solo(driver, stats_of_interest)
+			solo_dict = {}
+			if re.search('draftkings', url):
+				solo_dict = read_dk_solo(driver, stats_of_interest)
+			else:
+				solo_dict = read_fd_solo(driver, stats_of_interest, team_name)
 
 			# DK changed so all bets on solo page but not always allowed solo
 			# BUT no need to read both
@@ -2582,111 +2670,135 @@ def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 
 	# Read SGP Odds
 
+	sites = ['fd']
 
-	for game in game_teams:
-		print('\ngame: ' + str(game))
+	for site in sites:
 
-		game_team = game[0] # only read 1 page bc bth teams same page
-		#print('game_team: ' + str(game_team))
+		all_players_solo_odds[site] = {}
 
-		all_players_solo_odds[game_team] = {} # loops for both teams in game?
-		all_players_multi_odds[game_team] = {}
+		for game in game_teams:
+			print('\ngame: ' + str(game))
 
-		team_name = determiner.determine_team_name(game_team)
-		#print("team_name: " + str(team_name))
+			game_team = game[0] # only read 1 page bc bth teams same page
+			#print('game_team: ' + str(game_team))
 
-		# only diff in url bt solo/multi is sgp mode=true at end
-		# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds
-		game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
-		#print('game_odds_url: ' + game_odds_url)
-		# points_url = game_odds_url + '?category=odds&subcategory=player-points'
-		# print('points_url: ' + points_url)
+			all_players_solo_odds[site][game_team] = {}
 
-		# return dictionary results for a url
-		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-		# need to use react reader bc dynamic btn pages
-		# fcn reads url to tell what page so it can click correct btns and read correct classes
-		retries = 0
-		max_retries = 3
-		# check if no tables found
-		game_players_odds_data = gp_solo_odds = gp_multi_odds = None
-		while game_players_odds_data is None and retries < max_retries:
-			game_players_odds_data = read_react_website(game_odds_url, team_name, stats_of_interest)
-			# if glitch returns none, try again bc seems to work second try
-			if game_players_odds_data is None:
-				retries += 1
-				print(f"Glitch occurred. Retry {retries}/{max_retries}...")
-
-		if game_players_odds_data is not None:
-			gp_solo_odds = game_players_odds_data[0]
-			gp_multi_odds = game_players_odds_data[1]
-
-		# first get dict for all players in game page
-		# which is mix of teams
-		# then separate by team
-		# web_dict[stat_name][player_name][stat] = odds
-		# game_players_odds_dict = {}
-		# if points_odds_soup is not None:
-		# 	#print('soup: ' + str(soup))
-
-		# 	# sportsbook-event-accordion__wrapper
-		# 	for section in points_odds_soup.find_all('div', {'class': 'sportsbook-event-accordion__wrapper'}):
-		# 		print('section: ' + str(section))
+			team_name = determiner.determine_team_name(game_team)
+			#print("team_name: " + str(team_name))
 
 
-		# separate teams in games so each team gets a key
-		if gp_solo_odds is not None:
-			#print('gp_solo_odds:\n' + str(gp_solo_odds))
+			# read from each source/site
+			# need team name to get url
+			dk_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
+			# https://sportsbook.fanduel.com/basketball/nba/boston-celtics-@-atlanta-hawks-33140456?tab=player-points
+			fd_url = 'https://sportsbook.fanduel.com/basketball/nba/'# + re.sub(' ','-', team_name) + '--odds'
+			game_odds_url = dk_url
+			if site == 'fd':
+				game_odds_url = fd_url
+			
+			# site_urls = {'dk':dk_url, 'fd':fd_url}
+			# for site, game_odds_url in site_urls.items():
 
-			for stat_name, stat_odds_dict in gp_solo_odds.items():
-				#print('stat_name: ' + str(stat_name))
-				for player, player_odds_dict in stat_odds_dict.items():
-					#print('player: ' + str(player))
-					player_team = ''
-					if player in player_teams.keys():
-						player_team = list(player_teams[player][cur_yr].keys())[-1]
-					else:
-						print('Warning: player not in teams list! ' + player)
-					#print('player_team: ' + str(player_team))
-					if player_team not in all_players_solo_odds.keys():
-						all_players_solo_odds[player_team] = {}
+			# 	all_players_solo_odds[site] = {}
+			# 	if game_team not in all_players_solo_odds[site].keys():
+			# 		all_players_solo_odds[site][game_team] = {} # loops for both teams in game?
+			# 	all_players_multi_odds[site] = {}
+			# 	if game_team not in all_players_multi_odds[site].keys():
+			# 		all_players_multi_odds[site][game_team] = {}
 
-					if stat_name not in all_players_solo_odds[player_team].keys():
-						all_players_solo_odds[player_team][stat_name] = {}
+			# only diff in url bt solo/multi is sgp mode=true at end
+			# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds
+			#game_odds_url = url #'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
+			#print('game_odds_url: ' + game_odds_url)
+			# points_url = game_odds_url + '?category=odds&subcategory=player-points'
+			# print('points_url: ' + points_url)
 
-					all_players_solo_odds[player_team][stat_name][player] = player_odds_dict
+			# return dictionary results for a url
+			# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
+			# need to use react reader bc dynamic btn pages
+			# fcn reads url to tell what page so it can click correct btns and read correct classes
+			retries = 0
+			max_retries = 3
+			# check if no tables found
+			game_players_odds_data = gp_solo_odds = gp_multi_odds = None
+			while game_players_odds_data is None and retries < max_retries:
+				game_players_odds_data = read_react_website(game_odds_url, team_name, stats_of_interest)
+				# if glitch returns none, try again bc seems to work second try
+				if game_players_odds_data is None:
+					retries += 1
+					print(f"Glitch occurred. Retry {retries}/{max_retries}...")
 
-			print('Solo Success')
-		else:
-			print('Warning: website has no soup!')
+			if game_players_odds_data is not None:
+				gp_solo_odds = game_players_odds_data[0]
+				gp_multi_odds = game_players_odds_data[1]
+
+			# first get dict for all players in game page
+			# which is mix of teams
+			# then separate by team
+			# web_dict[stat_name][player_name][stat] = odds
+			# game_players_odds_dict = {}
+			# if points_odds_soup is not None:
+			# 	#print('soup: ' + str(soup))
+
+			# 	# sportsbook-event-accordion__wrapper
+			# 	for section in points_odds_soup.find_all('div', {'class': 'sportsbook-event-accordion__wrapper'}):
+			# 		print('section: ' + str(section))
 
 
-		if gp_multi_odds is not None:
-			#print('gp_multi_odds:\n' + str(gp_multi_odds))
+			# separate teams in games so each team gets a key
+			if gp_solo_odds is not None:
+				#print('gp_solo_odds:\n' + str(gp_solo_odds))
 
-			for stat_name, stat_odds_dict in gp_multi_odds.items():
-				#print('stat_name: ' + str(stat_name))
-				for player, player_odds_dict in stat_odds_dict.items():
-					#print('player: ' + str(player))
-					player_team = ''
-					if player in player_teams.keys():
-						player_team = list(player_teams[player][cur_yr].keys())[-1]
-					else:
-						print('Warning: player not in teams list! ' + player)
-					#print('player_team: ' + str(player_team))
-					if player_team not in all_players_multi_odds.keys():
-						all_players_multi_odds[player_team] = {}
+				for stat_name, stat_odds_dict in gp_solo_odds.items():
+					#print('stat_name: ' + str(stat_name))
+					for player, player_odds_dict in stat_odds_dict.items():
+						#print('player: ' + str(player))
+						player_team = ''
+						if player in player_teams.keys():
+							player_team = list(player_teams[player][cur_yr].keys())[-1]
+						else:
+							print('Warning: player not in teams list! ' + player)
+						#print('player_team: ' + str(player_team))
+						if player_team not in all_players_solo_odds[site].keys():
+							all_players_solo_odds[site][player_team] = {}
 
-					if stat_name not in all_players_multi_odds[player_team].keys():
-						all_players_multi_odds[player_team][stat_name] = {}
+						if stat_name not in all_players_solo_odds[site][player_team].keys():
+							all_players_solo_odds[site][player_team][stat_name] = {}
 
-					all_players_multi_odds[player_team][stat_name][player] = player_odds_dict
+						all_players_solo_odds[site][player_team][stat_name][player] = player_odds_dict
 
-			print('Multi Success')
-		else:
-			print('Warning: website has no soup!')
+				print('Solo Success')
+			else:
+				print('Warning: website has no soup!')
+
+
+			if gp_multi_odds is not None:
+				#print('gp_multi_odds:\n' + str(gp_multi_odds))
+
+				for stat_name, stat_odds_dict in gp_multi_odds.items():
+					#print('stat_name: ' + str(stat_name))
+					for player, player_odds_dict in stat_odds_dict.items():
+						#print('player: ' + str(player))
+						player_team = ''
+						if player in player_teams.keys():
+							player_team = list(player_teams[player][cur_yr].keys())[-1]
+						else:
+							print('Warning: player not in teams list! ' + player)
+						#print('player_team: ' + str(player_team))
+						if player_team not in all_players_multi_odds[site].keys():
+							all_players_multi_odds[site][player_team] = {}
+
+						if stat_name not in all_players_multi_odds[site][player_team].keys():
+							all_players_multi_odds[site][player_team][stat_name] = {}
+
+						all_players_multi_odds[site][player_team][stat_name][player] = player_odds_dict
+
+				print('Multi Success')
+			else:
+				print('Warning: website has no soup! ' + site)
 	
-	# print('all_players_solo_odds: ' + str(all_players_solo_odds))
+	print('all_players_solo_odds: ' + str(all_players_solo_odds))
 	# print('all_players_multi_odds: ' + str(all_players_multi_odds))
 	return all_players_solo_odds, all_players_multi_odds
 

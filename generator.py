@@ -2781,8 +2781,11 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     prop_tables.append(prop_dicts)
     sheet_names.append('HP')
 
+    # Strategy 1:
+    # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
+    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts)
     sort_keys = ['dp', 'ev']
-    prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
+    prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
     prop_tables.append(prop_dicts)
     sheet_names.append('DP')
     
@@ -3222,6 +3225,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
 
     # for each proposition dict, add odds val
     # if no odds val, then do not add to available dict
+    # see which source/site has best deal/value
     for stat_dict in stat_dicts:
         #print('stat_dict: ' + str(stat_dict))
         # see if stat available
@@ -3230,38 +3234,55 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
 
         # add val to dict
         # check single/odds odds first bc if available as both prefer single/solo
-        odds = 'NA'
+        #odds = 'NA'
         team = stat_dict['team']
         solo = False
-        if team in all_players_solo_odds.keys():
-            stat_name = stat_dict['stat']
-            #print('stat_name: ' + stat_name)
-            if stat_name in all_players_solo_odds[team].keys():
-                player = stat_dict['player'].lower()
-                #print('player: ' + player)
-                #print('player_dict: ' + str(all_players_odds[team][stat_name]))
-                if player in all_players_solo_odds[team][stat_name].keys():
-                    ok_val = str(stat_dict['val'])
-                    #print('ok_val: ' + str(ok_val))
-                    if str(ok_val) in all_players_solo_odds[team][stat_name][player].keys():
-                        solo = True
-                        odds = all_players_solo_odds[team][stat_name][player][ok_val] #reader.read_stat_odds(stat_dict, all_players_odds)
-        
+        #site = 'dk'
+        #sites = ['dk', 'fd']
+        # get odds from each source and compare
+        site_odds = {}
+        for site, site_players_solo_odds in all_players_solo_odds.items():
+            # print('\nSite: ' + site)
+            # print('site_players_solo_odds: ' + str(site_players_solo_odds))
+            # print('team: ' + team)
+            if team in site_players_solo_odds.keys():
+                stat_name = stat_dict['stat']
+                #print('stat_name: ' + stat_name)
+                if stat_name in site_players_solo_odds[team].keys():
+                    player = stat_dict['player'].lower()
+                    # print('player: ' + player)
+                    # print('player_dict: ' + str(site_players_solo_odds[team][stat_name]))
+                    if player in site_players_solo_odds[team][stat_name].keys():
+                        ok_val = str(stat_dict['val'])
+                        #print('ok_val: ' + str(ok_val))
+                        if str(ok_val) in site_players_solo_odds[team][stat_name][player].keys():
+                            #print('solo')
+                            solo = True
+
+                            site_odds[site] = site_players_solo_odds[team][stat_name][player][ok_val] #reader.read_stat_odds(stat_dict, all_players_odds)
+                            #site_odds[site] = odds
+                            #print('site_odds: ' + str(site_odds))
+
+
         # if no single odds see if multi/combo odds available
         # if not solo then odds == NA
-        if not solo and team in all_players_multi_odds.keys():
-            stat_name = stat_dict['stat']
-            #print('stat_name: ' + stat_name)
-            if stat_name in all_players_multi_odds[team].keys():
-                player = stat_dict['player'].lower()
-                #print('player: ' + player)
-                #print('player_dict: ' + str(all_players_odds[team][stat_name]))
-                if player in all_players_multi_odds[team][stat_name].keys():
-                    ok_val = str(stat_dict['val'])
-                    #print('ok_val: ' + str(ok_val))
-                    if str(ok_val) in all_players_multi_odds[team][stat_name][player].keys():
-                    
-                        odds = all_players_multi_odds[team][stat_name][player][ok_val]
+        # For DK all odds shown on solo page 
+        # so how to tell difference bt those which must be grouped???
+        if not solo:
+            for site, site_players_solo_odds in all_players_solo_odds.items():
+                if team in all_players_multi_odds.keys():
+                    stat_name = stat_dict['stat']
+                    #print('stat_name: ' + stat_name)
+                    if stat_name in all_players_multi_odds[team].keys():
+                        player = stat_dict['player'].lower()
+                        #print('player: ' + player)
+                        #print('player_dict: ' + str(all_players_odds[team][stat_name]))
+                        if player in all_players_multi_odds[team][stat_name].keys():
+                            ok_val = str(stat_dict['val'])
+                            #print('ok_val: ' + str(ok_val))
+                            if str(ok_val) in all_players_multi_odds[team][stat_name][player].keys():
+                            
+                                site_odds[site] = all_players_multi_odds[team][stat_name][player][ok_val]
         
         
         #     else:
@@ -3276,13 +3297,31 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         #print('odds: ' + odds)
 
         # +100 means 1 unit in to profit 1 unit
-        stat_dict['odds'] = odds # format +100 = 1 spent/1 earned
+        # get best odds out of all sources
+        
+        #print('site_odds: ' + str(site_odds))
+        # site odds will be blank for player not listed on site
+        odds = site = 'NA'
+        if len(site_odds.keys()) > 0:
+            odds = max(site_odds.values())
+
+            # add site to show which source has better value ev
+            site = max(site_odds, key=site_odds.get) #max(zip(site_odds.values(), site_odds.keys()))[1]
+
+        # always put odds in dict even if NA
+        stat_dict['odds'] = odds
+        stat_dict['site'] = site
+        
+        
+        # print('max_odds: ' + str(max_odds))
+        # stat_dict['odds'] = max_odds # format +100 = 1 spent/1 earned
 
         # now we have odds return profit/loss
         # so get ev = e(x) = xp
         #+200=200/100=2, -200=100/200=1/2
         ev = 0 # if no odds
-        if odds != 'NA' and odds != '?':
+        #if odds != 'NA' and odds != '?':
+        if len(site_odds.keys()) > 0:
             true_prob = stat_dict['true prob']
             #print('true_prob: ' + str(true_prob))
 
@@ -3307,6 +3346,8 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         # we must add ev to stat dict
         #print('ev: ' + str(ev))
         stat_dict['ev'] = ev
+
+        
         
 
         if odds != 'NA' and odds != '?':
@@ -10477,7 +10518,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         available_prop_data = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
         available_prop_dicts = available_prop_data[0]
         available_multi_prop_dicts = available_prop_data[1]
-        desired_order.extend(['odds','ev']) # is there another way to ensure odds comes after true prob
+        desired_order.extend(['odds','ev','site']) # is there another way to ensure odds comes after true prob
 
     #desired_order = ['player', 'team', 'stat','ok val','ok val prob','odds','ok val post prob', 'ok val min margin', 'ok val post min margin', 'ok val mean margin', 'ok val post mean margin']
     

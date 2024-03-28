@@ -138,6 +138,14 @@ def isolate_keys_in_dict(regex, dict):
     print('isolate keys')
 
 
+
+
+
+
+
+
+
+
 def isolate_high_prob_props(prop_dicts):
     print('\n===Isolate High Prob Props===\n')
 
@@ -152,6 +160,22 @@ def isolate_high_prob_props(prop_dicts):
 
     print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
+
+# arbitrary uncertainty +/- 0.05???
+def isolate_props_in_range(prop_dicts):
+    print('\n===Isolate Props in range===\n')
+
+    props_in_range = []
+
+    neg_uncertainty = -0.03 # bc 2 sig figs?
+    pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
+
+    for prop in prop_dicts:
+        if neg_uncertainty <= float(prop['ev']) <= pos_uncertainty:
+            props_in_range.append(prop)
+
+    print('props_in_range: ' + str(props_in_range))
+    return props_in_range
 
 # arbitrary uncertainty +/- 0.05???
 def isolate_plus_ev_props(prop_dicts):

@@ -186,14 +186,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('cle','cha'), ('gsw','orl'), ('bkn','wsh'), ('por','atl'), ('lac','phi'), ('nyk','tor'), ('ind','chi'), ('lal','mem'), ('det','min'), ('hou','okc'), ('sas','uta'), ('phx','den')]#, ('nop','lal')
+game_teams = [('bos','atl')]#, ('mil','nop')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('ind','lac')]
+    game_teams = [('phx','den')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -204,7 +204,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['kawhi leonard'] # 'jacob gilyard', use for testing
+    players_names = ['kevin durant'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
