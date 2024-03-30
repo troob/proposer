@@ -62,6 +62,8 @@ all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 # === STATS OF INTEREST === 
 stats_of_interest = ['pts','reb','ast']#, '3pm']
 
+#odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
+
 # if we want to see how it would perform for previous years
 # we need to know the exact game (or even specific prop) that we want to evaluate
 # by default, go through entire year
@@ -123,7 +125,7 @@ read_new_rosters = False
 test = False
 
 # run dist probs with prints/comments
-prints_on = False
+prints_on = True
 if test:
     prints_on = True
 
@@ -186,14 +188,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('bos','atl')]#, ('mil','nop')]#, ('nop','lal')
+game_teams = [('bos','nop'), ('mem','orl'), ('mil','atl')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('phx','den')]
+    game_teams = [('mem','orl')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -204,7 +206,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['kevin durant'] # 'jacob gilyard', use for testing
+    players_names = ['wenyan gabriel'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

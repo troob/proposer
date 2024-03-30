@@ -2251,7 +2251,16 @@ def determine_player_team_by_game(player, game_key, player_teams):
 
 
 
+def determine_duplicate(prop, unique_props):
 
+    duplicate = False
+
+    for up in unique_props:
+        if prop['player'] == up['player'] and prop['stat'] == up['stat']:
+            duplicate = True
+            break
+
+    return duplicate
 
 # given main prop and fields, find vals in those fields
 # keys = fields = ['player', 'stat']

@@ -162,16 +162,41 @@ def isolate_high_prob_props(prop_dicts):
     return high_prob_props
 
 # arbitrary uncertainty +/- 0.05???
-def isolate_props_in_range(prop_dicts):
+def isolate_props_in_range(prop_dicts, fields):
     print('\n===Isolate Props in range===\n')
 
     props_in_range = []
 
-    neg_uncertainty = -0.03 # bc 2 sig figs?
+    # noticed slight neg ev still good if dp high
+    neg_uncertainty = 0 # OR -0.05 if we dont have enough >0 # bc 2 sig figs?
     pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
 
+    
     for prop in prop_dicts:
-        if neg_uncertainty <= float(prop['ev']) <= pos_uncertainty:
+
+        in_range = True
+
+        for field in fields:
+
+            if field == 'odds':
+                neg_uncertainty = -1000
+                pos_uncertainty = 500
+            elif field == 'ev':
+                neg_uncertainty = 0
+                pos_uncertainty = 0.3
+
+            if neg_uncertainty > float(prop[field]) or pos_uncertainty < float(prop[field]):
+                in_range = False
+                break
+                
+            # if neg_uncertainty <= float(prop[field]) <= pos_uncertainty:
+            #     continue
+
+            # in_range = False
+            # break
+            
+
+        if in_range:        
             props_in_range.append(prop)
 
     print('props_in_range: ' + str(props_in_range))

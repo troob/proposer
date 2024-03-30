@@ -2496,6 +2496,20 @@ def generate_review_props(props):
     return review_props
 
 
+def generate_unique_props(prop_dicts):
+
+    unique_props = []
+
+    for prop in prop_dicts:
+        
+        #if prop not in unique_props:
+        if not determiner.determine_duplicate(prop, unique_props):
+            unique_props.append(prop)
+
+    return unique_props
+
+
+
 # strategy 1: high prob +ev (balance prob with ev)
 # 1. iso tru prob >= 90
 # 1.1 show tru prob >= 90 & prev_val < stat+ or prev_val > stat-
@@ -2775,35 +2789,48 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
         # sheet_names.append('Review Multi')
 
 
-
     # Put Solo Props at front bc priority
     # Put after review props bc review applies to solo/multi
+
+    sort_keys = ['ev', 'dp']
+    ev_prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
+    prop_tables.append(ev_prop_dicts)
+    sheet_names.append('EV')
+
+    # former and national coverage conditions tend toward overs???
+    sort_keys = ['former', 'coverage']
+    fc_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys)
+    prop_tables.append(fc_prop_dicts)
+    sheet_names.append('FC')
+
+    sort_keys = ['rare prev', 'ev', 'dp']
+    rp_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
+    prop_tables.append(rp_prop_dicts)
+    sheet_names.append('RP')
+
+    # prop dicts already sorted by prob
     prop_tables.append(prop_dicts)
     sheet_names.append('HP')
 
     # Strategy 1:
     # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
-    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts)
+    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['ev', 'odds'])
+    #dp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, field='odds')
     sort_keys = ['dp', 'ev']
-    prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
-    prop_tables.append(prop_dicts)
+    dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
+    prop_tables.append(dp_prop_dicts)
     sheet_names.append('DP')
-    
-    sort_keys = ['ev', 'dp']
-    prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
-    prop_tables.append(prop_dicts)
-    sheet_names.append('EV')
 
-    # former and national coverage conditions tend toward overs???
-    sort_keys = ['former', 'coverage']
-    prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys)
-    prop_tables.append(prop_dicts)
-    sheet_names.append('FC')
-
-    sort_keys = ['rare prev', 'ev', 'dp']
-    prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
-    prop_tables.append(prop_dicts)
-    sheet_names.append('RP')
+    # Now take top 30 and sort by game and stat so easy to click/navigate on site
+    # keep only top 1 of player-stat with highest dp-ev
+    # loop thru each dp prop and if not yet same player-stat added to top dp then add new
+    dp_prop_dicts = generate_unique_props(dp_prop_dicts)
+    sort_keys = ['game', 'stat order']
+    dp_prop_dicts = generate_stat_order(dp_prop_dicts)
+    dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts[:30], sort_keys, reverse=False)
+    dp_prop_dicts = remover.remove_stat_order(dp_prop_dicts)
+    prop_tables.append(dp_prop_dicts)
+    sheet_names.append('Top DP')
 
     # review props
     #review_sheet_name = 'Review'
@@ -3214,14 +3241,25 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     
     # all_players_multi_odds = reader.read_all_players_multi_odds(game_teams, player_teams, cur_yr) # {team: stat: { player: odds,... }}
 
+    # read compare table to see which site has best odds/return
+    # ratio_url = 'https://betkarma.com/props-comparison'
+    # ratio bt dk and source of interest
+    # start with only dk-fd ratio and add for any source with bot blocker like fd
+    # {player:{stat:ratio,...}, ...}
+    #read_odds_ratios()
+    #odds_ratios = reader.read_odds_ratios_website()
+
     # read solo first, then click sgp btn, then read sgp/multi
     # bc much faster than loading twice separately!
-    all_players_odds = reader.read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest)
-    all_players_solo_odds = all_players_odds[0]
-    all_players_multi_odds = all_players_odds[1]
+    all_players_solo_odds = reader.read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest)
+    #all_players_solo_odds = all_players_odds[0]
+    #all_players_multi_odds = all_players_odds[1]
 
     #for team in teams:
         #all_players_odds = reader.read_all_stat_odds(stat_dict, all_players_odds)
+    
+
+    
 
     # for each proposition dict, add odds val
     # if no odds val, then do not add to available dict
@@ -3231,6 +3269,9 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         # see if stat available
         # could do same check for all and put 0 if na 
         # and then sort by val/odds or elim 0s
+
+        stat_name = stat_dict['stat']
+        #print('stat_name: ' + stat_name)
 
         # add val to dict
         # check single/odds odds first bc if available as both prefer single/solo
@@ -3246,8 +3287,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
             # print('site_players_solo_odds: ' + str(site_players_solo_odds))
             # print('team: ' + team)
             if team in site_players_solo_odds.keys():
-                stat_name = stat_dict['stat']
-                #print('stat_name: ' + stat_name)
+                
                 if stat_name in site_players_solo_odds[team].keys():
                     player = stat_dict['player'].lower()
                     # print('player: ' + player)
@@ -3268,21 +3308,22 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         # if not solo then odds == NA
         # For DK all odds shown on solo page 
         # so how to tell difference bt those which must be grouped???
-        if not solo:
-            for site, site_players_solo_odds in all_players_solo_odds.items():
-                if team in all_players_multi_odds.keys():
-                    stat_name = stat_dict['stat']
-                    #print('stat_name: ' + stat_name)
-                    if stat_name in all_players_multi_odds[team].keys():
-                        player = stat_dict['player'].lower()
-                        #print('player: ' + player)
-                        #print('player_dict: ' + str(all_players_odds[team][stat_name]))
-                        if player in all_players_multi_odds[team][stat_name].keys():
-                            ok_val = str(stat_dict['val'])
-                            #print('ok_val: ' + str(ok_val))
-                            if str(ok_val) in all_players_multi_odds[team][stat_name][player].keys():
+        # if not solo:
+        #     for site, site_players_multi_odds in all_players_multi_odds.items():
+        #         if team in site_players_multi_odds.keys():
+        #             # already got stat name above bc same for all loops
+        #             #stat_name = stat_dict['stat']
+        #             #print('stat_name: ' + stat_name)
+        #             if stat_name in all_players_multi_odds[team].keys():
+        #                 player = stat_dict['player'].lower()
+        #                 #print('player: ' + player)
+        #                 #print('player_dict: ' + str(all_players_odds[team][stat_name]))
+        #                 if player in all_players_multi_odds[team][stat_name].keys():
+        #                     ok_val = str(stat_dict['val'])
+        #                     #print('ok_val: ' + str(ok_val))
+        #                     if str(ok_val) in all_players_multi_odds[team][stat_name][player].keys():
                             
-                                site_odds[site] = all_players_multi_odds[team][stat_name][player][ok_val]
+        #                         site_odds[site] = all_players_multi_odds[team][stat_name][player][ok_val]
         
         
         #     else:
@@ -3298,6 +3339,19 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
 
         # +100 means 1 unit in to profit 1 unit
         # get best odds out of all sources
+                                
+                                
+        # now we have all props available by scraping
+        # but we still need from sites with bot detection prevention
+        # so for each existing dk odds, put fd odds proportional to the compare table ratio
+        # read compare table to see which site has best odds/return
+	    # https://betkarma.com/props-comparison
+        #compare_tables = reader.read_odds_compare_tables()
+        #dk_players_solo_odds = all_players_solo_odds['dk']
+        
+        # player_stat_odds_ratio = odds_ratios[player][stat_name]
+        # site_odds['fd'] = site_odds['dk'] * player_stat_odds_ratio
+                                
         
         #print('site_odds: ' + str(site_odds))
         # site odds will be blank for player not listed on site
@@ -3387,7 +3441,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
 
     # print('available_prop_dicts: ' + str(available_prop_dicts))
     # print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
-    return available_prop_dicts, available_multi_prop_dicts
+    return available_prop_dicts#, available_multi_prop_dicts
 
 def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev):
     # add more fields for ref
@@ -8196,18 +8250,22 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                 coverage = ''
                 if game_key in year_games_info.keys():
                     game_info = year_games_info[game_key]
-                    city = game_info['city']
-                    timelag = determiner.determine_timelag(city, player_team)
-                    # timezone = determiner.determine_timezone(city)
-                    # timezone_time = converter.convert_time_zone_to_time(timezone)
-                    # # get timeshift from game timezone and home timezone
-                    # #home_city = determiner.determine_team_city(player_team)
-                    # home_timezone = determiner.determine_team_timezone(player_team)
-                    # home_timezone_time = converter.convert_time_zone_to_time(home_timezone)
-                    # timeshift = home_timezone_time - timezone_time
-                    tod = game_info['tod']
-                    #audience = game_info['audience']
-                    coverage = game_info['coverage']
+                    #print('game_info for ' + game_key + ': ' + str(game_info))
+                    # some preseason games have no info
+                    #if 'city' in game_info.keys():
+                    if len(game_info.keys()) > 0:
+                        city = game_info['city']
+                        timelag = determiner.determine_timelag(city, player_team)
+                        # timezone = determiner.determine_timezone(city)
+                        # timezone_time = converter.convert_time_zone_to_time(timezone)
+                        # # get timeshift from game timezone and home timezone
+                        # #home_city = determiner.determine_team_city(player_team)
+                        # home_timezone = determiner.determine_team_timezone(player_team)
+                        # home_timezone_time = converter.convert_time_zone_to_time(home_timezone)
+                        # timeshift = home_timezone_time - timezone_time
+                        tod = game_info['tod']
+                        #audience = game_info['audience']
+                        coverage = game_info['coverage']
                 else:
                     print('Warning: Game key not in games info! ' + game_key)
 
@@ -10514,10 +10572,11 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     read_odds = True
     if 'read odds' in settings.keys():
         read_odds = settings['read odds']
+    #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
     if read_odds:
-        available_prop_data = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
-        available_prop_dicts = available_prop_data[0]
-        available_multi_prop_dicts = available_prop_data[1]
+        available_prop_dicts = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
+        # available_prop_dicts = available_prop_data[0]
+        # available_multi_prop_dicts = available_prop_data[1]
         desired_order.extend(['odds','ev','site']) # is there another way to ensure odds comes after true prob
 
     #desired_order = ['player', 'team', 'stat','ok val','ok val prob','odds','ok val post prob', 'ok val min margin', 'ok val post min margin', 'ok val mean margin', 'ok val post mean margin']
@@ -10530,7 +10589,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     available_prop_dicts = sorter.sort_dicts_by_keys(available_prop_dicts, sort_keys)
     #print('available_prop_dicts: ' + str(available_prop_dicts))
 
-    available_multi_prop_dicts = sorter.sort_dicts_by_keys(available_multi_prop_dicts, sort_keys)
+    available_multi_prop_dicts = {}#sorter.sort_dicts_by_keys(available_multi_prop_dicts, sort_keys)
     #print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
 
     # add ref vars to headers
