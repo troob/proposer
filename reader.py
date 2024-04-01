@@ -2317,6 +2317,97 @@ def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retrie
 	print('\n===Read React Website===\n')
 	#print('url: ' + url)
 
+
+	# === Version 2 ===
+
+	team_name = team_name.split()[-1]
+
+	retries = 0
+
+	# check if no tables found
+	while retries < max_retries:
+		try:
+
+			# Create Chromeoptions instance 
+			options = webdriver.ChromeOptions() 
+			# Adding argument to disable the AutomationControlled flag 
+			options.add_argument("--disable-blink-features=AutomationControlled") 
+			# Exclude the collection of enable-automation switches 
+			options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+			# Turn-off userAutomationExtension 
+			options.add_experimental_option("useAutomationExtension", False) 
+			# Setting the driver path and requesting a page 
+			driver = webdriver.Chrome(options=options) 
+			driver.implicitly_wait(3)
+			# Changing the property of the navigator value for webdriver to undefined 
+			driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
+			driver.get(url) # Open the URL on a google chrome window
+
+			web_dict = {}
+			print('url: ' + url)
+			if re.search('draftkings', url):
+
+				root_element = driver.find_element('id', 'root').get_attribute('innerHTML')
+
+				# if glitch leads to league page
+				# see if event btn link is there to click
+				if re.search('sportsbook-league-page', root_element):
+
+					class_name = 'event-cell-link'
+					event_btns = driver.find_element('id', 'root').find_element('class name', 'sportsbook-table').find_elements('class name', class_name)
+
+					for event_btn in event_btns:
+						
+						#sgp_key = team_name
+						event_url = event_btn.get_attribute('href')
+						# print('event_url: ' + str(event_url))
+						# print('team_name: ' + str(team_name))
+						# if event_url is None:
+						# 	print('event_btn: ' + str(event_btn.get_attribute('innerHTML')))
+
+						if event_url is not None and re.search(team_name, event_url):
+							#print('found event btn: ' + str(event_btn.get_attribute('innerHTML')) + ', ' + str(event_url))
+							driver.execute_script("arguments[0].scrollIntoView(true);", event_btn)
+							event_btn.click()
+							# new root element after click new page
+							root_element = driver.find_element('id', 'root').get_attribute('innerHTML')
+							#time.sleep(10)
+							break
+
+				
+				# if no glitch and correctly directed to game event page, not nba main page events list
+				# click stat btn header and read stat page for each stat
+				if re.search('sportsbook-event-page__wrapper', root_element):
+					web_dict = read_dk_solo(driver, stats_of_interest)
+					print("Read React Website Success")
+					return web_dict
+				else:
+					# glitch so try again
+					driver.close()
+					#home_team = game[1]
+					full_team_name = determiner.determine_team_name(game[1])
+					url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', full_team_name) + '--odds'
+					retries += 1
+					continue
+			
+		except Exception as e:
+			
+			retries += 1
+			print(f"Exception occurred. Retrying {retries}/{max_retries}...")#\n", e)#, e.getheaders(), e.gettext(), e.getcode())
+			print('Warning: No SGP element!\n', e)
+
+
+
+
+
+
+
+
+
+
+
+	# === Version 1 ===
+
 	#web_data = [] # web_data = [dataframe1,...] or [dict1,...] or {}
 	#web_dict = {}
 
@@ -2334,156 +2425,167 @@ def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retrie
 	# driver.implicitly_wait(3)
 
 	# Create Chromeoptions instance 
-	options = webdriver.ChromeOptions() 
+	# options = webdriver.ChromeOptions() 
 	
-	# Adding argument to disable the AutomationControlled flag 
-	options.add_argument("--disable-blink-features=AutomationControlled") 
+	# # Adding argument to disable the AutomationControlled flag 
+	# options.add_argument("--disable-blink-features=AutomationControlled") 
 	
-	# Exclude the collection of enable-automation switches 
-	options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+	# # Exclude the collection of enable-automation switches 
+	# options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
 	
-	# Turn-off userAutomationExtension 
-	options.add_experimental_option("useAutomationExtension", False) 
+	# # Turn-off userAutomationExtension 
+	# options.add_experimental_option("useAutomationExtension", False) 
 
-	# add ublock origin to disable javascript captcha
-	# /Users/USERNAME/Library/Application Support/Google/Chrome/Default/Extensions
-	# cjpalhdlnbpafiamejdnhcphjbkeiagm
-	# Problem: need javascript to run app so it fails
+	# # add ublock origin to disable javascript captcha
+	# # /Users/USERNAME/Library/Application Support/Google/Chrome/Default/Extensions
+	# # cjpalhdlnbpafiamejdnhcphjbkeiagm
+	# # Problem: need javascript to run app so it fails
 	
 	
-	# Setting the driver path and requesting a page 
-	driver = webdriver.Chrome(options=options) 
+	# # Setting the driver path and requesting a page 
+	# driver = webdriver.Chrome(options=options) 
 
-	# try raising from 3 to 5 
-	# bc often fails to load so btn click goes to wrong page???
-	driver.implicitly_wait(3)
+	# # try raising from 3 to 5 
+	# # bc often fails to load so btn click goes to wrong page???
+	# driver.implicitly_wait(3)
 	
-	# Changing the property of the navigator value for webdriver to undefined 
-	driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
+	# # Changing the property of the navigator value for webdriver to undefined 
+	# driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
 
-	driver.get(url) # Open the URL on a google chrome window
+	# driver.get(url) # Open the URL on a google chrome window
 
-	# udriver failed
-	# udriver = uc.Chrome(headless=True,use_subprocess=False)
-	# udriver.get(url)
-	# print('got udriver')
+	# # udriver failed
+	# # udriver = uc.Chrome(headless=True,use_subprocess=False)
+	# # udriver.get(url)
+	# # print('got udriver')
 
-	retries = 0
+	# retries = 0
 
-	# check if no tables found
-	while retries < max_retries:
-		try:
-			#sgp_element = driver.find_element('id','dom_SameGameParlayWeb').get_attribute('outerHTML')	
-			#soup = BeautifulSoup(page, features='lxml')
+	# # check if no tables found
+	# while retries < max_retries:
+	# 	try:
+	# 		#sgp_element = driver.find_element('id','dom_SameGameParlayWeb').get_attribute('outerHTML')	
+	# 		#soup = BeautifulSoup(page, features='lxml')
 
-			# look for sgp in url to tell if sgp mode bc diff key nums
-			# instead of needing keys input just click each btn until find stat of interest
-			# if re.search('sgp', url):
-			# 	# Read DraftKings SGP pages
-			# 	web_dict = read_dk_sgp(driver)
+	# 		# look for sgp in url to tell if sgp mode bc diff key nums
+	# 		# instead of needing keys input just click each btn until find stat of interest
+	# 		# if re.search('sgp', url):
+	# 		# 	# Read DraftKings SGP pages
+	# 		# 	web_dict = read_dk_sgp(driver)
 				
-			# else: 
-			# 	# Draftkings Solo Props
-			# 	web_dict = read_dk_solo(driver)
+	# 		# else: 
+	# 		# 	# Draftkings Solo Props
+	# 		# 	web_dict = read_dk_solo(driver)
+
+	# 		# Read Solo Odds
+	# 		web_dict = {}
+	# 		print('url: ' + url)
+	# 		if re.search('draftkings', url):
+	# 			# wait to load
+	# 			# still fails for some teams so try other team in game
+	# 			#time.sleep(3)
+	# 			# if directed to home page glitch
+	# 			# no participants found so click event btn first
+				
+	# 			web_dict = read_dk_solo(driver, stats_of_interest)
+	# 		else:
+	# 			# fd blocked by bot detection
+	# 			#solo_dict = read_fd_solo(driver, stats_of_interest, team_name)
+	# 			web_dict = {}
+	# 			print('Warning: Unknown react website! ' + url)
+
+	# 		# DK changed so all bets on solo page but not always allowed solo
+	# 		# BUT no need to read both
+	# 		# Click SGP Button
+	# 		# sgp_btn = driver.find_element('class name','event-page-sgp-button')
+	# 		# sgp_btn.click()
+
+	# 		# # Read SGP Odds
+	# 		#multi_dict = {}#read_dk_sgp(driver, stats_of_interest)
 
 
+	# 		print("Read React Website Success")
+	# 		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
+	# 		#print('final web_dict:\n' + str(web_dict))
+	# 		#return solo_dict, multi_dict
+	# 		return web_dict
 
-			# Read Solo Odds
-			web_dict = {}
-			print('url: ' + url)
-			if re.search('draftkings', url):
-				# wait to load
-				# still fails for some teams so try other team in game
-				#time.sleep(3)
-				web_dict = read_dk_solo(driver, stats_of_interest)
-			else:
-				# fd blocked by bot detection
-				#solo_dict = read_fd_solo(driver, stats_of_interest, team_name)
-				web_dict = {}
-				print('Warning: Unknown react website! ' + url)
-
-			# DK changed so all bets on solo page but not always allowed solo
-			# BUT no need to read both
-			# Click SGP Button
-			# sgp_btn = driver.find_element('class name','event-page-sgp-button')
-			# sgp_btn.click()
-
-			# # Read SGP Odds
-			#multi_dict = {}#read_dk_sgp(driver, stats_of_interest)
-
-
-			print("Read React Website Success")
-			# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-			#print('final web_dict:\n' + str(web_dict))
-			#return solo_dict, multi_dict
-			return web_dict
-
-		except Exception as e:
+	# 	except Exception as e:
 			
-			retries += 1
-			print(f"Exception occurred. Retrying {retries}/{max_retries}...")#\n", e)#, e.getheaders(), e.gettext(), e.getcode())
-			print('Warning: No SGP element!\n', e)
+	# 		retries += 1
+	# 		print(f"Exception occurred. Retrying {retries}/{max_retries}...")#\n", e)#, e.getheaders(), e.gettext(), e.getcode())
+	# 		print('Warning: No SGP element!\n', e)
 
-			# e_msg = str(e)
-			# print('e msg: ' + e_msg)
-			# if e == Message: no such element: Unable to locate element: {"method":"css selector","selector":".rj-market__groups"}
-			# click on sgp btn for correct game
-			# python selenium find element by href
-			# https://sportsbook.draftkings.com/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true
-			# href="/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true"
-			# sgp_url = ''
-			# sgp_btn = driver.find_element_by_xpath('//a[@href="'+sgp_url+'"]')
-			# need to loop thru links to find 1 with keywords, bc url has unknown code
-			# game teams or is 1 team enough?
-			# get team name from url
-			# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
-			# see if known team name is in url
-			# take last word of team name to simplify so we dont need to remove dashes
-			# add dash bc always preceded by city
-			if re.search('draftkings', url):
+	# 		#time.sleep(100)
 
-				if retries == 1:
-					driver.close()
-					# clicking event link only works sometimes
-					# so first try going to other team in game page
-					home_team = game[1]
-					team_name = determiner.determine_team_name(home_team)
-					url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
-					options = webdriver.ChromeOptions() 
-					options.add_argument("--disable-blink-features=AutomationControlled") 
-					options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
-					options.add_experimental_option("useAutomationExtension", False) 
-					driver = webdriver.Chrome(options=options) 
-					driver.implicitly_wait(3)
-					driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
-					driver.get(url)
-				# # if neither team page works directly,
-				# # try clicking event button on main nba page
-				else:
-					team_name = '-' + team_name.split()[-1]
-					#print('team_name: ' + str(team_name))
-					# title = Open game in SGP mode
-					class_name = 'event-cell-link'
-					if re.search('sgp', url):
-						class_name = 'toggle-sgp-badge__nav-link'
-					event_btns = driver.find_elements('class name', class_name)
-					#print('sgp_btns: ' + str(sgp_btns))
-					for event_btn in event_btns:
-						#print('sgp_btn: ' + str(sgp_btn))
-						#sgp_key = team_name
-						event_url = event_btn.get_attribute('href')
-						#print('sgp_url: ' + str(sgp_url))
-						if re.search(team_name, event_url):
-							#print('found sgp btn: ' + str(sgp_btn) + ', ' + str(sgp_url))
-							driver.execute_script("arguments[0].scrollIntoView(true);", event_btn)
-							event_btn.click()
-							break
+	# 		# e_msg = str(e)
+	# 		# print('e msg: ' + e_msg)
+	# 		# if e == Message: no such element: Unable to locate element: {"method":"css selector","selector":".rj-market__groups"}
+	# 		# click on sgp btn for correct game
+	# 		# python selenium find element by href
+	# 		# https://sportsbook.draftkings.com/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true
+	# 		# href="/event/dal-mavericks-%40-bos-celtics/30208614?sgpmode=true"
+	# 		# sgp_url = ''
+	# 		# sgp_btn = driver.find_element_by_xpath('//a[@href="'+sgp_url+'"]')
+	# 		# need to loop thru links to find 1 with keywords, bc url has unknown code
+	# 		# game teams or is 1 team enough?
+	# 		# get team name from url
+	# 		# https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
+	# 		# see if known team name is in url
+	# 		# take last word of team name to simplify so we dont need to remove dashes
+	# 		# add dash bc always preceded by city
+	# 		if re.search('draftkings', url):
+
+	# 			if retries == 1:
+	# 				driver.close()
+	# 				# clicking event link only works sometimes
+	# 				# so first try going to other team in game page
+	# 				home_team = game[1]
+	# 				team_name = determiner.determine_team_name(home_team)
+	# 				url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + re.sub(' ','-', team_name) + '--odds'
+	# 				options = webdriver.ChromeOptions() 
+	# 				options.add_argument("--disable-blink-features=AutomationControlled") 
+	# 				options.add_experimental_option("excludeSwitches", ["enable-automation"]) 
+	# 				options.add_experimental_option("useAutomationExtension", False) 
+	# 				driver = webdriver.Chrome(options=options) 
+	# 				driver.implicitly_wait(3)
+	# 				driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
+	# 				driver.get(url)
+	# 			# # if neither team page works directly,
+	# 			# # try clicking event button on main nba page
+	# 			else:
+	# 				team_name = team_name.split()[-1]
+	# 				print('team_name: ' + str(team_name))
+					
+	# 				# title = Open game in SGP mode
+	# 				class_name = 'event-cell-link'
+	# 				if re.search('sgp', url):
+	# 					class_name = 'toggle-sgp-badge__nav-link'
+	# 				# find_element('class name', 'sportsbook-table').
+	# 				event_btns = driver.find_element('id', 'root').find_element('class name', 'sportsbook-table').find_elements('class name', class_name)
+	# 				#print('sgp_btns: ' + str(sgp_btns))
+
+	# 				# why sometimes event cell link not found so no event btns found???
+	# 				if len(event_btns) == 0:
+	# 					print('No Event Btns')
+	# 					time.sleep(100)
+
+	# 				for event_btn in event_btns:
+	# 					print('event_btn: ' + str(event_btn.get_attribute('innerHTML')))
+	# 					#sgp_key = team_name
+	# 					event_url = event_btn.get_attribute('href')
+	# 					print('event_url: ' + str(event_url))
+	# 					if re.search(team_name, event_url):
+	# 						print('found event btn: ' + str(event_btn.get_attribute('innerHTML')) + ', ' + str(event_url))
+	# 						driver.execute_script("arguments[0].scrollIntoView(true);", event_btn)
+	# 						event_btn.click()
+	# 						break
 
 				
 
 
-			# default 10s seems too long
-			time.sleep(1)
+	# 		# default 10s seems too long
+	# 		time.sleep(1)
 
 	
 	# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
@@ -2702,7 +2804,7 @@ def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_inter
 # but specific to compare odds site
 def read_odds_ratios_website(stats_of_interest):
 	print('\n===Read Odds Ratios===\n')
-	print('\nOutput: odds_ratios = {player:{stat:ratio,...}, ...\n')
+	print('\nOutput: odds_ratios = {player:{stat:(over fd/dk ratio, under fd/dk ratio), ...}, ... = {\'pts\': {\'luka doncic\': (1.09, 1.0), ...\n')
 
 	odds_ratios = {}
 
@@ -2748,7 +2850,11 @@ def read_odds_ratios_website(stats_of_interest):
 	stat_names = {'pts':'Points', 'reb':'Rebounds', 'ast':'Assists'}
 
 	for stat in stats_of_interest:
+		# full name for dropdown menu
 		stat_name = stat_names[stat]
+
+		if stat_name not in odds_ratios.keys():
+			odds_ratios[stat] = {}
 		
 		time.sleep(10)
 
@@ -2758,7 +2864,7 @@ def read_odds_ratios_website(stats_of_interest):
 		# select by value 
 		#select.select_by_value('1')
 
-		print('read compare table')
+		#print('read compare table')
 		# skip header row
 		table_rows = driver.find_element('class name', 'table-container').find_elements('tag name', 'tr')[1:]
 		#print('table: ' + table.get_attribute('innerHTML'))
@@ -2766,30 +2872,165 @@ def read_odds_ratios_website(stats_of_interest):
 		# 	print('table: ' + table.get_attribute('innerHTML'))
 		# # table_rows = driver.find_elements('tag name', 'tr')
 		for row in table_rows:
-			print('\nrow:\n')# + row.get_attribute('innerHTML'))
+			#print('\nRow:\n')# + row.get_attribute('innerHTML'))
 
 			row_cells = row.find_elements('tag name', 'td')
 
 			player_cell = row_cells[0]
-			print('player_cell: ' + player_cell.get_attribute('innerHTML'))
+			#print('player_cell: ' + player_cell.get_attribute('innerHTML'))
 			player_name = player_cell.find_element('tag name', 'p').get_attribute('innerHTML').strip().lower()
-			print('player_name: ' + player_name)
+			player_name = re.sub('\\.', '', player_name)
+			player_name = re.sub('-', ' ', player_name)
+			#print('player_name: ' + player_name)
+
+			# if player_name not in odds_ratios[stat_name].keys():
+			# 	odds_ratios[stat_name][player_name] = {}
 
 			# for now just dk and fd, but eventually consider all?
 			# maybe not bc only shows avg line which differs so cant directly compare
 			# plus this is only for sites with bot blockers but could still be unlimited 
 			# so make loop for desired columns of table
+			all_over_odds = []
+			all_under_odds = []
+			# for each column of interest in row
 			for site_cell in row_cells[3:5]:
 				# dk_cell = row_cells[3]
 				# fd_cell = row_cells[4]
 
-				print('site_cell: ' + site_cell.get_attribute('innerHTML'))
+				#print('site_cell: ' + site_cell.get_attribute('innerHTML'))
 
 				site_odds = site_cell.find_elements('tag name', 'a')
+				over_odds_e = site_odds[0].get_attribute('innerHTML')
+				under_odds_e = site_odds[1].get_attribute('innerHTML')
+				
+				over_odds = under_odds = ''
+				stat_val = over_stat_odds = under_stat_odds = 0
+				# if dk na then we cant get ratio
+				if re.search('N/A', over_odds_e):
+					# print('over_odds_e: ' + over_odds_e)
+					# print('under_odds_e: ' + under_odds_e)
+					break
 
+				over_odds = site_odds[0].find_element('xpath', 'div').find_element('xpath', 'div').find_element('xpath', 'div').get_attribute('innerHTML')
+				# remove o/u bc we know which is which
+				over_odds = over_odds.split(':')[1]
+				over_odds_data = re.split(' &nbsp;', over_odds)
+				# stat val same for o/u bc projected line shown in table
+				# line differs bt sites but same within site bc single avg (most likely) line
+				stat_val = float(over_odds_data[0])
+
+				over_stat_odds = int(over_odds_data[1])
+
+				# actually on this site if over na then both na bc only shows avg line
+				#if not re.search('N/A', under_odds_e):
+				under_odds = site_odds[1].find_element('xpath', 'div').find_element('xpath', 'div').find_element('xpath', 'div').get_attribute('innerHTML')
+				under_odds = under_odds.split(':')[1]
+				under_odds_data = re.split(' &nbsp;', under_odds)
+				under_stat_odds = int(under_odds_data[1])
+
+				# over_odds: o:2.5 &nbsp;+340
+				# print('over_odds: ' + over_odds)
+				# print('under_odds: ' + under_odds)
+				# print('stat_val: ' + str(stat_val))
+				# print('over_stat_odds: ' + str(over_stat_odds))
+				# print('under_stat_odds: ' + str(under_stat_odds))
+
+				# dont add if na
+				all_over_odds.append((stat_val, over_stat_odds))
+				all_under_odds.append((stat_val, under_stat_odds))
+
+			# print('all_over_odds: ' + str(all_over_odds))
+			# print('all_under_odds: ' + str(all_under_odds))
+
+			# we can only take ratio if stat val is same
+			# bc if diff vals we cannot take proportionally???
+			# get ratio of other sites odds relative to first site on list, in this case dk
+			#for odds_idx in range(len(all_over_odds)):
+
+			player_stat_odds_over_ratio = player_stat_odds_under_ratio = 0 # fd_odds / dk_odds
 			
+			# we need both odds to get ratio
+			if len(all_over_odds) < 2:
+				continue
 
-	time.sleep(100)
+			dk_over_odds_data = all_over_odds[0]
+			fd_over_odds_data = all_over_odds[1]
+			dk_under_odds_data = all_under_odds[0]
+			fd_under_odds_data = all_under_odds[1]
+
+			# stat val same for over/under
+			dk_stat_val = dk_over_odds_data[0]
+			fd_stat_val = fd_over_odds_data[0]
+
+			dk_over_odds = dk_over_odds_data[1]
+			fd_over_odds = fd_over_odds_data[1]
+
+			dk_under_odds = dk_under_odds_data[1]
+			fd_under_odds = fd_under_odds_data[1]
+
+			# print('dk_stat_val: ' + str(dk_stat_val))
+			# print('fd_stat_val: ' + str(fd_stat_val))
+			# if diff sites have diff vals in table cannot accurately extrapolate odds???
+			if dk_stat_val == fd_stat_val:
+				# if same sign then take direct ratio
+				# if dk negative, fd positive, then fd higher
+				# so convert dk neg to pos and then get ratio
+				# if dk pos, fd neg, then fd lower
+				# so convert fd neg to pos and then get ratio
+				# so always convert neg to pos
+				# subtract 100 from abs val to get offset
+				# print('fd_over_odds: ' + str(fd_over_odds))
+				# print('dk_over_odds: ' + str(dk_over_odds))
+				# print('fd_under_odds: ' + str(fd_under_odds))
+				# print('dk_under_odds: ' + str(dk_under_odds))
+
+				# if diff signs then always within -100 to 100 bc similar projections on diff sites
+				if fd_over_odds > 0 and dk_over_odds < 0:
+					# -110 -> 10
+					offset = abs(dk_over_odds) - 100
+					# convert dk odds to positive relative to fd odds
+					# 100 = 110 - 10
+					# 95 = 105 - 10
+					# so ratio = 105/95
+					dk_over_odds = fd_over_odds - offset
+					#print('adjusted dk_over_odds: ' + str(dk_over_odds))
+				elif fd_over_odds < 0 and dk_over_odds > 0:
+					# -110 -> 10
+					offset = abs(fd_over_odds) - 100
+					# convert dk odds to positive relative to fd odds
+					# 100 = 110 - 10
+					# 95 = 105 - 10
+					# so ratio 95/105
+					fd_over_odds = dk_over_odds - offset
+					#print('adjusted fd_over_odds: ' + str(fd_over_odds))
+
+				if fd_under_odds > 0 and dk_under_odds < 0:
+					offset = abs(dk_under_odds) - 100
+					dk_under_odds = fd_under_odds - offset
+					#print('adjusted dk_under_odds: ' + str(dk_under_odds))
+				elif fd_under_odds < 0 and dk_under_odds > 0:
+					offset = abs(fd_under_odds) - 100
+					fd_under_odds = dk_under_odds - offset
+					#print('adjusted fd_under_odds: ' + str(fd_under_odds))
+
+
+				# if negative, take dk/fd bc more neg is less val
+				if fd_over_odds > 0 and dk_over_odds > 0:
+					player_stat_odds_over_ratio = converter.round_half_up(fd_over_odds / dk_over_odds, 2)
+				elif fd_over_odds < 0 and dk_over_odds < 0:
+					player_stat_odds_over_ratio = converter.round_half_up(dk_over_odds / fd_over_odds, 2)
+				if fd_under_odds > 0 and dk_under_odds > 0:
+					player_stat_odds_under_ratio = converter.round_half_up(fd_under_odds / dk_under_odds, 2)
+				elif fd_under_odds < 0 and dk_under_odds < 0:
+					player_stat_odds_under_ratio = converter.round_half_up(dk_under_odds / fd_under_odds, 2)
+				
+				# print('player_stat_odds_over_ratio: ' + str(player_stat_odds_over_ratio))
+				# print('player_stat_odds_under_ratio: ' + str(player_stat_odds_under_ratio))
+
+				odds_ratios[stat][player_name] = (player_stat_odds_over_ratio, player_stat_odds_under_ratio)
+				#print('odds_ratios: ' + str(odds_ratios))
+
+	#time.sleep(100)
 
 	driver.close()
 	

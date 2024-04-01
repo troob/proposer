@@ -125,7 +125,7 @@ read_new_rosters = False
 test = False
 
 # run dist probs with prints/comments
-prints_on = True
+prints_on = False
 if test:
     prints_on = True
 
@@ -151,7 +151,7 @@ read_new_game_ids = True
 # but are now out for the rest of season
 # 'cha':['kyle lowry'], 
 # need fcn to check for news of ofs players bc not listed in lineup
-ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
+ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', 'lamelo ball'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
 # dont waste time read from internet if not needed
 if not test:
     ofs_players = reader.read_ofs_players()
@@ -188,7 +188,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('bos','nop'), ('mem','orl'), ('mil','atl')]#, ('nop','lal')
+game_teams = [('bos','cha'), ('mem','det'), ('bkn','ind'), ('por','orl'), ('atl','chi'), ('phx','nop')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???

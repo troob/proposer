@@ -162,30 +162,55 @@ def isolate_high_prob_props(prop_dicts):
     return high_prob_props
 
 # arbitrary uncertainty +/- 0.05???
-def isolate_props_in_range(prop_dicts, fields):
+def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
     print('\n===Isolate Props in range===\n')
 
     props_in_range = []
 
     # noticed slight neg ev still good if dp high
-    neg_uncertainty = 0 # OR -0.05 if we dont have enough >0 # bc 2 sig figs?
-    pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
-
+    # neg_uncertainty = 0 # OR -0.05 if we dont have enough >0 # bc 2 sig figs?
+    # pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
+    low = init_low
+    high = init_high
     
     for prop in prop_dicts:
 
         in_range = True
 
         for field in fields:
+            print('\nField: ' + field)
 
-            if field == 'odds':
-                neg_uncertainty = -1000
-                pos_uncertainty = 500
-            elif field == 'ev':
-                neg_uncertainty = 0
-                pos_uncertainty = 0.3
+            if init_low == None:
+                if field == 'odds':
+                    low = -1000
+                elif field == 'ev':
+                    low = 0
+                elif field == 'dp':
+                    low = 0
+            if init_high == None:
+                if field == 'odds':
+                    high = 500
+                elif field == 'ev':
+                    high = 0.3
+                elif field == 'dp':
+                    high = 100
 
-            if neg_uncertainty > float(prop[field]) or pos_uncertainty < float(prop[field]):
+
+            # if field == 'odds':
+            #     neg_uncertainty = low
+            #     pos_uncertainty = 500
+            # elif field == 'ev':
+            #     neg_uncertainty = low
+            #     pos_uncertainty = 0.3
+            # elif field == 'dp':
+            #     neg_uncertainty = low
+            #     pos_uncertainty = 100
+
+            print('low: ' + str(low))
+            print('high: ' + str(high))
+            print('val: ' + str(prop[field]))
+            if low > float(prop[field]) or high < float(prop[field]):
+                print('out range')
                 in_range = False
                 break
                 
@@ -196,7 +221,8 @@ def isolate_props_in_range(prop_dicts, fields):
             # break
             
 
-        if in_range:        
+        if in_range:       
+            print('in range') 
             props_in_range.append(prop)
 
     print('props_in_range: ' + str(props_in_range))

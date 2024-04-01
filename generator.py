@@ -2501,7 +2501,7 @@ def generate_unique_props(prop_dicts):
     unique_props = []
 
     for prop in prop_dicts:
-        
+
         #if prop not in unique_props:
         if not determiner.determine_duplicate(prop, unique_props):
             unique_props.append(prop)
@@ -2814,17 +2814,28 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
 
     # Strategy 1:
     # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
-    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['ev', 'odds'])
+    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['dp', 'ev', 'odds'])
     #dp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, field='odds')
     sort_keys = ['dp', 'ev']
     dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
+    # prefer only unique props bc taking highest dp and ev so no reason to take diff stat val
+    dp_prop_dicts = generate_unique_props(dp_prop_dicts)
     prop_tables.append(dp_prop_dicts)
     sheet_names.append('DP')
+
+    # test strategy with only >100 odds to ensure double bet if win to cover loss
+    ddp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, fields=['odds'], init_low=100)
+    sort_keys = ['game', 'stat order']
+    ddp_prop_dicts = generate_stat_order(ddp_prop_dicts)
+    ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:15], sort_keys, reverse=False)
+    ddp_prop_dicts = remover.remove_stat_order(ddp_prop_dicts)
+    prop_tables.append(ddp_prop_dicts)
+    sheet_names.append('DDP')
 
     # Now take top 30 and sort by game and stat so easy to click/navigate on site
     # keep only top 1 of player-stat with highest dp-ev
     # loop thru each dp prop and if not yet same player-stat added to top dp then add new
-    dp_prop_dicts = generate_unique_props(dp_prop_dicts)
+    
     sort_keys = ['game', 'stat order']
     dp_prop_dicts = generate_stat_order(dp_prop_dicts)
     dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts[:30], sort_keys, reverse=False)
@@ -2892,16 +2903,17 @@ def generate_all_players_median_oiaps(players_names, all_players_positions, all_
 # bc we need to get all instances of tiap conds to get median
 # and then for stat dict we use median to get offset for each game
 def generate_player_median_piaps(player_name, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, cur_yr, prints_on=False):
-    print('\n===Generate Player Median PIAPs: ' + player_name.title() + '===\n')
-    print('Setting: Season Part = ' + season_part)
-    print('Setting: Current Year = ' + cur_yr)
-    print('\nInput: player_position = ' + player_position)
-    print('Input: gp_cur_team = ' + str(gp_cur_team))
-    print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-    print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-    print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
-    print('\nOutput: player_median_tiaps = {year:{team:tiap, ...')
-    print('Output: player_median_oiaps = {year:{team:oiap, ...\n')
+    if prints_on:
+        print('\n===Generate Player Median PIAPs: ' + player_name.title() + '===\n')
+        print('Setting: Season Part = ' + season_part)
+        print('Setting: Current Year = ' + cur_yr)
+        print('\nInput: player_position = ' + player_position)
+        print('Input: gp_cur_team = ' + str(gp_cur_team))
+        print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+        print('Input: player_season_logs = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+        print('Input: all_box_scores = {year:{game key:{away:{starters:[],bench:[]},home:{starters:[],bench:[]}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': [\'J Jackson Jr PF\', ...], \'bench\': [\'S Aldama PF\', ...]}, \'home\': ...')
+        print('\nOutput: player_median_tiaps = {year:{team:tiap, ...')
+        print('Output: player_median_oiaps = {year:{team:oiap, ...\n')
 
     player_median_tiaps = {}
     player_median_oiaps = {}
@@ -3076,8 +3088,8 @@ def generate_all_players_median_piaps(players_names, all_players_positions, all_
             all_players_median_tiaps[player] = median_data[0]
             all_players_median_oiaps[player] = median_data[1]
 
-    print('all_players_median_tiaps: ' + str(all_players_median_tiaps))
-    print('all_players_median_oiaps: ' + str(all_players_median_oiaps))
+    # print('all_players_median_tiaps: ' + str(all_players_median_tiaps))
+    # print('all_players_median_oiaps: ' + str(all_players_median_oiaps))
     return all_players_median_tiaps, all_players_median_oiaps
 
 def generate_all_players_gp_cur_teams(all_players_teams, all_players_season_logs, current_year_str, players_names):
@@ -3247,7 +3259,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # start with only dk-fd ratio and add for any source with bot blocker like fd
     # {player:{stat:ratio,...}, ...}
     #read_odds_ratios()
-    #odds_ratios = reader.read_odds_ratios_website()
+    all_odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
 
     # read solo first, then click sgp btn, then read sgp/multi
     # bc much faster than loading twice separately!
@@ -3349,9 +3361,12 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         #compare_tables = reader.read_odds_compare_tables()
         #dk_players_solo_odds = all_players_solo_odds['dk']
         
-        # player_stat_odds_ratio = odds_ratios[player][stat_name]
-        # site_odds['fd'] = site_odds['dk'] * player_stat_odds_ratio
-                                
+        if stat_name in all_odds_ratios.keys() and player in all_odds_ratios[stat_name].keys():
+            player_stat_odds_ratio = all_odds_ratios[stat_name][player]
+            print('site_odds[dk]: ' + str(site_odds['dk']))
+            print('player_stat_odds_ratio: ' + str(player_stat_odds_ratio))
+            site_odds['fd'] = converter.round_half_up(site_odds['dk'] * player_stat_odds_ratio)
+            print('site_odds[fd] = site_odds[dk] * player_stat_odds_ratio = ' + str(site_odds['dk']) + ' * ' + str(player_stat_odds_ratio) + ' = ' + str(site_odds['fd']))
         
         #print('site_odds: ' + str(site_odds))
         # site odds will be blank for player not listed on site
@@ -3497,16 +3512,16 @@ def generate_rare_prev_cond(rare_prev_val_players, stat_name, player):
 # get low sample sizes for this player cur conds
 # format string: 'cond:size,...'
 def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_players_abbrevs, player_team, opp_team, season_years, season_part, single_conds, prints_on, player=''):
-    print('\n===Generate Low Sample Sizes: ' + player.title() + '===\n')
-    print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
-    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
+    # print('\n===Generate Low Sample Sizes: ' + player.title() + '===\n')
+    # print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    # print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
 
     cond_low_sample_sizes = piap_low_sample_sizes = gp_low_sample_sizes = opp_low_sample_sizes = ''
 
     low_cond_idx = piap_low_cond_idx = gp_low_cond_idx = opp_low_cond_idx = 0
     for condition in player_cur_conds_list:
-        print('\ncondition: ' + str(condition))
+        #print('\ncondition: ' + str(condition))
 
         # all opp conds are low sample size so make sep list but no warning here
         # need space in search to avoid name "toppin"
@@ -3523,7 +3538,7 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 
         
 
-        print('cond_sample_size: ' + str(cond_sample_size))
+        #print('cond_sample_size: ' + str(cond_sample_size))
         if cond_sample_size < 5:
             # opp conds are city and opp team
             # opp team always 3 letter abbrev and only cond like that
@@ -3566,10 +3581,10 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 
                     low_cond_idx += 1
 
-    print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
-    print('piap_low_sample_sizes: ' + str(piap_low_sample_sizes))
-    print('gp_low_sample_sizes: ' + str(gp_low_sample_sizes))
-    print('opp_low_sample_sizes: ' + str(opp_low_sample_sizes))
+    # print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+    # print('piap_low_sample_sizes: ' + str(piap_low_sample_sizes))
+    # print('gp_low_sample_sizes: ' + str(gp_low_sample_sizes))
+    # print('opp_low_sample_sizes: ' + str(opp_low_sample_sizes))
     return cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes
 
 # flatten nested dicts into one level and list them
@@ -3606,10 +3621,11 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
     # get delta prob to compare
     dp_key = 'dp'
     # get all prob to ref
-    ap_key = 'ap'
+    # only needed temp to make sure working bc dp gives ap
+    #ap_key = 'ap'
 
     for player, player_stat_probs_dict in all_true_probs_dict.items():
-        print('\n===Player: ' + player.title() + '===\n')
+        #print('\n===Player: ' + player.title() + '===\n')
         #stat_val_probs_dict = {'player': player}
         # player_teams = {year:{team:gp,...},...
         player_teams = all_players_teams[player]
@@ -3660,7 +3676,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
             #                 consistent_stat_dict[key] = val
             
             if stat_name in stats_of_interest:
-                print('\n===Stat: ' + str(stat_name) + '===\n')
+                #print('\n===Stat: ' + str(stat_name) + '===\n')
                 condition = 'all' # all conds match all
                 part = 'regular' # get current part from time of year mth
                 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
@@ -3678,7 +3694,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
 
                 # add to existing string with conds that dont depend on stat
                 # only if low sample size
-                print('\n===Add Prev Val Low Sample Size===\n')
+                #print('\n===Add Prev Val Low Sample Size===\n')
                 prev_val_range = determiner.determine_stat_range(prev_val, stat_name)
                 prev_val_cond = prev_val_range + ' prev'
                 # for cond_key, cond_val in player_current_conditions.items():
@@ -3689,13 +3705,13 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 
                 # display in row with name of stat
                 cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':part}
-                print('cur_conds: ' + str(cur_conds))
+                #print('cur_conds: ' + str(cur_conds))
                 prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
                 #if prev_stat_low_sample_size != '':
                 if prev_stat_sample_size < 5:
                     #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
                     cond_low_sample_sizes += '\n' + prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
-                print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+                #print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
 
 
                 # add cond if rare prev which can only be added after true prob done for all other conds
@@ -5118,7 +5134,7 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
 
     # for each player each stat, determine if rare prev vals
     for player, player_true_probs_dict in all_true_probs_dict.items():
-        # print('\nplayer: ' + player.title())
+        #print('\nplayer: ' + player.title())
         # print('player_true_probs_dict: ' + str(player_true_probs_dict))
         player_abbrev = generate_player_abbrev(player, num_letters=2)
 
@@ -5578,10 +5594,11 @@ def generate_all_counts(all_players_season_logs, cur_yr, todays_date):
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # player_teams = {year:team:gp}
-def generate_player_current_conditions(player, game_teams, player_teams, all_lineups={}, player_cur_season_log={}, player_stat_dict={}, init_game_ids_dict={}, all_teams_schedules={}, all_cur_games_info={}, all_players_positions={}, player_cur_median_tiaps={}, player_cur_median_oiaps={}, cur_yr='', rosters={}, cur_date='', read_new_game_ids=True, todays_games_date_obj=datetime.today()):
-    print('\n===Generate Player Current Conditions: ' + player.title() + '===\n')
-    print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-    print('Input: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')# = ' + str(all_teams_schedules))
+def generate_player_current_conditions(player, game_teams, player_teams, all_lineups={}, player_cur_season_log={}, player_stat_dict={}, init_game_ids_dict={}, all_teams_schedules={}, all_cur_games_info={}, all_players_positions={}, player_cur_median_tiaps={}, player_cur_median_oiaps={}, cur_yr='', rosters={}, cur_date='', read_new_game_ids=True, todays_games_date_obj=datetime.today(), prints_on=False):
+    if prints_on:
+        print('\n===Generate Player Current Conditions: ' + player.title() + '===\n')
+        print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+        print('Input: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')# = ' + str(all_teams_schedules))
 
     player_current_conditions = {}
 
@@ -5796,7 +5813,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 
         # teammates in/out at position
         tiap = determiner.determine_teammates_in_at_position(player_team_lineup, all_players_positions, player)
-        print('tiap: ' + str(tiap))   
+        #print('tiap: ' + str(tiap))   
         player_current_conditions['tiap'] = str(tiap) + ' tiap'
         # need stat dict to get median tiap bc shows samples for each cond
         #player_current_conditions['offset tiap'] = determiner.determine_offset_tiap(tiap_str, player_stat_dict, player)
@@ -5808,15 +5825,15 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
             player_current_conditions['off'] = str(player_cur_median_tiaps[player_team] - tiap) + ' off'
             # tiap conds for opps:
             oiap = determiner.determine_opp_in_at_position(opp_team_lineup, all_players_positions, player)
-            print('oiap: ' + str(oiap))   
+            #print('oiap: ' + str(oiap))   
             player_current_conditions['oiap'] = str(oiap) + ' oiap'
             # opposite of tiap bc iff less opps at position then less playtime
             off_oiap = str(oiap - player_cur_median_oiaps[player_team]) + ' oo'
             player_current_conditions['off oiap'] = off_oiap
-            print('off_oiap: ' + str(off_oiap))  
+            #print('off_oiap: ' + str(off_oiap))  
             # minutes go up if opp has more players at position
             diff = str(oiap - tiap) + ' diff' 
-            print('diff: ' + str(diff))   
+            #print('diff: ' + str(diff))   
             # diff bt tiap and oiap = diff piap or diff for short
             player_current_conditions['diff'] = diff
 
@@ -5832,14 +5849,15 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
 
 
     # player_current_conditions = {out:[p1,...], starters:[p1,...], loc:l1, city:c1, dow:d1, tod:t1,...}
-    print('player_current_conditions: ' + str(player_current_conditions))
+    if prints_on:
+        print('player_current_conditions: ' + str(player_current_conditions))
     return player_current_conditions, init_game_ids_dict, all_cur_games_info#, player_prev_vals
 
 # make dict of all current conditions for each player so we can use to compute true prob
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...} OR {player1:[c1,c2,...], p2:[],...}
 # if player on new team but has not yet played (eg injury) then only consider current conditions if they are specifically noted as playing? 
 # cant bc only lists starters and out
-def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps, all_players_median_oiaps):#, read_lineups):
+def generate_all_current_conditions(players, game_teams, all_players_teams, rosters, all_players_season_logs, init_game_ids_dict, find_players, cur_yr, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps, all_players_median_oiaps, prints_on):#, read_lineups):
     print('\n===Generate All Current Conditions===\n')
     print('Settings: Find Players')
     print('\nInput: Players of Interest')# = ' + str(players))
@@ -5909,7 +5927,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
                 #player_position = all_players_positions[player]
                 player_stat_dict = {}#all_players_stats_dicts[player]
                 # need to pass all lineups bc opponent lineups matter too
-                player_cur_conds_data = generate_player_current_conditions(player, game_teams, player_teams, all_lineups, player_cur_season_log, player_stat_dict, init_game_ids_dict, all_teams_schedules, all_cur_games_info, all_players_positions, player_cur_median_tiaps, player_cur_median_oiaps, cur_yr=cur_yr, rosters=rosters)
+                player_cur_conds_data = generate_player_current_conditions(player, game_teams, player_teams, all_lineups, player_cur_season_log, player_stat_dict, init_game_ids_dict, all_teams_schedules, all_cur_games_info, all_players_positions, player_cur_median_tiaps, player_cur_median_oiaps, cur_yr=cur_yr, rosters=rosters, prints_on=prints_on)
                 player_cur_conds = player_cur_conds_data[0]
                 # updates game ids when it reads new game
                 init_game_ids_dict = player_cur_conds_data[1]
@@ -10221,7 +10239,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_prev_vals = {}
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
-        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps, all_players_median_oiaps)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
+        all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps, all_players_median_oiaps, prints_on)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
         #print('players_names after cur conds: ' + str(players_names))
         #all_current_conditions = all_cur_conds_data[0]
         #all_lineups = all_cur_conds_data[1]
