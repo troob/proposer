@@ -362,35 +362,59 @@ def read_all_teams_schedules(game_teams):
 	return all_teams_schedules
 
 
-def read_player_prev_stat_vals(season_log_of_interest, player):
+def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player):
 	# print('\n===Read Player Prev Stat Vals: ' + player.title() + '===\n')
 	# print('season_log_of_interest: ' + str(season_log_of_interest))
 
-	prev_stat_vals = {}
+	player_prev_stat_vals = {}
 	
-	stats_of_interest = ['pts','ast','reb']
+	#stats_of_interest = ['pts','ast','reb']
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
-		prev_stat_vals[stat_name] = list(season_log_of_interest[stat_name.upper()].values())
+		print('stat_name: ' + stat_name)
+		prev_stat_vals = None
+		if re.search('\\+', stat_name):
+			prev_stat_vals = []
+			stat_names = stat_name.split('+')
+			prev_stat_val = 0
+			# take first stat to get length
+			stat_vals = list(season_log_of_interest['PTS'].values())
+			for val_idx in range(len(stat_vals)):
+				for sn in stat_names:
+					prev_stat_val += int(season_log_of_interest[sn.upper()][str(val_idx)])
 
-	return prev_stat_vals
+				prev_stat_vals.append(prev_stat_val)
+		else:
+			prev_stat_vals = list(season_log_of_interest[stat_name.upper()].values())
+	
+		player_prev_stat_vals[stat_name] = prev_stat_vals
 
-def read_player_last_stat_vals(season_log_of_interest):
+	return player_prev_stat_vals
+
+def read_player_last_stat_vals(season_log_of_interest, stats_of_interest):
 
 	prev_stat_vals = {}
 	
-	stats_of_interest = ['pts','ast','reb']
+	#stats_of_interest = ['pts','ast','reb']
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
-		prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
+		prev_stat_val = None
+		if re.search('\\+', stat_name):
+			prev_stat_val = 0
+			stat_names = stat_name.split('+')
+			for sn in stat_names:
+				prev_stat_val += int(season_log_of_interest[sn.upper()]['0'])
+		else:
+			prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
+		
 		prev_stat_vals[stat_name] = prev_stat_val
 
 	return prev_stat_vals
 
 # read along with current conditions
-def read_all_prev_stat_vals(all_players_season_logs, season_year):
+def read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year):
 	print('\n===Read All Prev Stat Vals===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
@@ -406,7 +430,7 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
 			#print('season_log_of_interest: ' + str(season_log_of_interest))
 			if len(season_log_of_interest.keys()) > 0:
-				player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest, player)
+				player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player)
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
@@ -414,7 +438,7 @@ def read_all_prev_stat_vals(all_players_season_logs, season_year):
 	return all_prev_stat_vals
 
 # read along with current conditions
-def read_all_last_stat_vals(all_players_season_logs, season_year):
+def read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year):
 	print('\n===Read All Last Stat Vals===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_last_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
@@ -430,7 +454,7 @@ def read_all_last_stat_vals(all_players_season_logs, season_year):
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
 			#print('season_log_of_interest: ' + str(season_log_of_interest))
 
-			player_last_stat_vals = read_player_last_stat_vals(season_log_of_interest)
+			player_last_stat_vals = read_player_last_stat_vals(season_log_of_interest, stats_of_interest)
 			
 		all_last_stat_vals[player] = player_last_stat_vals
 
@@ -1939,7 +1963,7 @@ def read_dk_solo(driver, stats_of_interest):
 			
 	pts_key = 4
 	stat_key = pts_key
-	stats_keys = {'pts':0,'3pm':1,'reb':3,'ast':4} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
+	stats_keys = {'pts':0,'3pm':1,'combo':2,'reb':3,'ast':4,'def':5} #keys relative to pts key. data_table_keys={'pts':pts_key,'reb':pts_key+3,'ast':pts_key+4}
 	#for stat in stats_of_interest:
 	# for dk, pts+reb+ast in combo section, key 2
 	# for dk, stl+blk in defense section, key 5
@@ -1947,12 +1971,26 @@ def read_dk_solo(driver, stats_of_interest):
 	#web_dict[key] = read_lazy_elements(key)
 	#for key in data_table_keys:#.keys():
 	#for stat_name, relative_key in stats_keys.items():
+	# multiple stats but only read 1 page once
+	done_combos = done_def = False
 	for stat_name in stats_of_interest:
 		print("stat_name: " + stat_name)
 
-		relative_key = stats_keys[stat_name]
+		# all stat combos on same page so read once
+		relative_key = stats_keys['combo']
+		if re.search('stl|blk',stat_name):
+			if done_def:
+				continue # still more stats after combos
+			relative_key = stats_keys['def']
+			done_def = True
+		elif re.search('\\+',stat_name):
+			if done_combos:
+				continue # still more stats after combos
+			done_combos = True
+		else:
+			relative_key = stats_keys[stat_name]
 
-		web_dict[stat_name] = {}
+			web_dict[stat_name] = {}
 
 		# click pts btn
 		epath = 'a[' + str(stat_key+relative_key) + ']'
@@ -1992,6 +2030,8 @@ def read_dk_solo(driver, stats_of_interest):
 		driver.execute_script("arguments[0].scrollIntoView(true);", stat_btn)
 		stat_btn.click()
 
+		#time.sleep(5)
+
 
 		# Now on stat page, read tables
 		# outer container: sportsbook-responsive-card-container
@@ -2002,11 +2042,28 @@ def read_dk_solo(driver, stats_of_interest):
 
 			# sportsbook-event-accordion__title
 			section_name = e.find_element('class name', 'sportsbook-event-accordion__title').get_attribute('innerHTML')
-			#print("section_name: " + section_name)
+			print("section_name: " + section_name)
 
-			# ignore quarter stats for now
-			if re.search('Quarter',section_name):
-				break # can break bc list ends with quarter stats
+			# if combo or defense then section name is stat name
+			# bc all combos on same page
+			if re.search('stl|blk',section_name):
+				# Steals + Blocks -> stl+blk
+				stat_name = re.sub('Steals', 'stl', section_name) # remove spaces to get keys
+				stat_name = re.sub('Blocks', 'blk', stat_name)
+				stat_name = re.sub(' ', '', stat_name).strip()
+				print("stat_name: " + stat_name)
+				if stat_name not in web_dict.keys():
+					web_dict[stat_name] = {}
+			elif re.search('\\+',section_name):
+				stat_name = re.sub('\s|ALT\s|Alt\s', '', section_name).lower() # remove spaces to get keys
+				#print("stat_name: " + stat_name)
+				if stat_name not in web_dict.keys():
+					web_dict[stat_name] = {}
+
+			# ignore quarter stats and double stats for now
+			if re.search('Quarter|Double',section_name):
+				continue # allow for invalid sections anywhere in list
+				#break # can break bc list ends with quarter stats
 
 			# read diff if table vs component list
 			# check for table element tag
@@ -2025,7 +2082,7 @@ def read_dk_solo(driver, stats_of_interest):
 					# strip in case source typo added space
 					player_name = player_row.find_element('class name', 'sportsbook-row-name').get_attribute('innerHTML').strip().lower()
 					player_name = converter.convert_irregular_player_name(player_name)
-					#print('player_name: ' + player_name)
+					print('player_name: ' + player_name)
 
 					if player_name not in web_dict[stat_name].keys():
 						web_dict[stat_name][player_name] = {}
@@ -2071,7 +2128,7 @@ def read_dk_solo(driver, stats_of_interest):
 					#print("player_comp: " + player_comp.get_attribute('innerHTML'))
 
 					player_name = player_comp.find_element('class name', 'participants').get_attribute('innerHTML')
-					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|O/U','',player_name).strip().lower()
+					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|Steals|Blocks|O/U|\\+','',player_name).strip().lower()
 					player_name = converter.convert_irregular_player_name(player_name)
 					#print('player_name: ' + player_name)
 
@@ -2079,9 +2136,15 @@ def read_dk_solo(driver, stats_of_interest):
 						web_dict[stat_name][player_name] = {}
 
 					# get element for each stat-odd pair in list for given player
-					stat_class = 'sportsbook-outcome-cell__line'
-					if re.search('X', section_name):
-						stat_class = 'sportsbook-outcome-cell__label'
+					# stat_class = 'sportsbook-outcome-cell__line'
+					# alt_stats_list_str = 'X|ALT\s[A-Za-z]+\\+|Alt\s[A-Za-z]+\\+|Alt Blocks|Alt Steals'
+					# if re.search(alt_stats_list_str, section_name):
+					# 	stat_class = 'sportsbook-outcome-cell__label' # sportsbook-outcome-cell__label
+					# simpler to flip so default is label and change to line if alt o/u only
+					stat_class = 'sportsbook-outcome-cell__label'
+					alt_ou_str = 'Alt Points|Alt Assists|Alt Rebounds'
+					if re.search(alt_ou_str, section_name):
+						stat_class = 'sportsbook-outcome-cell__line'
 
 					stat_vals = player_comp.find_elements('class name', stat_class)
 					#print('stat_vals: ' + str(stat_vals))
@@ -2095,7 +2158,8 @@ def read_dk_solo(driver, stats_of_interest):
 						#print('odds: ' + odds)
 
 						# X+ Points section has format 10+ so leave as is
-						if not re.search('X',section_name):
+						#if not re.search(alt_stats_list_str,section_name):
+						if re.search(alt_ou_str,section_name):
 							# start with over and then take every other value as over
 							if idx % 2 == 0:
 								stat = str(converter.round_half_up(float(stat) + 0.5)) + '+' #or str(int(stat))#str(converter.round_half_up(float(stat) + 0.5)) # 0.5 to 1
@@ -2808,7 +2872,9 @@ def read_odds_ratios_website(stats_of_interest):
 
 	odds_ratios = {}
 
-	url = 'https://betkarma.com/props-comparison'
+	# betkarma only has avg line which cannot be scaled proportionally to other stat vals so FAIL
+	# FAIL url = 'https://betkarma.com/props-comparison'
+	url = 'https://www.oddschecker.com/us/basketball/nba'
 
 	# Create Chromeoptions instance 
 	options = webdriver.ChromeOptions() 
@@ -2852,6 +2918,7 @@ def read_odds_ratios_website(stats_of_interest):
 	for stat in stats_of_interest:
 		# full name for dropdown menu
 		stat_name = stat_names[stat]
+		#print('stat_name: ' + stat_name)
 
 		if stat_name not in odds_ratios.keys():
 			odds_ratios[stat] = {}
@@ -2901,7 +2968,7 @@ def read_odds_ratios_website(stats_of_interest):
 
 				site_odds = site_cell.find_elements('tag name', 'a')
 				over_odds_e = site_odds[0].get_attribute('innerHTML')
-				under_odds_e = site_odds[1].get_attribute('innerHTML')
+				#under_odds_e = site_odds[1].get_attribute('innerHTML')
 				
 				over_odds = under_odds = ''
 				stat_val = over_stat_odds = under_stat_odds = 0
@@ -3037,6 +3104,13 @@ def read_odds_ratios_website(stats_of_interest):
 	print('odds_ratios: ' + str(odds_ratios))
 	return odds_ratios
 
+def read_fd_odds(stats_of_interest):
+
+	fd_odds = {}
+	return fd_odds
+
+
+
 def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 	print('\n===Read All Players Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
@@ -3063,7 +3137,8 @@ def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 	# compare tables: https://betkarma.com/props-comparison
 	sites = ['dk']
 	site_urls = {'dk': 'https://sportsbook.draftkings.com/teams/basketball/nba/', 
-			  	'bm': ''}
+			  	'fd': 'https://www.oddstrader.com/nba/', 
+				'bm': ''}
 
 	for site in sites:
 

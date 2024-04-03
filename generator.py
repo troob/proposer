@@ -2245,7 +2245,7 @@ def generate_valid_top_ev_props(plus_ev_props):
 # add stat order field to dict temp to sort so it is best for user
 def generate_stat_order(props):
 
-    stat_orders = {'pts':1, 'reb':2, 'ast':3} # dk. diff for diff platforms
+    stat_orders = {'pts':1, 'reb':2, 'ast':3, 'pts+reb+ast':4, 'pts+reb':5, 'pts+ast':6, 'reb+ast':7} # dk. diff for diff platforms
 
     for prop in props:
         stat_name = prop['stat']
@@ -2496,14 +2496,14 @@ def generate_review_props(props):
     return review_props
 
 
-def generate_unique_props(prop_dicts):
+def generate_unique_props(prop_dicts, strict=False):
 
     unique_props = []
 
     for prop in prop_dicts:
 
         #if prop not in unique_props:
-        if not determiner.determine_duplicate(prop, unique_props):
+        if not determiner.determine_duplicate(prop, unique_props, strict):
             unique_props.append(prop)
 
     return unique_props
@@ -2809,28 +2809,26 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     sheet_names.append('RP')
 
     # prop dicts already sorted by prob
-    prop_tables.append(prop_dicts)
+    # remove props below 95% with dp<-1
+    # remove props below 80%
+    hp_prop_dicts = generate_unique_props(prop_dicts, strict=False)
+    hp_prop_dicts = isolator.isolate_props_in_range(hp_prop_dicts, fields=['true prob'])
+    hp_prop_dicts = isolator.isolate_props_in_ranges(hp_prop_dicts, fields=['true prob', 'dp'], init_vals=[95, -1])
+    prop_tables.append(hp_prop_dicts)
     sheet_names.append('HP')
 
     # Strategy 1:
     # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
-    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['dp', 'ev', 'odds'])
+    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['dp', 'ev', 'odds', 'ap'])
     #dp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, field='odds')
     sort_keys = ['dp', 'ev']
     dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
     # prefer only unique props bc taking highest dp and ev so no reason to take diff stat val
-    dp_prop_dicts = generate_unique_props(dp_prop_dicts)
+    dp_prop_dicts = generate_unique_props(dp_prop_dicts, strict=True)
     prop_tables.append(dp_prop_dicts)
     sheet_names.append('DP')
 
-    # test strategy with only >100 odds to ensure double bet if win to cover loss
-    ddp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, fields=['odds'], init_low=100)
-    sort_keys = ['game', 'stat order']
-    ddp_prop_dicts = generate_stat_order(ddp_prop_dicts)
-    ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:15], sort_keys, reverse=False)
-    ddp_prop_dicts = remover.remove_stat_order(ddp_prop_dicts)
-    prop_tables.append(ddp_prop_dicts)
-    sheet_names.append('DDP')
+    
 
     # Now take top 30 and sort by game and stat so easy to click/navigate on site
     # keep only top 1 of player-stat with highest dp-ev
@@ -2842,6 +2840,26 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     dp_prop_dicts = remover.remove_stat_order(dp_prop_dicts)
     prop_tables.append(dp_prop_dicts)
     sheet_names.append('Top DP')
+
+
+    # test strategy with only >100 odds to ensure double bet if win to cover loss
+    # based on 1 day, works better bc ensures bets return more at same prob
+    ddp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, fields=['odds'], init_low=100)
+    # separate ddp prop dicts with rare prevs in opposite direction for review
+    rp_prop_data = isolator.separate_rare_prev_props(ddp_prop_dicts)
+    ddp_prop_dicts = rp_prop_data[0]
+    ddp_rp_prop_dicts = rp_prop_data[1]
+    prop_tables.append(ddp_rp_prop_dicts)
+    sheet_names.append('DDP RP')
+
+    sort_keys = ['game', 'stat order']
+    ddp_prop_dicts = generate_stat_order(ddp_prop_dicts)
+    ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:30], sort_keys, reverse=False)
+    ddp_prop_dicts = remover.remove_stat_order(ddp_prop_dicts)
+    prop_tables.append(ddp_prop_dicts)
+    sheet_names.append('DDP')
+
+
 
     # review props
     #review_sheet_name = 'Review'
@@ -3220,6 +3238,48 @@ def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, al
     return conditions_order
 
 
+def generate_bet_spread(prop_dict):
+    #print('\n===Generate Bet Spread===\n')
+
+    bet_spread = 0.1 # min bet
+    # shift in range based on min allowed prob
+    # accepted range 15-100% ap
+    # but that usually requires 20% tp
+    prob = prop_dict['true prob'] - 20 #max(prop_dict['true prob'] - 20, 0)
+    #print('prob: ' + str(prob))
+
+    # if prob < 0:
+    #     prob = 0
+
+    # accept 15% as base bet unless noticed never wins
+    if prob >= 0:
+        # accepted range 15-100% ap
+        # but that usually requires 20% tp
+        # bc noticed below 15% ap is too rare to hit regularly
+        # make 20% lowest bet so 80 range
+        ratio = prob / 80 # fraction of max bet
+        # min is 10 so range is 20
+        # OR should we increase to 30 bc really rare to see 100%?
+        # OR should we decrease range to 15 so smaller change in prob makes bigger change proportionally in bet???
+        max_bet = 20
+        # divide by 100 bc small scale tests in cents input as decimal dollars
+        bet_spread = (10 + converter.round_half_up(max_bet * ratio)) / 100
+
+    #print('bet_spread: ' + str(bet_spread))
+    return bet_spread
+
+def generate_all_bet_spreads(available_prop_dicts):
+    print('\n===Generate All Bet Spreads===\n')
+    print('\nOutput: available_prop_dicts = [{...}, ...]\n')
+
+    for prop_dict in available_prop_dicts:
+
+        prop_dict['bet'] = generate_bet_spread(prop_dict)
+        
+
+    return available_prop_dicts
+
+
 # NEED to return separate available as single picks vs multi picks which must be combined
 # stat_dict: {'player name': 'Trevelin Queen', 'stat name': 'ast', 'prob val': 0, 'prob': 100...
 def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, stats_of_interest):
@@ -3259,7 +3319,10 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # start with only dk-fd ratio and add for any source with bot blocker like fd
     # {player:{stat:ratio,...}, ...}
     #read_odds_ratios()
-    all_odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
+    # try oddschecker tmw to see if alt odds in table
+    # BUT if not then FAIL bc no way to get alt odds for fd!!!
+    # instead try to get fd odds from oddstrader.com
+    #all_odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
 
     # read solo first, then click sgp btn, then read sgp/multi
     # bc much faster than loading twice separately!
@@ -3277,13 +3340,18 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # if no odds val, then do not add to available dict
     # see which source/site has best deal/value
     for stat_dict in stat_dicts:
-        #print('stat_dict: ' + str(stat_dict))
+        print('stat_dict: ' + str(stat_dict))
         # see if stat available
         # could do same check for all and put 0 if na 
         # and then sort by val/odds or elim 0s
 
         stat_name = stat_dict['stat']
-        #print('stat_name: ' + stat_name)
+        print('stat_name: ' + stat_name)
+
+        # need sign to tell which odds ratio to use o/u
+        # ok_val = x+ or x-
+        ok_val = str(stat_dict['val'])
+        print('ok_val: ' + str(ok_val))
 
         # add val to dict
         # check single/odds odds first bc if available as both prefer single/solo
@@ -3305,13 +3373,14 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
                     # print('player: ' + player)
                     # print('player_dict: ' + str(site_players_solo_odds[team][stat_name]))
                     if player in site_players_solo_odds[team][stat_name].keys():
-                        ok_val = str(stat_dict['val'])
+                        
                         #print('ok_val: ' + str(ok_val))
+                        # ok_val = x+ or x-
                         if str(ok_val) in site_players_solo_odds[team][stat_name][player].keys():
                             #print('solo')
                             solo = True
 
-                            site_odds[site] = site_players_solo_odds[team][stat_name][player][ok_val] #reader.read_stat_odds(stat_dict, all_players_odds)
+                            site_odds[site] = int(site_players_solo_odds[team][stat_name][player][ok_val]) #reader.read_stat_odds(stat_dict, all_players_odds)
                             #site_odds[site] = odds
                             #print('site_odds: ' + str(site_odds))
 
@@ -3361,22 +3430,74 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
         #compare_tables = reader.read_odds_compare_tables()
         #dk_players_solo_odds = all_players_solo_odds['dk']
         
-        if stat_name in all_odds_ratios.keys() and player in all_odds_ratios[stat_name].keys():
-            player_stat_odds_ratio = all_odds_ratios[stat_name][player]
-            print('site_odds[dk]: ' + str(site_odds['dk']))
-            print('player_stat_odds_ratio: ' + str(player_stat_odds_ratio))
-            site_odds['fd'] = converter.round_half_up(site_odds['dk'] * player_stat_odds_ratio)
-            print('site_odds[fd] = site_odds[dk] * player_stat_odds_ratio = ' + str(site_odds['dk']) + ' * ' + str(player_stat_odds_ratio) + ' = ' + str(site_odds['fd']))
+        
         
         #print('site_odds: ' + str(site_odds))
         # site odds will be blank for player not listed on site
         odds = site = 'NA'
         if len(site_odds.keys()) > 0:
-            odds = max(site_odds.values())
+            # odds ratios not scalable so FAIL
+            # if stat_name in all_odds_ratios.keys() and player in all_odds_ratios[stat_name].keys():
+            #     player_stat_odds_ratio = all_odds_ratios[stat_name][player]
+            #     print('ok_val: ' + str(ok_val))
+            #     print('site_odds[dk]: ' + str(site_odds['dk']))
+                
+            #     idx = 0
+            #     if ok_val[-1] == '-':
+            #         idx = 1
+            #     print('player_stat_odds_ratio: ' + str(player_stat_odds_ratio[idx]))
+            #     if site_odds['dk'] > 0:
+            #         fd_odds = converter.round_half_up(site_odds['dk'] * player_stat_odds_ratio[idx])
+            #         print('site_odds[fd] = site_odds[dk] * player_stat_odds_ratio = ' + str(site_odds['dk']) + ' * ' + str(player_stat_odds_ratio[idx]) + ' = ' + str(fd_odds))
+            #         # convert to american odds if <100 abs val
+            #         site_odds['fd'] = fd_odds
+            #         # eg 90
+            #         if fd_odds < 100:
+            #             # eg 10
+            #             offset = 100 - fd_odds
+            #             # eg -110
+            #             site_odds['fd'] = -100 - offset
+
+            #     else:
+            #         fd_odds = converter.round_half_up(site_odds['dk'] / player_stat_odds_ratio[idx])
+            #         print('site_odds[fd] = site_odds[dk] / player_stat_odds_ratio = ' + str(site_odds['dk']) + ' / ' + str(player_stat_odds_ratio[idx]) + ' = ' + str(fd_odds))
+            #         site_odds['fd'] = fd_odds
+            #         # eg -90
+            #         if fd_odds > -100:
+            #             # eg 10
+            #             offset = 100 + fd_odds
+            #             # eg +110
+            #             site_odds['fd'] = 100 + offset
+            
+
+            #     # put odds in str format so it shows +x to diff bt -x and other cols/vals in table
+            #     # clearly shows odds column
+            #     odds = str(max(site_odds.values()))
+            #     if not re.search('-', odds):
+            #         odds = '+' + odds
+
+            #     # add site to show which source has better value ev
+            #     site = max(site_odds, key=site_odds.get) #max(zip(site_odds.values(), site_odds.keys()))[1]
+
+
+            # # if we have dk site odds but no fd ratio
+            # # still need to manually check fd until we have way to scale odds for diff avg lines
+            # else:
+            #     odds = str(site_odds['dk'])
+            #     if not re.search('-', odds):
+            #         odds = '+' + odds
+            #     # site = 'NA' default
+                    
+
+            odds = str(max(site_odds.values()))
+            if not re.search('-', odds):
+                odds = '+' + odds
 
             # add site to show which source has better value ev
-            site = max(site_odds, key=site_odds.get) #max(zip(site_odds.values(), site_odds.keys()))[1]
+            site = max(site_odds, key=site_odds.get)
 
+        # print('odds: ' + str(odds))
+        # print('site: ' + str(site))
         # always put odds in dict even if NA
         stat_dict['odds'] = odds
         stat_dict['site'] = site
@@ -6296,6 +6417,9 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                         valid_stat = True
                         if stat_name == 'pts' and player_stat_model_avg <= 3:
                             valid_stat = False
+                        elif stat_name == 'stl' or stat_name == 'blk':
+                            if player_stat_model_avg <= 0.5:
+                                valid_stat = False
                         elif player_stat_model_avg <= 1:
                             valid_stat = False
 
@@ -6780,7 +6904,8 @@ def generate_player_distrib_models(player_stat_dict, stats_of_interest, player_n
                 
                 for stat_name, stat_dict in part_stat_dict.items():
 
-                    if stat_name in stats_of_interest:
+                    # include stat combos
+                    if stat_name in stats_of_interest:# or re.search('\\+', stat_name):
                         #print('\nstat_name: ' + stat_name)
 
                         #condition = 'all'
@@ -7072,12 +7197,12 @@ def generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team
 
         cond_minutes = []
         if gp_cur_team is not None:
-            print('gp cur team: ' + str(gp_cur_team))
+            #print('gp cur team: ' + str(gp_cur_team))
             # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
             prev_minutes = 0
             for game_idx, minutes in cond_minutes_dict.items():
-                print('game idx: ' + game_idx)
-                print('minutes: ' + str(minutes))
+                # print('game idx: ' + game_idx)
+                # print('minutes: ' + str(minutes))
                 # max 30 samples bc playtime changes over time
                 if int(game_idx) >= gp_cur_team or int(game_idx) >= 30:
                     break
@@ -7542,7 +7667,8 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                 part_season_logs = generate_part_season_logs(player_season_logs, part)
                 for stat, stat_dict in part_stat_dict.items():
                     
-                    if stat in stats_of_interest:
+                    # include stat combos
+                    if stat in stats_of_interest or re.search('\\+', stat):
                         #print("\n===Stat Name " + str(stat) + "===\n")
 
                         if stat not in player_unit_stat_dict[year][part].keys():
@@ -8073,13 +8199,25 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
     all_ftms_dicts = {'all':{}}
     all_ftas_dicts = {'all':{}}
     all_ft_rates_dicts = {'all':{}}
-    all_bs_dicts = {'all':{}}
-    all_ss_dicts = {'all':{}}
+    
     all_fs_dicts = {'all':{}}
     all_tos_dicts = {'all':{}}
 
-    all_stats_dicts = {'pts':all_pts_dicts, 'reb':all_rebs_dicts, 'ast':all_asts_dicts, 'w score':all_winning_scores_dicts, 'l score':all_losing_scores_dicts, 'min':all_minutes_dicts, 'fgm':all_fgms_dicts, 'fga':all_fgas_dicts, 'fg%':all_fg_rates_dicts, '3pm':all_threes_made_dicts, '3pa':all_threes_attempts_dicts, '3p%':all_threes_rates_dicts, 'ftm':all_ftms_dicts, 'fta':all_ftas_dicts, 'ft%':all_ft_rates_dicts, 'blk':all_bs_dicts, 'stl':all_ss_dicts, 'pf':all_fs_dicts, 'to':all_tos_dicts} # loop through to add all new stats with 1 fcn
+    # Stat Combos
+    all_pts_reb_dicts = {'all':{}}
+    all_pts_ast_dicts = {'all':{}}
+    all_reb_ast_dicts = {'all':{}}
+    all_pts_reb_ast_dicts = {'all':{}}
+    #all_stat_combos_dicts = {'pts reb':all_pts_reb_dicts, 'pts ast':all_pts_ast_dicts, 'reb ast':all_reb_ast_dicts, 'pts reb ast':all_pts_reb_ast_dicts}
 
+    # Defense
+    all_stl_dicts = {'all':{}}
+    all_blk_dicts = {'all':{}}
+    all_stl_blk_dicts = {'all':{}}
+
+    all_stats_dicts = {'pts':all_pts_dicts, 'reb':all_rebs_dicts, 'ast':all_asts_dicts, 'pts+reb':all_pts_reb_dicts, 'pts+ast':all_pts_ast_dicts, 'reb+ast':all_reb_ast_dicts, 'pts+reb+ast':all_pts_reb_ast_dicts, 'stl':all_stl_dicts, 'blk':all_blk_dicts, 'stl+blk':all_stl_blk_dicts, 'w score':all_winning_scores_dicts, 'l score':all_losing_scores_dicts, 'min':all_minutes_dicts, 'fgm':all_fgms_dicts, 'fga':all_fgas_dicts, 'fg%':all_fg_rates_dicts, '3pm':all_threes_made_dicts, '3pa':all_threes_attempts_dicts, '3p%':all_threes_rates_dicts, 'ftm':all_ftms_dicts, 'fta':all_ftas_dicts, 'ft%':all_ft_rates_dicts, 'pf':all_fs_dicts, 'to':all_tos_dicts} # loop through to add all new stats with 1 fcn
+
+    
 
     # if getting data from player game logs read from internet
     # for game log for particular given season/year
@@ -8113,7 +8251,8 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                 for stat_idx in range(len(all_stats_dicts.values())):
                     stat_name = list(all_stats_dicts.keys())[stat_idx]
 
-                    if stat_name not in stats_of_interest and stat_name != 'min':
+                    # include stat combos
+                    if stat_name not in stats_of_interest and stat_name != 'min' and not re.search('\\+',stat_name):
                         continue
 
                     stat_dict = list(all_stats_dicts.values())[stat_idx]
@@ -8316,7 +8455,8 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
                     stat_name = list(all_stats_dicts.keys())[stat_idx]
 
-                    if stat_name not in stats_of_interest and stat_name != 'min':
+                    # include stat combos
+                    if stat_name not in stats_of_interest and stat_name != 'min' and not re.search('\\+',stat_name):
                         continue
 
                     stat_dict = list(all_stats_dicts.values())[stat_idx]
@@ -8551,7 +8691,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         # condition: prev val
                         # make range bc not enough samples of exact val
                         # dont need prev playtime
-                        if stat_name in stats_of_interest:
+                        if stat_name in stats_of_interest or re.search('\\+', stat_name):
                             #print('\n===Condition: Prev Val===\n')
                             #if game_idx != '0': # first game has no prev val, but idx goes from recent to distant so last idx is first game
                             #prev_game_idx = str(int(game_idx)+1)
@@ -8559,7 +8699,15 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             # season_part_game_log = {year: {stat name: {game idx: stat val, ... = {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
                             # get prev val from game log bc this loop constructs stat dict so not there yet
                             #stat_log = season_part_game_log
-                            prev_stat_val = int(player_game_log.loc[str(prev_game_idx), stat_name.upper()])
+                            # if stat combo then add substats
+                            prev_stat_val = None
+                            if re.search('\\+', stat_name):
+                                prev_stat_val = 0
+                                stat_names = stat_name.split('+')
+                                for sn in stat_names:
+                                    prev_stat_val += int(player_game_log.loc[str(prev_game_idx), sn.upper()])
+                            else:
+                                prev_stat_val = int(player_game_log.loc[str(prev_game_idx), stat_name.upper()])
                             
                             # if prev_game_idx in stat_dict['all'].keys():
                             #     print('found prev game')
@@ -10249,8 +10397,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_game_player_cur_conds = all_cur_conds_data[1]
 
         #player_prev_vals = reader.read_player_prev_stat_vals(player_game_log)
-        all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, season_year)
-        all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, season_year)
+        all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year)
+        all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year)
 
         #all_counts = generate_all_counts(all_players_season_logs, season_year, todays_date)
 
@@ -10595,7 +10743,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         available_prop_dicts = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
         # available_prop_dicts = available_prop_data[0]
         # available_multi_prop_dicts = available_prop_data[1]
-        desired_order.extend(['odds','ev','site']) # is there another way to ensure odds comes after true prob
+        # add bet spread to available prop dicts, 
+        # based on true prob, dp, odds, ev, ...???
+        available_prop_dicts = generate_all_bet_spreads(available_prop_dicts)
+        desired_order.extend(['odds','ev','site','bet']) # is there another way to ensure odds comes after true prob
 
     #desired_order = ['player', 'team', 'stat','ok val','ok val prob','odds','ok val post prob', 'ok val min margin', 'ok val post min margin', 'ok val mean margin', 'ok val post mean margin']
     

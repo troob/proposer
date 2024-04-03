@@ -961,8 +961,8 @@ def determine_game_stats(player_game_log, game_idx):
     # === Collect Stats for Current Game ===
 
     pts = int(player_game_log.loc[game_idx, 'PTS'])
-    rebs = int(player_game_log.loc[game_idx, 'REB'])
-    asts = int(player_game_log.loc[game_idx, 'AST'])
+    reb = int(player_game_log.loc[game_idx, 'REB'])
+    ast = int(player_game_log.loc[game_idx, 'AST'])
 
     results = player_game_log.loc[game_idx, 'Result']
     #print("results: " + results)
@@ -996,13 +996,21 @@ def determine_game_stats(player_game_log, game_idx):
     fta = int(ft_data[1])
     ft_rate = converter.round_half_up(float(player_game_log.loc[game_idx, 'FT%']), 1)
 
-    bs = int(player_game_log.loc[game_idx, 'BLK'])
-    ss = int(player_game_log.loc[game_idx, 'STL'])
+    stl = int(player_game_log.loc[game_idx, 'STL'])
+    blk = int(player_game_log.loc[game_idx, 'BLK'])
+
     fs = int(player_game_log.loc[game_idx, 'PF'])
     tos = int(player_game_log.loc[game_idx, 'TO'])
 
+    # Stat Combos
+    pts_reb = pts + reb
+    pts_ast = pts + ast
+    reb_ast = reb + ast
+    pts_reb_ast = pts + reb + ast
+    stl_blk = stl + blk
+
     # make list to loop through so we can add all stats to dicts with 1 fcn
-    game_stats = [pts,rebs,asts,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_made,threes_attempts,three_rate,ftm,fta,ft_rate,bs,ss,fs,tos] 
+    game_stats = [pts,reb,ast,pts_reb,pts_ast,reb_ast,pts_reb_ast,stl,blk,stl_blk,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_made,threes_attempts,three_rate,ftm,fta,ft_rate,fs,tos] 
 
     return game_stats
 
@@ -2251,14 +2259,28 @@ def determine_player_team_by_game(player, game_key, player_teams):
 
 
 
-def determine_duplicate(prop, unique_props):
+def determine_duplicate(prop, unique_props, strict=False):
 
     duplicate = False
 
     for up in unique_props:
-        if prop['player'] == up['player'] and prop['stat'] == up['stat']:
-            duplicate = True
-            break
+        if prop['player'] == up['player']:
+            # if combo stat then consider duplicate if any matching stat overlap
+            stat_name = prop['stat']
+            if stat_name == up['stat']:
+                duplicate = True
+                break
+
+            if strict:
+                if re.search('\\+', stat_name):
+                    stat_names = stat_name.split('+')
+                    for sn in stat_names:
+                        if re.search(sn, up['stat']):
+                            duplicate = True
+                            break
+
+            if duplicate:
+                break
 
     return duplicate
 

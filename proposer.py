@@ -60,9 +60,13 @@ model_x_seasons = 2
 all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 
 # === STATS OF INTEREST === 
-stats_of_interest = ['pts','reb','ast']#, '3pm']
+# put stats in order of website nav for faster nav without scrolling
+stats_of_interest = ['pts','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast','stl','blk','stl+blk']#, '3pm']
 
 #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
+
+#fd_odds = reader.read_fd_odds(stats_of_interest)
+
 
 # if we want to see how it would perform for previous years
 # we need to know the exact game (or even specific prop) that we want to evaluate
@@ -154,7 +158,7 @@ read_new_game_ids = True
 ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', 'lamelo ball'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
 # dont waste time read from internet if not needed
 if not test:
-    ofs_players = reader.read_ofs_players()
+    ofs_players = reader.read_ofs_players(ofs_players)
 
 
 settings = {'find matchups': find_matchups, 
@@ -188,14 +192,14 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('bos','cha'), ('mem','det'), ('bkn','ind'), ('por','orl'), ('atl','chi'), ('phx','nop')]#, ('nop','lal')
+game_teams = [('por','cha'), ('lal','wsh'), ('det','atl'), ('okc','bos'), ('ind','bkn'), ('mem','mil'), ('tor','min'), ('orl','nop'), ('cle','phx')]#, ('nop','lal')
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('mem','orl')]
+    game_teams = [('lal','tor')]
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -206,7 +210,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['wenyan gabriel'] # 'jacob gilyard', use for testing
+    players_names = ['lebron james'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

@@ -161,6 +161,156 @@ def isolate_high_prob_props(prop_dicts):
     print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
+def separate_rare_prev_props(prop_dicts):
+    print('\n===Separate Rare Prev Props===\n')
+
+    common_prev_props = []
+    rare_prev_props = []
+
+    for prop_dict in prop_dicts:
+
+        # get sign/direction
+        stat_val = prop_dict['val']
+        # get rare field
+        rp_val = prop_dict['rare prev']
+
+        # if rare prev over and recommends taking over, 
+        # AVOID bc less likely to go over again
+        if re.search('over', rp_val) and stat_val[-1] == '+':
+            rare_prev_props.append(prop_dict)
+        elif re.search('under', rp_val) and stat_val[-1] == '-':
+            rare_prev_props.append(prop_dict)
+        else:
+            common_prev_props.append(prop_dict)
+
+
+    return common_prev_props, rare_prev_props
+
+
+def isolate_props_in_ranges(prop_dicts, fields, init_vals=[]):
+    print('\n===Isolate Props in Ranges===\n')
+
+    props_in_range = []
+
+    # noticed slight neg ev still good if dp high
+    # neg_uncertainty = 0 # OR -0.05 if we dont have enough >0 # bc 2 sig figs?
+    # pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
+    # low = init_low
+    # high = init_high
+    
+    for prop in prop_dicts:
+
+        in_range = True
+
+        field1 = 'true prob'
+        field2 = 'dp'
+
+        #if >95%, in range
+        if float(prop[field1]) < 95 and float(prop[field2]) < -1:
+            in_range = False
+
+
+        # General Case
+        #in_range = True
+        #init_vals = [95, -1]
+        #for field_idx in range(len(fields)):
+            # field = fields[field_idx]
+            # init_val = init_vals[field_idx]
+
+            # # if >
+
+            # # if matches this field, continue to next field
+            # # but if no match then out of range
+            # if float(prop[field]) < init_val:
+            #     continue
+
+            # # if reaches here then prop field val missing range of at least 1 field
+            # in_range = False
+            # break
+
+
+
+
+
+        if in_range:       
+            print('in range') 
+            props_in_range.append(prop)
+
+    return props_in_range
+
+# if all given fields are in range,
+# then prop is in range
+# eg <95% and dp >=-1 would keep right ones
+def isolate_props_in_all_ranges(prop_dicts, fields, init_low=None, init_high=None):
+    print('\n===Isolate Props in All Ranges===\n')
+
+    props_in_range = []
+
+    # noticed slight neg ev still good if dp high
+    # neg_uncertainty = 0 # OR -0.05 if we dont have enough >0 # bc 2 sig figs?
+    # pos_uncertainty = 0.3 # tested >0.3 and seems out of range bc super unlikely
+    low = init_low
+    high = init_high
+    
+    for prop in prop_dicts:
+
+        in_range = True
+
+        for field in fields:
+            #print('\nField: ' + field)
+
+            if init_low == None:
+                if field == 'odds':
+                    low = -1000
+                elif field == 'ev':
+                    low = 0 # if 0ev only take if ultra rare prev or huge unaccounted for factor
+                elif field == 'dp':
+                    low = -1
+                elif field == 'true prob':
+                    low = 25
+                elif field == 'ap':
+                    low = 15
+            if init_high == None:
+                if field == 'odds':
+                    high = 500
+                elif field == 'ev':
+                    high = 0.3
+                elif field == 'dp':
+                    high = 100
+                elif field == 'true prob':
+                    high = 100
+                elif field == 'ap':
+                    high = 100
+
+            prop_field_val = 0
+            if field == 'ap':
+                prop_field_val = int(prop['true prob']) - int(prop['dp'])
+            else:
+                prop_field_val = float(prop[field])
+            # print('low: ' + str(low))
+            # print('high: ' + str(high))
+            # print('val: ' + str(prop_field_val))
+            if low > prop_field_val or high < prop_field_val:
+                #print('out range')
+                in_range = False
+                break
+                
+            # if neg_uncertainty <= float(prop[field]) <= pos_uncertainty:
+            #     continue
+
+            # in_range = False
+            # break
+            
+
+        if in_range:       
+            #print('in range') 
+            props_in_range.append(prop)
+
+    #print('props_in_range: ' + str(props_in_range))
+    return props_in_range
+
+# if any of the given fields are out of range, 
+# then prop out of range
 # arbitrary uncertainty +/- 0.05???
 def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
     print('\n===Isolate Props in range===\n')
@@ -178,15 +328,19 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
         in_range = True
 
         for field in fields:
-            print('\nField: ' + field)
+            #print('\nField: ' + field)
 
             if init_low == None:
                 if field == 'odds':
                     low = -1000
                 elif field == 'ev':
-                    low = 0
+                    low = 0 # if 0ev only take if ultra rare prev or huge unaccounted for factor
                 elif field == 'dp':
-                    low = 0
+                    low = -1
+                elif field == 'true prob':
+                    low = 25
+                elif field == 'ap':
+                    low = 15
             if init_high == None:
                 if field == 'odds':
                     high = 500
@@ -194,38 +348,30 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
                     high = 0.3
                 elif field == 'dp':
                     high = 100
+                elif field == 'true prob':
+                    high = 100
+                elif field == 'ap':
+                    high = 100
 
-
-            # if field == 'odds':
-            #     neg_uncertainty = low
-            #     pos_uncertainty = 500
-            # elif field == 'ev':
-            #     neg_uncertainty = low
-            #     pos_uncertainty = 0.3
-            # elif field == 'dp':
-            #     neg_uncertainty = low
-            #     pos_uncertainty = 100
-
-            print('low: ' + str(low))
-            print('high: ' + str(high))
-            print('val: ' + str(prop[field]))
-            if low > float(prop[field]) or high < float(prop[field]):
-                print('out range')
+            prop_field_val = 0
+            if field == 'ap':
+                prop_field_val = int(prop['true prob']) - int(prop['dp'])
+            else:
+                prop_field_val = float(prop[field])
+            # print('low: ' + str(low))
+            # print('high: ' + str(high))
+            # print('val: ' + str(prop_field_val))
+            if low > prop_field_val or high < prop_field_val:
+                #print('out range')
                 in_range = False
                 break
-                
-            # if neg_uncertainty <= float(prop[field]) <= pos_uncertainty:
-            #     continue
-
-            # in_range = False
-            # break
             
 
         if in_range:       
-            print('in range') 
+            #print('in range') 
             props_in_range.append(prop)
 
-    print('props_in_range: ' + str(props_in_range))
+    #print('props_in_range: ' + str(props_in_range))
     return props_in_range
 
 # arbitrary uncertainty +/- 0.05???

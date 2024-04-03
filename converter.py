@@ -464,6 +464,7 @@ def convert_player_name_to_abbrevs(game_player, all_players_abbrevs, game_player
 def convert_irregular_player_name(player_name):
 
     player_name = re.sub('−|-',' ',player_name).lower()
+    # do we need to remove ' bc seems to work with it???
     player_name = re.sub('\.','',player_name)
 
     if player_name == 'nicolas claxton':
