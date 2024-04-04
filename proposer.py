@@ -61,7 +61,7 @@ all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 
 # === STATS OF INTEREST === 
 # put stats in order of website nav for faster nav without scrolling
-stats_of_interest = ['pts','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast','stl','blk','stl+blk']#, '3pm']
+stats_of_interest = ['pts','3pm','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast','stl','blk','stl+blk']#, '3pm']
 
 #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
 
@@ -160,6 +160,14 @@ ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', '
 if not test:
     ofs_players = reader.read_ofs_players(ofs_players)
 
+# === Max Props ===
+# ideal no. props to diversify to ensure min risk/volatility
+# 30 is good according to portfolio theory
+# try bt 10-30
+# change during run bc run again an hour before each game that day
+# so subtract num from prev run to get cur run max props
+# need to save in file BUT cant tell if props in run actually used
+max_props = 30
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -180,7 +188,8 @@ settings = {'find matchups': find_matchups,
             'test probs': test_probs,
             'prints on': prints_on, 
             'single conds': single_conds,
-            'seasons start days': all_seasons_start_days}
+            'seasons start days': all_seasons_start_days,
+            'max props': max_props}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -192,14 +201,18 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('por','cha'), ('lal','wsh'), ('det','atl'), ('okc','bos'), ('ind','bkn'), ('mem','mil'), ('tor','min'), ('orl','nop'), ('cle','phx')]#, ('nop','lal')
+game_teams = [('phi','mia'), ('sac','nyk'), ('atl','dal'), ('gsw','hou'), ('den','lac')]#, ('nop','lal')
+
 if test:
     # when we run with empty game teams, it will run for all teams
     # so all teams players gets filled???
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('lal','tor')]
+    game_teams = [('cle','phx')]
+
+if len(game_teams) == 0:
+    game_teams = reader.read_current_game_teams()
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -210,7 +223,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['lebron james'] # 'jacob gilyard', use for testing
+    players_names = ['kevin durant'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

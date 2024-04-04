@@ -233,7 +233,7 @@ def isolate_props_in_ranges(prop_dicts, fields, init_vals=[]):
 
 
         if in_range:       
-            print('in range') 
+            #print('in range') 
             props_in_range.append(prop)
 
     return props_in_range

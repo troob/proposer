@@ -1010,7 +1010,7 @@ def determine_game_stats(player_game_log, game_idx):
     stl_blk = stl + blk
 
     # make list to loop through so we can add all stats to dicts with 1 fcn
-    game_stats = [pts,reb,ast,pts_reb,pts_ast,reb_ast,pts_reb_ast,stl,blk,stl_blk,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_made,threes_attempts,three_rate,ftm,fta,ft_rate,fs,tos] 
+    game_stats = [pts,reb,ast,pts_reb,pts_ast,reb_ast,pts_reb_ast,stl,blk,stl_blk,threes_made,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_attempts,three_rate,ftm,fta,ft_rate,fs,tos] 
 
     return game_stats
 
@@ -2260,6 +2260,9 @@ def determine_player_team_by_game(player, game_key, player_teams):
 
 
 def determine_duplicate(prop, unique_props, strict=False):
+    # print('\n===Determine Duplicate===\n')
+    # print('prop: ' + str(prop))
+    # print('unique_props: ' + str(unique_props))
 
     duplicate = False
 
@@ -2267,21 +2270,31 @@ def determine_duplicate(prop, unique_props, strict=False):
         if prop['player'] == up['player']:
             # if combo stat then consider duplicate if any matching stat overlap
             stat_name = prop['stat']
-            if stat_name == up['stat']:
+            up_stat = up['stat']
+            # print('stat_name: ' + str(stat_name))
+            # print('up_stat: ' + str(up_stat))
+
+            if stat_name == up_stat:
                 duplicate = True
                 break
 
             if strict:
+                if re.search(stat_name, up_stat):
+                    duplicate = True
+                    break
                 if re.search('\\+', stat_name):
                     stat_names = stat_name.split('+')
                     for sn in stat_names:
-                        if re.search(sn, up['stat']):
+                        # print('sn: ' + str(sn))
+                        # print('up_stat: ' + str(up_stat))
+                        if re.search(sn, up_stat):
                             duplicate = True
                             break
 
             if duplicate:
                 break
 
+    #print('duplicate: ' + str(duplicate))
     return duplicate
 
 # given main prop and fields, find vals in those fields

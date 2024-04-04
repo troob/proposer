@@ -373,6 +373,10 @@ def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
 		print('stat_name: ' + stat_name)
+		# only 3pt made has diff format bc both 3pt made and attempted shown
+		log_stat_name = stat_name
+		if stat_name == '3pm':
+			log_stat_name = '3PT_SA'
 		prev_stat_vals = None
 		if re.search('\\+', stat_name):
 			prev_stat_vals = []
@@ -386,7 +390,7 @@ def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player
 
 				prev_stat_vals.append(prev_stat_val)
 		else:
-			prev_stat_vals = list(season_log_of_interest[stat_name.upper()].values())
+			prev_stat_vals = list(season_log_of_interest[log_stat_name.upper()].values())
 	
 		player_prev_stat_vals[stat_name] = prev_stat_vals
 
@@ -400,6 +404,10 @@ def read_player_last_stat_vals(season_log_of_interest, stats_of_interest):
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
+		# only 3pt made has diff format bc both 3pt made and attempted shown
+		log_stat_name = stat_name
+		if stat_name == '3pm':
+			log_stat_name = '3PT_SA'
 		prev_stat_val = None
 		if re.search('\\+', stat_name):
 			prev_stat_val = 0
@@ -407,7 +415,7 @@ def read_player_last_stat_vals(season_log_of_interest, stats_of_interest):
 			for sn in stat_names:
 				prev_stat_val += int(season_log_of_interest[sn.upper()]['0'])
 		else:
-			prev_stat_val = int(season_log_of_interest[stat_name.upper()]['0'])
+			prev_stat_val = int(season_log_of_interest[log_stat_name.upper()]['0'])
 		
 		prev_stat_vals[stat_name] = prev_stat_val
 
@@ -2042,19 +2050,19 @@ def read_dk_solo(driver, stats_of_interest):
 
 			# sportsbook-event-accordion__title
 			section_name = e.find_element('class name', 'sportsbook-event-accordion__title').get_attribute('innerHTML')
-			print("section_name: " + section_name)
+			#print("section_name: " + section_name)
 
 			# if combo or defense then section name is stat name
 			# bc all combos on same page
-			if re.search('stl|blk',section_name):
+			if re.search('Steals|Blocks',section_name):
 				# Steals + Blocks -> stl+blk
 				stat_name = re.sub('Steals', 'stl', section_name) # remove spaces to get keys
 				stat_name = re.sub('Blocks', 'blk', stat_name)
-				stat_name = re.sub(' ', '', stat_name).strip()
-				print("stat_name: " + stat_name)
+				stat_name = re.sub('\s|Alt', '', stat_name).strip()
+				#print("stat_name: " + stat_name)
 				if stat_name not in web_dict.keys():
 					web_dict[stat_name] = {}
-			elif re.search('\\+',section_name):
+			elif re.search('[^X]\\+',section_name):
 				stat_name = re.sub('\s|ALT\s|Alt\s', '', section_name).lower() # remove spaces to get keys
 				#print("stat_name: " + stat_name)
 				if stat_name not in web_dict.keys():
@@ -2082,7 +2090,7 @@ def read_dk_solo(driver, stats_of_interest):
 					# strip in case source typo added space
 					player_name = player_row.find_element('class name', 'sportsbook-row-name').get_attribute('innerHTML').strip().lower()
 					player_name = converter.convert_irregular_player_name(player_name)
-					print('player_name: ' + player_name)
+					#print('player_name: ' + player_name)
 
 					if player_name not in web_dict[stat_name].keys():
 						web_dict[stat_name][player_name] = {}
@@ -2128,7 +2136,7 @@ def read_dk_solo(driver, stats_of_interest):
 					#print("player_comp: " + player_comp.get_attribute('innerHTML'))
 
 					player_name = player_comp.find_element('class name', 'participants').get_attribute('innerHTML')
-					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|Steals|Blocks|O/U|\\+','',player_name).strip().lower()
+					player_name = re.sub('\sAlt\s|Points|Rebounds|Assists|Steals|Blocks|Threes|Three Pointers Made|O/U|\\+','',player_name).strip().lower()
 					player_name = converter.convert_irregular_player_name(player_name)
 					#print('player_name: ' + player_name)
 
@@ -6508,6 +6516,73 @@ def read_game_teams(read_season_year):
 	game_teams = [] # read todays schedule if cur yr
 
 	return game_teams
+
+def read_current_game_teams():
+
+	game_teams = [] # read todays schedule if cur yr
+
+	url = 'https://www.espn.com/nba/schedule'
+
+	# Table__Title
+	# get game dates from soup bc not in table data
+	soup = read_website(url)
+	if soup is not None:
+
+		dates = []
+		for date_div in soup.find_all('div', {'class': 'Table__Title'}): #.encode_contents()
+			
+			# Thursday, April 4, 2024
+			game_date_str = date_div.decode_contents()
+			print('game_date_str: ' + str(game_date_str))
+			#game_date = converter.convert_str_to_date(date_div.decode_contents().lower())
+			game_date = datetime.strptime(game_date_str, '%A, %B %d, %Y')
+			print('game_date: ' + str(game_date))
+			dates.append(game_date)
+
+		#print('dates: ' + str(dates))
+
+	
+	game_tables = read_web_data(url)
+
+	if game_tables is not None:
+		len_html_results = len(game_tables) # each element is a dataframe/table so we loop thru each table
+
+		todays_date = datetime.today()
+		# need to see if cur time past game in table
+		current_time = datetime.now.time() #.strftime("%H:%M") 
+
+		# maybe first or second table depending what time of day
+		# if page updated for new day
+		# so loop until find current date
+		for order in range(len_html_results):
+			print("order: " + str(order))
+
+			game_tables_df = game_tables[order]
+			print('game_tables: ' + str(game_tables_df))
+			print("no. columns: " + str(len(game_tables_df.columns.tolist())))
+
+			date = dates[order]
+			print('date: ' + str(date))
+			if date == todays_date:
+				for idx, row in game_tables_df.iterrows():
+
+					matchup = row['MATCHUP']
+
+					time = row['TIME']
+
+
+				break # after read todays games
+
+
+
+
+
+
+
+
+
+	return game_teams
+
 
 # https://www.espn.com/nba/injuries
 def read_ofs_players(ofs_players={}):

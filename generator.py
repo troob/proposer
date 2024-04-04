@@ -2245,7 +2245,7 @@ def generate_valid_top_ev_props(plus_ev_props):
 # add stat order field to dict temp to sort so it is best for user
 def generate_stat_order(props):
 
-    stat_orders = {'pts':1, 'reb':2, 'ast':3, 'pts+reb+ast':4, 'pts+reb':5, 'pts+ast':6, 'reb+ast':7} # dk. diff for diff platforms
+    stat_orders = {'pts':1, 'reb':2, 'ast':3, 'pts+reb+ast':4, 'pts+reb':5, 'pts+ast':6, 'reb+ast':7, '3pm':8, 'stl':9, 'blk':10, 'stl+blk':11} # dk. diff for diff platforms
 
     for prop in props:
         stat_name = prop['stat']
@@ -2497,6 +2497,8 @@ def generate_review_props(props):
 
 
 def generate_unique_props(prop_dicts, strict=False):
+    print('\n===Generate Unique Props===\n')
+    print('strict = ' + str(strict))
 
     unique_props = []
 
@@ -2526,7 +2528,7 @@ def generate_unique_props(prop_dicts, strict=False):
 
 # desired order: key = S Curry Pg, B Podziemski G, K Thompson Sg, J Kuminga Pf, K Looney F Starters 2024 Regular Prob
 # available_prop_dicts: key = 
-def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joint_sheet_name='Joints', rare_sheet_name='Rare', rare_prev_val_players={}, prints_on=False):
+def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joint_sheet_name='Joints', rare_sheet_name='Rare', rare_prev_val_players={}, prints_on=False, max_props=30):
     print('\n===Generate Prop Table Data===\n')
     print('Input: multi_prop_dicts before = [{player: james harden, ...}, ...')# = ' + str(available_prop_dicts))
     print('Input: desired_order = [] = ' + str(desired_order))
@@ -2824,8 +2826,8 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     sort_keys = ['dp', 'ev']
     dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
     # prefer only unique props bc taking highest dp and ev so no reason to take diff stat val
-    dp_prop_dicts = generate_unique_props(dp_prop_dicts, strict=True)
-    prop_tables.append(dp_prop_dicts)
+    udp_prop_dicts = generate_unique_props(dp_prop_dicts, strict=True)
+    prop_tables.append(udp_prop_dicts)
     sheet_names.append('DP')
 
     
@@ -2835,7 +2837,7 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     # loop thru each dp prop and if not yet same player-stat added to top dp then add new
     
     sort_keys = ['game', 'stat order']
-    dp_prop_dicts = generate_stat_order(dp_prop_dicts)
+    dp_prop_dicts = generate_stat_order(udp_prop_dicts)
     dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts[:30], sort_keys, reverse=False)
     dp_prop_dicts = remover.remove_stat_order(dp_prop_dicts)
     prop_tables.append(dp_prop_dicts)
@@ -2844,7 +2846,7 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
 
     # test strategy with only >100 odds to ensure double bet if win to cover loss
     # based on 1 day, works better bc ensures bets return more at same prob
-    ddp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, fields=['odds'], init_low=100)
+    ddp_prop_dicts = isolator.isolate_props_in_range(udp_prop_dicts, fields=['odds'], init_low=100)
     # separate ddp prop dicts with rare prevs in opposite direction for review
     rp_prop_data = isolator.separate_rare_prev_props(ddp_prop_dicts)
     ddp_prop_dicts = rp_prop_data[0]
@@ -2854,7 +2856,7 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
 
     sort_keys = ['game', 'stat order']
     ddp_prop_dicts = generate_stat_order(ddp_prop_dicts)
-    ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:30], sort_keys, reverse=False)
+    ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:max_props], sort_keys, reverse=False)
     ddp_prop_dicts = remover.remove_stat_order(ddp_prop_dicts)
     prop_tables.append(ddp_prop_dicts)
     sheet_names.append('DDP')
@@ -3340,18 +3342,18 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # if no odds val, then do not add to available dict
     # see which source/site has best deal/value
     for stat_dict in stat_dicts:
-        print('stat_dict: ' + str(stat_dict))
+        #print('stat_dict: ' + str(stat_dict))
         # see if stat available
         # could do same check for all and put 0 if na 
         # and then sort by val/odds or elim 0s
 
         stat_name = stat_dict['stat']
-        print('stat_name: ' + stat_name)
+        #print('stat_name: ' + stat_name)
 
         # need sign to tell which odds ratio to use o/u
         # ok_val = x+ or x-
         ok_val = str(stat_dict['val'])
-        print('ok_val: ' + str(ok_val))
+        #print('ok_val: ' + str(ok_val))
 
         # add val to dict
         # check single/odds odds first bc if available as both prefer single/solo
@@ -3579,7 +3581,7 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
     return available_prop_dicts#, available_multi_prop_dicts
 
-def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev):
+def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt):
     # add more fields for ref
     stat_val_probs_dict['game'] = game_num
     stat_val_probs_dict['prev'] = prev_val
@@ -3590,6 +3592,7 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, 
     stat_val_probs_dict['piap warn'] = piap_low_sample_sizes
     stat_val_probs_dict['gp warn'] = gp_low_sample_sizes
     stat_val_probs_dict['opp warn'] = opp_low_sample_sizes
+    stat_val_probs_dict['cnt'] = player_stat_cnt
     
 
     for cond_key, cond_val in player_current_conditions.items():
@@ -3714,7 +3717,7 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 # conditions prob = b biyombo c starter 2023 regular prob
 # need all_player_stat_dicts to get prev val
 # all_players_teams = {player:year:team:gp}
-def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_last_vals={}, all_player_stat_dicts={}, all_players_abbrevs={}, game_teams=[], rosters={}, rare_prev_val_players={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[], prints_on=False):
+def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_counts={}, all_player_stat_dicts={}, all_players_abbrevs={}, game_teams=[], rosters={}, rare_prev_val_players={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[], prints_on=False):
     print('\n===Generate All True Prob Dicts===\n')
     print('Setting: Current Year to get current team = ' + cur_yr)
     print('\nInput: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
@@ -3841,6 +3844,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 # default: no, options: rare to ultra rare over/under
                 rare_prev = generate_rare_prev_cond(rare_prev_val_players, stat_name, player)
 
+                player_stat_cnt = all_counts[player][stat_name]
+
                 # integrate overs and unders in same loop
                 #val_probs_dict: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
                 for val, val_probs_dict in stat_probs_dict.items():
@@ -3882,7 +3887,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #per_unit_prob = val_probs_dict[per_unit_conditions]
                         #per_unit_prob = per_unit_probs_dict[player][stat_name][val][conditions] #val_probs_dict[per_unit_conditions]
                         #print('prob: ' + str(prob))
-                        if prob is not None:
+                        if prob is not None and dp is not None:
                             stat_val_probs_dict[true_prob_key] = round_half_up(prob * 100)
                             #stat_val_probs_dict[ap_key] = round_half_up(ap * 100)
                             stat_val_probs_dict[dp_key] = round_half_up(dp * 100)
@@ -3922,7 +3927,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     # # for game in game_teams:
                     # #     if player_team
                     # stat_val_probs_dict['game'] = game_num
-                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev)
+                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
 
                     # we want per unit probs next to corresponding yr for comparison in table
                     # so add key above when looping thru conditions
@@ -3962,7 +3967,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                             #ap = val_probs_dict[ap_key]
                             dp = val_probs_dict[dp_key]
                             #print('over prob: ' + str(prob))
-                            if prob is not None:
+                            if prob is not None and dp is not None:
                                 stat_val_probs_dict[true_prob_key] = 100 - round_half_up(prob * 100)
                                 #stat_val_probs_dict[ap_key] = 100 - round_half_up(ap * 100)
                                 # ap = prob - dp
@@ -3988,7 +3993,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #             team_part_cond_key = team_part # eg. 'starters'
                         #         stat_val_probs_dict[team_part_cond_key] = team_part_players
                         # stat_val_probs_dict['game'] = game_num
-                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev)
+                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
 
                         # one row for each val which has all conditions
                         #print('stat_val_probs_dict: ' + str(stat_val_probs_dict))
@@ -5295,6 +5300,9 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
                     #print('val: ' + str(val))
                     true_prob = val_true_probs_dict['true prob']
                     #print('true_prob: ' + str(true_prob))
+                    if true_prob is None:
+                        continue
+
                     if true_prob < rare_prob:
                         #likely_val = lower_val
                         #rare_cat = ultra_rare_over_key
@@ -5631,11 +5639,12 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
                     if true_prob is not None:
                         all_prob = generate_condition_mean_prob('all', val_probs_dict, player_stat_dict, season_years, season_part, stat)
                         
-                        dp = converter.round_half_up(true_prob - all_prob, 2)
-                        if prints_on:
-                            print('true_prob: ' + str(true_prob))
-                            print('all_prob: ' + str(all_prob))
-                            print('dp: ' + str(dp))
+                        if all_prob is not None:
+                            dp = converter.round_half_up(true_prob - all_prob, 2)
+                            if prints_on:
+                                print('true_prob: ' + str(true_prob))
+                                print('all_prob: ' + str(all_prob))
+                                print('dp: ' + str(dp))
 
                     # all prob not needed bc dp shows diff/relative prob 
                     #val_probs_dict['ap'] = all_prob
@@ -5661,15 +5670,45 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
 # easiest to take avg and 
 # then see if stat val is in 12/52 (+/- 6/52) of {half range} = {avg}
 # so if avg pts=10, 10(6/52) = 15/13 = 1+2/13
-def generate_player_stat_counts(player, player_season_log, todays_date):
+def generate_player_stat_counts(player, player_season_log, stats_of_interest):
     print('\n===Generate Player Stat Counts: ' + player.title() + '===\n')
+    print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' +str(all_players_season_logs))
+    print('\nOutput: player_stat_counts = {stat:count, ...}, ...}\n')
 
     player_stat_counts = {}
 
     
     # loop thru each game before cur game, each stat val
     # and determine which range it is in
+    for stat_name, stat_vals in player_season_log.items():
+
+        if stat_name not in stats_of_interest:
+            continue
+
+        
+
+        count = 0
+
+        # no running avg if no games yet
+        running_avg = None
+        prev_stat_vals = []
+        for stat_val in stat_vals.values():
+            
+            # or running avg is None
+            if len(prev_stat_vals) == 0:
+                running_avg = stat_val
+
+            count_diff = running_avg * (3 / 25) # 6/52=3/25
+            if stat_val > running_avg + count_diff:
+                count += 1
+            elif stat_val < running_avg - count_diff:
+                count -= 1
+
+            prev_stat_vals.append(stat_val)
+            running_avg = np.mean(prev_stat_vals)
     
+
+        player_stat_counts[stat_name] = count
 
 
     # save the current count for each player 
@@ -5678,12 +5717,15 @@ def generate_player_stat_counts(player, player_season_log, todays_date):
     # so save file with date in name
         
 
-
+    print('player_stat_counts: ' + str(player_stat_counts))
     return player_stat_counts
 
 # count based on cur yr bc deck shuffled each yr at start
-def generate_all_counts(all_players_season_logs, cur_yr, todays_date):
+def generate_all_counts(all_players_season_logs, cur_yr, todays_date, stats_of_interest):
     print('\n===Generate All Counts===\n')
+    print('Settings: Current Year = ' + cur_yr)
+    print('\nInput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' +str(all_players_season_logs))
+    print('\nOutput: all_counts = {player: {stat:count, ...}, ...}\n')
 
     all_counts = {}
 
@@ -5694,7 +5736,7 @@ def generate_all_counts(all_players_season_logs, cur_yr, todays_date):
 
 
     for player, player_season_logs in all_players_season_logs.items():
-        print('\nPlayer: ' + player.title())
+        #print('\nPlayer: ' + player.title())
 
         if player in init_all_counts.keys():
             all_counts[player] = init_all_counts[player]
@@ -5702,7 +5744,7 @@ def generate_all_counts(all_players_season_logs, cur_yr, todays_date):
         elif cur_yr in player_season_logs.keys():
 
             player_cur_season_log = player_season_logs[cur_yr]
-            all_counts[player] = generate_player_stat_counts(player, player_cur_season_log, todays_date)
+            all_counts[player] = generate_player_stat_counts(player, player_cur_season_log, stats_of_interest)
 
 
     # if init_all_counts != all_counts:
@@ -6417,13 +6459,17 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                         valid_stat = True
                         if stat_name == 'pts' and player_stat_model_avg <= 3:
                             valid_stat = False
-                        elif stat_name == 'stl' or stat_name == 'blk':
-                            if player_stat_model_avg <= 0.5:
-                                valid_stat = False
-                        elif player_stat_model_avg <= 1:
+                        elif stat_name == 'ast' and player_stat_model_avg <= 1:
+                            valid_stat = False
+                        # noticed blocks go down to 0.1 BUT test if good ev???
+                        # elif stat_name == 'stl' or stat_name == 'blk' or stat_name == '3pm':
+                        #     if player_stat_model_avg <= 0.5:
+                        #         valid_stat = False
+                        elif player_stat_model_avg <= 0.5:
                             valid_stat = False
 
                         if not valid_stat:
+                            print('invalid stat avg')
                             # iso only those with avg<1 and see if valid picks on any platform
                             low_avg_model = (player_name, stat_name, player_stat_model_name, player_stat_model_avg)
                             low_avg_stats.append(low_avg_model)
@@ -6625,7 +6671,13 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                         player_stat_model_avg = player_stat_model['avg']
                         if stat_name == 'pts' and player_stat_model_avg <= 3:
                             valid_stat = False
-                        elif player_stat_model_avg <= 1:
+                        elif stat_name == 'ast' and player_stat_model_avg <= 1:
+                            valid_stat = False
+                        # noticed blocks go down to 0.1 BUT test if good ev???
+                        # elif stat_name == 'stl' or stat_name == 'blk' or stat_name == '3pm':
+                        #     if player_stat_model_avg <= 0.5:
+                        #         valid_stat = False
+                        elif player_stat_model_avg <= 0.5:
                             valid_stat = False
 
                         if not valid_stat:
@@ -8184,16 +8236,19 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
     # all_pts_dicts = {'all':{idx:val,..},..}
     #{ 'all':{}, 'home':{}, 'away':{}, ... }
+    # stats of interest
     all_pts_dicts = {'all':{}} # 'opp eg okc':{}, 'day of week eg tue':{}
     all_rebs_dicts = {'all':{}}
     all_asts_dicts = {'all':{}}
+    all_threes_made_dicts = {'all':{}}
+
     all_winning_scores_dicts = {'all':{}}
     all_losing_scores_dicts = {'all':{}}
     all_minutes_dicts = {'all':{}}
     all_fgms_dicts = {'all':{}}
     all_fgas_dicts = {'all':{}}
     all_fg_rates_dicts = {'all':{}}
-    all_threes_made_dicts = {'all':{}}
+    
     all_threes_attempts_dicts = {'all':{}}
     all_threes_rates_dicts = {'all':{}}
     all_ftms_dicts = {'all':{}}
@@ -8215,7 +8270,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
     all_blk_dicts = {'all':{}}
     all_stl_blk_dicts = {'all':{}}
 
-    all_stats_dicts = {'pts':all_pts_dicts, 'reb':all_rebs_dicts, 'ast':all_asts_dicts, 'pts+reb':all_pts_reb_dicts, 'pts+ast':all_pts_ast_dicts, 'reb+ast':all_reb_ast_dicts, 'pts+reb+ast':all_pts_reb_ast_dicts, 'stl':all_stl_dicts, 'blk':all_blk_dicts, 'stl+blk':all_stl_blk_dicts, 'w score':all_winning_scores_dicts, 'l score':all_losing_scores_dicts, 'min':all_minutes_dicts, 'fgm':all_fgms_dicts, 'fga':all_fgas_dicts, 'fg%':all_fg_rates_dicts, '3pm':all_threes_made_dicts, '3pa':all_threes_attempts_dicts, '3p%':all_threes_rates_dicts, 'ftm':all_ftms_dicts, 'fta':all_ftas_dicts, 'ft%':all_ft_rates_dicts, 'pf':all_fs_dicts, 'to':all_tos_dicts} # loop through to add all new stats with 1 fcn
+    all_stats_dicts = {'pts':all_pts_dicts, 'reb':all_rebs_dicts, 'ast':all_asts_dicts, 'pts+reb':all_pts_reb_dicts, 'pts+ast':all_pts_ast_dicts, 'reb+ast':all_reb_ast_dicts, 'pts+reb+ast':all_pts_reb_ast_dicts, 'stl':all_stl_dicts, 'blk':all_blk_dicts, 'stl+blk':all_stl_blk_dicts, '3pm':all_threes_made_dicts, 'w score':all_winning_scores_dicts, 'l score':all_losing_scores_dicts, 'min':all_minutes_dicts, 'fgm':all_fgms_dicts, 'fga':all_fgas_dicts, 'fg%':all_fg_rates_dicts, '3pa':all_threes_attempts_dicts, '3p%':all_threes_rates_dicts, 'ftm':all_ftms_dicts, 'fta':all_ftas_dicts, 'ft%':all_ft_rates_dicts, 'pf':all_fs_dicts, 'to':all_tos_dicts} # loop through to add all new stats with 1 fcn
 
     
 
@@ -8693,6 +8748,10 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                         # dont need prev playtime
                         if stat_name in stats_of_interest or re.search('\\+', stat_name):
                             #print('\n===Condition: Prev Val===\n')
+                            log_stat_name = stat_name
+                            # only 3pt made has diff format bc both 3pt made and attempted shown
+                            if stat_name == '3pm':
+                                log_stat_name = '3PT_SA'
                             #if game_idx != '0': # first game has no prev val, but idx goes from recent to distant so last idx is first game
                             #prev_game_idx = str(int(game_idx)+1)
                             #print('prev_game_idx: ' + str(prev_game_idx))
@@ -8707,7 +8766,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 for sn in stat_names:
                                     prev_stat_val += int(player_game_log.loc[str(prev_game_idx), sn.upper()])
                             else:
-                                prev_stat_val = int(player_game_log.loc[str(prev_game_idx), stat_name.upper()])
+                                prev_stat_val = int(player_game_log.loc[str(prev_game_idx), log_stat_name.upper()])
                             
                             # if prev_game_idx in stat_dict['all'].keys():
                             #     print('found prev game')
@@ -10400,7 +10459,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year)
         all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year)
 
-        #all_counts = generate_all_counts(all_players_season_logs, season_year, todays_date)
+        all_counts = generate_all_counts(all_players_season_logs, season_year, todays_date, stats_of_interest)
 
         # list all changed lineups since last run
         # init lineups != all lineups
@@ -10719,7 +10778,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # flatten nested dicts into one level and list them
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
     # add warnings to row in table
-    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_last_vals, all_player_stat_dicts, all_players_abbrevs, game_teams, teams_current_rosters, rare_prev_val_players, current_year_str, season_years, season_part, single_conds, stats_of_interest, prints_on)
+    # add counts to available props
+    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_counts, all_player_stat_dicts, all_players_abbrevs, game_teams, teams_current_rosters, rare_prev_val_players, current_year_str, season_years, season_part, single_conds, stats_of_interest, prints_on)
     desired_order = ['player', 'game', 'team', 'stat','val']
     #writer.list_dicts(all_stat_prob_dicts, desired_order)
 
@@ -10746,7 +10806,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # add bet spread to available prop dicts, 
         # based on true prob, dp, odds, ev, ...???
         available_prop_dicts = generate_all_bet_spreads(available_prop_dicts)
-        desired_order.extend(['odds','ev','site','bet']) # is there another way to ensure odds comes after true prob
+        desired_order.extend(['odds','ev','cnt','site','bet']) # is there another way to ensure odds comes after true prob
 
     #desired_order = ['player', 'team', 'stat','ok val','ok val prob','odds','ok val post prob', 'ok val min margin', 'ok val post min margin', 'ok val mean margin', 'ok val post mean margin']
     
@@ -10829,7 +10889,9 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     
     joint_sheet_name = 'Joints'
     rare_sheet_name = 'Rare'
-    prop_table_data = generate_prop_table_data(available_prop_dicts, available_multi_prop_dicts, desired_order, joint_sheet_name, rare_sheet_name, rare_prev_val_players, prints_on)
+    if 'max props' in settings.keys():
+        max_props = settings['max props']
+    prop_table_data = generate_prop_table_data(available_prop_dicts, available_multi_prop_dicts, desired_order, joint_sheet_name, rare_sheet_name, rare_prev_val_players, prints_on, max_props)
 
     prop_tables = prop_table_data[0]
     sheet_names = prop_table_data[1]
