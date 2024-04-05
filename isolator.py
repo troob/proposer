@@ -161,6 +161,31 @@ def isolate_high_prob_props(prop_dicts):
     print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
+def separate_opposite_count_props(prop_dicts):
+    print('\n===Separate Opposite Count Props===\n')
+
+    common_prev_props = []
+    opp_cnt_props = []
+
+    for prop_dict in prop_dicts:
+
+        # get sign/direction
+        stat_val = prop_dict['val']
+        # get rare field
+        count = prop_dict['cnt']
+
+        # if count over and recommends taking over, 
+        # AVOID bc less likely to continue above/below avg
+        if count > 0 and stat_val[-1] == '+':
+            opp_cnt_props.append(prop_dict)
+        elif count < 0 and stat_val[-1] == '-':
+            opp_cnt_props.append(prop_dict)
+        else:
+            common_prev_props.append(prop_dict)
+
+
+    return common_prev_props, opp_cnt_props
+
 def separate_rare_prev_props(prop_dicts):
     print('\n===Separate Rare Prev Props===\n')
 
@@ -330,13 +355,14 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
         for field in fields:
             #print('\nField: ' + field)
 
+            # inclusive vals range
             if init_low == None:
                 if field == 'odds':
                     low = -1000
                 elif field == 'ev':
                     low = 0 # if 0ev only take if ultra rare prev or huge unaccounted for factor
                 elif field == 'dp':
-                    low = -1
+                    low = 0
                 elif field == 'true prob':
                     low = 25
                 elif field == 'ap':

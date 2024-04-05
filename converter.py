@@ -302,6 +302,51 @@ def convert_box_score_to_dict(box_score_df):
     #print('box_score_dict: ' + str(box_score_dict))
     return box_score_dict
 
+def convert_team_loc_to_abbrev(team_loc):
+    #print('\n===Convert Team Location to Abbrev: ' + team_name + '===\n')
+    
+    abbrev = ''
+
+    team_locs = {'atlanta':'atl', 
+                    'boston':'bos', 
+                    'brooklyn':'bkn', 
+                    'charlotte':'cha', 
+                    'chicago':'chi',
+                    'cleveland':'cle',
+                    'dallas':'dal',
+                    'denver':'den',
+                    'detroit':'det',
+                    'golden state':'gsw',
+                    'houston':'hou',
+                    'indiana':'ind',
+                    'la':'lac',
+                    'los angeles':'lal',
+                    'memphis':'mem',
+                    'miami':'mia',
+                    'milwaukee':'mil',
+                    'minnesota':'min',
+                    'new orleans':'nop',
+                    'new york':'nyk',
+                    'oklahoma city':'okc',
+                    'orlando':'orl',
+                    'philadelphia':'phi',
+                    'phoenix':'phx',
+                    'portland':'por',
+                    'sacramento':'sac',
+                    'san antonio':'sas',
+                    'toronto':'tor',
+                    'utah':'uta',
+                    'washington':'wsh'} # could get from fantasy pros table but simpler to make once bc only 30 immutable vals
+
+    # hard fail so we can correct name
+    #if team_name in team_abbrevs.keys():
+    abbrev = team_locs[team_loc]
+    # else:
+    #     print('Warning: Unknown team name! ' + team_name)
+
+    #print('abbrev: ' + abbrev)
+    return abbrev
+
 def convert_team_name_to_abbrev(team_name):
     #print('\n===Convert Team Name to Abbrev: ' + team_name + '===\n')
     

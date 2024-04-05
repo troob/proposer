@@ -167,7 +167,7 @@ if not test:
 # change during run bc run again an hour before each game that day
 # so subtract num from prev run to get cur run max props
 # need to save in file BUT cant tell if props in run actually used
-max_props = 30
+max_props = 12
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -201,7 +201,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('phi','mia'), ('sac','nyk'), ('atl','dal'), ('gsw','hou'), ('den','lac')]#, ('nop','lal')
+game_teams = []#, ('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams
@@ -209,7 +209,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('cle','phx')]
+    game_teams = [('phi','mia')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams()
@@ -223,7 +223,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['kevin durant'] # 'jacob gilyard', use for testing
+    players_names = ['terry rozier'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

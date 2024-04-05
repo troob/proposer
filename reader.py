@@ -381,10 +381,12 @@ def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player
 		if re.search('\\+', stat_name):
 			prev_stat_vals = []
 			stat_names = stat_name.split('+')
-			prev_stat_val = 0
+			
 			# take first stat to get length
 			stat_vals = list(season_log_of_interest['PTS'].values())
 			for val_idx in range(len(stat_vals)):
+				# reset prev stat val for each game bc adding all stats in single game
+				prev_stat_val = 0
 				for sn in stat_names:
 					prev_stat_val += int(season_log_of_interest[sn.upper()][str(val_idx)])
 
@@ -5615,7 +5617,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, player_e
 def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024, game_teams=[], rosters={}, all_seasons_start_days={}):
 	print('\n===Read All Players Season Logs===\n')
 	print('Settings: read x seasons prev, init year of interest')
-	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]' + str(players_names))
+	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')# + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('Input: all_players_teams = {player:{year:{team:{gp:gp, min:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
 	print('\nOutput: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...\n')
@@ -5948,7 +5950,7 @@ def read_all_players_teams(players_names, all_players_espn_ids, rosters, cur_yr,
 	if not init_all_players_teams == all_players_teams:
 		writer.write_json_to_file(all_players_teams, all_players_teams_file)
 
-	print("players_names: " + str(players_names))
+	#print("players_names: " + str(players_names))
 	# all_players_teams = {player:{year:{team:gp,...},...}}
 	#print("all_players_teams: " + str(all_players_teams))
 	return all_players_teams
@@ -6172,7 +6174,7 @@ def read_player_espn_id(init_player_name, init_all_players_espn_ids={}, player_t
 # pass all bc we need teammates and opponents
 def read_all_players_espn_ids(players_names, player_of_interest=''):
 	print('\n===Read All Players ESPN IDs===\n')
-	print('Input: players_names: [p1, ...] = [jalen brunson, ...] = ' + str(players_names))
+	print('Input: players_names: [p1, ...] = [jalen brunson, ...]')# = ' + str(players_names))
 	print('\nOutput: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}\n')
 	
 	all_players_espn_ids = {}
@@ -6518,6 +6520,7 @@ def read_game_teams(read_season_year):
 	return game_teams
 
 def read_current_game_teams():
+	print('\n===Read Current Games Teams===\n')
 
 	game_teams = [] # read todays schedule if cur yr
 
@@ -6532,10 +6535,14 @@ def read_current_game_teams():
 		for date_div in soup.find_all('div', {'class': 'Table__Title'}): #.encode_contents()
 			
 			# Thursday, April 4, 2024
-			game_date_str = date_div.decode_contents()
-			print('game_date_str: ' + str(game_date_str))
+			game_date_str = date_div.decode_contents().strip()
+			# remove dow bc strptime fails
+			#game_date_str = re.sub('[a-zA-Z]+,\s','',game_date_str)
+			print('game_date_str: \'' + game_date_str + '\'')
 			#game_date = converter.convert_str_to_date(date_div.decode_contents().lower())
-			game_date = datetime.strptime(game_date_str, '%A, %B %d, %Y')
+			# game_date_str = 'Thursday, April 4, 2024'
+			# print('game_date_str: \'' + game_date_str + '\'')
+			game_date = datetime.strptime(game_date_str, '%A, %B %d, %Y').date()
 			print('game_date: ' + str(game_date))
 			dates.append(game_date)
 
@@ -6547,9 +6554,12 @@ def read_current_game_teams():
 	if game_tables is not None:
 		len_html_results = len(game_tables) # each element is a dataframe/table so we loop thru each table
 
-		todays_date = datetime.today()
+		# todays_date: 2024-04-04 21:32:29.423709
+		todays_date = datetime.today().date()
+		print("todays_date: " + str(todays_date))
 		# need to see if cur time past game in table
-		current_time = datetime.now.time() #.strftime("%H:%M") 
+		current_time = datetime.today().time()
+		print("current_time: " + str(current_time))
 
 		# maybe first or second table depending what time of day
 		# if page updated for new day
@@ -6563,12 +6573,33 @@ def read_current_game_teams():
 
 			date = dates[order]
 			print('date: ' + str(date))
+			# simplest case running code on day of game
+			# BUT allow for option to input date of interest
 			if date == todays_date:
+				print('found todays schedule')
 				for idx, row in game_tables_df.iterrows():
 
-					matchup = row['MATCHUP']
+					
+					# time: 10:00 PM
+					game_time_str = row['TIME']
 
-					time = row['TIME']
+					if game_time_str == 'LIVE':
+						continue
+
+					game_time = datetime.strptime(game_time_str, '%I:%M %p').time()
+					print('game_time: ' + str(game_time))
+
+					if current_time < game_time:
+						away_team = row['MATCHUP'].lower()
+						home_team = re.sub('@ ', '', row['MATCHUP.1']).lower()
+						print('away_team: ' + str(away_team))
+						print('home_team: ' + str(home_team))
+						# convert game_teams: [('Denver', '@ LA')]
+						# remove last word from full team name
+						away_team = converter.convert_team_loc_to_abbrev(away_team)
+						home_team = converter.convert_team_loc_to_abbrev(home_team)
+						game = (away_team, home_team)
+						game_teams.append(game)
 
 
 				break # after read todays games
@@ -6580,7 +6611,7 @@ def read_current_game_teams():
 
 
 
-
+	print("game_teams: " + str(game_teams))
 	return game_teams
 
 
