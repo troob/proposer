@@ -3269,7 +3269,7 @@ def generate_bet_spread(prop_dict):
     # for every 2 count, 
     # multiply by 2 OR add another bet???
     # only need to assume cnt direction bc bet=0 if cnt in opp direc
-    cnt_factor = abs(prop_dict['cnt'] / 2)
+    cnt_factor = abs(prop_dict['cnt'] / 4)
     bet_spread += bet_spread * cnt_factor
 
     # divide by desired investment scale
@@ -5257,9 +5257,11 @@ def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, p
 # triple rare/ultra rare
 # 3/4 rare
 # after 4 prev games we lose value of pattern???
-def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_teams, all_players_teams, cur_yr, rosters):#, all_players_season_logs):
+def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_teams, all_players_teams, all_players_stat_dicts, all_players_abbrevs, cur_yr, season_part, rosters, prints_on):#, all_players_season_logs):
     print('\n===Generate Rare Prev Val Players===\n')
-    print('Input: all_true_probs_dict = {player: {stat: {val: {true prob:prob, condition1:prob1, ... = {\'nikola jokic\': {\'pts\': {1: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ..., \'true prob\': 1.0}')
+    print('Setting: Current Year = ' + cur_yr)
+    print('Setting: Season Part = ' + season_part)
+    print('\nInput: all_true_probs_dict = {player: {stat: {val: {true prob:prob, condition1:prob1, ... = {\'nikola jokic\': {\'pts\': {1: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ..., \'true prob\': 1.0}')
     print('Input: all_prev_vals = {player:{stat name:[prev val 1,...}, ... = {jalen brunson:{pts:[20,23,...},...')
     print('\nOutput: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...}\n')
 
@@ -5293,10 +5295,19 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
 
         player_teams = all_players_teams[player]
         player_team = determiner.determine_player_current_team(player, player_teams, cur_yr, rosters)
+        opp_team = determiner.determine_opponent_team(player, player_team, game_teams)
         game_num = determiner.determine_game_num(game_teams, player_team)
 
         for stat, stat_true_probs_dict in player_true_probs_dict.items():
             #print('\nstat: ' + stat.upper())
+
+            # skip combos bc shown by single stats???
+            # No actually gives clearer picture to know if other stat combos rare 
+            # bc not always all single stats rare but combo rare
+            # if re.search('\\+', stat):
+            #     continue
+
+            
 
             # if prev val < likely val, then rare prev val
             prev_stat_vals = player_prev_vals[stat]
@@ -5400,11 +5411,12 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
                                 rare = True
 
                         if rare:
-                            total_prob = true_prob
-                            if num_rare != '3/4':
-                                total_prob = total_prob ** num_rare
-                            total_prob = round_half_up(total_prob * 100, 2)
-                            true_prob *= 100
+                            total_prob = 0
+                            if true_prob is not None:
+                                if num_rare != '3/4':
+                                    total_prob = total_prob ** num_rare
+                                total_prob = round_half_up(total_prob * 100, 2)
+                                true_prob *= 100
                             rare_prev_val = (game_num, player_abbrev, stat.upper(), likely_under, prev_stat_val, num_rare, true_prob, total_prob, player) #player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
                             # if over_key not in rare_prev_val_players.keys():
                             #     rare_prev_val_players[over_key] = []
@@ -5413,6 +5425,37 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
                         
                         break
                 #print('likely_under: ' + str(likely_under))
+
+
+            # if stat not considered rare by prob
+            # check if rare by low sample size
+            # add to base rare cond level bc ~ that level?
+            # to tell if o/u check if prev val > than val before that
+            # 99% right but sometimes multiple rares in a row so could be lower than prev but still rare over
+            # better to check compare to avg
+            # could get avg from probs dict vals already passed here as param
+            # prev_val_range = determiner.determine_stat_range(prev_stat_val, stat)
+            # prev_val_cond = prev_val_range + ' prev'
+            # cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':season_part}
+            # #print('cur_conds: ' + str(cur_conds))
+            # player_stat_dict = all_players_stat_dicts[player]
+            # prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
+            # #if prev_stat_low_sample_size != '':
+            # if prev_stat_sample_size < 5:
+            #     stat_avg = converter.round_half_up(len(stat_true_probs_dict.keys()) / 2)
+            #     val_true_probs_dict = stat_true_probs_dict[stat_avg]
+            #     true_prob = val_true_probs_dict['true prob']
+            #     total_prob = true_prob
+            #     # if num_rare != '3/4':
+            #     #     total_prob = total_prob ** num_rare
+            #     total_prob = round_half_up(total_prob * 100, 2)
+            #     true_prob *= 100
+            #     if prev_stat_val > stat_avg:
+            #         rare_prev_val = (game_num, player_abbrev, stat.upper(), stat_avg, prev_stat_val, num_rare, true_prob, total_prob, player)
+            #         rare_prev_val_players['rare over'].append(rare_prev_val)
+            #     else: # under
+            #         rare_prev_val = (game_num, player_abbrev, stat.upper(), stat_avg, prev_stat_val, num_rare, true_prob, total_prob, player)
+            #         rare_prev_val_players['rare under'].append(rare_prev_val)
 
 
             
@@ -5693,11 +5736,12 @@ def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all
 # easiest to take avg and 
 # then see if stat val is in 12/52 (+/- 6/52) of {half range} = {avg}
 # so if avg pts=10, 10(6/52) = 15/13 = 1+2/13
-def generate_player_stat_counts(player, player_season_log, stats_of_interest):
-    print('\n===Generate Player Stat Counts: ' + player.title() + '===\n')
-    print('Setting: stats_of_interest = ' + str(stats_of_interest))
-    print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_season_log))
-    print('\nOutput: player_stat_counts = {stat:count, ...}, ...}\n')
+def generate_player_stat_counts(player, player_season_log, stats_of_interest, prints_on):
+    if prints_on:
+        print('\n===Generate Player Stat Counts: ' + player.title() + '===\n')
+        print('Setting: stats_of_interest = ' + str(stats_of_interest))
+        print('\nInput: player_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')# = ' + str(player_season_log))
+        print('\nOutput: player_stat_counts = {stat:count, ...}, ...}\n')
 
     player_stat_counts = {}
 
@@ -5712,7 +5756,6 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
     #         continue
 
     for stat_name in stats_of_interest:
-        print('\nStat_name: ' + stat_name)
         
         # if 3pm, stat log name = 3pt_sa
         # if combo+, add stat vals in combo
@@ -5740,7 +5783,10 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
         
         # given recent to distant but count starts from start
         all_prev_stat_vals = list(reversed(all_prev_stat_vals))
-        print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
+        
+        if prints_on:
+            print('\nStat_name: ' + stat_name)
+            print('all_prev_stat_vals: ' + str(all_prev_stat_vals))
 
         # no running avg if no games yet
         # if prev yr available use that for init run avg???
@@ -5749,8 +5795,9 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
         prev_stat_vals = []
         zero_cnt = 0
         for stat_val in all_prev_stat_vals:
-            print('\nStat_val: ' + str(stat_val))
-            print('prev_stat_vals: ' + str(prev_stat_vals))
+            if prints_on:
+                print('\nStat_val: ' + str(stat_val))
+                print('prev_stat_vals: ' + str(prev_stat_vals))
             
             # or running avg is None
             # if len(prev_stat_vals) == 0:
@@ -5764,7 +5811,7 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
                     running_avg = np.mean(prev_stat_vals[start_idx:])
                 else:
                     running_avg = np.mean(prev_stat_vals)
-                print('running_avg: ' + str(running_avg))
+                
 
                 # min 1 count diff?
                 count_diff = 1
@@ -5774,14 +5821,18 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
                     # running avg is half the deck so multiply by 2
                     # round up always to ensure count only changes when val diff than avg
                     count_diff = math.ceil(running_avg * (6 / 25)) # 6/52=3/25 ->*2=6/25
-                print('count_diff: ' + str(count_diff))
+                
                 over_line = converter.round_half_up(running_avg + count_diff)
                 # if under line is 0 cant go below it
                 # BUT also dont want count to go down if val=0 if that is avg
                 # if underline below 0 then shift over line higher by offset
                 under_line = converter.round_half_up(running_avg - count_diff)
-                print('init over_line: ' + str(over_line))
-                print('init under_line: ' + str(under_line))
+                
+                if prints_on:
+                    print('running_avg: ' + str(running_avg))
+                    print('count_diff: ' + str(count_diff))
+                    print('init over_line: ' + str(over_line))
+                    print('init under_line: ' + str(under_line))
                 # still count down if 3 zeros in a row if underline=0
                 # if avg closer to 0 than 1 then count not changed by 0s unless undeniable no. 0s in a row
                 if under_line <= 0:
@@ -5791,7 +5842,8 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
                     # if under line < 0, keep 0 count and lower count every 3 in a row? 0s
                     if stat_val == 0:
                         zero_cnt += 1
-                        print('zero_cnt: ' + str(zero_cnt))
+                        if prints_on:
+                            print('zero_cnt: ' + str(zero_cnt))
                         if zero_cnt == 3 and running_avg >= 0.5:
                             count -= 1
                             zero_cnt = 0 # reset
@@ -5800,21 +5852,25 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
                             zero_cnt = 0 # reset
                     else:
                         zero_cnt = 0 # reset if need to be in a row
-                print('over_line: ' + str(over_line))
-                print('under_line: ' + str(under_line))
+                if prints_on:
+                    print('over_line: ' + str(over_line))
+                    print('under_line: ' + str(under_line))
                 if stat_val > over_line:
-                    print('over line')
+                    if prints_on:
+                        print('over line')
                     count += 1
                 elif stat_val < under_line:
-                    print('under line')
+                    if prints_on:
+                        print('under line')
                     count -= 1
-                print('count: ' + str(count))
+                if prints_on:
+                    print('count: ' + str(count))
 
             prev_stat_vals.append(stat_val)
             
     
-
-        print('count: ' + str(count))
+        if prints_on:
+            print('count: ' + str(count))
         player_stat_counts[stat_name] = count
 
 
@@ -5823,12 +5879,12 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest):
     # bc it only changes after new game
     # so save file with date in name
         
-
-    print('player_stat_counts: ' + str(player_stat_counts))
+    if prints_on:
+        print('player_stat_counts: ' + str(player_stat_counts))
     return player_stat_counts
 
 # count based on cur yr bc deck shuffled each yr at start
-def generate_all_counts(all_players_season_logs, cur_yr, season_part, todays_date, stats_of_interest):
+def generate_all_counts(all_players_season_logs, cur_yr, season_part, todays_date, stats_of_interest, prints_on):
     print('\n===Generate All Counts===\n')
     print('Settings: Current Year = ' + str(cur_yr))
     print('Settings: Season Part = ' + str(season_part))
@@ -5854,7 +5910,7 @@ def generate_all_counts(all_players_season_logs, cur_yr, season_part, todays_dat
 
             player_cur_season_log = pd.DataFrame(player_season_logs[cur_yr])
             player_cur_part_log = determiner.determine_season_part_games(player_cur_season_log, season_part).to_dict()
-            all_counts[player] = generate_player_stat_counts(player, player_cur_part_log, stats_of_interest)
+            all_counts[player] = generate_player_stat_counts(player, player_cur_part_log, stats_of_interest, prints_on)
 
 
     # if init_all_counts != all_counts:
@@ -10569,7 +10625,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year)
         all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year)
 
-        all_counts = generate_all_counts(all_players_season_logs, current_year_str, season_part, todays_date, stats_of_interest)
+        all_counts = generate_all_counts(all_players_season_logs, current_year_str, season_part, todays_date, stats_of_interest, prints_on)
 
         # list all changed lineups since last run
         # init lineups != all lineups
@@ -10882,7 +10938,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # we can tell rare prev val
     # by taking prev val w/ <20% chance
     # and then add special class for 2 rare prev vals in a row
-    rare_prev_val_players = generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_teams, all_players_teams, current_year_str, teams_current_rosters)
+    rare_prev_val_players = generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_teams, all_players_teams, all_player_stat_dicts, all_players_abbrevs, current_year_str, season_part, teams_current_rosters, prints_on)
 
 
     # flatten nested dicts into one level and list them

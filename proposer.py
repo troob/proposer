@@ -129,7 +129,7 @@ read_new_rosters = False
 test = False
 
 # run dist probs with prints/comments
-prints_on = False
+prints_on = True
 if test:
     prints_on = True
 
@@ -167,7 +167,7 @@ if not test:
 # change during run bc run again an hour before each game that day
 # so subtract num from prev run to get cur run max props
 # need to save in file BUT cant tell if props in run actually used
-max_props = 12
+max_props = 30
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -201,7 +201,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = []#, ('nop','lal')
+game_teams = [('lac','uta')]#, ('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams

@@ -6,7 +6,7 @@ from bs4 import BeautifulSoup # read html from webpage
 
 import csv
 
-from datetime import datetime # get current year so we can get current teams
+from datetime import datetime, timedelta # get current year so we can get current teams
 
 import copy # deepcopy game logs json so we can add to it before writing to file without losing data
 import json # we need projected lines table to be json so we can refer to player when analyzing stats
@@ -372,7 +372,7 @@ def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
-		print('stat_name: ' + stat_name)
+		#print('stat_name: ' + stat_name)
 		# only 3pt made has diff format bc both 3pt made and attempted shown
 		log_stat_name = stat_name
 		if stat_name == '3pm':
@@ -3403,6 +3403,152 @@ def read_players_from_rosters(rosters, game_teams=[]):
 
 
 
+def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):#, init_all_lineups):
+	print('\n===Read All Likely Lineups===\n')
+	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
+	print('\nOutput: all_likely_lineups = {\'cle\': [{\'starters\': [\'donovan mitchell\', ...],...}, ...], ...\n')
+	#print('all_teams_players: ' + str(all_teams_players))
+
+	# could add 'stars' as condition as well as level above starters
+	all_likely_lineups = {}#{'den':{'starters':['jamal murray', 'nikola jokic', 'aaron gordon', 'michael porter jr', 'kentavious caldwell pope'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}, 'mia':{'starters':['tyler herro', 'jimmy butler', 'bam adebayo', 'caleb martin', 'kyle lowry'],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}}
+
+	# read all lineups from source website
+	# do we need to save local? yes and make setting to force new lineups
+	url = 'https://www.rotowire.com/basketball/nba-lineups.php'
+	soup = read_website(url)
+
+	#init_lineups = []
+	#lineups_file = 'data/all lineups.json'
+	# init_lineups = read_json(lineups_file)
+
+	starters_key = 'starters'
+	bench_key = 'bench'
+	out_key = 'out'
+	probable_key = 'probable'
+	question_key = 'question'
+	doubt_key = 'doubt'
+	#in_key = 'in'
+	dnp_key = 'dnp'
+
+	if soup is not None:
+		#print('soup: ' + str(soup))
+
+		for lineup in soup.find_all('div', {'class': 'lineup'}):
+			#print('lineup: ' + str(lineup))
+
+			lineup_classes = lineup['class']
+			#print('lineup_classes: ' + str(lineup_classes))
+
+			# if tools section, reached end
+			# lineup: <div class="lineup is-nba is-tools">
+			if 'is-tools' in lineup_classes:
+				break
+
+			lineup_teams = []
+			for lineup_team in lineup.find_all('div', {'class': 'lineup__abbr'}):
+				#print('lineup_team: ' + str(lineup_team))
+				team_abbrev = converter.convert_irregular_team_abbrev(lineup_team.decode_contents())#str(list(lineup_team.descendants)[0])
+				#print('team_abbrev: ' + str(team_abbrev))
+				lineup_teams.append(team_abbrev)
+			#print('lineup_teams: ' + str(lineup_teams))
+
+			lineup_statuses = []
+			for lineup_status in lineup.find_all('li', {'class': 'lineup__status'}):
+				#print('lineup_status: ' + str(lineup_status))
+				status_text = 'expected'#lineup_status.decode_contents()#str(list(lineup_team.descendants)[0])
+				if re.search('confirmed',str(lineup_status)):
+					status_text = 'confirmed'
+				#print('status_text: ' + str(status_text))
+				lineup_statuses.append(status_text)
+			#print('lineup_statuses: ' + str(lineup_statuses))
+
+			# 1 for each team, so 2 per list
+			lineups_lists = lineup.find_all('ul', {'class': 'lineup__list'})
+			for team_idx in range(len(lineups_lists)):
+				lineup_list = lineups_lists[team_idx]
+				#print('lineup_list: ' + str(lineup_list))
+
+				lineup_team = lineup_teams[team_idx]
+				#print('lineup_team: ' + str(lineup_team))
+				# if team not in rosters for todays games, 
+				# then we do not need to get the current lineup
+				# likely bc the game already started but there are other games today
+				# read all lineups not just those of interest, 
+				# bc used to compare prev lineups used to get game models if updated
+				if lineup_team in rosters.keys():
+					# for each team on page,
+					# list all possible likely lineups based on player status tags
+					all_likely_lineups[lineup_team] = []
+					likely_lineup = {starters_key:[],'bench':[],'out':[],'probable':[],'question':[],'doubt':[]}
+
+					starters = []
+					out = []
+					probable = []
+					questionable = []
+					doubtful = []
+					dnp = []
+
+					# for each player,
+					# get player status to get all likely options for each player
+	 				# then use itertools to get all combos bt players
+					player_num = 0
+					for player_element in lineup_list.find_all('li', {'class': 'lineup__player'}):
+						#print('\nplayer_element: ' + str(player_element))
+						player_name = player_element.find('a').decode_contents()
+						#print('player_name: ' + str(player_name))
+						player_pos = player_element.find('div').decode_contents().lower()
+						#print('player_pos: ' + str(player_pos))
+						player_name = determiner.determine_player_full_name(player_name, lineup_team, all_players_teams, rosters, cur_yr=cur_yr, position=player_pos)
+						print('player_name: ' + str(player_name))
+						print('player_num: ' + str(player_num))
+
+						if player_name in all_players_teams.keys():
+							player_teams = all_players_teams[player_name]
+
+							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name):
+								
+								# list all likely health statuses based on current status tag
+								player_statuses = []
+
+								# if out
+								# title="Very Unlikely To Play"
+								if re.search('Very Unlikely',str(player_element)):
+									if lineup_team in player_teams[cur_yr].keys():
+										#print('out')
+										player_statuses = ['out'] # confirmed out tag
+									else:
+										#print('dnp')
+										player_statuses = ['dnp'] # confirmed dnp
+								# if doubtful
+								# title="Unlikely To Play"
+								elif re.search('Unlikely',str(player_element)):
+									#print('doubtful')
+									#doubtful.append(player_name)
+									# change doubt to out bc always ends up being out
+									# if not dnp player on past team but out due to recent trade
+									# then consider dnp not out bc has not played together yet
+									if lineup_team in player_teams[cur_yr].keys():
+										#print('out')
+										player_statuses = ['out'] # treat as confirmed out tag
+									else:
+										#print('dnp')
+										player_statuses = ['dnp'] # confirmed dnp
+								# if questionable
+								# title="Toss Up To Play"
+								elif re.search('Toss Up',str(player_element)):
+									#print('questionable')
+									player_statuses = ['out'] 
+									if player_num < 5:
+										player_statuses.append('starters')
+									else:
+										player_statuses.append('bench')
+	  
+
+
+
+	return all_likely_lineups
+
+
 # read lineups from internet
 # https://www.rotowire.com/basketball/nba-lineups.php
 # given starters from internet rotowire
@@ -3633,7 +3779,11 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 			# AND shows if teammate was in box score no longer on team so not on bench
 			#starters = lineup[starters_key]
 			#out = lineup[out_key]
-			lineup[out_key].extend(team_ofs_players)
+   			# sometimes player ofs and listed in out section so only add once
+			#lineup[out_key].extend(team_ofs_players)
+			for ofs_player in team_ofs_players:
+				if ofs_player not in lineup[out_key]:
+					lineup[out_key].append(ofs_player)
 			#doubtful = lineup[doubt_key]
 			# print('starters: ' + str(starters))
 			# print('out: ' + str(out))
@@ -6586,7 +6736,10 @@ def read_current_game_teams():
 					if game_time_str == 'LIVE':
 						continue
 
-					game_time = datetime.strptime(game_time_str, '%I:%M %p').time()
+					game_time = datetime.strptime(game_time_str, '%I:%M %p')
+					# add 10min to game time as standard
+					time_change = timedelta(minutes=10)
+					game_time = (game_time + time_change).time()
 					print('game_time: ' + str(game_time))
 
 					if current_time < game_time:
@@ -6616,23 +6769,48 @@ def read_current_game_teams():
 
 
 # https://www.espn.com/nba/injuries
-def read_ofs_players(ofs_players={}):
+def read_ofs_players(ofs_players={}, max_retries=3):
 	print('\n===Read OFS Players===\n')
 	print('ofs_players = {\'bkn\':[\'ben simmons\', ...\n')
 
 	injuries_url = 'https://www.espn.com/nba/injuries'
 
-	# get team names from soup bc not in table data
-	soup = read_website(injuries_url)
-	if soup is not None:
+	teams = []
 
-		teams = []
-		for team_span in soup.find_all('span', {'class': 'injuries__teamName'}): #.encode_contents()
-			
-			team = converter.convert_team_name_to_abbrev(team_span.decode_contents().lower())
-			teams.append(team)
+	# infinite retries? 
+ 	# no but 10 high number bc we need ofs players to proceed
+	# but what if actually 0 ofs players? then run 5 times to be sure without wasting time?
+	# also if fails makes sense to try again in an hour when site updated
+	retries = 0
+	while retries < max_retries:
+		# get team names from soup bc not in table data
+		soup = read_website(injuries_url)
+		if soup is not None:
 
-		#print('teams: ' + str(teams))
+			# if no team spans then try again maybe error
+			all_team_spans = soup.find_all('span', {'class': 'injuries__teamName'})
+			if len(all_team_spans) == 0:
+				retries += 1
+				continue
+
+			for team_span in all_team_spans: #.encode_contents()
+				
+				team = converter.convert_team_name_to_abbrev(team_span.decode_contents().lower())
+				teams.append(team)
+
+			#print('teams: ' + str(teams))
+
+		# default first or last???
+  		# put the way it should go first and backups after???
+		# in code usually special cases first and default last 
+  		# bc conditional statements fit better for special cases
+		# if len(teams) == 0: # try again
+		# 	retries += 1
+		# else:
+		# 	break
+
+	# if 0 ofs players after 5 retries maybe actually 0 ofs players??? super rare but possible
+	# to be sure need to replicate error causing 0 teams to tell diff bt actual 0 ofs players and blank page
 
 	# rare but could be no injuries so check order lines up
 	# no blank tables so if no inj then no table
