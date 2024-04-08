@@ -3402,7 +3402,10 @@ def read_players_from_rosters(rosters, game_teams=[]):
 
 
 
-
+# 1. get list of player statuses
+# 2. combine name status into unique strings
+# 3. get combos of all players statuses
+# 4. reformat into lineup with list of starters, bench, out
 def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):#, init_all_lineups):
 	print('\n===Read All Likely Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
@@ -3429,6 +3432,9 @@ def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_playe
 	doubt_key = 'doubt'
 	#in_key = 'in'
 	dnp_key = 'dnp'
+
+	# 1. get all players statuses
+	all_players_statuses = {}
 
 	if soup is not None:
 		#print('soup: ' + str(soup))
@@ -3543,6 +3549,8 @@ def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_playe
 									else:
 										player_statuses.append('bench')
 	  
+
+						all_players_statuses[player_name] = player_statuses
 
 
 
@@ -6669,7 +6677,7 @@ def read_game_teams(read_season_year):
 
 	return game_teams
 
-def read_current_game_teams():
+def read_current_game_teams(cutoff_time_str='11:00 pm'):
 	print('\n===Read Current Games Teams===\n')
 
 	game_teams = [] # read todays schedule if cur yr
@@ -6742,7 +6750,9 @@ def read_current_game_teams():
 					game_time = (game_time + time_change).time()
 					print('game_time: ' + str(game_time))
 
-					if current_time < game_time:
+					cutoff_time = datetime.strptime(cutoff_time_str, '%I:%M %p').time()
+
+					if current_time < game_time and cutoff_time > game_time:
 						away_team = row['MATCHUP'].lower()
 						home_team = re.sub('@ ', '', row['MATCHUP.1']).lower()
 						print('away_team: ' + str(away_team))
@@ -6800,14 +6810,15 @@ def read_ofs_players(ofs_players={}, max_retries=3):
 
 			#print('teams: ' + str(teams))
 
+		# sometimes error forbidden so no teams so use manual input or saved from prev day
 		# default first or last???
   		# put the way it should go first and backups after???
 		# in code usually special cases first and default last 
   		# bc conditional statements fit better for special cases
-		# if len(teams) == 0: # try again
-		# 	retries += 1
-		# else:
-		# 	break
+		if len(teams) == 0: # try again
+			retries += 1
+		else:
+			break
 
 	# if 0 ofs players after 5 retries maybe actually 0 ofs players??? super rare but possible
 	# to be sure need to replicate error causing 0 teams to tell diff bt actual 0 ofs players and blank page

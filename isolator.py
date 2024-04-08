@@ -161,6 +161,52 @@ def isolate_high_prob_props(prop_dicts):
     print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
+# former + national
+def separate_fn_props(prop_dicts):
+    print('\n===Separate Former+National Props===\n')
+
+    common_props = []
+    fn_props = []
+
+    for prop_dict in prop_dicts:
+
+        # get sign/direction
+        stat_val = prop_dict['val']
+        former = prop_dict['former']
+        coverage = prop_dict['coverage']
+
+        # if recommends under but against former team on national tv 
+        # expect more effort so higher stats so avoid under in this case
+        if stat_val[-1] == '-' and former == 'former' and coverage == 'national':
+            fn_props.append(prop_dict)
+        else:
+            common_props.append(prop_dict)
+
+
+    return common_props, fn_props
+
+# steals, blocks
+def separate_defense_props(prop_dicts):
+    print('\n===Separate Defense Props===\n')
+
+    offense_props = []
+    defense_props = []
+
+    for prop_dict in prop_dicts:
+
+        # get stat name
+        stat = prop_dict['stat']
+
+        # if count over and recommends taking over, 
+        # AVOID bc less likely to continue above/below avg
+        if re.search('stl|blk', stat):
+            defense_props.append(prop_dict)
+        else:
+            offense_props.append(prop_dict)
+
+
+    return offense_props, defense_props
+
 def separate_opposite_count_props(prop_dicts):
     print('\n===Separate Opposite Count Props===\n')
 

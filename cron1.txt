@@ -1,0 +1,1844 @@
+
+===Proposer===
+
+
+===Proposer===
+
+
+===Read OFS Players===
+
+ofs_players = {'bkn':['ben simmons', ...
+
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... <urlopen error [Errno 54] Connection reset by peer> https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... <urlopen error [Errno 54] Connection reset by peer> https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+
+===Proposer===
+
+
+===Proposer===
+
+
+===Read OFS Players===
+
+ofs_players = {'bkn':['ben simmons', ...
+
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 2/3... The read operation timed out
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... Remote end closed connection without response
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... <urlopen error [Errno 54] Connection reset by peer> https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... URLError error occurred. Retrying 1/3... <urlopen error [Errno 54] Connection reset by peer> https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... <urlopen error [Errno 8] nodename nor servname provided, or not known> https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... <urlopen error [Errno 8] nodename nor servname provided, or not known> https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... <urlopen error [Errno 51] Network is unreachable> https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... <urlopen error [Errno 8] nodename nor servname provided, or not known> https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 2/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 2/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+Exception error occurred. Retrying 1/3... The read operation timed out
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... <urlopen error [Errno 51] Network is unreachable> https://www.espn.com/nba/injuries
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1348, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1294, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1340, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1289, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1048, in _send_output
+    self.send(msg)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 986, in send
+    self.connect()
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1466, in connect
+    self.sock = self._context.wrap_socket(self.sock,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 517, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1108, in _create
+    self.do_handshake()
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1383, in do_handshake
+    self._sslobj.do_handshake()
+TimeoutError: _ssl.c:989: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/m/repos/proposer/reader.py", line 125, in read_website
+    page = urlopen(req, timeout=timeout) # response
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1351, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error _ssl.c:989: The handshake operation timed out>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/m/repos/proposer/proposer.py", line 161, in <module>
+    # dont waste time read from internet if not needed
+                      ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/m/repos/proposer/reader.py", line 6787, in read_ofs_players
+    soup = read_website(injuries_url)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/m/repos/proposer/reader.py", line 141, in read_website
+    print(f"Timeout error occurred. Retrying {retries}/{max_retries}...", e, e.getheaders(), e.gettext(), e.getcode())
+                                                                             ^^^^^^^^^^^^
+AttributeError: 'URLError' object has no attribute 'getheaders'
+HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 2/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+URLError error occurred. Retrying 3/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Maximum retries reached.
+URLError error occurred. Retrying 1/3... HTTP Error 403: Forbidden https://www.espn.com/nba/injuries
+Exception error occurred. Retrying 1/3... The read operation timed out
+Traceback (most recent call last):
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1348, in do_open
+    h.request(req.get_method(), req.selector, req.data, headers,
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1294, in request
+    self._send_request(method, url, body, headers, encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1340, in _send_request
+    self.endheaders(body, encode_chunked=encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1289, in endheaders
+    self._send_output(message_body, encode_chunked=encode_chunked)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1048, in _send_output
+    self.send(msg)
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 986, in send
+    self.connect()
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/http/client.py", line 1466, in connect
+    self.sock = self._context.wrap_socket(self.sock,
+                ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 517, in wrap_socket
+    return self.sslsocket_class._create(
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1108, in _create
+    self.do_handshake()
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/ssl.py", line 1383, in do_handshake
+    self._sslobj.do_handshake()
+TimeoutError: _ssl.c:989: The handshake operation timed out
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/m/repos/proposer/reader.py", line 125, in read_website
+    page = urlopen(req, timeout=timeout) # response
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 216, in urlopen
+    return opener.open(url, data, timeout)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 519, in open
+    response = self._open(req, data)
+               ^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 536, in _open
+    result = self._call_chain(self.handle_open, protocol, protocol +
+             ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 496, in _call_chain
+    result = func(*args)
+             ^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1391, in https_open
+    return self.do_open(http.client.HTTPSConnection, req,
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/opt/homebrew/Cellar/python@3.11/3.11.7_1/Frameworks/Python.framework/Versions/3.11/lib/python3.11/urllib/request.py", line 1351, in do_open
+    raise URLError(err)
+urllib.error.URLError: <urlopen error _ssl.c:989: The handshake operation timed out>
+
+During handling of the above exception, another exception occurred:
+
+Traceback (most recent call last):
+  File "/Users/m/repos/proposer/proposer.py", line 163, in <module>
+    # problem error forbidden reading page at 330am-5am???
+                  ^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/m/repos/proposer/reader.py", line 6787, in read_ofs_players
+    soup = read_website(injuries_url)
+           ^^^^^^^^^^^^^^^^^^^^^^^^^^
+  File "/Users/m/repos/proposer/reader.py", line 141, in read_website
+    print(f"Timeout error occurred. Retrying {retries}/{max_retries}...", e, e.getheaders(), e.gettext(), e.getcode())
+                                                                             ^^^^^^^^^^^^
+AttributeError: 'URLError' object has no attribute 'getheaders'

@@ -2008,10 +2008,10 @@ def determine_player_name(teammate_abbrev, player_team, all_players_abbrevs, cur
 
 # cur avg playtime is weight of player condition
 def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player):
-    print('\n===Determine Cur Avg Playtime: ' + player.title() + '===\n')
-    print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
-    print('Input: player_gp_cur_team = x = ' + str(player_gp_cur_team))
-    print('\nOutput: gp_cond_weight = x\n')
+    # print('\n===Determine Cur Avg Playtime: ' + player.title() + '===\n')
+    # print('Input: player_cur_season_log = {stat name:{game idx:stat val, ... = {\'Player\': {\'0\': \'jalen brunson\', ...')
+    # print('Input: player_gp_cur_team = x = ' + str(player_gp_cur_team))
+    # print('\nOutput: gp_cond_weight = x\n')
 
     cur_avg_playtime = 0
 
@@ -2029,15 +2029,22 @@ def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player
 
     
     cur_season_minutes = player_cur_season_log['MIN']
-    
-    for game_idx in range(player_gp_cur_team):
+    max_games = 30
+    num_games = min(player_gp_cur_team, max_games)
+    prev_minutes = None
+    for game_idx in range(num_games):
         game_minutes = cur_season_minutes[str(game_idx)]
-        cur_team_minutes.append(game_minutes)
+        # remove outliers
+        # need prev minutes none in case player starts with multiple 0 minute games
+        if prev_minutes is None or game_minutes > prev_minutes / 4:
+            cur_team_minutes.append(game_minutes)
+
+        prev_minutes = game_minutes
 
     if len(cur_team_minutes) > 0:
         cur_avg_playtime = converter.round_half_up(np.mean(cur_team_minutes), 2)
     
-    print('cur_avg_playtime: ' + str(cur_avg_playtime))
+    #print('cur_avg_playtime: ' + str(cur_avg_playtime))
     return cur_avg_playtime
 
 # cur avg playtime is weight of player condition
@@ -2062,7 +2069,7 @@ def determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players
             
             all_players_cur_avg_playtimes[player] = determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player)
 
-    print('all_players_cur_avg_playtimes: ' + str(all_players_cur_avg_playtimes))
+    #print('all_players_cur_avg_playtimes: ' + str(all_players_cur_avg_playtimes))
     return all_players_cur_avg_playtimes
 
 
@@ -3065,6 +3072,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'marvin bagley iii'
     elif player == 'j williams' and team == 'okc' and position == 'c':
         return 'jaylin williams'
+    elif player == 'j williams' and team == 'okc' and position == 'f':
+        return 'jalen williams'
     # add jr to end of name in irreg cases
     # cannot simply look for jr in all case bc maybe diff players, 1 jr and other not
     elif player == 'kelly oubre':

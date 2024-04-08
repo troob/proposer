@@ -1,3 +1,4 @@
+#print('\n===Proposer===\n')
 # player outcome generator
 # updated version of player probability determiner
 # instead of generating predictions for all players
@@ -8,6 +9,7 @@
 #/.venv/bin/python
 # source .venv/bin/activate
 #!/Users/m/repos/proposer/.venv/bin/python3
+
 
 
 import generator, reader#, writer
@@ -61,7 +63,8 @@ all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 
 # === STATS OF INTEREST === 
 # put stats in order of website nav for faster nav without scrolling
-stats_of_interest = ['pts','3pm','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast','stl','blk','stl+blk']#, '3pm']
+# stl/blk defense stats too volatile to use like offense stats
+stats_of_interest = ['pts','3pm','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast']#,'stl','blk','stl+blk']#, '3pm']
 
 #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
 
@@ -129,7 +132,7 @@ read_new_rosters = False
 test = False
 
 # run dist probs with prints/comments
-prints_on = True
+prints_on = False
 if test:
     prints_on = True
 
@@ -158,6 +161,7 @@ read_new_game_ids = True
 ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', 'lamelo ball'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
 # dont waste time read from internet if not needed
 if not test:
+    # problem error forbidden reading page at 330am-5am???
     ofs_players = reader.read_ofs_players(ofs_players)
 
 # === Max Props ===
@@ -201,7 +205,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = [('lac','uta')]#, ('nop','lal')
+game_teams = []#, ('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams
