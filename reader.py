@@ -3907,9 +3907,9 @@ def read_new_team_players(all_teams_players, year, game_key, game_box_scores, al
 	game_data = game_key.split()
 	if len(game_data) > 2:
 		away_team = game_data[0]
-		print('away_team: ' + str(away_team))
+		#print('away_team: ' + str(away_team))
 		home_team = game_data[1]
-		print('home_team: ' + str(home_team))
+		#print('home_team: ' + str(home_team))
 
 		# skip preseason games
 
@@ -3925,18 +3925,18 @@ def read_new_team_players(all_teams_players, year, game_key, game_box_scores, al
 		team = away_team
 		if loc == 'home':
 			team = home_team
-		print('loc: ' + str(loc))
-		print('team: ' + str(team))
+		# print('loc: ' + str(loc))
+		# print('team: ' + str(team))
 
 		team_players = year_teams_players[team]
 
 		#game_team_players = game_players[loc]
-		print('game_team_box_score: ' + str(game_team_box_score))
+		#print('game_team_box_score: ' + str(game_team_box_score))
 		for team_part in game_team_box_score.values():
 			# team_part = {player:play time, ...}
-			print('team_part: ' + str(team_part))
+			#print('team_part: ' + str(team_part))
 			for player_abbrev in team_part.keys():
-				print('\nplayer_abbrev: ' + player_abbrev)
+				#print('\nplayer_abbrev: ' + player_abbrev)
 				# here we consider avg play time, not play time this game
 				# bc we want to exclude practice players?
 				# but are they practice players if they played a game more than 10min? 
@@ -3967,25 +3967,25 @@ def read_new_team_players(all_teams_players, year, game_key, game_box_scores, al
 							#print('found name ' + name)
 							player_name = name
 							break
-				print('init player_name: ' + str(player_name))
+				#print('init player_name: ' + str(player_name))
 				if player_name == '':
 					player_name = determiner.determine_player_full_name(player_abbrev, team, all_players_teams, rosters, game_key, cur_yr)#converter.convert_player_abbrev_to_name(player)
 				# now we have both full name and abbrevs from players in games dict
 				# if not already added, then add
-				print('full player_name: ' + str(player_name))
+				#print('full player_name: ' + str(player_name))
 				if player_name in all_players_teams.keys():
 					player_teams = all_players_teams[player_name]
 					# added dnp check so make sure it is ok to exclude dnp players here
 					if not determiner.determine_dnp_player(player_teams, cur_yr, player_name) and player_name not in team_players and player_name != '': # blank if player gone and never read
 						team_players.append(player_name)
-						print('team_players: ' + str(team_players))
+						#print('team_players: ' + str(team_players))
 				
 				# elif player_name == '':
 				# 	print('Warning: player name not found! ' + player)
 					
-		print('team_players after game: ' + str(team_players))
+		#print('team_players after game: ' + str(team_players))
 
-	print('final team_players: ' + str(team_players))
+	#print('final team_players: ' + str(team_players))
 	return all_teams_players
 
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
@@ -4007,11 +4007,11 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 		# print('game_box_scores: ' + str(game_box_scores))
 		# if we find this team in this game
 		if re.search(team, game_key):
-			print('found team ' + team.upper() + ' in game ' + game_key)
+			#print('found team ' + team.upper() + ' in game ' + game_key)
 			game_data = game_key.split()
 			if len(game_data) > 2:
 				away_team = game_data[0]
-				print('away_team: ' + str(away_team))
+				#print('away_team: ' + str(away_team))
 				#home_team = game_data[1]
 				#print('home_team: ' + str(home_team))
 
@@ -4020,18 +4020,18 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 				loc = 'home'
 				if team == away_team:
 					loc = 'away'
-				print('loc: ' + str(loc))
+				#print('loc: ' + str(loc))
 
 				# always current team of interest
 				# game_team_players = {starters:[],bench:[]}
 				game_team_box_score = game_box_scores[loc]
 				#game_team_players = game_players[loc]
-				print('game_team_box_score: ' + str(game_team_box_score))
+				#print('game_team_box_score: ' + str(game_team_box_score))
 				for team_part in game_team_box_score.values():
 					# team_part = {player:play time, ...}
-					print('team_part: ' + str(team_part))
+					#print('team_part: ' + str(team_part))
 					for player_abbrev in team_part.keys():
-						print('\nplayer_abbrev: ' + player_abbrev)
+						#print('\nplayer_abbrev: ' + player_abbrev)
 						# here we consider avg play time, not play time this game
 						# bc we want to exclude practice players?
 						# but are they practice players if they played a game more than 10min? 
@@ -4062,25 +4062,25 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 									#print('found name ' + name)
 									player_name = name
 									break
-						print('init player_name: ' + str(player_name))
+						#print('init player_name: ' + str(player_name))
 						if player_name == '':
 							player_name = determiner.determine_player_full_name(player_abbrev, team, all_players_teams, rosters, game_key, cur_yr)#converter.convert_player_abbrev_to_name(player)
 						# now we have both full name and abbrevs from players in games dict
 						# if not already added, then add
-						print('full player_name: ' + str(player_name))
+						#print('full player_name: ' + str(player_name))
 						if player_name in all_players_teams.keys():
 							player_teams = all_players_teams[player_name]
 							# added dnp check so make sure it is ok to exclude dnp players here
 							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name) and player_name not in team_players and player_name != '': # blank if player gone and never read
 								team_players.append(player_name)
-								print('team_players: ' + str(team_players))
+								#print('team_players: ' + str(team_players))
 						
 						# elif player_name == '':
 						# 	print('Warning: player name not found! ' + player)
 							
-				print('team_players after game: ' + str(team_players))
+				#print('team_players after game: ' + str(team_players))
 
-	print('final team_players: ' + str(team_players))
+	#print('final team_players: ' + str(team_players))
 	return team_players
 
 # all_teams_players = {year:{team:[players],...},...}
@@ -5018,11 +5018,20 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 			# (teams_reg_and_playoff_games_played, season_part_game_log, teams, games_played)		
 			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player)
 			teams_reg_and_playoff_games_played = season_games_played_data[0]
-			season_part_game_log = season_games_played_data[1]
-			teams = season_games_played_data[2]
-			games_played = season_games_played_data[3]
+			#season_part_game_log = season_games_played_data[1]
+			teams = season_games_played_data[1]
+			games_played = season_games_played_data[2]
 
 			player_team_idx = 0
+
+			# for reg season, we want reg season log
+			# for postseason, here we want all full season to get all games
+			season_part_game_log = {}
+			player_season_log_df = pd.DataFrame(player_season_log)
+			if season_part == 'regular':
+				season_part_game_log = determiner.determine_season_part_games(player_season_log_df)
+			else:
+				season_part_game_log = determiner.determine_season_part_games(player_season_log_df, 'full')
 
 			#try:
 
@@ -5065,10 +5074,18 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 
 					if game_espn_id != '':
 						game_box_scores_dict = read_game_box_scores(game_key, game_espn_id, read_new_game_ids=read_new_game_ids, player_name=player)
+
+						if re.search('Has not entered game', str(game_box_scores_dict)):
+							continue
 						
 						# players_in_box_score_dict = {away:{starters:[],bench:[]},home:{starters:[],bench:[]}}
 						#players_in_box_score_dict = read_players_in_box_score(game_box_scores_dict)
 					
+						# if format "lal nop 4/14/2024": {"away": {"bench": "H Giles III F": "Has not entered game"
+	  					# then attempted to add midgame
+						# so skip
+	  					
+
 						# may need to save player box scores if internet connection fails during read all box scores
 						# do not allow blank box scores
 						if len(game_box_scores_dict.keys()) > 0:
@@ -5210,6 +5227,7 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 
 	# read all games info or just season part of interest?
 	# more efficient to ignore unused game info
+	# determine teams reg and playoff games auto changes post to full to get full season log
 	#season_part = 'full'
 
 	for player, player_season_logs in all_players_season_logs.items():
@@ -5232,9 +5250,19 @@ def read_all_games_info(all_players_season_logs, all_players_teams, init_game_id
 			
 			season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player)
 			teams_reg_and_playoff_games_played = season_games_played_data[0]
-			season_part_game_log = season_games_played_data[1]
-			teams = season_games_played_data[2]
-			games_played = season_games_played_data[3]
+			#season_part_game_log = season_games_played_data[1]
+			teams = season_games_played_data[1]
+			games_played = season_games_played_data[2]
+
+			# for reg season, we want reg season log
+			# for postseason, here we want all full season to get all games
+			player_season_log_df = pd.DataFrame(player_season_log)
+			season_part_game_log = {}
+			if season_part == 'regular':
+				season_part_game_log = determiner.determine_season_part_games(player_season_log_df)
+			else:
+				season_part_game_log = determiner.determine_season_part_games(player_season_log_df, 'full')
+
 
 			player_team_idx = 0
 
@@ -5353,7 +5381,7 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 
 def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[], rosters={}):
 	print("\n===Read All Players Positions===\n")
-	print('Input: players_names = [p1,...]')# = ' + str(players_names))
+	print('Input: players_names = [p1,...] = ' + str(players_names))
 	print('Input: all_players_espn_ids = {player:id, ...} = {\'jalen brunson\': \'3934672\', ...}')
 	print('\nOutput: all_players_positions = {player:position, ...} = {\'jalen brunson\': \'pg\', ...}\n')
 
@@ -6677,7 +6705,7 @@ def read_game_teams(read_season_year):
 
 	return game_teams
 
-def read_current_game_teams(cutoff_time_str='11:00 pm'):
+def read_current_game_teams(cutoff_time_str='11:59 pm'):
 	print('\n===Read Current Games Teams===\n')
 
 	game_teams = [] # read todays schedule if cur yr
@@ -6754,6 +6782,8 @@ def read_current_game_teams(cutoff_time_str='11:00 pm'):
 
 					if current_time < game_time and cutoff_time > game_time:
 						away_team = row['MATCHUP'].lower()
+						# if playin, away_team: los angelesnba play-in - west - 7th place vs 8th place
+						away_team = re.split('nba|east|west',away_team)[0]#.strip()
 						home_team = re.sub('@ ', '', row['MATCHUP.1']).lower()
 						print('away_team: ' + str(away_team))
 						print('home_team: ' + str(home_team))

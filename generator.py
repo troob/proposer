@@ -2416,9 +2416,14 @@ def generate_reg_season_logs(player_season_logs):
     return reg_season_logs
 
 def generate_part_season_logs(player_season_logs, part):
+    print('\n===Generate Part Season Logs===\n')
+    print('Setting: Season Part = ' + part)
+    print('\nOutput: part_season_logs =  {\'2024\': {\'Player\': {}, \'Season\': {}, \'Type\': {}, ...\n')
+
     part_season_logs = {}
 
-    if part == 'full':
+    # here we want all samples for postseason
+    if part == 'full' or part == 'postseason':
         part_season_logs = player_season_logs
     else:
         for year, year_season_log in player_season_logs.items():
@@ -2528,7 +2533,7 @@ def generate_unique_props(prop_dicts, strict=False):
 
 # desired order: key = S Curry Pg, B Podziemski G, K Thompson Sg, J Kuminga Pf, K Looney F Starters 2024 Regular Prob
 # available_prop_dicts: key = 
-def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joint_sheet_name='Joints', rare_sheet_name='Rare', rare_prev_val_players={}, prints_on=False, max_props=30):
+def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joint_sheet_name='Joints', rare_sheet_name='Rare', rare_prev_val_players={}, prints_on=False, max_props=30, all_players_season_logs={}):
     print('\n===Generate Prop Table Data===\n')
     print('Input: multi_prop_dicts before = [{player: james harden, ...}, ...')# = ' + str(available_prop_dicts))
     print('Input: desired_order = [] = ' + str(desired_order))
@@ -2830,6 +2835,10 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     prop_tables.append(udp_prop_dicts)
     sheet_names.append('DP')
 
+
+
+    
+
     
 
     # Now take top 30 and sort by game and stat so easy to click/navigate on site
@@ -2877,12 +2886,45 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     sheet_names.append('DDP FN')
 
 
+    # separate low avg 3s bc too volatile
+    # need to avg >=2 3pt attempts per game to get good odds
+    threes_prop_data = isolator.separate_threes_props(ddp_prop_dicts, all_players_season_logs)
+    ddp_prop_dicts = threes_prop_data[0]
+    ddp_threes_prop_dicts = threes_prop_data[1]
+    prop_tables.append(ddp_threes_prop_dicts)
+    sheet_names.append('DDP 3s')
+
+
     sort_keys = ['game', 'stat order']
     ddp_prop_dicts = generate_stat_order(ddp_prop_dicts)
     ddp_prop_dicts = sorter.sort_dicts_by_keys(ddp_prop_dicts[:max_props], sort_keys, reverse=False)
     ddp_prop_dicts = remover.remove_stat_order(ddp_prop_dicts)
     prop_tables.append(ddp_prop_dicts)
     sheet_names.append('DDP')
+
+
+
+    # Strategy 2: Take all props in game with favorable conditions and favorable count and +EV 
+    # –bc by definition favorable conditions should outweigh unfavorable conditions 
+    # –BUT does that mean majority of props with favorable conditions are correct??? 
+    # –No, BUT since they are +EV, then taken as a group of +EV props with favorable conditions, they should produce +EV over time.
+    # sort by game bc need to take all good props in game to take full advantage of covariance
+    rp_prop_data = isolator.separate_rare_prev_props(udp_prop_dicts)
+    udp_prop_dicts = rp_prop_data[0]
+    # oc_prop_data = isolator.separate_opposite_count_props(udp_prop_dicts)
+    # udp_prop_dicts = oc_prop_data[0]
+    # sb_prop_data = isolator.separate_defense_props(udp_prop_dicts)
+    # udp_prop_dicts = sb_prop_data[0]
+    fn_prop_data = isolator.separate_fn_props(udp_prop_dicts)
+    udp_prop_dicts = fn_prop_data[0]
+    threes_prop_data = isolator.separate_threes_props(udp_prop_dicts, all_players_season_logs)
+    udp_prop_dicts = threes_prop_data[0]
+    sort_keys = ['game', 'stat order']
+    dpcev_prop_dicts = generate_stat_order(udp_prop_dicts)
+    dpcev_prop_dicts = sorter.sort_dicts_by_keys(dpcev_prop_dicts, sort_keys, reverse=False)
+    dpcev_prop_dicts = remover.remove_stat_order(dpcev_prop_dicts)
+    prop_tables.append(dpcev_prop_dicts)
+    sheet_names.append('DPCEV')
 
 
 
@@ -2945,6 +2987,7 @@ def generate_all_players_median_oiaps(players_names, all_players_positions, all_
 # loop thru season logs like for stat dict
 # bc we need to get all instances of tiap conds to get median
 # and then for stat dict we use median to get offset for each game
+# if postseason, start with full season medians
 def generate_player_median_piaps(player_name, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, cur_yr, prints_on=False):
     if prints_on:
         print('\n===Generate Player Median PIAPs: ' + player_name.title() + '===\n')
@@ -2985,13 +3028,17 @@ def generate_player_median_piaps(player_name, player_position, player_teams, gp_
         player_game_log.index = player_game_log.index.map(str)
         #print("player_game_log:\n" + str(player_game_log))
 
-        season_part_game_log = determiner.determine_season_part_games(player_game_log, season_part)
+        # postseason gets full both parts
+        read_season_part = season_part
+        if season_part == 'postseason':
+            read_season_part = 'full'
+        season_part_game_log = determiner.determine_season_part_games(player_game_log, read_season_part)
 
         season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_game_log, season_part, season_year, cur_yr, gp_cur_team, player_name)
         teams_reg_and_playoff_games_played = season_games_played_data[0]
-        season_part_game_log = season_games_played_data[1]
-        teams = season_games_played_data[2]
-        games_played = season_games_played_data[3]
+        #season_part_game_log = season_games_played_data[1]
+        teams = season_games_played_data[1]
+        games_played = season_games_played_data[2]
 
         player_team_idx = 0
         
@@ -3107,14 +3154,15 @@ def generate_player_median_piaps(player_name, player_position, player_teams, gp_
 
 
     if prints_on:
-        print('player_median_tiaps: ' + str(player_median_tiaps))
+        print('\nplayer_median_tiaps: ' + str(player_median_tiaps))
         print('player_median_oiaps: ' + str(player_median_oiaps))
     return player_median_tiaps, player_median_oiaps
 
 # each team gets diff median bc positions may change but playtime stays same
 # so the way pos affects playtime is relative to team median tiap
-def generate_all_players_median_piaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str):
+def generate_all_players_median_piaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str, prints_on):
     print('\n===Generate All Players Median PIAPs===\n')
+    print('players_names: ' + str(players_names))
 
     all_players_median_tiaps = {}
     all_players_median_oiaps = {}
@@ -3122,12 +3170,13 @@ def generate_all_players_median_piaps(players_names, all_players_positions, all_
     for player in players_names:
         # if player log not read then dnp player
         if player in all_players_season_logs.keys():
+            print('found player season log')
             player_season_logs = all_players_season_logs[player]
             player_position = all_players_positions[player]
             player_teams = all_players_teams[player]
             gp_cur_team = all_players_gp_cur_teams[player]
 
-            median_data = generate_player_median_piaps(player, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, current_year_str)
+            median_data = generate_player_median_piaps(player, player_position, player_teams, gp_cur_team, player_season_logs, all_box_scores, season_part, current_year_str, prints_on)
             all_players_median_tiaps[player] = median_data[0]
             all_players_median_oiaps[player] = median_data[1]
 
@@ -3213,8 +3262,8 @@ def generate_all_cur_conds_lists(all_cur_conds_dicts, all_game_player_cur_conds,
         #print('player_conditions_list: ' + str(player_conditions_list))
         all_cur_conds_lists[player].extend(player_conditions_list)
 
-    print('all_cur_conds_lists: ' + str(all_cur_conds_lists))
-    print('all_players_gp_conds: ' + str(all_players_gp_conds))
+    # print('all_cur_conds_lists: ' + str(all_cur_conds_lists))
+    # print('all_players_gp_conds: ' + str(all_players_gp_conds))
     return all_cur_conds_lists, all_players_gp_conds
 
 # conditions = list(list(all_current_conditions.values())[0].keys()) ['loc']
@@ -3266,11 +3315,11 @@ def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, al
 def generate_bet_spread(prop_dict):
     #print('\n===Generate Bet Spread===\n')
 
-    bet_spread = 0.1 # min bet
-    # shift in range based on min allowed prob
-    # accepted range 15-100% ap
-    # but that usually requires 20% tp
-    prob = prop_dict['true prob'] - 20 #max(prop_dict['true prob'] - 20, 0)
+    # bet_spread = 0.1 # min bet
+    # # shift in range based on min allowed prob
+    # # accepted range 15-100% ap
+    # # but that usually requires 20% tp
+    # prob = prop_dict['true prob']# - 20 #max(prop_dict['true prob'] - 20, 0)
     #print('prob: ' + str(prob))
 
     # if prob < 0:
@@ -3282,16 +3331,26 @@ def generate_bet_spread(prop_dict):
     # SO try divide by 2
     # BUT then should we lower weight of count to balance???
     # probably until more tests run
-    bet_spread = prob / 2
+    # change so fraction shown in cnt factor relative to prob
+    # 10% prob is below threshold
+    # 20% prob is practical threshold so if 20% then bet=1/scale
+    #min_prob = 20
+    # flat bet until further notice 
+    # bc all props in group have similar probs once accounting for other sources comparisons
+    bet_spread = 0.1 #prob / min_prob #/2
     # for every 2 count, 
     # multiply by 2 OR add another bet???
     # only need to assume cnt direction bc bet=0 if cnt in opp direc
-    cnt_factor = abs(prop_dict['cnt'] / 4)
-    bet_spread += bet_spread * cnt_factor
+    # cnt does not affect spread as much as prob and dp???
+    # 1/4 seems too much
+    # cnt_factor = abs(prop_dict['cnt'] / 20)
+    # bet_spread += bet_spread * cnt_factor
 
     # divide by desired investment scale
-    scale = 98
-    bet_spread = converter.round_half_up(bet_spread/scale, 2)
+    # scale = 10
+    # bet_spread = converter.round_half_up(bet_spread / scale, 2)
+
+
 
     # === Version 1 ===
     # accept 15% as base bet unless noticed never wins
@@ -5822,13 +5881,18 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest, pr
             #     running_avg = stat_val
 
             if len(prev_stat_vals) > 1:
-                # running avg only last 30? games
-                max_games = 30
-                if len(prev_stat_vals) > max_games:
-                    start_idx = len(prev_stat_vals) - max_games
-                    running_avg = np.mean(prev_stat_vals[start_idx:])
-                else:
-                    running_avg = np.mean(prev_stat_vals)
+                # running avg only last 5 or 15 or 30? games
+                # 30 seems too much bc rotations change more often
+                # 5 is min samples with relevance to be accurate bc rotations change so often
+                # not useful to show relative to season avg 
+                # bc then the count would go way up when playtime goes up temp due to injury backup
+                # so then the backup players count would be wrong bc their avg is different in this role while teammate injured
+                # max_games = 5
+                # if len(prev_stat_vals) > max_games:
+                #     start_idx = len(prev_stat_vals) - max_games
+                #     running_avg = np.mean(prev_stat_vals[start_idx:])
+                # else:
+                running_avg = np.mean(prev_stat_vals)
                 
 
                 # min 1 count diff?
@@ -6680,7 +6744,11 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
 
 
                         # 2. find probs for conditions in parallel
-                        # 8 power cores on macbook pro
+                        # 8 power cores on macbook pro, so n_jobs=8
+                        # njobs=-1 sets all available cores
+                        # backend loky enables full cpu?
+                        # , backend='loky' made no difference
+                        # njobs=-1 seemed to slow down computer??? bc uses all 10 cores!
                         all_conds_stat_probs = joblib.Parallel(n_jobs=8)(joblib.delayed(generate_condition_probs)(condition, stat_dict, player_stat_model, prints_on) for condition in valid_conditions)
                         #print('all_conds_stat_probs: ' + str(all_conds_stat_probs))
 
@@ -7001,8 +7069,8 @@ def generate_all_players_distrib_probs(all_player_unit_stat_dicts, all_cur_conds
     return all_players_distrib_probs
 
 def generate_samples_from_set(condition_stat_data, num_samples):
-    # print('\n===Generate Samples from Set===\n')
-    # print('init condition_stat_data: ' + str(condition_stat_data))
+    print('\n===Generate Samples from Set===\n')
+    print('init condition_stat_data: ' + str(condition_stat_data))
 
     # gen random idx from 0 to len(cond stat data)
     for num in range(num_samples):
@@ -7013,15 +7081,15 @@ def generate_samples_from_set(condition_stat_data, num_samples):
 
         condition_stat_data.append(sample)
 
-    #print('final condition_stat_data: ' + str(condition_stat_data))
+    print('final condition_stat_data: ' + str(condition_stat_data))
     return condition_stat_data
 
 
 def generate_num_samples(season_year, furthest_year, base_num_samples):
-    # print('\n===Generate Num Samples===\n')
-    # print('season_year: ' + str(season_year))
-    # print('furthest_year: ' + str(furthest_year))
-    # print('base_num_samples: ' + str(base_num_samples))
+    print('\n===Generate Num Samples===\n')
+    print('season_year: ' + str(season_year))
+    print('furthest_year: ' + str(furthest_year))
+    print('base_num_samples: ' + str(base_num_samples))
 
 
     num_samples = 0
@@ -7050,7 +7118,7 @@ def generate_num_samples(season_year, furthest_year, base_num_samples):
         num_samples = total_num_samples - base_num_samples
 
 
-    #print('num_samples = total_num_samples - base_num_samples = ' + str(num_samples))
+    print('num_samples = total_num_samples - base_num_samples = ' + str(num_samples))
     return num_samples
 
 def fit_dist(all_data):
@@ -7131,10 +7199,14 @@ def generate_player_distrib_models(player_stat_dict, stats_of_interest, player_n
 
                 # furthest_year_dict = player_stat_dict[furthest_year]
                 # print('furthest_year_dict: ' + str(furthest_year_dict))
-                furthest_stat_dict = list(player_stat_dict[furthest_year][part].values())[0]
-                #print('furthest_stat_dict: ' + str(furthest_stat_dict))
-                base_num_samples = len(furthest_stat_dict[all_cond].keys())
-                #print('base_num_samples: ' + str(base_num_samples))
+                # no samples if first postseason game for rookie first yr or did not play last yr
+                furthest_stat_list = list(player_stat_dict[furthest_year][part].values())
+                base_num_samples = 0
+                if len(furthest_stat_list) > 0:
+                    furthest_stat_dict = furthest_stat_list[0]
+                    #print('furthest_stat_dict: ' + str(furthest_stat_dict))
+                    base_num_samples = len(furthest_stat_dict[all_cond].keys())
+                    #print('base_num_samples: ' + str(base_num_samples))
 
                 num_samples = generate_num_samples(season_year, furthest_year, base_num_samples)
                 
@@ -7555,7 +7627,85 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             all_cond_playtimes = {}#[]
 
             # get samples from cur part of cur season
-            player_cur_part_stat_dict = player_stat_dict[cur_yr][season_part]
+            # if no postseason yet bc game 1, get from cur season reg reason???
+            # NO, bc main players play more in postseason so more like last postseason
+            # and role players play less but maybe not same as last postseason
+            # role players maybe closer to reg season minutes cur season
+            # better to use 1 sample from cur postseason than all samples from reg season
+            # if no postseason samples this season yet, 
+            # use last postseason avg bc better than cur regseason avg
+            # BUT for prob calcs, use 80-20 split post-reg season bc need more samples to avg stats
+            # bc stats more variable than playtime
+            # so from post-reg, we get full season probs to use as true prob for postseason
+            # so full prob = true prob for postseason
+            # maybe better to use 50/50 or 60/40 split until >5 postseason samples
+            # bc inaccurate until enough samples
+            # so for done prev season, split 80/20???
+            # set range of weight from 1 sample postseason to max samples postseason
+            # so we know how the weight changes in full range
+            # from 50/50 to 80/20? maybe 80/20 at 10 samples?
+            player_cur_part_stat_dict = {}
+
+            # read_yr is not always cur yr if first game of postseason bc prefer take last postseason to compare
+            read_yr = cur_yr
+            read_season_part = season_part
+
+            # if first game of postseason
+            if season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part].keys()) == 0:
+                # if played last season, get from last postseason if available
+                # AND if same team as last postseason? not needed for main players
+                prev_yr = str(int(cur_yr) - 1)
+                print('prev_yr: ' + str(prev_yr))
+                if prev_yr in player_stat_dict.keys():
+                    prev_yr_stat_dict = player_stat_dict[prev_yr]
+                    #year_stat_dicts = list(player_stat_dict.values())
+                    if season_part in prev_yr_stat_dict:
+                        
+                        # need to get both last postseason and this cur regseason 
+                        # bc if outlier big diff than prefer this regseason
+                        # just compare last game minutes unless exception 
+                        #player_prev_stat_dict = year_stat_dicts[1]
+                        player_prev_post_stat_dict = prev_yr_stat_dict[season_part]
+
+                        player_regseason_stat_dict = player_stat_dict[cur_yr]['regular']
+
+                        # if last yr post playtime < 12 and < cur season playtime / 2
+                        if 'min' in player_prev_post_stat_dict.keys():
+                            prev_post_minutes_dict = player_prev_post_stat_dict['min']['all']
+                            if '0' not in prev_post_minutes_dict.keys():
+                                print('no postseason last yr')
+                                read_season_part = 'regular'
+                                player_cur_part_stat_dict = player_regseason_stat_dict
+                            else:
+                                prev_post_playtime = prev_post_minutes_dict['0']
+                                print('prev_post_playtime: ' + str(prev_post_playtime))
+                                regseason_playtime = player_regseason_stat_dict['min']['all']['0']
+                                print('regseason_playtime: ' + str(regseason_playtime))
+                                # TEST/TUNE: cutoff time and fraction
+                                if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
+                                    # use regseason
+                                    print('invalid postseason last yr')
+                                    read_season_part = 'regular'
+                                    player_cur_part_stat_dict = player_regseason_stat_dict
+                                else:
+                                    print('found postseason last yr')
+                                    player_cur_part_stat_dict = player_prev_post_stat_dict
+                                    read_yr = prev_yr
+                        else:
+                            print('no postseason last yr')
+                            read_season_part = 'regular'
+                            player_cur_part_stat_dict = player_regseason_stat_dict
+                    else:
+                        print('no postseason last yr') # so read cur reg season as approx
+                        read_season_part = 'regular'
+                        player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+                else:
+                    print('did not play last yr')
+                    read_season_part = 'regular'
+                    player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+            else:
+                player_cur_part_stat_dict = player_stat_dict[cur_yr][season_part]
+            #print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
 
             # for playtime we are first concerned with teammates in/out
             # then we can consider how many opponents at each position to approximate matchups and therefore playtime
@@ -7589,13 +7739,16 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                     multi_conds[cond_key] = cond
                     #continue
 
+
+            
+
             # get single conds
             # and form multiconds for next loop
             for cond in teammate_gp_conds:
                 #print('\nCondition: ' + cond)
 
                 # get cur conds to get sample size
-                cur_conds = {'condition':cond, 'year':cur_yr, 'part':season_part}
+                cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
 
                 cond_data = cond.rsplit(' ', 1)
                 cond_key = cond_data[1]
@@ -7713,7 +7866,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
             # get tiap cond once at beginning instead of each encounter of low samples
             # bc almost always 1 multicond has low samples and usually multiple
-            cur_conds = {'condition':player_cur_tiap, 'year':cur_yr, 'part':season_part}
+            cur_conds = {'condition':player_cur_tiap, 'year':read_yr, 'part':read_season_part}
             tiap_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
             # may not consider sample size
             # OR only scale for 2-5 and above that is same
@@ -7738,7 +7891,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                 teammates_weight = multi_cond_weights[cond_key]
                 
 
-                cur_conds = {'condition':cond, 'year':cur_yr, 'part':season_part}
+                cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
                 # do not need to pass gp cur team for multiconds bc always same team? 
                 # not always but rare for 2 players to get traded and be only players out but not impossible
                 # so pass gp cur team just in case
@@ -7917,31 +8070,35 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
         # year is a string bc it can be read from json which forces string
         for year, year_stat_dict in player_stat_dict.items():
             year = str(year) # to compare to json
-            #print("\n===Year " + year + "===\n")
+            print("\n===Year " + year + "===\n")
 
             if year not in player_unit_stat_dict.keys():
                 player_unit_stat_dict[year] = {}
 
             for part, part_stat_dict in year_stat_dict.items():
-                #print("\n===Season Part " + str(part) + "===\n")
+                print("\n===Season Part " + str(part) + "===\n")
 
                 if part not in player_unit_stat_dict[year].keys():
                     player_unit_stat_dict[year][part] = {}
 
                 # need to isolate season part df to align with nested dict
                 part_season_logs = generate_part_season_logs(player_season_logs, part)
+                season_log = part_season_logs[year]
+                #print('season_log: ' + str(season_log))
+                season_minutes_dict = season_log['MIN'] # {game idx: minutes, ... = {'20': m, ...}
+                print('season_minutes_dict: ' + str(season_minutes_dict))
                 for stat, stat_dict in part_stat_dict.items():
                     
                     # include stat combos
                     if stat in stats_of_interest or re.search('\\+', stat):
-                        #print("\n===Stat Name " + str(stat) + "===\n")
+                        print("\n===Stat Name " + str(stat) + "===\n")
 
                         if stat not in player_unit_stat_dict[year][part].keys():
                             player_unit_stat_dict[year][part][stat] = {}
 
                         # condition_stat_dict = {game idx: stat val, ...
                         for condition, condition_stat_dict in stat_dict.items():
-                            #print("\n===Condition " + str(condition) + "===\n")
+                            print("\n===Condition " + str(condition) + "===\n")
 
                             if condition not in player_unit_stat_dict[year][part][stat].keys():
                                 player_unit_stat_dict[year][part][stat][condition] = {}
@@ -7949,7 +8106,7 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                             #num_games_reached = 0 # num games >= stat val, stat count, reset for each check stat val bc new count
                             # loop through games to get count stat val >= game stat val
                             for game_idx, game_stat_val in condition_stat_dict.items():
-                                #print('\ngame_idx: ' + str(game_idx))
+                                print('\ngame_idx: ' + str(game_idx))
                                 # if 0 consider adding x instead of multiplying 0
 
                                 # prev stat val meaning from a prev game so will be adjusted to current minutes
@@ -7962,11 +8119,9 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                                 #if year != cur_yr:
                                     
                                 #relative_game_idx = game_idx + int(list(list(season_log.values()[0].keys())[0]))
-                                season_log = part_season_logs[year]
-                                #print('season_log: ' + str(season_log))
-                                season_minutes_dict = season_log['MIN'] # {game idx: minutes, ... = {'20': m, ...}
-                                game_minutes = season_minutes_dict[game_idx]#list(season_log['MIN'].values())[int(game_idx)]#[str(relative_game_idx)]
-                                #print('game_minutes: ' + str(game_minutes))
+                                
+                                game_minutes = season_minutes_dict[game_idx] #list(season_log['MIN'].values())[int(game_idx)]#[str(relative_game_idx)]
+                                print('game_minutes: ' + str(game_minutes))
                                 # print('game_stat_val * cur_mean_minutes / game_minutes')
                                 # print(str(game_stat_val) + ' * ' + str(cur_mean_minutes) + ' / ' + str(game_minutes))
                                 # game stat val is what the stat val would be if playing current minutes
@@ -7974,7 +8129,7 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                                 if game_minutes > 4:
                                     unit_stat_val = round_half_up(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
                                 
-                                #print('unit_stat_val: ' + str(unit_stat_val))
+                                print('unit_stat_val: ' + str(unit_stat_val))
                                     
                                 player_unit_stat_dict[year][part][stat][condition][game_idx] = unit_stat_val
 
@@ -8506,7 +8661,10 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
         # if season_part == 'regular':
         #     season_part_game_log = determiner.determine_season_part_games(player_game_log, season_part)
         # elif season_part == 'full':
-        #print("season_part_game_log:\n" + str(season_part_game_log) + '\n')
+        #print("season_part_game_log before determine gp:\n" + str(season_part_game_log) + '\n')
+
+        if len(season_part_game_log) == 0:
+            all_stats_dicts = {}
 
         # print('season_year: ' + str(season_year))
         # print('season_years: ' + str(season_years))
@@ -8614,9 +8772,12 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
             season_games_played_data = determiner.determine_teams_reg_and_playoff_games_played(player_teams, player_game_log, season_part, season_year, cur_yr, gp_cur_team, player_name)
             teams_reg_and_playoff_games_played = season_games_played_data[0]
-            season_part_game_log = season_games_played_data[1]
-            teams = season_games_played_data[2]
-            games_played = season_games_played_data[3]
+            # error with postseason bc 
+            #season_part_game_log = season_games_played_data[1]
+            teams = season_games_played_data[1]
+            games_played = season_games_played_data[2]
+
+            #print("season_part_game_log after determine gp:\n" + str(season_part_game_log) + '\n')
 
             player_team_idx = 0
 
@@ -8625,11 +8786,31 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
 
 
             #prev_stat_vals = []
+            prev_playtime = 0
             for game_idx, row in season_part_game_log.iterrows():
                 # print('\ngame_idx: ' + game_idx)
                 # print('\n===Game ' + str(int(game_idx)+1) + '===')
                 # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
                 # print('row:\n' + str(row))
+
+
+                # make list to loop through so we can add all stats to dicts with 1 fcn
+                game_stats = determiner.determine_game_stats(season_part_game_log, game_idx) #[pts,rebs,asts,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_made,threes_attempts,three_rate,ftm,fta,ft_rate,bs,ss,fs,tos] 
+                
+                # check if outlier due to early injury or ejection
+                # based on no. minutes and relative to prev game/avg
+                # lined up with idx all_stats_dicts['min']
+                # remove bc 0s do not get scaled by minutes
+                min_idx = 13 # minutes
+                game_playtime = game_stats[min_idx]
+                # print('game_playtime: ' + str(game_playtime))
+                # print('prev_playtime: ' + str(prev_playtime))
+                if game_playtime < 10 and game_playtime < prev_playtime / 2:
+                    #print('found outlier')
+                    prev_playtime = game_playtime
+                    continue
+                prev_playtime = game_playtime
+
 
                 # player team used for conditions: location, city, game players
                 # determine player team for game
@@ -8708,9 +8889,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                 # get game type so we can add stat to reg or post season game
                 # instead loop thru each part separately
                 
-                # make list to loop through so we can add all stats to dicts with 1 fcn
-                game_stats = determiner.determine_game_stats(season_part_game_log, game_idx) #[pts,rebs,asts,winning_score,losing_score,minutes,fgm,fga,fg_rate,threes_made,threes_attempts,three_rate,ftm,fta,ft_rate,bs,ss,fs,tos] 
-
+                
 
                 # === Add Stats to Dict ===
 
@@ -8730,6 +8909,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     stat_dict = list(all_stats_dicts.values())[stat_idx]
                     
                     stat = game_stats[stat_idx]
+
+
+                    
 
 
                     # condition: all
@@ -10425,6 +10607,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_seasons_start_days = settings['seasons start days']
     # OLD: all_player_season_logs_dict
     # if read new teams, then we need all players logs to get all teams players
+    # returns dict form of game log with part of season type in each row postseason/regular
     all_players_season_logs = reader.read_all_players_season_logs(players_names, current_year_str, todays_date, all_players_espn_ids, all_players_teams, model_x_seasons, season_year, game_teams, teams_current_rosters, all_seasons_start_days)
     
     # need season yrs to get per unit time stats
@@ -10643,7 +10826,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     
 
     # need all players median tiaps to get cur offset tiap for cur conds
-    median_data = generate_all_players_median_piaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str)
+    median_data = generate_all_players_median_piaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str, prints_on)
     all_players_median_tiaps = median_data[0]
     all_players_median_oiaps = median_data[1] #generate_all_players_median_oiaps(players_names, all_players_positions, all_players_teams, all_players_gp_cur_teams, all_players_season_logs, all_box_scores, season_part, current_year_str)
 
@@ -10871,8 +11054,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # need all likely playtimes to match likely cur conds from likely liineups
         player_playtime = generate_player_playtime(player_name, player_team, player_position, all_players_positions, player_gp_conds, player_cur_tiap, gp_cur_team, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, current_year_str, season_part, prints_on)
         all_players_playtimes[player_name] = round_half_up(player_playtime)
-        player_likely_playtimes = generate_player_likely_playtimes(player_name, player_team, player_position, all_players_positions, player_gp_conds, player_cur_tiap, gp_cur_team, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, current_year_str, season_part, prints_on)
-        all_players_likely_playtimes[player_name] = player_likely_playtimes
+        # player_likely_playtimes = generate_player_likely_playtimes(player_name, player_team, player_position, all_players_positions, player_gp_conds, player_cur_tiap, gp_cur_team, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, current_year_str, season_part, prints_on)
+        # all_players_likely_playtimes[player_name] = player_likely_playtimes
 
         player_unit_stat_dict = generate_player_unit_stat_dict(player_name, player_team, player_playtime, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, current_year_str, season_part, stats_of_interest)
         all_player_unit_stat_dicts[player_name] = player_unit_stat_dict
@@ -11108,7 +11291,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     rare_sheet_name = 'Rare'
     if 'max props' in settings.keys():
         max_props = settings['max props']
-    prop_table_data = generate_prop_table_data(available_prop_dicts, available_multi_prop_dicts, desired_order, joint_sheet_name, rare_sheet_name, rare_prev_val_players, prints_on, max_props)
+    prop_table_data = generate_prop_table_data(available_prop_dicts, available_multi_prop_dicts, desired_order, joint_sheet_name, rare_sheet_name, rare_prev_val_players, prints_on, max_props, all_players_season_logs)
 
     prop_tables = prop_table_data[0]
     sheet_names = prop_table_data[1]

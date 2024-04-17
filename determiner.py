@@ -1211,152 +1211,186 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
     
     if year in player_stat_dict.keys() and part in player_stat_dict[year].keys():
         # all stats have same sample size unless prev val cond
+        part_stat_dict = player_stat_dict[year][part]
         stat_dict = {}
         if stat_name in player_stat_dict[year][part].keys():
             stat_dict = player_stat_dict[year][part][stat_name]
         else:
-            stat_dict = list(player_stat_dict[year][part].values())[0]
+            part_stat_list = list(part_stat_dict.values())
+            if len(part_stat_list) > 0:
+                stat_dict = part_stat_list[0]
 
         # always need minutes to check if outlier
-        minutes_dict = player_stat_dict[year][part]['min']
-        #print('minutes_dict: ' + str(minutes_dict))
+        if 'min' in part_stat_dict.keys():
+            minutes_dict = part_stat_dict['min']
+            #print('minutes_dict: ' + str(minutes_dict))
 
-        # V2: Enable Combos of Abbrevs to get all samples
-        # if gp cond then check all versions of abbrev
-        # eg og anunoby vs o anunoby
-        # only check o anunoby if no og anunoby found???
-        # need to check both to find all samples
-        # but what if another player is strictly 1 version so rule cannot be generalized
-        # so must track irregular abbrevs
-            
-        # start blank and add all versions of abbrev or combos of abbrevs
-        conditions = []
-        
-        # name might have out in it but if name then also gp cond so true
-        if re.search('starters|bench|out', condition): # single or multi player cond
-            
-            # do not sub opp or out bc names have it inside like toppin and trout 
-            # so add space in search
-            gp_abbrev = re.sub(' starters| bench| out| opp', ' ', condition).strip()
-            #gp_abbrev = re.sub(' out| opp', ' ', condition).strip()
-            
-            # if prints_on:
-            #     print('Found player cond: ' + condition)
-            #     print('gp_abbrev: ' + gp_abbrev)
-
-            opp_key = ' opp'
-
-            team_part = condition.split()[-1]
-
-            gp_team = player_cur_team
-            if re.search(opp_key, condition):
-                gp_team = opp_team
-
-            # multi player conds need to get all combos of abbrevs
-            if re.search(',', condition):
-                gp_abbrevs = gp_abbrev.split(',')
-
-                # if prints_on:
-                #     print('Multiplayer cond')
-                #     print('gp_abbrevs before strip: ' + str(gp_abbrevs))
-
-                game_part_players = {}
-                for abbrev in gp_abbrevs:
-                    #abbrev = abbrev.strip()
-                    abbrev_key = abbrev.strip() + '-' + gp_team
-                    if abbrev_key in all_players_abbrevs[year].keys():
-                        game_player = all_players_abbrevs[year][abbrev_key]
-                        # if prints_on:
-                        #     print('game_player: ' + game_player)
-                        game_part_players[game_player] = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team, prints_on=prints_on)
+            # V2: Enable Combos of Abbrevs to get all samples
+            # if gp cond then check all versions of abbrev
+            # eg og anunoby vs o anunoby
+            # only check o anunoby if no og anunoby found???
+            # need to check both to find all samples
+            # but what if another player is strictly 1 version so rule cannot be generalized
+            # so must track irregular abbrevs
                 
-                combos_of_abbrevs = generator.generate_combos_of_abbrevs(game_part_players)#, all_game_players_abbrevs)
-                # if prints_on:
-                #     print('combos_of_abbrevs: ' + str(combos_of_abbrevs))
-
-                # need a string for each combo
+            # start blank and add all versions of abbrev or combos of abbrevs
+            conditions = []
+            
+            # name might have out in it but if name then also gp cond so true
+            if re.search('starters|bench|out', condition): # single or multi player cond
                 
-                for abbrev_combo in combos_of_abbrevs:
+                # do not sub opp or out bc names have it inside like toppin and trout 
+                # so add space in search
+                gp_abbrev = re.sub(' starters| bench| out| opp', ' ', condition).strip()
+                #gp_abbrev = re.sub(' out| opp', ' ', condition).strip()
+                
+                # if prints_on:
+                #     print('Found player cond: ' + condition)
+                #     print('gp_abbrev: ' + gp_abbrev)
 
-                    game_part_players_str = converter.convert_to_game_players_str(abbrev_combo)
-                    
-                    # game part players, where part = starters or bench or out
-                    game_part_players_cond_val = game_part_players_str
-                    
-                    # if opp in cond then add opp to cond so it matches stat dict samples
-                    if re.search(opp_key, condition):
-                        game_part_players_cond_val += opp_key 
-                    game_part_players_cond_val += ' ' + team_part
+                opp_key = ' opp'
+
+                team_part = condition.split()[-1]
+
+                gp_team = player_cur_team
+                if re.search(opp_key, condition):
+                    gp_team = opp_team
+
+                # multi player conds need to get all combos of abbrevs
+                if re.search(',', condition):
+                    gp_abbrevs = gp_abbrev.split(',')
 
                     # if prints_on:
-                    #     print('abbrev_combo: ' + str(abbrev_combo))
-                    #     print('game_part_players_str: ' + str(game_part_players_str))
-                    #     print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
-                    
-                    conditions.append(game_part_players_cond_val)
+                    #     print('Multiplayer cond')
+                    #     print('gp_abbrevs before strip: ' + str(gp_abbrevs))
 
-            else: # single player cond
-                
-                # get player abbrev from cond
-                # by removing group and position from end of cond
-                # remove group
-                abbrev_key = gp_abbrev + '-' + gp_team
-                if prints_on:
-                    print('Single player cond')
-                    print('abbrev_key: ' + abbrev_key)
-                if abbrev_key in all_players_abbrevs[year].keys():
-                    game_player = all_players_abbrevs[year][abbrev_key]
-                    # use cur team bc cur conds
-                    game_player_abbrevs = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team, prints_on=prints_on)
-                    if prints_on:
-                        print('game_player: ' + game_player)
-                        print('game_player_abbrevs: ' + str(game_player_abbrevs))
-                    for abbrev in game_player_abbrevs:
-                        gp_cond = abbrev
-                        if re.search(opp_key, condition):
-                            gp_cond += opp_key 
-                        gp_cond += ' ' + team_part
-                        if prints_on:
-                            print('gp_cond: ' + str(gp_cond))
+                    game_part_players = {}
+                    for abbrev in gp_abbrevs:
+                        #abbrev = abbrev.strip()
+                        abbrev_key = abbrev.strip() + '-' + gp_team
+                        if abbrev_key in all_players_abbrevs[year].keys():
+                            game_player = all_players_abbrevs[year][abbrev_key]
+                            # if prints_on:
+                            #     print('game_player: ' + game_player)
+                            game_part_players[game_player] = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team, prints_on=prints_on)
+                    
+                    combos_of_abbrevs = generator.generate_combos_of_abbrevs(game_part_players)#, all_game_players_abbrevs)
+                    # if prints_on:
+                    #     print('combos_of_abbrevs: ' + str(combos_of_abbrevs))
+
+                    # need a string for each combo
+                    
+                    for abbrev_combo in combos_of_abbrevs:
+
+                        game_part_players_str = converter.convert_to_game_players_str(abbrev_combo)
                         
-                        # append string to list
-                        conditions.append(gp_cond)
+                        # game part players, where part = starters or bench or out
+                        game_part_players_cond_val = game_part_players_str
+                        
+                        # if opp in cond then add opp to cond so it matches stat dict samples
+                        if re.search(opp_key, condition):
+                            game_part_players_cond_val += opp_key 
+                        game_part_players_cond_val += ' ' + team_part
 
+                        # if prints_on:
+                        #     print('abbrev_combo: ' + str(abbrev_combo))
+                        #     print('game_part_players_str: ' + str(game_part_players_str))
+                        #     print('game_part_players_cond_val: ' + str(game_part_players_cond_val))
+                        
+                        conditions.append(game_part_players_cond_val)
 
-
-                # irregular_abbrevs = ['og anunoby']
-                
-                # # remove position
-                # #gp_abbrev_data = condition.split()[:-2]
-                # gp_abbrev = gp_abbrev.rsplit(' ', 1)[0]#.strip()
-                # print('gp_abbrev: ' + gp_abbrev)
-                # if gp_abbrev in irregular_abbrevs:
-                #     # try all versions of abbrev
+                else: # single player cond
                     
-                #     # if 2 letters in first name, try version with 1 letter
-                #     cond_data = condition.split()
-                #     if len(cond_data[0]) > 1:
-                #         alt_cond = cond_data[0][0]
-                #         for data in cond_data[1:]:
-                #             alt_cond += ' ' + data
-                #         conditions.append(alt_cond)
-                #     print('conditions: ' + str(conditions))
-        
-            if prints_on:
-                print('conditions: ' + str(conditions))
-            #sample_size = 0
-            for cond in conditions:
-                # if prints_on:
-                #     print('cond: ' + cond)
-                #     print('cond keys: ' + str(list(stat_dict.keys())))
-                if cond in stat_dict.keys():
+                    # get player abbrev from cond
+                    # by removing group and position from end of cond
+                    # remove group
+                    abbrev_key = gp_abbrev + '-' + gp_team
                     if prints_on:
-                        print('found cond in stat dict: ' + cond)
+                        print('Single player cond')
+                        print('abbrev_key: ' + abbrev_key)
+                    if abbrev_key in all_players_abbrevs[year].keys():
+                        game_player = all_players_abbrevs[year][abbrev_key]
+                        # use cur team bc cur conds
+                        game_player_abbrevs = converter.convert_player_name_to_abbrevs(game_player, all_players_abbrevs, gp_team, prints_on=prints_on)
+                        if prints_on:
+                            print('game_player: ' + game_player)
+                            print('game_player_abbrevs: ' + str(game_player_abbrevs))
+                        for abbrev in game_player_abbrevs:
+                            gp_cond = abbrev
+                            if re.search(opp_key, condition):
+                                gp_cond += opp_key 
+                            gp_cond += ' ' + team_part
+                            if prints_on:
+                                print('gp_cond: ' + str(gp_cond))
+                            
+                            # append string to list
+                            conditions.append(gp_cond)
+
+
+
+                    # irregular_abbrevs = ['og anunoby']
+                    
+                    # # remove position
+                    # #gp_abbrev_data = condition.split()[:-2]
+                    # gp_abbrev = gp_abbrev.rsplit(' ', 1)[0]#.strip()
+                    # print('gp_abbrev: ' + gp_abbrev)
+                    # if gp_abbrev in irregular_abbrevs:
+                    #     # try all versions of abbrev
+                        
+                    #     # if 2 letters in first name, try version with 1 letter
+                    #     cond_data = condition.split()
+                    #     if len(cond_data[0]) > 1:
+                    #         alt_cond = cond_data[0][0]
+                    #         for data in cond_data[1:]:
+                    #             alt_cond += ' ' + data
+                    #         conditions.append(alt_cond)
+                    #     print('conditions: ' + str(conditions))
+            
+                if prints_on:
+                    print('conditions: ' + str(conditions))
+                #sample_size = 0
+                for cond in conditions:
+                    # if prints_on:
+                    #     print('cond: ' + cond)
+                    #     print('cond keys: ' + str(list(stat_dict.keys())))
+                    if cond in stat_dict.keys():
+                        if prints_on:
+                            print('found cond in stat dict: ' + cond)
+                        # cannot take first stat dict bc prev val depends on which stat
+                        #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+                        cond_stat_dict = stat_dict[cond]
+                        #print('cond_stat_dict: ' + str(cond_stat_dict))
+                        # if given gp cur team then cut off before prev team
+                        if gp_cur_team is not None:
+                            if prints_on:
+                                print('gp cur team: ' + str(gp_cur_team))
+                            # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
+                            prev_minutes = 0
+                            for game_idx in cond_stat_dict.keys():
+                                #print('game idx: ' + game_idx)
+                                # first instance of cond may already be > gp cur team
+                                if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
+                                    break
+
+                                # IF ensure not outlier 
+                                # outlier if < 1/4 prev minutes
+                                # 1/4 only applies to minutes
+                                # so no matter the stat always check minutes are standard range not outlier
+                                minutes = minutes_dict[cond][game_idx]
+                                if minutes > prev_minutes / 4:
+                                    sample_size += 1
+                                    prev_minutes = minutes
+                        else:
+                            sample_size += len(cond_stat_dict.keys())
+
+            else: # normal cond only has 1 version
+                if condition in stat_dict.keys():
                     # cannot take first stat dict bc prev val depends on which stat
                     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
-                    cond_stat_dict = stat_dict[cond]
+                    cond_stat_dict = stat_dict[condition]
                     #print('cond_stat_dict: ' + str(cond_stat_dict))
-                    # if given gp cur team then cut off before prev team
+                    # take only up to index < gp cur team, if given
+                    #sample_size = 0
                     if gp_cur_team is not None:
                         if prints_on:
                             print('gp cur team: ' + str(gp_cur_team))
@@ -1364,7 +1398,6 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                         prev_minutes = 0
                         for game_idx in cond_stat_dict.keys():
                             #print('game idx: ' + game_idx)
-                            # first instance of cond may already be > gp cur team
                             if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
                                 break
 
@@ -1372,54 +1405,25 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                             # outlier if < 1/4 prev minutes
                             # 1/4 only applies to minutes
                             # so no matter the stat always check minutes are standard range not outlier
-                            minutes = minutes_dict[cond][game_idx]
+                            minutes = minutes_dict[condition][game_idx]
                             if minutes > prev_minutes / 4:
                                 sample_size += 1
                                 prev_minutes = minutes
+
                     else:
-                        sample_size += len(cond_stat_dict.keys())
+                        sample_size = len(cond_stat_dict.keys())
 
-        else: # normal cond only has 1 version
-            if condition in stat_dict.keys():
-                # cannot take first stat dict bc prev val depends on which stat
-                #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
-                cond_stat_dict = stat_dict[condition]
-                #print('cond_stat_dict: ' + str(cond_stat_dict))
-                # take only up to index < gp cur team, if given
-                #sample_size = 0
-                if gp_cur_team is not None:
-                    if prints_on:
-                        print('gp cur team: ' + str(gp_cur_team))
-                    # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
-                    prev_minutes = 0
-                    for game_idx in cond_stat_dict.keys():
-                        #print('game idx: ' + game_idx)
-                        if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
-                            break
-
-                        # IF ensure not outlier 
-                        # outlier if < 1/4 prev minutes
-                        # 1/4 only applies to minutes
-                        # so no matter the stat always check minutes are standard range not outlier
-                        minutes = minutes_dict[condition][game_idx]
-                        if minutes > prev_minutes / 4:
-                            sample_size += 1
-                            prev_minutes = minutes
-
-                else:
-                    sample_size = len(cond_stat_dict.keys())
-
-        
-        
-        # V1: normal cond only has 1 version
-        # if condition in stat_dict.keys():
-        #     # cannot take first stat dict bc prev val depends on which stat
-        #     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
-        #     cond_stat_dict = stat_dict[condition]
-        #     #print('cond_stat_dict: ' + str(cond_stat_dict))
-        #     v1_sample_size = len(cond_stat_dict.keys())
-            # if prints_on:
-            #     print('v1_sample_size: ' + str(v1_sample_size))
+            
+            
+            # V1: normal cond only has 1 version
+            # if condition in stat_dict.keys():
+            #     # cannot take first stat dict bc prev val depends on which stat
+            #     #stat_dict = list(player_stat_dict[year][part].values())[0][condition]
+            #     cond_stat_dict = stat_dict[condition]
+            #     #print('cond_stat_dict: ' + str(cond_stat_dict))
+            #     v1_sample_size = len(cond_stat_dict.keys())
+                # if prints_on:
+                #     print('v1_sample_size: ' + str(v1_sample_size))
 
     if prints_on:
         print('sample_size: ' + str(sample_size))
@@ -2792,24 +2796,27 @@ def determine_next_game_date(schedule_date_dict, cur_yr):
     # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
     # print('\nOutput: next_game_date = mm/dd/yyyy\n')
 
+    # if last game of season then no next game or first game of next season
+    next_game_date = '10/01/' + cur_yr
 
     next_game_num = determine_next_game_num(schedule_date_dict, cur_yr)
     
     # mm/dd
-    next_game_date = schedule_date_dict[next_game_num].split(', ')[1] # mar 31
-    next_game_mth = next_game_date.split()[0].lower() # mar
-    #print('next_game_mth: ' + str(next_game_mth))
-    # game_mth = next_game_date.split()[0] # mar
-    # print('game_mth: ' + game_mth)
-    next_game_mth = converter.convert_month_abbrev_to_num(next_game_mth)
-    #print('next_game_mth_num: ' + str(next_game_mth))
-    
-    next_game_yr = determine_game_year(next_game_mth, cur_yr)
+    if next_game_num in schedule_date_dict.keys():
+        next_game_date = schedule_date_dict[next_game_num].split(', ')[1] # mar 31
+        next_game_mth = next_game_date.split()[0].lower() # mar
+        #print('next_game_mth: ' + str(next_game_mth))
+        # game_mth = next_game_date.split()[0] # mar
+        # print('game_mth: ' + game_mth)
+        next_game_mth = converter.convert_month_abbrev_to_num(next_game_mth)
+        #print('next_game_mth_num: ' + str(next_game_mth))
+        
+        next_game_yr = determine_game_year(next_game_mth, cur_yr)
 
-    next_game_day = next_game_date.split()[1].lower() # 31
-    #print('next_game_day: ' + str(next_game_day))
-    
-    next_game_date = str(next_game_mth) + '/' + next_game_day + '/' + next_game_yr # mm/dd + /yyyy
+        next_game_day = next_game_date.split()[1].lower() # 31
+        #print('next_game_day: ' + str(next_game_day))
+        
+        next_game_date = str(next_game_mth) + '/' + next_game_day + '/' + next_game_yr # mm/dd + /yyyy
 
     # next_game_date_obj = datetime.strptime(next_game_date, '%b %d %Y')
     # next_game_date = next_game_date_obj.strftime('%m/%d/%Y')
@@ -3064,8 +3071,8 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'dennis smith jr'
     elif player == 'g' and team == 'mil': # no position in abbrev so we know from lineup source
         return 'giannis antetokounmpo'
-    elif player == 'kj martin':
-        return 'kenyon martin jr'
+    # elif player == 'kj martin': # i think espn updated name to kj martin
+    #     return 'kenyon martin jr'
     elif player == 'p baldwin':
         return 'patrick baldwin jr'
     elif player == 'marvin bagley' or player == 'm bagley':
@@ -3074,6 +3081,9 @@ def determine_player_full_name(init_player, team, all_players_teams, rosters={},
         return 'jaylin williams'
     elif player == 'j williams' and team == 'okc' and position == 'f':
         return 'jalen williams'
+    # need to fix workflow to keep apostrophes for all names unless format refuses
+    elif player == 'j tate':
+        return "jae'sean tate"
     # add jr to end of name in irreg cases
     # cannot simply look for jr in all case bc maybe diff players, 1 jr and other not
     elif player == 'kelly oubre':
@@ -3436,23 +3446,27 @@ def determine_player_team_idx(player, player_team_idx, game_idx, row, games_play
 
 
 def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player):
-    #print('\n===Determine Teams Reg + Playoff Games Played: ' + player.title() + '===\n')
+    print('\n===Determine Teams Reg + Playoff Games Played: ' + player.title() + '===\n')
     
     # read all box scores if postseason to get more samples and compare to reg season
-    if season_part == 'postseason':
-        season_part = 'full'
+    # if season_part == 'postseason':
+    #     season_part = 'full'
 
     player_season_log_df = pd.DataFrame(player_season_log)
-    season_part_game_log = determine_season_part_games(player_season_log_df, season_part)
+    
 
     num_playoff_games = 0 # reg season idx
-    if season_part == 'regular':
-        if len(season_part_game_log.index) > 0:
-            num_playoff_games = int(season_part_game_log.index[0]) # num playoff games not counting playin bc playn listed after 
-    else: # full
-        regseason_game_log = determine_season_part_games(player_season_log_df)
-        if len(regseason_game_log.index) > 0:
-            num_playoff_games = int(regseason_game_log.index[0])
+    # if season_part == 'regular': # already have so no need to get separate
+    #     season_part_game_log = determine_season_part_games(player_season_log_df)#, season_part)
+    #     if len(season_part_game_log.index) > 0:
+    #         num_playoff_games = int(season_part_game_log.index[0]) # num playoff games not counting playin bc playn listed after 
+    # else: # need reg log 0 idx num to get playoff games
+    #     regseason_game_log = determine_season_part_games(player_season_log_df)
+    #     if len(regseason_game_log.index) > 0:
+    #         num_playoff_games = int(regseason_game_log.index[0])
+    regseason_game_log = determine_season_part_games(player_season_log_df)
+    if len(regseason_game_log.index) > 0:
+        num_playoff_games = int(regseason_game_log.index[0])
     #print('num_playoff_games: ' + str(num_playoff_games))
     
     # determine player team for game at idx
@@ -3508,11 +3522,11 @@ def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log
     teams_reg_and_playoff_games_played = int(reg_and_playoff_games_played[player_team_idx])
     
 
-    # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
-    # #print('season_part_game_log: ' + str(season_part_game_log))
-    # print('teams: ' + str(teams))
-    # print('games_played: ' + str(games_played))
-    return (teams_reg_and_playoff_games_played, season_part_game_log, teams, games_played)
+    print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+    #print('season_part_game_log: ' + str(season_part_game_log))
+    print('teams: ' + str(teams))
+    print('games_played: ' + str(games_played))
+    return (teams_reg_and_playoff_games_played, teams, games_played)
 
 def determine_regular_season_games(player_game_log):
 
@@ -3567,6 +3581,8 @@ def determine_season_part_games(player_game_log, season_part='regular', player='
         # select season part games by type
         # so we need to have accurate types set in read season log
         
+        # we use full for postseason bc we need more samples
+        # full diff from post bc sometimes we want to see post only
         if season_part != 'full': # bc full does not have game type bc it takes all types
             season_part_games_df = season_part_games_df[season_part_games_df['Type'].str.startswith(season_part.title())]
             #print("partial reg_season_games_df:\n" + str(reg_season_games_df) + '\n')

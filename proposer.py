@@ -6,10 +6,14 @@
 # list of conditions
 # playing against former team players probably play better bc more effort
 
-#/.venv/bin/python
+# recognizes absolute path like
+#absolute path: /usr/local/bin
+#relative path: /.venv/bin/python3
 # source .venv/bin/activate
+# try with relative path bc prob dist runs slow like joblib not connected?
+# seems like relative path either doesnt work or doesnt help joblib
+# following seems to work except joblib not working???
 #!/Users/m/repos/proposer/.venv/bin/python3
-
 
 
 import generator, reader#, writer
@@ -49,6 +53,8 @@ irreg_play_times = {}#{'dennis schroder': 22}
 # read all seasons to compare and see trend
 read_x_seasons = 2 # set 0 or high number to read all seasons
 read_season_year = 2024 # user can choose year. read x seasons previous
+# see determine_current_season_part()
+#read_season_part = 'postseason'
 
 # === MODEL SEASONS === 
 # no. seasons to use in all data to fit probability distribution
@@ -129,10 +135,10 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = False
+test = True
 
 # run dist probs with prints/comments
-prints_on = False
+prints_on = True
 if test:
     prints_on = True
 
@@ -164,6 +170,8 @@ if not test:
     # problem error forbidden reading page at 330am-5am???
     ofs_players = reader.read_ofs_players(ofs_players)
 
+
+# VARIABLE USER INPUT
 # === Max Props ===
 # ideal no. props to diversify to ensure min risk/volatility
 # 30 is good according to portfolio theory
@@ -171,7 +179,9 @@ if not test:
 # change during run bc run again an hour before each game that day
 # so subtract num from prev run to get cur run max props
 # need to save in file BUT cant tell if props in run actually used
-max_props = 30
+# ~1/3 props are flagged by FD to avoid so add 10 to end with ~30 props
+max_props = 40
+cutoff_time = '11:59 pm' # default 11:59 pm bc latest games??? better to default blank for no cutoff or just make 1159pm???
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 
@@ -205,7 +215,8 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
 # [('min','chi')]#
-game_teams = []#, ('nop','lal')
+#[('lal','nop')] #
+game_teams = [] #('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams
@@ -213,10 +224,10 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('phi','mia')]
+    game_teams = [('mia', 'phi')]
 
 if len(game_teams) == 0:
-    game_teams = reader.read_current_game_teams()
+    game_teams = reader.read_current_game_teams(cutoff_time)
 # if not test_performance:
 #     game_teams = reader.read_game_teams(read_season_year)
 # if read_season_year == current_year:
@@ -227,7 +238,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['terry rozier'] # 'jacob gilyard', use for testing
+    players_names = ['jimmy butler'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

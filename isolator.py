@@ -4,6 +4,7 @@
 
 import re
 from tabulate import tabulate # display output
+import numpy as np
 
 import determiner # determine vals in dict to isolate
 import sorter # sort dicts by key to get highest ev dict
@@ -161,6 +162,39 @@ def isolate_high_prob_props(prop_dicts):
     print('high_prob_props: ' + str(high_prob_props))
     return high_prob_props
 
+
+def separate_threes_props(prop_dicts, all_players_season_logs):
+    print('\n===Separate 3s Props===\n')
+    print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+
+    common_props = []
+    threes_props = []
+
+    for prop_dict in prop_dicts:
+
+        # if 3s prop w/ low avg, too volatile and hard to model
+        # with current methods
+        stat_name = prop_dict['stat']
+
+        # rotations change ~ every 15 games
+        # get cur yr log 3s attempts
+        player_season_log = list(all_players_season_logs[prop_dict['player']].values())[0]
+        all_three_attempts = list(player_season_log['3PT_A'].values())[:15]
+
+        avg_three_attempts = np.mean(all_three_attempts)
+
+        # if recommends under but against former team on national tv 
+        # expect more effort so higher stats so avoid under in this case
+        if stat_name == '3pm' and avg_three_attempts < 2:
+            threes_props.append(prop_dict)
+        else:
+            common_props.append(prop_dict)
+
+
+    return common_props, threes_props
+
+
+
 # former + national
 def separate_fn_props(prop_dicts):
     print('\n===Separate Former+National Props===\n')
@@ -222,7 +256,10 @@ def separate_opposite_count_props(prop_dicts):
 
         # if count over and recommends taking over, 
         # AVOID bc less likely to continue above/below avg
-        if count > 0 and stat_val[-1] == '+':
+        # exclude count=0 when we want specifically favorable conditions
+        if count == 0:
+            opp_cnt_props.append(prop_dict)
+        elif count > 0 and stat_val[-1] == '+':
             opp_cnt_props.append(prop_dict)
         elif count < 0 and stat_val[-1] == '-':
             opp_cnt_props.append(prop_dict)
@@ -406,9 +443,9 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
                 if field == 'odds':
                     low = -1000
                 elif field == 'ev':
-                    low = 0 # if 0ev only take if ultra rare prev or huge unaccounted for factor
+                    low = 0.01 # if 0ev only take if ultra rare prev or huge unaccounted for factor
                 elif field == 'dp':
-                    low = 0
+                    low = 1
                 elif field == 'true prob':
                     low = 25
                 elif field == 'ap':
