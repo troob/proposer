@@ -11,6 +11,7 @@ import pandas as pd # write spreadsheets from lists to dataframes
 from datetime import datetime # add date to filename
 
 import numpy as np # mean, median to display over time
+import os
 import re # see if string contains stat and player of interest to display
 
 from tabulate import tabulate # display output, eg consistent stat vals
@@ -524,7 +525,8 @@ def write_json_to_file(dict, filepath, write_param='w+'):
     #         os.mkdir(folder_path)
 
 
-    #if not os.path.isfile(filepath):
+    if not os.path.isfile(filepath):
+        open(filepath, 'x')
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?
     with open(filepath, write_param) as outfile:
