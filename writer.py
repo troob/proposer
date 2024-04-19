@@ -525,12 +525,21 @@ def write_json_to_file(dict, filepath, write_param='w+'):
     #         os.mkdir(folder_path)
 
 
-    if not os.path.isfile(filepath):
-        open(filepath, 'x')
+    try:
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?
-    with open(filepath, write_param) as outfile:
-        json.dump(dict, outfile)
+        with open(filepath, write_param) as outfile:
+            json.dump(dict, outfile)
+
+    except Exception as e:
+        print('e: ' + str(e))
+        if str(e) == 'FileNotFoundError':
+            #if not os.path.isfile(filepath):
+            gpath = 'content/gdrive/My Drive/' + filepath
+            open(gpath, 'x')
+
+            with open(gpath, write_param) as outfile:
+                json.dump(dict, outfile)
 
 # data = [[name,id],..]
 # for espn id we only want to append new ids bc they do not change
