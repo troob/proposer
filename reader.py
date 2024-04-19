@@ -5325,7 +5325,7 @@ def read_player_position(player_name, player_id, init_all_players_positions={}):
 
 	# if not given exisiting positions see if local file saved
 	if len(init_all_players_positions.keys()) == 0:
-		data_type = 'player positions'
+		data_type = 'Player Positions'
 		player_positions = extract_data(data_type, header=True)
 		
 		for row in player_positions:
@@ -5394,7 +5394,7 @@ def read_all_players_positions(players_names, all_players_espn_ids, game_teams=[
 	all_players_positions = {}
 
 	# see if position saved in file
-	data_type = 'player positions'
+	data_type = 'Player Positions'
 	player_positions = extract_data(data_type, header=True)
 	init_all_players_positions = {}
 	for row in player_positions:
