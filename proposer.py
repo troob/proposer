@@ -138,7 +138,7 @@ read_new_rosters = False
 test = True
 
 # run dist probs with prints/comments
-prints_on = True
+prints_on = False
 if test:
     prints_on = True
 
@@ -224,7 +224,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('mia', 'phi')]
+    game_teams = [('mia', 'chi')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)

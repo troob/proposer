@@ -2128,7 +2128,13 @@ def read_dk_solo(driver, stats_of_interest):
 					web_dict[stat_name][player_name][over_stat] = over_odds
 					web_dict[stat_name][player_name][under_stat] = under_odds
 
-
+			# Separate Any Player stats which can hit if any player hits
+			elif re.search('Any Player', section_html_str):
+				print('Found Any Player Props Section')
+			elif re.search('Combined Total', section_html_str):
+				print('Found Combined Total Props Section')
+			
+   			
 			else: # read list of components
 				
 				player_comps = e.find_element('class name', 'sportsbook-event-accordion__children-wrapper').find_elements('xpath', '*') #('tag name', 'div')
@@ -3290,7 +3296,7 @@ def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 	
 	
 	
-	print('all_players_solo_odds: ' + str(all_players_solo_odds))
+	#print('all_players_solo_odds: ' + str(all_players_solo_odds))
 	# print('all_players_multi_odds: ' + str(all_players_multi_odds))
 	return all_players_solo_odds#, all_players_multi_odds
 
@@ -5498,7 +5504,8 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 				len_html_results = len(html_results) # each element is a dataframe/table so we loop thru each table
 				#print('len_html_results: ' + str(len_html_results))
 				for order in range(len_html_results):
-					#print("order: " + str(order))
+					#print("\nOrder: " + str(order))
+					#print("html_results[order]: " + str(html_results[order]))
 
 					# see if we can find header to differntiate preseason and regseason
 					# what if only 1 table is preseason?
@@ -5524,8 +5531,12 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 						# len=4 does not work for unknown reason
 						preseason = False
 						if len_html_results - 2 == order and len_html_results > 4: # 3 or more should work but check if invalid for any players bc 4 or more means they did not play preseason but does not account for if they played postseason
-							part_of_season['Type'] = 'Preseason'
-							preseason = True
+							last_cell = part_of_season.iloc[-1,0]
+							#print('last_cell: ' + str(last_cell))
+							if not re.search('play-in',last_cell.lower()):
+								#print('Found Preseason')
+								part_of_season['Type'] = 'Preseason'
+								preseason = True
 
 						# what if len only 3 bc missed preseason? check that games are in october
 						#elif len_html_results == 3 and order == 1:
@@ -5558,16 +5569,22 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 						# 		part_of_season['Type'] = 'Preseason'
 
 						if not preseason:
+							#print('Not Preseason')
 							# last row of postseason section has 'finals' in it, eg quarter finals, semi finals, finals
 							last_cell = part_of_season.iloc[-1,0]
 							#print('last_cell: ' + str(last_cell))
 							if re.search('final',last_cell.lower()) or re.search('play-in',last_cell.lower()):
+								#print('Found Postseason')
 								part_of_season['Type'] = 'Postseason'
 							# if len(part_of_season[(part_of_season['OPP'].str.contains('GAME'))]) > 0:
 							# 	part_of_season['Type'] = 'Postseason'
+							
+							# may need to separate playin from postseason bc idx comes after reg season games
 							# elif re.search('play-in',last_cell.lower()):
-							# 	part_of_season['Type'] = 'Playin'
+							# 	part_of_season['Type'] = 'Play-In'
+							
 							else:
+								#print('Found Regular')
 								# cannot assign type to whole subsection bc mixed in with in-season tournament
 								# only game that doesnt count is champ so look for label below row: 'championship'
 								# row 2: game stats
@@ -5686,8 +5703,10 @@ def read_player_season_log(player_name, season_year=2024, player_url='', player_
 
 
 # here we decide default season year, so make input variable parameter
+# second postseason section is playin bc no need to label separately...YET
 def read_player_season_logs(player_name, current_year_str, todays_date, player_espn_id='', read_x_seasons=1, all_players_espn_ids={}, season_year=2024, all_game_logs={}, player_teams={}, all_seasons_start_days={}):
-	#print('\n===Read Player Season Logs: ' + player_name.title() + '===\n')
+	# print('\n===Read Player Season Logs: ' + player_name.title() + '===\n')
+	# print('\nOutput: {\'2024\': {\'Player\': {\'0\': \'jimmy butler\', ..., \'Type\': {\'0\': \'Postseason\', ..., \'10\': \'Regular\', ..., \'60\': \'Postseason\', ..., \'62\': \'Preseason\'}, ...\n')
 
 	player_name = player_name.lower()
 

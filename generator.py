@@ -2391,8 +2391,12 @@ def generate_ev(prob, odds):
 
 
 # make logs dicts sorted by yr
-def generate_reg_season_logs(player_season_logs):
-    reg_season_logs = {}
+def generate_season_part_logs(player_season_logs, season_part='regular'):
+    print('\n===Generate Season Part Logs===\n')
+    print('season_part = ' + str(season_part))
+    print('player_season_logs = ' + str(player_season_logs))
+    
+    season_part_logs = {}
 
     # for year, year_season_log in player_season_logs.items():
     #     reg_season_logs[year] = {}
@@ -2408,12 +2412,12 @@ def generate_reg_season_logs(player_season_logs):
         player_season_log_df.index = player_season_log_df.index.map(str)
         #print('player_season_log_df: ' + str(player_season_log_df))
 
-        reg_season_log_df = determiner.determine_season_part_games(player_season_log_df)
+        reg_season_log_df = determiner.determine_season_part_games(player_season_log_df, season_part)
         reg_season_log = reg_season_log_df.to_dict()
-        reg_season_logs[year] = reg_season_log
+        season_part_logs[year] = reg_season_log
 
-    #print('reg_season_logs: ' + str(reg_season_logs))
-    return reg_season_logs
+    print('season_part_logs: ' + str(season_part_logs))
+    return season_part_logs
 
 def generate_part_season_logs(player_season_logs, part):
     print('\n===Generate Part Season Logs===\n')
@@ -5852,7 +5856,9 @@ def generate_player_stat_counts(player, player_season_log, stats_of_interest, pr
                 # reset prev stat val for each game bc adding all stats in single game
                 prev_stat_val = 0
                 for sn in stat_names:
-                    prev_stat_val += int(player_season_log[sn.upper()][str(val_idx)])
+                    # take first idx, not idx='0' bc postseason idx != 0
+                    #prev_stat_val += int(player_season_log[sn.upper()][str(val_idx)])
+                    prev_stat_val += int(list(player_season_log[sn.upper()].values())[0])
 
                 all_prev_stat_vals.append(prev_stat_val)
         else:
@@ -7069,8 +7075,8 @@ def generate_all_players_distrib_probs(all_player_unit_stat_dicts, all_cur_conds
     return all_players_distrib_probs
 
 def generate_samples_from_set(condition_stat_data, num_samples):
-    print('\n===Generate Samples from Set===\n')
-    print('init condition_stat_data: ' + str(condition_stat_data))
+    # print('\n===Generate Samples from Set===\n')
+    # print('init condition_stat_data: ' + str(condition_stat_data))
 
     # gen random idx from 0 to len(cond stat data)
     for num in range(num_samples):
@@ -7081,15 +7087,15 @@ def generate_samples_from_set(condition_stat_data, num_samples):
 
         condition_stat_data.append(sample)
 
-    print('final condition_stat_data: ' + str(condition_stat_data))
+    #print('final condition_stat_data: ' + str(condition_stat_data))
     return condition_stat_data
 
 
 def generate_num_samples(season_year, furthest_year, base_num_samples):
-    print('\n===Generate Num Samples===\n')
-    print('season_year: ' + str(season_year))
-    print('furthest_year: ' + str(furthest_year))
-    print('base_num_samples: ' + str(base_num_samples))
+    # print('\n===Generate Num Samples===\n')
+    # print('season_year: ' + str(season_year))
+    # print('furthest_year: ' + str(furthest_year))
+    # print('base_num_samples: ' + str(base_num_samples))
 
 
     num_samples = 0
@@ -7118,7 +7124,7 @@ def generate_num_samples(season_year, furthest_year, base_num_samples):
         num_samples = total_num_samples - base_num_samples
 
 
-    print('num_samples = total_num_samples - base_num_samples = ' + str(num_samples))
+    #print('num_samples = total_num_samples - base_num_samples = ' + str(num_samples))
     return num_samples
 
 def fit_dist(all_data):
@@ -7611,6 +7617,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
     else:
         
+        # if no lineup given, just take avg minutes
         if len(player_gp_conds) > 0:
             #cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part)
         
@@ -7705,7 +7712,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                     player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
             else:
                 player_cur_part_stat_dict = player_stat_dict[cur_yr][season_part]
-            #print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
+            print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
 
             # for playtime we are first concerned with teammates in/out
             # then we can consider how many opponents at each position to approximate matchups and therefore playtime
@@ -7986,14 +7993,16 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             #     print('Warning: denom = sum_weights = 0 bc no samples for condition!')
 
         else: # not given player conds so just use most recent games to get idea of minutes if all teammates happen to be the same
+            print('No Lineup Given')
             #player_season_logs = all_players_season_logs[player_name]
             # get current season mean minutes to compare to prev seasons
             # we use mean of last 3 games bc most accurate considering ups and downs of rotation
             #cur_yr = list(player_season_logs.keys())[0]
             #print('cur_yr: ' + cur_yr)
-            reg_season_logs = generate_reg_season_logs(player_season_logs)
-            cur_season_log = reg_season_logs[cur_yr]#list(player_season_logs.values())[0]
-            #print('cur_season_log: ' + str(cur_season_log))
+            #reg_season_logs = generate_reg_season_logs(player_season_logs)
+            season_part_logs = generate_season_part_logs(player_season_logs, season_part)
+            cur_season_log = season_part_logs[cur_yr]#list(player_season_logs.values())[0]
+            print('cur_season_log: ' + str(cur_season_log))
             #cur_mean_minutes = 0
             # season_log = {stat name: {game idx: stat val, ...
             if 'MIN' in cur_season_log.keys():
@@ -8070,13 +8079,13 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
         # year is a string bc it can be read from json which forces string
         for year, year_stat_dict in player_stat_dict.items():
             year = str(year) # to compare to json
-            print("\n===Year " + year + "===\n")
+            #print("\n===Year " + year + "===\n")
 
             if year not in player_unit_stat_dict.keys():
                 player_unit_stat_dict[year] = {}
 
             for part, part_stat_dict in year_stat_dict.items():
-                print("\n===Season Part " + str(part) + "===\n")
+                #print("\n===Season Part " + str(part) + "===\n")
 
                 if part not in player_unit_stat_dict[year].keys():
                     player_unit_stat_dict[year][part] = {}
@@ -8086,19 +8095,19 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                 season_log = part_season_logs[year]
                 #print('season_log: ' + str(season_log))
                 season_minutes_dict = season_log['MIN'] # {game idx: minutes, ... = {'20': m, ...}
-                print('season_minutes_dict: ' + str(season_minutes_dict))
+                #print('season_minutes_dict: ' + str(season_minutes_dict))
                 for stat, stat_dict in part_stat_dict.items():
                     
                     # include stat combos
                     if stat in stats_of_interest or re.search('\\+', stat):
-                        print("\n===Stat Name " + str(stat) + "===\n")
+                        #print("\n===Stat Name " + str(stat) + "===\n")
 
                         if stat not in player_unit_stat_dict[year][part].keys():
                             player_unit_stat_dict[year][part][stat] = {}
 
                         # condition_stat_dict = {game idx: stat val, ...
                         for condition, condition_stat_dict in stat_dict.items():
-                            print("\n===Condition " + str(condition) + "===\n")
+                            #print("\n===Condition " + str(condition) + "===\n")
 
                             if condition not in player_unit_stat_dict[year][part][stat].keys():
                                 player_unit_stat_dict[year][part][stat][condition] = {}
@@ -8106,7 +8115,7 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                             #num_games_reached = 0 # num games >= stat val, stat count, reset for each check stat val bc new count
                             # loop through games to get count stat val >= game stat val
                             for game_idx, game_stat_val in condition_stat_dict.items():
-                                print('\ngame_idx: ' + str(game_idx))
+                                #print('\ngame_idx: ' + str(game_idx))
                                 # if 0 consider adding x instead of multiplying 0
 
                                 # prev stat val meaning from a prev game so will be adjusted to current minutes
@@ -8121,7 +8130,7 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                                 #relative_game_idx = game_idx + int(list(list(season_log.values()[0].keys())[0]))
                                 
                                 game_minutes = season_minutes_dict[game_idx] #list(season_log['MIN'].values())[int(game_idx)]#[str(relative_game_idx)]
-                                print('game_minutes: ' + str(game_minutes))
+                                #print('game_minutes: ' + str(game_minutes))
                                 # print('game_stat_val * cur_mean_minutes / game_minutes')
                                 # print(str(game_stat_val) + ' * ' + str(cur_mean_minutes) + ' / ' + str(game_minutes))
                                 # game stat val is what the stat val would be if playing current minutes
@@ -8129,7 +8138,7 @@ def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, p
                                 if game_minutes > 4:
                                     unit_stat_val = round_half_up(float(game_stat_val) * float(cur_mean_minutes) / float(game_minutes))
                                 
-                                print('unit_stat_val: ' + str(unit_stat_val))
+                                #print('unit_stat_val: ' + str(unit_stat_val))
                                     
                                 player_unit_stat_dict[year][part][stat][condition][game_idx] = unit_stat_val
 

@@ -3446,7 +3446,7 @@ def determine_player_team_idx(player, player_team_idx, game_idx, row, games_play
 
 
 def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log, season_part, season_year, cur_yr, gp_cur_team, player):
-    print('\n===Determine Teams Reg + Playoff Games Played: ' + player.title() + '===\n')
+    #print('\n===Determine Teams Reg + Playoff Games Played: ' + player.title() + '===\n')
     
     # read all box scores if postseason to get more samples and compare to reg season
     # if season_part == 'postseason':
@@ -3522,10 +3522,10 @@ def determine_teams_reg_and_playoff_games_played(player_teams, player_season_log
     teams_reg_and_playoff_games_played = int(reg_and_playoff_games_played[player_team_idx])
     
 
-    print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
-    #print('season_part_game_log: ' + str(season_part_game_log))
-    print('teams: ' + str(teams))
-    print('games_played: ' + str(games_played))
+    # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+    # #print('season_part_game_log: ' + str(season_part_game_log))
+    # print('teams: ' + str(teams))
+    # print('games_played: ' + str(games_played))
     return (teams_reg_and_playoff_games_played, teams, games_played)
 
 def determine_regular_season_games(player_game_log):
