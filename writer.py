@@ -511,7 +511,7 @@ def write_data_to_file(data, filepath, write_param, extension='csv'):
     else:
         print('Warning: Unknown file extension! ')
     
-def write_json_to_file(dict, filepath, write_param='w'):
+def write_json_to_file(dict, filepath, write_param='x'):
     #print('\n===Write JSON to File: ' + filepath + '===\n')
     # filepath = data/game logs/cur/...
 
