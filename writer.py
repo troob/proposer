@@ -511,7 +511,7 @@ def write_data_to_file(data, filepath, write_param, extension='csv'):
     else:
         print('Warning: Unknown file extension! ')
     
-def write_json_to_file(dict, filepath, write_param='x'):
+def write_json_to_file(dict, filepath, write_param='w+'):
     #print('\n===Write JSON to File: ' + filepath + '===\n')
     # filepath = data/game logs/cur/...
 
@@ -524,6 +524,7 @@ def write_json_to_file(dict, filepath, write_param='x'):
     #         os.mkdir(folder_path)
 
 
+    #if not os.path.isfile(filepath):
 
     #filepath = re.sub('\s+','-',filepath) # is this needed or are spaces ok?
     with open(filepath, write_param) as outfile:
