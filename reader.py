@@ -362,9 +362,10 @@ def read_all_teams_schedules(game_teams):
 	return all_teams_schedules
 
 
-def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player):
-	# print('\n===Read Player Prev Stat Vals: ' + player.title() + '===\n')
-	# print('season_log_of_interest: ' + str(season_log_of_interest))
+def read_player_prev_stat_vals(reg_season_log, post_season_log, stats_of_interest, player):
+	print('\n===Read Player Prev Stat Vals: ' + player.title() + '===\n')
+	print('reg_season_log: ' + str(reg_season_log))
+	print('post_season_log: ' + str(post_season_log))
 
 	player_prev_stat_vals = {}
 	
@@ -378,31 +379,73 @@ def read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player
 		if stat_name == '3pm':
 			log_stat_name = '3PT_SA'
 		prev_stat_vals = None
+		# if combo stat
 		if re.search('\\+', stat_name):
 			prev_stat_vals = []
 			stat_names = stat_name.split('+')
-			
+
+			# first postseason, then regseason
+			# ===Postseason
 			# take first stat to get length
-			stat_vals = list(season_log_of_interest['PTS'].values())
+   
+			if 'PTS' in post_season_log.keys():
+				stat_vals = list(post_season_log['PTS'].values())
+				for val_idx in range(len(stat_vals)):
+					# reset prev stat val for each game bc adding all stats in single game
+					prev_stat_val = 0
+					for sn in stat_names:
+						# some players not played postseason
+						#if sn.upper() in post_season_log.keys():
+						# cannot add to none but need to start with none in case no samples OR could use bool
+						# ACTUALLY INSTEAD if no pts above then will not reach here so prev stat val can start as 0 bc we know there will be a prev stat val to add
+						# if prev_stat_val is None:
+						# 	prev_stat_val = 0 
+						prev_stat_val += int(list(post_season_log[sn.upper()].values())[val_idx]) # [str(val_idx)]
+
+					#if prev_stat_val is not None:
+					prev_stat_vals.append(prev_stat_val)
+
+			# ===Regular
+			stat_vals = list(reg_season_log['PTS'].values())
 			for val_idx in range(len(stat_vals)):
 				# reset prev stat val for each game bc adding all stats in single game
 				prev_stat_val = 0
 				for sn in stat_names:
-					prev_stat_val += int(season_log_of_interest[sn.upper()][str(val_idx)])
+					prev_stat_val += int(list(reg_season_log[sn.upper()].values())[val_idx])
 
 				prev_stat_vals.append(prev_stat_val)
+
 		else:
-			prev_stat_vals = list(season_log_of_interest[log_stat_name.upper()].values())
+			# first postseason, then regseason
+			prev_stat_vals = []
+			# ===Postseason
+			# some players not played postseason
+			if log_stat_name.upper() in post_season_log.keys():
+				prev_stat_vals = list(post_season_log[log_stat_name.upper()].values())
+			# ===Regular
+			prev_stat_vals.extend(list(reg_season_log[log_stat_name.upper()].values()))
 	
 		player_prev_stat_vals[stat_name] = prev_stat_vals
 
+	print('player_prev_stat_vals: ' + str(player_prev_stat_vals))
 	return player_prev_stat_vals
 
-def read_player_last_stat_vals(season_log_of_interest, stats_of_interest):
+# if postseason, check if playin games at end of log
+# given gp regseason and game log
+# playin = game log - gp reg
+def read_player_last_stat_vals(season_log_of_interest, stats_of_interest, player=''):
+	print('\n===Read Player Last Stat Vals: ' + player.title() + '===\n')
+	print('season_log_of_interest: ' + str(season_log_of_interest))
 
-	prev_stat_vals = {}
+	last_stat_vals = {}
 	
 	#stats_of_interest = ['pts','ast','reb']
+ 
+ 	# if postseason samples, check if playoff/playin by game idx
+	# if playoff then simply take last idx
+ 	# BUT if playin, take most recent playin game,
+	# which is: playin idx = len game log - num playin
+	# if no post samples, use last game of regseason
 
 	for stat_name in stats_of_interest:
 	#for stat_name, stat_log in season_log_of_interest.items():
@@ -415,16 +458,20 @@ def read_player_last_stat_vals(season_log_of_interest, stats_of_interest):
 			prev_stat_val = 0
 			stat_names = stat_name.split('+')
 			for sn in stat_names:
-				prev_stat_val += int(season_log_of_interest[sn.upper()]['0'])
+				# not always idx='0' bc playin annoyingly placed out of chrono order
+				# but always first idx bc log chopped to only type=season part to check for playin 
+				# and then passes either reg season if first game of post, or post if any samples
+				prev_stat_val += int(list(season_log_of_interest[sn.upper()].values())[0])  # ['0']
 		else:
-			prev_stat_val = int(season_log_of_interest[log_stat_name.upper()]['0'])
+			prev_stat_val = int(list(season_log_of_interest[log_stat_name.upper()].values())[0])
 		
-		prev_stat_vals[stat_name] = prev_stat_val
+		last_stat_vals[stat_name] = prev_stat_val
 
-	return prev_stat_vals
+	print('last_stat_vals: ' + str(last_stat_vals))
+	return last_stat_vals
 
 # read along with current conditions
-def read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year):
+def read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_part):
 	print('\n===Read All Prev Stat Vals===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_prev_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
@@ -432,15 +479,45 @@ def read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_y
 	all_prev_stat_vals = {}
 
 	for player, player_season_logs in all_players_season_logs.items():
-		# print('\nPlayer: ' + player.title())
+		print('\nPlayer: ' + player.title())
 		# print('player_season_logs: ' + str(player_season_logs))
+
+		# in case player teams gp not updated???
+  		# requires updated accurate player teams gp value
+		# player_teams = all_players_teams[player]
+		# player_team_dict = list(player_teams.values())[-1]
+		# gp_regseason = player_team_dict['GP'] #determiner.determine_gp_regseason()
+		# use gp cur team to get accurate from game log, which takes only season part
+		#reg_gp_cur_team = determiner.determine_gp_cur_team()
+
+		
+
 		player_prev_stat_vals = {}
 		# dict goes from recent to distant so take first 1
 		if len(player_season_logs.keys()) > 0:
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
 			#print('season_log_of_interest: ' + str(season_log_of_interest))
+			reg_season_log = season_log_of_interest
+			post_season_log = {}
+   
+			# to get list of prev vals in order, need to sep reg/post 
+   			# bc playin sep from playoff in log but combine here
+			if season_part == 'postseason':
+				reg_season_log = isolator.isolate_season_part_dict(season_log_of_interest, 'regular')
+				print('reg_season_log: ' + str(reg_season_log))
+
+				# iso part of interest bc playin at bottom of log even though should be above reg season
+				# so if only season part, then just take first row
+				# OR pass the whole log and the prev game idx
+				post_season_log = isolator.isolate_season_part_dict(season_log_of_interest, 'postseason')
+				# tell if playin games bc idx != 0!!!!
+				print('post_season_log: ' + str(post_season_log))
+			# else:
+			# 	reg_season_log = season_log_of_interest
+
+
 			if len(season_log_of_interest.keys()) > 0:
-				player_prev_stat_vals = read_player_prev_stat_vals(season_log_of_interest, stats_of_interest, player)
+				player_prev_stat_vals = read_player_prev_stat_vals(reg_season_log, post_season_log, stats_of_interest, player)
 			
 		all_prev_stat_vals[player] = player_prev_stat_vals
 
@@ -448,7 +525,7 @@ def read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_y
 	return all_prev_stat_vals
 
 # read along with current conditions
-def read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year):
+def read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_part):
 	print('\n===Read All Last Stat Vals===\n')
 	print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
 	print('\nOutput: all_last_stat_vals = {player:{stat name:prev val,...}, ... = {\'clint capela\': {\'pts\': 6, \'ast\': 0, \'reb\': 9}}\n')
@@ -464,7 +541,20 @@ def read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_y
 			season_log_of_interest = list(player_season_logs.values())[0]#[str(season_year)]
 			#print('season_log_of_interest: ' + str(season_log_of_interest))
 
-			player_last_stat_vals = read_player_last_stat_vals(season_log_of_interest, stats_of_interest)
+			if season_part == 'postseason':
+				# iso part of interest bc playin at bottom of log even though should be above reg season
+				# so if only season part, then just take first row
+				# OR pass the whole log and the prev game idx
+				post_games_dict = isolator.isolate_season_part_dict(season_log_of_interest, 'postseason')
+				# tell if playin games bc idx != 0!!!!
+				print('post_games_dict: ' + str(post_games_dict))
+
+				# if first game of post, no games with type=postseason
+				# so prev is first of init season log
+				if len(post_games_dict.keys()) > 0:
+					season_log_of_interest = post_games_dict
+
+			player_last_stat_vals = read_player_last_stat_vals(season_log_of_interest, stats_of_interest, player)
 			
 		all_last_stat_vals[player] = player_last_stat_vals
 
@@ -5076,8 +5166,6 @@ def read_all_box_scores(all_players_season_logs, all_players_teams, season_years
 						continue
 
 					
-					#print('game_espn_id: ' + game_espn_id)
-
 					if game_espn_id != '':
 						game_box_scores_dict = read_game_box_scores(game_key, game_espn_id, read_new_game_ids=read_new_game_ids, player_name=player)
 
@@ -6203,7 +6291,7 @@ def read_game_espn_id(game_key, existing_game_ids_dict={}, read_new_game_ids=Fal
 			full_game_key = away_team_abbrev + ' ' + away_team + ' ' + home_team_abbrev + ' ' + home_team + ' ' + date_title
 
 			# no need to save game if game key error, warning
-			search_string = full_game_key.replace(' ', '+') + '+nba+espn+box+score'
+			search_string = full_game_key.replace(' ', '+') + '+nba+espn'#try without bc noticed error when close to end of season??? +box+score'
 			print('search_string: ' + search_string)
 			
 			site = 'https://www.google.com/search?q=' + search_string

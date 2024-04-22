@@ -1190,12 +1190,15 @@ def determine_all_stat_conds(all_stats_prob_dict):
 # cur_conds = {year:year, part:part, cond:cond}
 # all stats have same sample size 
 # but stat name needed for prev val bc different depending on stat
-def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player='', gp_cur_team=None, max_samples=None):
+# Currently Set to only include VALID samples, so NO OUTLIERS
+# could make diff fcn which includes all samples (see det cond sample size)???
+def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_cur_team, opp_team='', stat_name='', prints_on=False, player='', gp_cur_team=None, max_samples=None, player_avg_playtime=None):
     if prints_on:
         print('\n===Determine Sample Size: ' + player.title() + '===\n')
         print('cur_conds: ' + str(cur_conds))
         print('stat_name: ' + str(stat_name))
-        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+        print('max_samples: ' + str(max_samples))
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
         print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')
         print('Input: player_cur_team = ' + player_cur_team.upper())
         print('Input: opp_team = ' + opp_team.upper())
@@ -1210,8 +1213,10 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
 
     
     if year in player_stat_dict.keys() and part in player_stat_dict[year].keys():
+        #print('Found Season Year and Part in Stat Dict')
         # all stats have same sample size unless prev val cond
         part_stat_dict = player_stat_dict[year][part]
+        #print('part_stat_dict: ' + str(part_stat_dict))
         stat_dict = {}
         if stat_name in player_stat_dict[year][part].keys():
             stat_dict = player_stat_dict[year][part][stat_name]
@@ -1237,12 +1242,15 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
             conditions = []
             
             # name might have out in it but if name then also gp cond so true
+            #print('condition: ' + condition)
             if re.search('starters|bench|out', condition): # single or multi player cond
+                #print('Found keyword in condition: ' + condition)
                 
                 # do not sub opp or out bc names have it inside like toppin and trout 
                 # so add space in search
                 gp_abbrev = re.sub(' starters| bench| out| opp', ' ', condition).strip()
                 #gp_abbrev = re.sub(' out| opp', ' ', condition).strip()
+                #print('gp_abbrev: ' + gp_abbrev)
                 
                 # if prints_on:
                 #     print('Found player cond: ' + condition)
@@ -1255,6 +1263,7 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                 gp_team = player_cur_team
                 if re.search(opp_key, condition):
                     gp_team = opp_team
+                #print('gp_team: ' + gp_team)
 
                 # multi player conds need to get all combos of abbrevs
                 if re.search(',', condition):
@@ -1350,9 +1359,9 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                     print('conditions: ' + str(conditions))
                 #sample_size = 0
                 for cond in conditions:
-                    # if prints_on:
-                    #     print('cond: ' + cond)
-                    #     print('cond keys: ' + str(list(stat_dict.keys())))
+                    if prints_on:
+                        print('cond: ' + cond)
+                        #print('cond keys: ' + str(list(stat_dict.keys())))
                     if cond in stat_dict.keys():
                         if prints_on:
                             print('found cond in stat dict: ' + cond)
@@ -1365,19 +1374,50 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                             if prints_on:
                                 print('gp cur team: ' + str(gp_cur_team))
                             # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
-                            prev_minutes = 0
+                            prev_minutes = None
                             for game_idx in cond_stat_dict.keys():
                                 #print('game idx: ' + game_idx)
                                 # first instance of cond may already be > gp cur team
-                                if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
-                                    break
+                                # if postseason, then maybe played in playin
+                                # if played in playin, log shows at bottom which normally would mean new team
+                                # BUT bc postseason we know no trades so it must be playin game
+                                # print('part: ' + part)
+                                # print('max_samples: ' + str(max_samples))
+                                if part == 'regular':
+                                    if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
+                                        #print('game on different team so break')
+                                        break
 
                                 # IF ensure not outlier 
                                 # outlier if < 1/4 prev minutes
                                 # 1/4 only applies to minutes
                                 # so no matter the stat always check minutes are standard range not outlier
                                 minutes = minutes_dict[cond][game_idx]
-                                if minutes > prev_minutes / 4:
+                                
+                                # if minutes > prev_minutes / 4:
+                                #     #print('increase sample size')
+                                #     sample_size += 1
+                                #     prev_minutes = minutes
+
+
+                                outlier_ratio = 4
+                                if player_avg_playtime > 24: # half game
+                                    outlier_ratio = 1.5
+                                # if first game of postseason, compare to last game of regseason
+                                # BUT only for main players >20min bc below that players may not play postseason rotation
+                                #print('minutes: ' + str(minutes))
+                                # Default to avg playtime bc prev playtime may be much less/more than avg 
+                                # due to blowout or player out
+                                # we look for low minute outlier 
+                                # bc high minute outlier may be due to player out so keep those
+                                compare_minutes = player_avg_playtime
+                                if player_avg_playtime is None:
+                                    if prev_minutes is None:
+                                        compare_minutes = 0
+                                    else:
+                                        compare_minutes = prev_minutes
+                                if minutes > compare_minutes / outlier_ratio:# or minutes > avg_minutes / 1.5:
+                                    #print('increase sample size')
                                     sample_size += 1
                                     prev_minutes = minutes
                         else:
@@ -1395,18 +1435,43 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
                         if prints_on:
                             print('gp cur team: ' + str(gp_cur_team))
                         # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
-                        prev_minutes = 0
+                        prev_minutes = None
                         for game_idx in cond_stat_dict.keys():
                             #print('game idx: ' + game_idx)
-                            if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
-                                break
+                            if part == 'regular':
+                                if int(game_idx) >= gp_cur_team or (max_samples is not None and int(game_idx) >= max_samples):
+                                    break
 
                             # IF ensure not outlier 
                             # outlier if < 1/4 prev minutes
                             # 1/4 only applies to minutes
                             # so no matter the stat always check minutes are standard range not outlier
                             minutes = minutes_dict[condition][game_idx]
-                            if minutes > prev_minutes / 4:
+                            
+                            #outlier_ratio = 4
+                            # no need to remove outlier unless super low invalid 
+                            # bc usually even somewhat low playtime we can scale to cur playtime
+                            # if player_avg_playtime > 20:
+                            #     outlier_ratio = 1.5
+                            # if minutes > prev_minutes / outlier_ratio:
+                            #     sample_size += 1
+                            #     prev_minutes = minutes
+
+
+                            outlier_ratio = 4
+                            if player_avg_playtime > 24: # half game
+                                outlier_ratio = 1.5
+                            # if first game of postseason, compare to last game of regseason
+                            # BUT only for main players >20min bc below that players may not play postseason rotation
+                            #print('minutes: ' + str(minutes))
+                            compare_minutes = player_avg_playtime
+                            if player_avg_playtime is None:
+                                if prev_minutes is None:
+                                    compare_minutes = 0
+                                else:
+                                    compare_minutes = prev_minutes
+                            if minutes > compare_minutes / outlier_ratio:# or minutes > avg_minutes / 1.5:
+                                #print('increase sample size')
                                 sample_size += 1
                                 prev_minutes = minutes
 
@@ -2073,12 +2138,16 @@ def determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players
             
             all_players_cur_avg_playtimes[player] = determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player)
 
-    #print('all_players_cur_avg_playtimes: ' + str(all_players_cur_avg_playtimes))
+    print('all_players_cur_avg_playtimes: ' + str(all_players_cur_avg_playtimes))
     return all_players_cur_avg_playtimes
 
+# works bc uses type to get only season part games
+# so if playin includes with same idxs
+def determine_gp_cur_team_season_part():
+    print()
 
-
-# only reg season
+# ONLY reg season
+# so excludes playin at end of game log
 def determine_gp_cur_team(player_teams, player_season_logs, current_year_str, player):
     # print('\n===Determine GP Cur Team: ' + player.title() + '===\n')
     # print('Settings: Current Year = ' + current_year_str)
@@ -2555,7 +2624,7 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
         # player may have been recently traded and not played yet (eg theo maledon)
         # ordered from distant to recent
         cur_yr_teams_dicts = reversed(player_teams[cur_yr].values()) # {team:{min:m, gp:gp}, ...}
-        #print('cur_yr_teams_dicts: ' + str(cur_yr_teams_dicts))
+        #print('cur_yr_teams_dicts: ' + str(list(cur_yr_teams_dicts)))
         #if team in cur_yr_teams_dict.keys():
         # if played this yr then team dict will not be blank
         # they will still have team but the data will be blank
@@ -3210,15 +3279,81 @@ def determine_team_from_game_key(game_key, team_loc):
     #print('team: ' + team)
     return team
 
-# all yrs for single condition
-# player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
-# this fcn is passed a single condition and gets its sample size so we need outer fcn to call this fcn for all conds in list
-def determine_condition_sample_size(player_stat_dict, condition, part, stat_name=''):
-    # print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    # print('\nOutput: sample_size = x\n')
+
+def determine_post_playtime_sample_size(cond, cur_yr, player_stat_dict, all_players_abbrevs, player_team, player_name, prints_on, gp_cur_team, player_avg_playtime):
+    print('\n===Determine Post Playtime Sample Size===\n')
 
     sample_size = 0
+    # check if cond samples in:
+    # 1. cur post
+    cur_conds = {'condition':cond, 'year':cur_yr, 'part':'postseason'}
+    # use valid sample size to exclude outliers
+    # so if 1 sample but outlier compared to expected playtime
+    # consider 0 samples so check next part
+    cur_post_sample_size = determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30, player_avg_playtime=player_avg_playtime)
+    if cur_post_sample_size > 0:
+        print('Found Cur Post Samples')
+        sample_size = cur_post_sample_size
+    # 2. prev post
+    else:
+        prev_yr = str(int(cur_yr) - 1)
+        cur_conds = {'condition':cond, 'year':prev_yr, 'part':'postseason'}
+        prev_post_sample_size = determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30, player_avg_playtime=player_avg_playtime)
+        # 3. cur reg
+        if prev_post_sample_size > 0:
+            print('Found Prev Post Samples')
+            sample_size = prev_post_sample_size
+        else:
+            cur_conds = {'condition':cond, 'year':cur_yr, 'part':'regular'}
+            cur_reg_sample_size = determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30, player_avg_playtime=player_avg_playtime)
+            if cur_reg_sample_size > 0:
+                print('Found Cur Reg Samples')
+                sample_size = cur_reg_sample_size
+            # 4. prev reg
+            else:
+                cur_conds = {'condition':cond, 'year':prev_yr, 'part':'regular'}
+                sample_size = determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30, player_avg_playtime=player_avg_playtime)
+                if sample_size is not None:
+                    print('Found Prev Reg Samples')
+
+    print('sample_size: ' + str(sample_size))
+    return sample_size
+
+def determine_cond_yr_part_sample_size(player_stat_dict, condition, year, part, stat_name=''):
+    print('\n===Determine Cond-Year-Part Sample Size===\n')
+    print('condition: ' + condition)
+    print('year: ' + year)
+    print('part: ' + part)
+    print('stat_name: ' + stat_name)
+
+    cond_part_sample_size = 0
+
+    #for year, year_stat_dicts in player_stat_dict.items():
+    #print('\nyear: ' + year)
+    year_stat_dicts = player_stat_dict[year]
+    if part in year_stat_dicts.keys():
+        part_stat_dict = year_stat_dicts[part]
+        # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
+        # BUT we need to know stat to get prev val!!!
+        full_stat_dict = {}
+        if stat_name in part_stat_dict.keys():
+            full_stat_dict = part_stat_dict[stat_name]
+        else: # fail with error message or take first stat???
+            full_stat_dict = list(part_stat_dict.values())[0]
+
+        #print('full_stat_dict: ' + str(full_stat_dict))
+        if condition in full_stat_dict.keys():
+            #print('found condition ' + condition)
+            stat_dict = full_stat_dict[condition]
+            #print('stat_dict: ' + str(stat_dict))
+            cond_part_sample_size += len(stat_dict.keys())
+
+    print('cond_part_sample_size: ' + str(cond_part_sample_size))
+    return cond_part_sample_size
+
+def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition):
+
+    cond_part_sample_size = 0
 
     for year, year_stat_dicts in player_stat_dict.items():
         #print('\nyear: ' + year)
@@ -3237,7 +3372,42 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
                 #print('found condition ' + condition)
                 stat_dict = full_stat_dict[condition]
                 #print('stat_dict: ' + str(stat_dict))
-                sample_size += len(stat_dict.keys())
+                cond_part_sample_size += len(stat_dict.keys())
+
+    return cond_part_sample_size
+
+# all yrs for single condition
+# player_stat_dict: {2023: {'regular': {'pts': {'all': {0: 18, 1: 19...
+# this fcn is passed a single condition and gets its sample size 
+# so we need outer fcn to call this fcn for all conds in list
+# accepts part= regular|postseason|full
+def determine_condition_sample_size(player_stat_dict, condition, part, stat_name=''):
+    # print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+    # print('\nOutput: sample_size = x\n')
+
+    sample_size = 0
+
+    # for part=full, we say 80/20 split bt post/reg
+    # so take 80% of post samples and 20% of reg samples 
+    # to get adjusted sample size?
+
+    
+    if part == 'full':
+        season_part = 'regular'
+        reg_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition)
+        season_part = 'postseason'
+        post_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition)
+
+        sample_size = converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size)
+
+    else:
+        sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition)
+
+            
+
+
+    
 
     #print('sample_size: ' + str(sample_size))
     return sample_size
@@ -3581,6 +3751,7 @@ def determine_season_part_games(player_game_log, season_part='regular', player='
         # select season part games by type
         # so we need to have accurate types set in read season log
         
+        # isolate season part, unless full
         # we use full for postseason bc we need more samples
         # full diff from post bc sometimes we want to see post only
         if season_part != 'full': # bc full does not have game type bc it takes all types

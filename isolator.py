@@ -465,7 +465,7 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
             prop_field_val = 0
             if field == 'ap':
                 prop_field_val = int(prop['true prob']) - int(prop['dp'])
-            else:
+            elif field in prop.keys():
                 prop_field_val = float(prop[field])
             # print('low: ' + str(low))
             # print('high: ' + str(high))
@@ -558,6 +558,32 @@ def isolate_highest_ev_prop(sg_props):
     #print('highest_prop: ' + str(highest_prop))
     return highest_prop
 
+
+
+def isolate_season_part_dict(season_log, season_part):
+    print('\n===Isolate Season Part Dict===\n')
+    print('season_part: ' + str(season_part))
+    #print('season_log: ' + str(season_log))
+
+    season_part_dict = {}
+
+    # types
+    game_types = season_log['Type']
+    print('game_types: ' + str(game_types))
+
+    # get idxs by type
+    for stat_name, stat_dict in season_log.items():
+        
+        for game_idx, stat_val in stat_dict.items():
+
+            game_type = game_types[game_idx]
+            if game_type.lower() == season_part:
+                if stat_name not in season_part_dict.keys():
+                    season_part_dict[stat_name] = {}
+                season_part_dict[stat_name][game_idx] = stat_val
+
+
+    return season_part_dict
 
 
 

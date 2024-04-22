@@ -2804,40 +2804,43 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     # Put after review props bc review applies to solo/multi
 
     sort_keys = ['ev', 'dp']
-    ev_prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
-    prop_tables.append(ev_prop_dicts)
-    sheet_names.append('EV')
+    #prop_dict = prop_dicts[0]
+    udp_prop_dicts = prop_dicts
+    if 'ev' in prop_dicts[0].keys():
+        ev_prop_dicts = sorter.sort_dicts_by_keys(prop_dicts, sort_keys)
+        prop_tables.append(ev_prop_dicts)
+        sheet_names.append('EV')
 
-    # former and national coverage conditions tend toward overs???
-    sort_keys = ['former', 'coverage']
-    fc_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys)
-    prop_tables.append(fc_prop_dicts)
-    sheet_names.append('FC')
+        # former and national coverage conditions tend toward overs???
+        sort_keys = ['former', 'coverage']
+        fc_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys)
+        prop_tables.append(fc_prop_dicts)
+        sheet_names.append('FC')
 
-    sort_keys = ['rare prev', 'ev', 'dp']
-    rp_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
-    prop_tables.append(rp_prop_dicts)
-    sheet_names.append('RP')
+        sort_keys = ['rare prev', 'ev', 'dp']
+        rp_prop_dicts = sorter.sort_dicts_by_str_keys(prop_dicts, sort_keys, reverse=True)
+        prop_tables.append(rp_prop_dicts)
+        sheet_names.append('RP')
 
-    # prop dicts already sorted by prob
-    # remove props below 95% with dp<-1
-    # remove props below 80%
-    hp_prop_dicts = generate_unique_props(prop_dicts, strict=False)
-    hp_prop_dicts = isolator.isolate_props_in_range(hp_prop_dicts, fields=['true prob'])
-    hp_prop_dicts = isolator.isolate_props_in_ranges(hp_prop_dicts, fields=['true prob', 'dp'], init_vals=[95, -1])
-    prop_tables.append(hp_prop_dicts)
-    sheet_names.append('HP')
+        # prop dicts already sorted by prob
+        # remove props below 95% with dp<-1
+        # remove props below 80%
+        hp_prop_dicts = generate_unique_props(prop_dicts, strict=False)
+        hp_prop_dicts = isolator.isolate_props_in_range(hp_prop_dicts, fields=['true prob'])
+        hp_prop_dicts = isolator.isolate_props_in_ranges(hp_prop_dicts, fields=['true prob', 'dp'], init_vals=[95, -1])
+        prop_tables.append(hp_prop_dicts)
+        sheet_names.append('HP')
 
-    # Strategy 1:
-    # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
-    dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['dp', 'ev', 'odds', 'ap'])
-    #dp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, field='odds')
-    sort_keys = ['dp', 'ev']
-    dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
-    # prefer only unique props bc taking highest dp and ev so no reason to take diff stat val
-    udp_prop_dicts = generate_unique_props(dp_prop_dicts, strict=True)
-    prop_tables.append(udp_prop_dicts)
-    sheet_names.append('DP')
+        # Strategy 1:
+        # -S1: Sort by DP, take mid +EV -0.03 < x < +0.3
+        dp_prop_dicts = isolator.isolate_props_in_range(prop_dicts, fields=['dp', 'ev', 'odds', 'ap'])
+        #dp_prop_dicts = isolator.isolate_props_in_range(dp_prop_dicts, field='odds')
+        sort_keys = ['dp', 'ev']
+        dp_prop_dicts = sorter.sort_dicts_by_keys(dp_prop_dicts, sort_keys)
+        # prefer only unique props bc taking highest dp and ev so no reason to take diff stat val
+        udp_prop_dicts = generate_unique_props(dp_prop_dicts, strict=True)
+        prop_tables.append(udp_prop_dicts)
+        sheet_names.append('DP')
 
 
 
@@ -3034,6 +3037,7 @@ def generate_player_median_piaps(player_name, player_position, player_teams, gp_
 
         # postseason gets full both parts
         read_season_part = season_part
+        # set full so we dont isolate part of season
         if season_part == 'postseason':
             read_season_part = 'full'
         season_part_game_log = determiner.determine_season_part_games(player_game_log, read_season_part)
@@ -3174,7 +3178,7 @@ def generate_all_players_median_piaps(players_names, all_players_positions, all_
     for player in players_names:
         # if player log not read then dnp player
         if player in all_players_season_logs.keys():
-            print('found player season log')
+            #print('found player season log')
             player_season_logs = all_players_season_logs[player]
             player_position = all_players_positions[player]
             player_teams = all_players_teams[player]
@@ -4434,6 +4438,9 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
             year = season_years[year_idx]
             #print('\nyear: ' + str(year))
 
+            # is postseason, get both parts of season weighted avg
+            # see notes to range from 50/50 to 80/20 bt 1 and 10 samples postseason
+
             # for each yr, we need a new cur cond dict bc the yr changes the cur conds
             cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
             current_conditions = condition + ' ' + str(year) + ' ' + part + ' prob'
@@ -4608,11 +4615,11 @@ def generate_all_conditions_mean_probs(player_team, opp_team, prev_val, player_c
     #print('all_conditions_mean_probs: ' + str(all_conditions_mean_probs))
     return all_conditions_mean_probs
 
-def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats, prints_on=True):
+def generate_weighted_stats(all_conditions_mean_stats, all_conditions_weights, prints_on=True):
     if prints_on:
         print('\n===Generate Weighted Stats===\n')
         print('Input: all_conditions_mean_stats = {cond1:p1,... = ' + str(all_conditions_mean_stats))
-        print('Input: all_conditions_stats = {cond1:w1,... = ' + str(all_conditions_stats))
+        print('Input: all_conditions_weights = {cond1:w1,... = ' + str(all_conditions_weights))
         print('\nOutput: weighted_stats = [ws1,...]\n')
 
     # all_conditions_weights = [w1,...]
@@ -4620,7 +4627,7 @@ def generate_weighted_stats(all_conditions_mean_stats, all_conditions_stats, pri
     # always outer layer of conditions
     weighted_stats = []
     for cond, stat in all_conditions_mean_stats.items():
-        weight = all_conditions_stats[cond]
+        weight = all_conditions_weights[cond]
         
         ws = round_half_up(weight * stat, 6)
         
@@ -5022,6 +5029,11 @@ def generate_prev_val_weight(prev_val, player_stat_dict, part, player, stat, sin
 # player_current_conditions = {'loc':'away','out':[p1,...],...}
 # all_conditions_weights = [w1,...]
 # combine cond weight and sample size to get adjusted cond weight
+# Do we combine reg+postseason samples to get total sample size
+# since we are using weighted avg, do we also apply that weight to num samples?
+# that would help but ok to simply add total?
+# OR could just keep taking just season part samples and give weight based on that?
+# then what if no postseason samples for this player?
 def generate_all_conditions_weights(player_current_conditions, all_gp_conds, player_prev_vals, player_stat_dict, all_players_abbrevs, part, player='', player_team='', single_conds=[], prints_on=False):
     if prints_on:
         print('\n===Generate All Conditions Weights: ' + player.title() + '===\n')
@@ -5640,6 +5652,7 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
 # all_current_conditions = {p1:{loc:l1, city:c1, dow:d1, tod:t1,...}, p2:{},...}
 # given sub stat probs, add true prob key to probs dict
 # Current Year to get cur team
+# Does val probs dict have probs for both season parts???
 def generate_all_true_probs_dict(all_stat_probs_dict, all_player_stat_dicts, all_players_abbrevs={}, all_players_teams={}, rosters={}, all_cur_conds_dicts={}, all_game_player_cur_conds={}, all_prev_vals={}, all_players_cur_avg_playtimes={}, all_players_positions={}, game_teams=[], season_years=[], cur_yr='', stats_of_interest=[], single_conds=[], prints_on=False, season_part='regular'):
     #if prints_on:
     print('\n===Generate All True Probs Dict===\n')
@@ -6678,6 +6691,8 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
                     # but for reg season only read reg season
                     if season_part == 'regular' and part != 'regular':
                         continue
+                    # Do we even need full season stats??? why is it in stat dict?
+                    # full prob will be weighted avg of both parts so it should be separate dict
 
                     for stat_name, stat_dict in part_stat_dict.items():
                         #print('\nstat_name: ' + stat_name)
@@ -7490,56 +7505,6 @@ def generate_all_players_distrib_models(all_player_unit_stat_dicts, stats_of_int
     return all_players_models
 
 
-def generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team=None):
-    # print('\n===Generate Condition Mean Minutes: ' + cond + '===\n')
-    # #print('Input: cond = player abbrev game status = ' + cond)
-    # print('Input: player_cur_part_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    # print('Input: gp cur team = ' + str(gp_cur_team))
-    # print('\nOutput: condition_mean_minutes = x\n')
-
-    condition_mean_minutes = None
-
-    # minutes_dict = {condition: {game idx: stat val, ...
-    minutes_dict = player_cur_part_stat_dict['min']
-
-    # cond_minutes_dict = {game idx: stat val, ...
-    if cond in minutes_dict.keys():
-        cond_minutes_dict = minutes_dict[cond]
-
-        # get only minutes from cur team bc drastic diff bt teams
-        #gp_cur_team = 0
-
-        cond_minutes = []
-        if gp_cur_team is not None:
-            #print('gp cur team: ' + str(gp_cur_team))
-            # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
-            prev_minutes = 0
-            for game_idx, minutes in cond_minutes_dict.items():
-                # print('game idx: ' + game_idx)
-                # print('minutes: ' + str(minutes))
-                # max 30 samples bc playtime changes over time
-                if int(game_idx) >= gp_cur_team or int(game_idx) >= 30:
-                    break
-
-                # ensure not outlier 
-                # outlier if < 1/4 prev minutes
-                if minutes > prev_minutes / 4:
-                    cond_minutes.append(minutes)
-                    prev_minutes = minutes
-
-        else:
-            cond_minutes = list(cond_minutes_dict.values())
-        #print('cond_minutes: ' + str(cond_minutes))
-
-        # remove outlier samples if injured early in game bc throws off avg
-        # bc assumption is player plays normal minutes bc if not then conditions canceled
-
-        # need >1 samples to mean anything, pun intended
-        if len(cond_minutes) > 1:
-            condition_mean_minutes = round_half_up(np.mean(cond_minutes), 2)
-
-    #print('condition_mean_minutes: ' + str(condition_mean_minutes))
-    return condition_mean_minutes
 
 
 def generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond):
@@ -7588,27 +7553,490 @@ def generate_player_likely_playtimes(player_name, player_team, player_position, 
 
     return player_likely_playtimes
 
+def generate_post_stat_dict(player_stat_dict, cur_yr, season_part):
 
+    post_stat_dict = {}
+
+    # if we have samples for cur part, then simply take direct
+    cur_yr_stat_dict = player_stat_dict[cur_yr]
+    if season_part in cur_yr_stat_dict:
+        player_cur_post_stat_dict = cur_yr_stat_dict[season_part]
+        if 'min' in player_cur_post_stat_dict.keys():
+            cur_post_minutes_dict = player_cur_post_stat_dict['min']['all']
+            if '0' not in cur_post_minutes_dict.keys():
+                print('found postseason this yr')
+                #found_post = True
+                post_stat_dict = player_cur_post_stat_dict
+            
+
+    # BUT if first game of postseason, 
+    # THEN maybe no post last yr so no samples for cur part
+    # SO decide which part to use for playtime
+    if len(post_stat_dict.keys()) == 0:
+        # if played last season, get from last postseason if available
+        # AND if same team as last postseason? not needed for main players
+        prev_yr = str(int(cur_yr) - 1)
+        print('prev_yr: ' + str(prev_yr))
+        if prev_yr in player_stat_dict.keys():
+            prev_yr_stat_dict = player_stat_dict[prev_yr]
+            #year_stat_dicts = list(player_stat_dict.values())
+            if season_part in prev_yr_stat_dict:
+                
+                # need to get both last postseason and this cur regseason 
+                # bc if outlier big diff than prefer this regseason
+                # just compare last game minutes unless exception 
+                #player_prev_stat_dict = year_stat_dicts[1]
+                player_prev_post_stat_dict = prev_yr_stat_dict[season_part]
+
+                # always from cur yr for playtime
+                # BUT for prob of stats, we want avg from all yrs
+                player_regseason_stat_dict = player_stat_dict[cur_yr]['regular']
+
+                # if last yr post playtime < 12 and < cur season playtime / 2
+                if 'min' in player_prev_post_stat_dict.keys():
+                    prev_post_minutes_dict = player_prev_post_stat_dict['min']['all']
+                    if '0' in prev_post_minutes_dict.keys():
+                        # if no postseason, then return None and mean minutes will return regseason minutes
+                        prev_post_playtime = prev_post_minutes_dict['0']
+                        print('prev_post_playtime: ' + str(prev_post_playtime))
+                        regseason_playtime = player_regseason_stat_dict['min']['all']['0']
+                        print('regseason_playtime: ' + str(regseason_playtime))
+                        # TEST/TUNE: cutoff time and fraction
+                        if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
+                            # use regseason
+                            print('invalid postseason last yr')
+                            #read_season_part = 'regular'
+                            #player_cur_part_stat_dict = player_regseason_stat_dict
+                        elif prev_post_playtime >= 12 and prev_post_playtime > regseason_playtime * 1.5:
+                            # use regseason
+                            print('invalid postseason last yr')
+                            #read_season_part = 'regular'
+                            #player_cur_part_stat_dict = player_regseason_stat_dict
+                        else:
+                            print('found postseason last yr')
+                            post_stat_dict = player_prev_post_stat_dict
+                            #read_yr = prev_yr
+                else:
+                    print('no postseason last yr')
+            else:
+                print('no postseason last yr') 
+        else:
+            print('did not play last yr')
+
+
+    return post_stat_dict
+
+def generate_cur_part_stat_dict(player_stat_dict, cur_yr, season_part):
+    print('\n===Generate Cur Part Stat Dict===\n')
+
+    player_cur_part_stat_dict = {}
+
+    read_yr = cur_yr
+    read_season_part = season_part
+
+    #found_post = False
+
+    # if we have samples for cur part, then simply take direct
+    cur_yr_stat_dict = player_stat_dict[cur_yr]
+    if season_part in cur_yr_stat_dict:
+        player_cur_post_stat_dict = cur_yr_stat_dict[season_part]
+        if 'min' in player_cur_post_stat_dict.keys():
+            cur_post_minutes_dict = player_cur_post_stat_dict['min']['all']
+            if '0' not in cur_post_minutes_dict.keys():
+                print('found postseason this yr')
+                #found_post = True
+                player_cur_part_stat_dict = player_cur_post_stat_dict
+    
+    # BUT if first game of postseason, 
+    # THEN maybe no post last yr so no samples for cur part
+    # SO decide which part to use for playtime
+    if len(player_cur_part_stat_dict.keys()) == 0:
+        # if played last season, get from last postseason if available
+        # AND if same team as last postseason? not needed for main players
+        prev_yr = str(int(cur_yr) - 1)
+        print('prev_yr: ' + str(prev_yr))
+        if prev_yr in player_stat_dict.keys():
+            prev_yr_stat_dict = player_stat_dict[prev_yr]
+            #year_stat_dicts = list(player_stat_dict.values())
+            if season_part in prev_yr_stat_dict:
+                
+                # need to get both last postseason and this cur regseason 
+                # bc if outlier big diff than prefer this regseason
+                # just compare last game minutes unless exception 
+                #player_prev_stat_dict = year_stat_dicts[1]
+                player_prev_post_stat_dict = prev_yr_stat_dict[season_part]
+
+                # always from cur yr for playtime
+                # BUT for prob of stats, we want avg from all yrs
+                player_regseason_stat_dict = player_stat_dict[cur_yr]['regular']
+
+                # if last yr post playtime < 12 and < cur season playtime / 2
+                if 'min' in player_prev_post_stat_dict.keys():
+                    prev_post_minutes_dict = player_prev_post_stat_dict['min']['all']
+                    if '0' not in prev_post_minutes_dict.keys():
+                        print('no postseason last yr')
+                        read_season_part = 'regular'
+                        player_cur_part_stat_dict = player_regseason_stat_dict
+                    else:
+                        prev_post_playtime = prev_post_minutes_dict['0']
+                        print('prev_post_playtime: ' + str(prev_post_playtime))
+                        regseason_playtime = player_regseason_stat_dict['min']['all']['0']
+                        print('regseason_playtime: ' + str(regseason_playtime))
+                        # TEST/TUNE: cutoff time and fraction
+                        if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
+                            # use regseason
+                            print('invalid postseason last yr')
+                            read_season_part = 'regular'
+                            player_cur_part_stat_dict = player_regseason_stat_dict
+                        elif prev_post_playtime >= 12 and prev_post_playtime > regseason_playtime * 1.5:
+                            # use regseason
+                            print('invalid postseason last yr')
+                            read_season_part = 'regular'
+                            player_cur_part_stat_dict = player_regseason_stat_dict
+                        else:
+                            print('found postseason last yr')
+                            player_cur_part_stat_dict = player_prev_post_stat_dict
+                            read_yr = prev_yr
+                else:
+                    print('no postseason last yr')
+                    read_season_part = 'regular'
+                    player_cur_part_stat_dict = player_regseason_stat_dict
+            else:
+                print('no postseason last yr') # so read cur reg season as approx
+                read_season_part = 'regular'
+                player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+        else:
+            print('did not play last yr')
+            read_season_part = 'regular'
+            player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+
+    
+    return player_cur_part_stat_dict, read_yr, read_season_part
+
+
+
+
+def generate_condition_part_minutes(cond, season_part, player_cur_part_stat_dict, gp_cur_team=None, player_avg_minutes=None):
+    print('\n===Generate Condition Part Minutes: ' + cond + ', ' + season_part + '===\n')
+    print('Input: player_cur_part_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: gp cur team = ' + str(gp_cur_team))
+    print('Input: player_avg_minutes = ' + str(player_avg_minutes))
+    print('\nOutput: condition_mean_minutes = x\n')
+
+    condition_part_minutes = None 
+
+    # minutes_dict = {condition: {game idx: stat val, ...
+    if 'min' in player_cur_part_stat_dict.keys():
+        minutes_dict = player_cur_part_stat_dict['min']
+
+        # cond_minutes_dict = {game idx: stat val, ...
+        if cond in minutes_dict.keys():
+            cond_minutes_dict = minutes_dict[cond]
+
+            # get only minutes from cur team bc drastic diff bt teams
+            #gp_cur_team = 0
+
+            cond_minutes = []
+            if gp_cur_team is not None:
+                #print('gp cur team: ' + str(gp_cur_team))
+                # cannot simply take sample size = gp cur team bc stats in each condition occur irregularly
+                prev_minutes = None
+                for game_idx, minutes in cond_minutes_dict.items():
+                    # print('game idx: ' + game_idx)
+                    # print('minutes: ' + str(minutes))
+                    # max 30 samples bc playtime changes over time
+                    # first instance of cond may already be > gp cur team
+                    # if postseason, then maybe played in playin
+                    # if played in playin, log shows at bottom which normally would mean new team
+                    # BUT bc postseason we know no trades so it must be playin game
+                    if season_part == 'regular':
+                        if int(game_idx) >= gp_cur_team or int(game_idx) >= 30:
+                            break
+
+                    # ensure not outlier 
+                    # outlier if < 1/4 prev minutes
+                    # so if avg minutes 30
+                    # diff ratios for diff magnitudes bc means diff things
+                    outlier_ratio = 4
+                    if player_avg_minutes > 24: # half game
+                        outlier_ratio = 1.5
+                    # if first game of postseason, compare to last game of regseason
+                    # BUT only for main players >20min bc below that players may not play postseason rotation
+                    #print('minutes: ' + str(minutes))
+                    compare_minutes = player_avg_minutes
+                    if player_avg_minutes is None:
+                        if prev_minutes is None:
+                            compare_minutes = 0
+                        else:
+                            compare_minutes = prev_minutes
+                    if minutes > compare_minutes / outlier_ratio:# or minutes > avg_minutes / 1.5:
+                        cond_minutes.append(minutes)
+                        prev_minutes = minutes
+
+            else:
+                cond_minutes = list(cond_minutes_dict.values())
+            #print('cond_minutes: ' + str(cond_minutes))
+
+            # remove outlier samples if injured early in game bc throws off avg
+            # bc assumption is player plays normal minutes bc if not then conditions canceled
+
+            # need >1 samples to mean anything, pun intended
+            # BUT if postseason, then for now simply take the 1 sample bc less variation in minutes
+            # BUT better to avg post and reg to get more samples
+            if len(cond_minutes) > 1 or (season_part == 'postseason' and len(cond_minutes) > 0):
+                condition_part_minutes = round_half_up(np.mean(cond_minutes), 2)
+
+    return condition_part_minutes
+
+def generate_cond_reg_post_minutes(player_stat_dict, cur_yr, gp_cur_team, condition_reg_minutes, player_avg_minutes, prints_on):
+    print('\n===Generate Cond Reg Post Minutes===\n')
+    
+    # need avg postseason minutes to scale up/down???
+    # NO, we can scale cond post minutes by ratio cond reg/avg reg
+    # to get scaled cond reg minutes
+    # ACTUALLY we need reg and post avgs to compare scale/magnitude
+    player_reg_stat_dict = player_stat_dict[cur_yr]['regular']
+    avg_reg_minutes = generate_condition_part_minutes('all', 'regular', player_reg_stat_dict, gp_cur_team, player_avg_minutes)
+    # this post stat dict is from cur yr to match ratio to reg stat dict from cur yr
+    player_post_stat_dict = player_stat_dict[cur_yr]['postseason']
+    avg_post_minutes = generate_condition_part_minutes('all', 'postseason', player_post_stat_dict, gp_cur_team, player_avg_minutes)
+    # check if avg post minutes outlier due to injury
+    outlier_ratio = 1.5
+    # if player_avg_minutes > 24: # half game
+    #     outlier_ratio = 1.5
+    # if first game of postseason, compare to last game of regseason
+    # BUT only for main players >20min bc below that players may not play postseason rotation
+    reg_post_ratio = 1
+    cond_reg_post_minutes = condition_reg_minutes
+    if avg_post_minutes is not None: 
+        if player_avg_minutes <= 24 or (player_avg_minutes > 24 and avg_post_minutes > player_avg_minutes / outlier_ratio):# or minutes > avg_minutes / 1.5:
+            reg_post_ratio = avg_post_minutes / avg_reg_minutes
+            cond_reg_post_minutes = converter.round_half_up(condition_reg_minutes * reg_post_ratio, 2)
+
+    if prints_on:
+        print('\navg_reg_minutes: ' + str(avg_reg_minutes))
+        print('avg_post_minutes: ' + str(avg_post_minutes))
+        print('reg_post_ratio: ' + str(reg_post_ratio))
+        print('cond_reg_post_minutes: ' + str(cond_reg_post_minutes))
+
+    return cond_reg_post_minutes
+
+# Enable avg reg/post season
+# 1. if cur postseason, use it
+# 2. if not cur post, but prev post, use prev post
+# 3. if neither, use cur regseason
+# each cond may have different availability in diff seasons or parts
+# but need to check for outliers before using stat
+def generate_condition_mean_minutes(cond, player_stat_dict, gp_cur_team=None, season_part='regular', player_avg_minutes=None, cur_yr='', prints_on=False):
+    print('\n===Generate Condition Mean Minutes: ' + cond + '===\n')
+    #print('Input: cond = player abbrev game status = ' + cond)
+    print('Input: player_stat_dict = {stat name: {condition: {game idx: stat val, ... = {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: gp cur team = ' + str(gp_cur_team))
+    print('\nOutput: condition_mean_minutes = x\n')
+
+    condition_mean_minutes = None
+
+    # get both reg and post season mean minutes
+    # and then avg
+    # === Reg Season ===
+    cur_reg_stat_dict = player_stat_dict[cur_yr]['regular']
+    cond_cur_reg_minutes = generate_condition_part_minutes(cond, 'regular', cur_reg_stat_dict, gp_cur_team, player_avg_minutes)
+    print('cond_cur_reg_minutes: ' + str(cond_cur_reg_minutes))
+
+    if season_part == 'regular':
+        condition_mean_minutes = cond_cur_reg_minutes
+
+    #===Postseason===
+    #if season_part == 'postseason':
+    else:
+
+        # check if cond samples in:
+        # 1. cur post
+        cur_post_stat_dict = player_stat_dict[cur_yr]['postseason']
+        cond_cur_post_minutes = generate_condition_part_minutes(cond, 'postseason', cur_post_stat_dict, gp_cur_team, player_avg_minutes)
+        print('cond_cur_post_minutes: ' + str(cond_cur_post_minutes))
+
+        if cond_cur_post_minutes is not None:
+            condition_mean_minutes = cond_cur_post_minutes
+
+        # 2. prev post
+        else:
+            cond_prev_post_minutes = None
+            prev_yr = str(int(cur_yr) - 1)
+            if prev_yr in player_stat_dict.keys() and 'postseason' in player_stat_dict[prev_yr]['postseason']:
+                prev_post_stat_dict = player_stat_dict[prev_yr]['postseason']
+                cond_prev_post_minutes = generate_condition_part_minutes(cond, 'postseason', prev_post_stat_dict, gp_cur_team, player_avg_minutes)
+            print('cond_prev_post_minutes: ' + str(cond_prev_post_minutes))
+
+            if cond_prev_post_minutes is not None:
+                # scaling prev post to cur post minutes could be less accurate 
+                # bc more samples prev post and same/similar situation as cur post with less samples
+                condition_mean_minutes = cond_prev_post_minutes
+
+            # 3. cur reg
+            else:
+                cur_reg_stat_dict = player_stat_dict[cur_yr]['regular']
+                cond_cur_reg_minutes = generate_condition_part_minutes(cond, 'regular', cur_reg_stat_dict, gp_cur_team, player_avg_minutes)
+                print('cond_cur_reg_minutes: ' + str(cond_cur_reg_minutes))
+
+                if cond_cur_reg_minutes is not None:
+                    # scale cur reg minutes for specific cond relative to post minutes overall
+                    cond_reg_post_minutes = generate_cond_reg_post_minutes(player_stat_dict, cur_yr, gp_cur_team, cond_cur_reg_minutes, player_avg_minutes, prints_on)
+                    if cond_reg_post_minutes is not None:
+                        condition_mean_minutes = cond_reg_post_minutes
+                    else:
+                        condition_mean_minutes = cond_cur_reg_minutes
+
+                # 4. prev reg
+                else:
+                    cond_prev_reg_minutes = None
+                    if prev_yr in player_stat_dict.keys():
+                        prev_reg_stat_dict = player_stat_dict[prev_yr]['regular']
+                        # last option so if none then mean none
+                        # but still need to scale if possible
+                        cond_prev_reg_minutes = generate_condition_part_minutes(cond, 'regular', prev_reg_stat_dict, gp_cur_team, player_avg_minutes)
+                    print('cond_prev_reg_minutes: ' + str(cond_prev_reg_minutes))
+
+                    if cond_prev_reg_minutes is not None:
+                        cond_reg_post_minutes = generate_cond_reg_post_minutes(player_stat_dict, cur_yr, gp_cur_team, cond_prev_reg_minutes, player_avg_minutes, prints_on)
+                        if cond_reg_post_minutes is not None:
+                            condition_mean_minutes = cond_reg_post_minutes
+                        else:
+                            condition_mean_minutes = cond_prev_reg_minutes
+
+
+
+
+
+
+
+
+
+        # scale cond reg minutes compared to avg reg minutes
+        # if condition_reg_minutes is not None:
+        #     # need avg postseason minutes to scale up/down???
+        #     # NO, we can scale cond post minutes by ratio cond reg/avg reg
+        #     # to get scaled cond reg minutes
+        #     # ACTUALLY we need reg and post avgs to compare scale/magnitude
+        #     player_reg_stat_dict = player_stat_dict[cur_yr]['regular']
+        #     avg_reg_minutes = generate_condition_part_minutes('all', 'regular', player_reg_stat_dict, gp_cur_team, player_avg_minutes)
+        #     # this post stat dict is from cur yr to match ratio to reg stat dict from cur yr
+        #     player_post_stat_dict = player_stat_dict[cur_yr]['postseason']
+        #     avg_post_minutes = generate_condition_part_minutes('all', 'postseason', player_post_stat_dict, gp_cur_team, player_avg_minutes)
+        #     # check if avg post minutes outlier due to injury
+        #     outlier_ratio = 1.5
+        #     # if player_avg_minutes > 24: # half game
+        #     #     outlier_ratio = 1.5
+        #     # if first game of postseason, compare to last game of regseason
+        #     # BUT only for main players >20min bc below that players may not play postseason rotation
+        #     reg_post_ratio = 1
+        #     cond_reg_post_minutes = condition_reg_minutes
+        #     if avg_post_minutes is not None: 
+        #         if player_avg_minutes <= 24 or (player_avg_minutes > 24 and avg_post_minutes > player_avg_minutes / outlier_ratio):# or minutes > avg_minutes / 1.5:
+        #             reg_post_ratio = avg_post_minutes / avg_reg_minutes
+        #             cond_reg_post_minutes = converter.round_half_up(condition_reg_minutes * reg_post_ratio, 2)
+
+        #     if prints_on:
+        #         print('\navg_reg_minutes: ' + str(avg_reg_minutes))
+        #         print('avg_post_minutes: ' + str(avg_post_minutes))
+        #         print('reg_post_ratio: ' + str(reg_post_ratio))
+        #         print('cond_reg_post_minutes: ' + str(cond_reg_post_minutes))
+
+        # # determine if postseason stats available???
+        # # if cur postseason here, then use cur
+        # # if no cur post, but prev post, then use prev
+        # # read_yr = cur_yr
+        # # read_season_part = season_part
+        # # stat_dict_data = generate_cur_part_stat_dict(player_stat_dict, cur_yr, season_part) #player_stat_dict[cur_yr][season_part]
+        # # player_cur_part_stat_dict = stat_dict_data[0]
+        # # read_yr = stat_dict_data[1]
+        # # read_season_part = stat_dict_data[2]
+        # # post stat dict is cur season if available
+        # # OR prev season if available AND valid/similar
+        # player_post_stat_dict = generate_post_stat_dict(player_stat_dict, cur_yr, season_part)
+        # condition_post_minutes = generate_condition_part_minutes(cond, season_part, player_post_stat_dict, gp_cur_team, player_avg_minutes)
+        # print('condition_post_minutes: ' + str(condition_post_minutes))
+
+        
+        
+        # # TEST if combining weighted avg of multiple part samples improves accuracy
+        # # for now simply take most relevant part, even if only 1 sample
+        # # bc postseason has less variation for main players???
+        # if condition_post_minutes is None and condition_reg_minutes is not None:
+        #     condition_mean_minutes = cond_reg_post_minutes
+
+        # # it is important to get weighted avg of reg/post samples
+        # # bc for specific conditions such as teammate out,
+        # # no postseason samples, so extrap from regseas
+        # elif condition_reg_minutes is not None and condition_post_minutes is not None:
+        #     # base 50/50 if 1 postseason sample
+        #     # 50/50 to 80/20 from 1 to 11 samples (11-1=10)
+        #     # 80-50=30, 30/10=3, so add 3% for every 1 samples
+        #     # consider making regseason 0 weight after threshold postseason samples
+        #     # works bc only cur yr, BUT what if multiple yrs?
+        #     # if no postseason this yr but last yr on same team or main player
+        #     # then take only last yr postseason and ignore cur reg season
+        #     # we know we have post samples at this point
+        #     post_sample_weight = 0
+        #     reg_post_ratio = 3
+        #     #cur_conds = {'condition':cond, 'year':read_yr, 'part': read_season_part}
+        #     # all postseason samples from all yrs???
+        #     # NO bc for playtime we just need cur season
+        #     # BUT for postseason, the more samples from last season could help a lot
+        #     # since cond reg post minutes are scaled it could be better with more samples cur reg season
+        #     # it could also hurt a lot so for now simply take cur season minutes
+        #     #num_post_samples = determiner.determine_cond_yr_part_sample_size(player_stat_dict, cond, read_yr, read_season_part)
+        #     if num_post_samples > 1:
+        #         post_sample_weight = reg_post_ratio * (num_post_samples - 1)
+        #     condition_post_weight = 50 + post_sample_weight
+        #     condition_reg_weight = 100 - condition_post_weight
+        #     print('condition_post_weight: ' + str(condition_post_weight))
+        #     print('condition_reg_weight: ' + str(condition_reg_weight))
+            
+        #     all_cond_playtimes = {'regular':cond_reg_post_minutes, 'postseason':condition_post_minutes}
+        #     all_cond_weights = {'regular':condition_reg_weight, 'postseason':condition_post_weight}
+            
+        #     weighted_minutes = generate_weighted_stats(all_cond_playtimes, all_cond_weights, prints_on=True)
+
+        #     all_cond_weights_list = []
+        #     for cond in all_cond_playtimes.keys():
+        #         weight = all_cond_weights[cond]
+        #         all_cond_weights_list.append(weight)
+
+        #     sum_weights = sum(all_cond_weights_list)
+        #     #print('sum_weights: ' + str(sum_weights))
+
+        #     if sum_weights > 0:
+        #         condition_mean_minutes = round_half_up(sum(weighted_minutes) / sum_weights,2)
+
+    print('condition_mean_minutes: ' + str(condition_mean_minutes))
+    return condition_mean_minutes
 
 
 # playtime is weighted avg of playtime under player conditions
 # like gen true prob
 # use cond of player of interest starter/bench
 # and use out conds
+# 1. always read reg season playtime
+# If Postseason:
+# 2. if postseason, read postseason playtime
+# 3. if postseason, avg reg/post playtime
+# 3.1 only for specific regseason conds, excluding cur player start/bench cond
 def generate_player_playtime(player_name, player_team, player_position, all_players_positions, player_gp_conds, player_cur_tiap, gp_cur_team, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, cur_yr, season_part, prints_on):
-    if prints_on:
-        print('\n===Generate Player Playtime: ' + player_name.title() + '===\n')
-        print('Settings: Current Year = ' + cur_yr)
-        print('Settings: Season Part = ' + season_part)
-        print('\nInput: player team = abbrev = ' + player_team.upper())
-        print('Input: player_cur_tiap = ' + str(player_cur_tiap))
-        print('Input: player_gp_conds = [\'teammate out\',..., \'t1,...out\'] = [\'A Gordon F out\', ..., \'A Gordon F,...out\'] = ' + str(player_gp_conds))
-        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-        print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
-        print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
-        print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# = ' + str(all_players_abbrevs))
-        print('Input: irreg_play_times = {player:playtime,... = ' + str(irreg_play_times))
-        print('\nOutput: playtime = x\n')
+    #if prints_on:
+    print('\n===Generate Player Playtime: ' + player_name.title() + '===\n')
+    print('Settings: Current Year = ' + cur_yr)
+    print('Settings: Season Part = ' + season_part)
+    print('\nInput: player team = abbrev = ' + player_team.upper())
+    print('Input: player_cur_tiap = ' + str(player_cur_tiap))
+    print('Input: player_gp_conds = [\'teammate out\',..., \'t1,...out\'] = [\'A Gordon F out\', ..., \'A Gordon F,...out\'] = ' + str(player_gp_conds))
+    print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+    print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+    print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# = ' + str(all_players_abbrevs))
+    print('Input: all_players_cur_avg_playtimes = {player:playtime, ....')
+    print('Input: irreg_play_times = {player:playtime,... = ' + str(irreg_play_times))
+    print('\nOutput: playtime = x\n')
 
     playtime = 0
 
@@ -7629,6 +8057,8 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                                 'pf':['sf','f','pf','c'],
                                 'c':['sf','f','pf','c']}
             player_position_group = position_groups[player_position]
+
+            player_avg_playtime = all_players_cur_avg_playtimes[player_name]
 
             all_cond_weights = {}#[]
             all_cond_playtimes = {}#[]
@@ -7651,68 +8081,49 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             # set range of weight from 1 sample postseason to max samples postseason
             # so we know how the weight changes in full range
             # from 50/50 to 80/20? maybe 80/20 at 10 samples?
-            player_cur_part_stat_dict = {}
+            #player_cur_part_stat_dict = {}
 
             # read_yr is not always cur yr if first game of postseason bc prefer take last postseason to compare
             read_yr = cur_yr
             read_season_part = season_part
 
-            # if first game of postseason
-            if season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part].keys()) == 0:
-                # if played last season, get from last postseason if available
-                # AND if same team as last postseason? not needed for main players
-                prev_yr = str(int(cur_yr) - 1)
-                print('prev_yr: ' + str(prev_yr))
-                if prev_yr in player_stat_dict.keys():
-                    prev_yr_stat_dict = player_stat_dict[prev_yr]
-                    #year_stat_dicts = list(player_stat_dict.values())
-                    if season_part in prev_yr_stat_dict:
-                        
-                        # need to get both last postseason and this cur regseason 
-                        # bc if outlier big diff than prefer this regseason
-                        # just compare last game minutes unless exception 
-                        #player_prev_stat_dict = year_stat_dicts[1]
-                        player_prev_post_stat_dict = prev_yr_stat_dict[season_part]
-
-                        player_regseason_stat_dict = player_stat_dict[cur_yr]['regular']
-
-                        # if last yr post playtime < 12 and < cur season playtime / 2
-                        if 'min' in player_prev_post_stat_dict.keys():
-                            prev_post_minutes_dict = player_prev_post_stat_dict['min']['all']
-                            if '0' not in prev_post_minutes_dict.keys():
-                                print('no postseason last yr')
-                                read_season_part = 'regular'
-                                player_cur_part_stat_dict = player_regseason_stat_dict
-                            else:
-                                prev_post_playtime = prev_post_minutes_dict['0']
-                                print('prev_post_playtime: ' + str(prev_post_playtime))
-                                regseason_playtime = player_regseason_stat_dict['min']['all']['0']
-                                print('regseason_playtime: ' + str(regseason_playtime))
-                                # TEST/TUNE: cutoff time and fraction
-                                if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
-                                    # use regseason
-                                    print('invalid postseason last yr')
-                                    read_season_part = 'regular'
-                                    player_cur_part_stat_dict = player_regseason_stat_dict
-                                else:
-                                    print('found postseason last yr')
-                                    player_cur_part_stat_dict = player_prev_post_stat_dict
-                                    read_yr = prev_yr
-                        else:
-                            print('no postseason last yr')
-                            read_season_part = 'regular'
-                            player_cur_part_stat_dict = player_regseason_stat_dict
-                    else:
-                        print('no postseason last yr') # so read cur reg season as approx
-                        read_season_part = 'regular'
-                        player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
-                else:
-                    print('did not play last yr')
-                    read_season_part = 'regular'
-                    player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+            print('season_part: ' + str(season_part))
+            if len(player_stat_dict[cur_yr][season_part].keys()) == 0:
+                print('num samples: ' + str(len(player_stat_dict[cur_yr][season_part].keys())))
             else:
-                player_cur_part_stat_dict = player_stat_dict[cur_yr][season_part]
-            print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
+                print('num samples: ' + str(len(player_stat_dict[cur_yr][season_part]['min']['all'].keys())))
+            print('player_avg_playtime: ' + str(player_avg_playtime))
+
+            # if first game of postseason
+            # if season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part].keys()) == 0:
+                
+            #     stat_dict_data = generate_cur_part_stat_dict(player_stat_dict, read_yr, read_season_part, cur_yr, season_part)
+            #     player_cur_part_stat_dict = stat_dict_data[0]
+            #     read_yr = stat_dict_data[1]
+            #     read_season_part = stat_dict_data[2]
+
+                
+            # # if second game of postseason, check for outlier injury early in game
+            # # if low avg minutes, then we cannot tell if outlier bc often no playtime in playoffs
+            # elif player_avg_minutes > 24 and season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part]['min']['all'].keys()) == 1:
+            #     print('Second Game of Postseason')
+            #     player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+            #     # minutes_dict = {condition: {game idx: stat val, ...
+            #     sample_minutes = list(player_cur_part_stat_dict['min']['all'].values())[0]
+            #     print('sample_minutes: ' + str(sample_minutes))
+            #     # if player avg minutes < 20 then maybe coach took them out for playoffs rotation
+            #     # but if main player then we can check for outlier
+            #     if sample_minutes < player_avg_minutes / 1.5:
+            #         print('Found Outlier Injury First Game of Postseason')
+            #         stat_dict_data = generate_cur_part_stat_dict(player_stat_dict, read_yr, read_season_part, cur_yr, season_part)
+            #         player_cur_part_stat_dict = stat_dict_data[0]
+            #         read_yr = stat_dict_data[1]
+            #         read_season_part = stat_dict_data[2]
+
+            # else:
+            #     print('read_season_part: ' + str(read_season_part))
+            #     player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+            # print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
 
             # for playtime we are first concerned with teammates in/out
             # then we can consider how many opponents at each position to approximate matchups and therefore playtime
@@ -7730,6 +8141,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             multi_cond_weights = {'out':0, 'starters':0, 'bench':0}
             multi_conds = {}
             # need multiconds made first
+            #print('\nMulti Conds')
             for cond in teammate_gp_conds:
                 #print('\nCondition: ' + cond)
 
@@ -7751,11 +8163,11 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
             # get single conds
             # and form multiconds for next loop
+            #print('\nSingle Conds')
             for cond in teammate_gp_conds:
                 #print('\nCondition: ' + cond)
 
-                # get cur conds to get sample size
-                cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
+                
 
                 cond_data = cond.rsplit(' ', 1)
                 cond_key = cond_data[1]
@@ -7828,17 +8240,36 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
                     if teammate == player_name or cond_key == 'out':
 
+                        # ===If Postseason:
+                        # use only samples from best/most accurate part of season
+                        # bc including other parts reduces accuracy in postseason
+                        # bc postseason less variability for main players
+                        # but possibly more variability for role players???
+                        sample_size = determiner.determine_post_playtime_sample_size(cond, cur_yr, player_stat_dict, all_players_abbrevs, player_team, player_name, prints_on, gp_cur_team, player_avg_playtime)
                         
-                        # need to get only samples from cur team
-                        # only get last 30 games bc minutes can change drastically over course of season
-                        # see vince williams jr for same tiap but diff playtime
-                        # max 30 samples bc after 30 games playtime is inaccurate
-                        sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+
+                        # get cur conds to get sample size
+                        # cur_conds = {'condition':cond, 'year':read_yr, 'part':'regular'}
+                        # # need to get only samples from cur team
+                        # # only get last 30 games bc minutes can change drastically over course of season
+                        # # see vince williams jr for same tiap but diff playtime
+                        # # max 30 samples bc after 30 games playtime is inaccurate
+                        # sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+                        # num_post_samples = None
+                        # if season_part == 'postseason':
+                        #     cur_conds = {'condition':cond, 'year':read_yr, 'part':season_part}
+                        #     num_post_samples = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+                        #     sample_size += num_post_samples
+                        #     print('total sample_size: ' + str(sample_size))
+
                         cond_weight = 0
                         cond_playtime = None
                         # consider requiring >2 bc noticed anomalies can happen twice although rare
                         # so maybe allow 2 samples but give less weight
-                        if sample_size > 1:
+                        # what if sample size = 1???
+                        # if postseason, then just take the 1 sample for the player starting position
+                        # OR could take avg of regseason last 30? and 1 sample from postseason
+                        if sample_size > 1 or (read_season_part == 'postseason' and sample_size > 0):
                             # sample weight negligible compared to teammate weight
                             # bc teammate may have many samples but not effect and vice versa
                             #sample_weight = math.log10(sample_size)
@@ -7848,9 +8279,12 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
                             # get weighted avg bt all season yrs, like gen all conds weights?
                             # no just get this yr bc minutes change drastically each yr
-                            cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team)
+                            cond_playtime = generate_condition_mean_minutes(cond, player_stat_dict, gp_cur_team, read_season_part, player_avg_playtime, cur_yr, prints_on)
                             
-                            
+                            # if cond playtime none bc only 1 sample is outlier from injury
+                            # take avg minutes instead
+                            # if cond_playtime is None and read_season_part == 'postseason' and sample_size == 1:
+                            #     # take from last postseason if same team
 
                             if cond_playtime is not None:
 
@@ -7873,10 +8307,20 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
             # get tiap cond once at beginning instead of each encounter of low samples
             # bc almost always 1 multicond has low samples and usually multiple
-            cur_conds = {'condition':player_cur_tiap, 'year':read_yr, 'part':read_season_part}
-            tiap_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+            # cur_conds = {'condition':player_cur_tiap, 'year':read_yr, 'part':'regular'}
+            # tiap_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+            # num_post_samples = None
+            # if season_part == 'postseason':
+            #     cur_conds = {'condition':cond, 'year':read_yr, 'part':season_part}
+            #     num_post_samples = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+            #     tiap_sample_size += num_post_samples
+            #     print('total tiap_sample_size: ' + str(tiap_sample_size))
+            
             # may not consider sample size
             # OR only scale for 2-5 and above that is same
+
+            tiap_sample_size = determiner.determine_post_playtime_sample_size(cond, cur_yr, player_stat_dict, all_players_abbrevs, player_team, player_name, prints_on, gp_cur_team, player_avg_playtime)
+
             tiap_cond_playtime = 0
             if tiap_sample_size > 1:
                 #tiap_sample_weight = math.log10(tiap_sample_size) / 3 # 1/3 bc 3 groups out, start, bench OR 1/2 bc sample loss in quality bc of position not specific player
@@ -7886,7 +8330,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                 # for tiap specifically but also other conds
                 # only get last 30 games bc minutes can change drastically over course of season
                 # see vince williams jr for same tiap but diff playtime
-                tiap_cond_playtime = generate_condition_mean_minutes(player_cur_tiap, player_cur_part_stat_dict, gp_cur_team)
+                tiap_cond_playtime = generate_condition_mean_minutes(player_cur_tiap, player_stat_dict, gp_cur_team, read_season_part, player_avg_playtime, cur_yr, prints_on)
                         
 
             for cond_key, cond in multi_conds.items():
@@ -7898,11 +8342,20 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
                 teammates_weight = multi_cond_weights[cond_key]
                 
 
-                cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
-                # do not need to pass gp cur team for multiconds bc always same team? 
-                # not always but rare for 2 players to get traded and be only players out but not impossible
-                # so pass gp cur team just in case
-                sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+                # cur_conds = {'condition':cond, 'year':read_yr, 'part':'regular'}
+                # # do not need to pass gp cur team for multiconds bc always same team? 
+                # # not always but rare for 2 players to get traded and be only players out but not impossible
+                # # so pass gp cur team just in case
+                # sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+                # num_post_samples = None
+                # if season_part == 'postseason':
+                #     cur_conds = {'condition':cond, 'year':read_yr, 'part':season_part}
+                #     num_post_samples = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+                #     sample_size += num_post_samples
+                #     print('total sample_size: ' + str(sample_size))
+
+                sample_size = determiner.determine_post_playtime_sample_size(cond, cur_yr, player_stat_dict, all_players_abbrevs, player_team, player_name, prints_on, gp_cur_team, player_avg_playtime)
+
                 #sample_weight = 0
                 cond_weight = 0
                 cond_playtime = None
@@ -7914,7 +8367,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
                     # get weighted avg bt all season yrs, like gen all conds weights?
                     # no just get this yr bc minutes change drastically each yr
-                    cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team)
+                    cond_playtime = generate_condition_mean_minutes(cond, player_stat_dict, gp_cur_team, read_season_part, player_avg_playtime, cur_yr, prints_on)
                     
                     if cond_playtime is not None:
 
@@ -7997,6 +8450,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             #player_season_logs = all_players_season_logs[player_name]
             # get current season mean minutes to compare to prev seasons
             # we use mean of last 3 games bc most accurate considering ups and downs of rotation
+            # BUT must remove outliers
             #cur_yr = list(player_season_logs.keys())[0]
             #print('cur_yr: ' + cur_yr)
             #reg_season_logs = generate_reg_season_logs(player_season_logs)
@@ -8021,6 +8475,429 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
 
     print('playtime: ' + str(playtime))
     return playtime
+
+
+# def generate_season_part_playtime(player_name, season_part, player_team, player_position, all_players_positions, player_gp_conds, player_cur_tiap, gp_cur_team, player_stat_dict, player_season_logs, all_players_abbrevs, all_players_cur_avg_playtimes, after_injury_players, irreg_play_times, cur_yr, prints_on):
+#     if prints_on:
+#         print('\n===Generate Season Part Playtime: ' + player_name.title() + '===\n')
+#         print('Settings: Current Year = ' + cur_yr)
+#         print('Settings: Season Part = ' + season_part)
+#         print('\nInput: player team = abbrev = ' + player_team.upper())
+#         print('Input: player_cur_tiap = ' + str(player_cur_tiap))
+#         print('Input: player_gp_conds = [\'teammate out\',..., \'t1,...out\'] = [\'A Gordon F out\', ..., \'A Gordon F,...out\'] = ' + str(player_gp_conds))
+#         print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+#         print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
+#         print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30}, ...')
+#         print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# = ' + str(all_players_abbrevs))
+#         print('Input: all_players_cur_avg_playtimes = {player:playtime, ....')
+#         print('Input: irreg_play_times = {player:playtime,... = ' + str(irreg_play_times))
+#         print('\nOutput: playtime = x\n')
+
+#     playtime = 0
+
+#     if player_name in irreg_play_times.keys():
+#         playtime = irreg_play_times[player_name]
+
+#     else:
+        
+#         # if no lineup given, just take avg minutes
+#         if len(player_gp_conds) > 0:
+#             #cur_mean_minutes = generate_player_playtime(player_name, player_team, player_gp_conds, player_stat_dict, all_players_season_logs, all_players_teams, all_players_abbrevs, cur_yr, season_part)
+        
+#             position_groups = {'pg':['pg','sg','g','sf'], 
+#                                 'sg':['pg','sg','g','sf'],
+#                                 'g':['pg','sg','g','sf'],
+#                                 'sf':['sg','g','sf','f','pf'],
+#                                 'f':['sf','f','pf','c'],
+#                                 'pf':['sf','f','pf','c'],
+#                                 'c':['sf','f','pf','c']}
+#             player_position_group = position_groups[player_position]
+
+#             player_avg_minutes = all_players_cur_avg_playtimes[player_name]
+
+#             all_cond_weights = {}#[]
+#             all_cond_playtimes = {}#[]
+
+#             # get samples from cur part of cur season
+#             # if no postseason yet bc game 1, get from cur season reg reason???
+#             # NO, bc main players play more in postseason so more like last postseason
+#             # and role players play less but maybe not same as last postseason
+#             # role players maybe closer to reg season minutes cur season
+#             # better to use 1 sample from cur postseason than all samples from reg season
+#             # if no postseason samples this season yet, 
+#             # use last postseason avg bc better than cur regseason avg
+#             # BUT for prob calcs, use 80-20 split post-reg season bc need more samples to avg stats
+#             # bc stats more variable than playtime
+#             # so from post-reg, we get full season probs to use as true prob for postseason
+#             # so full prob = true prob for postseason
+#             # maybe better to use 50/50 or 60/40 split until >5 postseason samples
+#             # bc inaccurate until enough samples
+#             # so for done prev season, split 80/20???
+#             # set range of weight from 1 sample postseason to max samples postseason
+#             # so we know how the weight changes in full range
+#             # from 50/50 to 80/20? maybe 80/20 at 10 samples?
+#             player_cur_part_stat_dict = {}
+
+#             # read_yr is not always cur yr if first game of postseason bc prefer take last postseason to compare
+#             read_yr = cur_yr
+#             read_season_part = season_part
+
+#             print('season_part: ' + str(season_part))
+#             if len(player_stat_dict[cur_yr][season_part].keys()) == 0:
+#                 print('num samples: ' + str(len(player_stat_dict[cur_yr][season_part].keys())))
+#             else:
+#                 print('num samples: ' + str(len(player_stat_dict[cur_yr][season_part]['min']['all'].keys())))
+#             print('player_avg_minutes: ' + str(player_avg_minutes))
+
+#             # if first game of postseason
+#             if season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part].keys()) == 0:
+                
+#                 stat_dict_data = generate_cur_part_stat_dict(player_stat_dict, read_yr, read_season_part, cur_yr, season_part)
+#                 player_cur_part_stat_dict = stat_dict_data[0]
+#                 read_yr = stat_dict_data[1]
+#                 read_season_part = stat_dict_data[2]
+
+                
+#             # if second game of postseason, check for outlier injury early in game
+#             # if low avg minutes, then we cannot tell if outlier bc often no playtime in playoffs
+#             elif player_avg_minutes > 24 and season_part == 'postseason' and len(player_stat_dict[cur_yr][season_part]['min']['all'].keys()) == 1:
+#                 print('Second Game of Postseason')
+#                 player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+#                 # minutes_dict = {condition: {game idx: stat val, ...
+#                 sample_minutes = list(player_cur_part_stat_dict['min']['all'].values())[0]
+#                 print('sample_minutes: ' + str(sample_minutes))
+#                 # if player avg minutes < 20 then maybe coach took them out for playoffs rotation
+#                 # but if main player then we can check for outlier
+#                 if sample_minutes < player_avg_minutes / 1.5:
+#                     print('Found Outlier Injury First Game of Postseason')
+#                     stat_dict_data = generate_cur_part_stat_dict(player_stat_dict, read_yr, read_season_part, cur_yr, season_part)
+#                     player_cur_part_stat_dict = stat_dict_data[0]
+#                     read_yr = stat_dict_data[1]
+#                     read_season_part = stat_dict_data[2]
+
+#             else:
+#                 print('read_season_part: ' + str(read_season_part))
+#                 player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
+#             print('player_cur_part_stat_dict: ' + str(player_cur_part_stat_dict))
+
+#             # for playtime we are first concerned with teammates in/out
+#             # then we can consider how many opponents at each position to approximate matchups and therefore playtime
+#             teammate_gp_conds = []
+#             for cond in player_gp_conds:
+#                 # need space in search to avoid name "toppin"
+#                 if not re.search('opp ', cond):
+#                     teammate_gp_conds.append(cond)
+
+
+
+
+
+#             # get only single teammate conds so we can sum weights for multiconds
+#             multi_cond_weights = {'out':0, 'starters':0, 'bench':0}
+#             multi_conds = {}
+#             # need multiconds made first
+#             #print('\nMulti Conds')
+#             for cond in teammate_gp_conds:
+#                 #print('\nCondition: ' + cond)
+
+#                 cond_data = cond.rsplit(' ', 1)
+#                 cond_key = cond_data[1]
+#                 #print('cond_key: ' + cond_key)
+
+#                 # only need out cond, player cond, and multiconds for minutes avg
+#                 # so exclude single player conds except player of interest
+#                 # first check for player cond
+
+#                 # if multiplayer cond, sum single player weights
+#                 if re.search(',', cond):
+#                     multi_conds[cond_key] = cond
+#                     #continue
+
+
+            
+
+#             # get single conds
+#             # and form multiconds for next loop
+#             #print('\nSingle Conds')
+#             for cond in teammate_gp_conds:
+#                 #print('\nCondition: ' + cond)
+
+#                 # get cur conds to get sample size
+#                 cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
+
+#                 cond_data = cond.rsplit(' ', 1)
+#                 cond_key = cond_data[1]
+#                 #print('cond_key: ' + cond_key)
+
+#                 # only need out cond and player cond for minutes avg and multiconds
+#                 # so exclude single player conds except player of interest
+#                 # first check for player cond
+
+#                 # if multiplayer cond, sum single player weights
+#                 if re.search(',', cond):
+#                     #multi_conds[cond_key] = cond
+#                     continue
+
+
+#                 # Get Cond
+#                 # get teammate name from abbrev
+#                 # cond = teammate out
+                
+#                 init_teammmate_abbrev = cond_data[0] #determiner.determine_teammate_in_cond(cond)
+#                 # teammate_abbrev_key = teammate_abbrev + '-' + player_team
+#                 # teammate = all_players_abbrevs[cur_yr][teammate_abbrev_key]
+
+#                 teammate_data = determiner.determine_player_name(init_teammmate_abbrev, player_team, all_players_abbrevs, cur_yr)
+#                 teammate = teammate_data[0]
+#                 teammate_abbrev = teammate_data[1] # corrected in case of irregular abbrev so it matches abbrev dict
+#                 # INSTEAD of changing cond, NEED to check for all combos of abbrevs
+#                 if init_teammmate_abbrev != teammate_abbrev:
+#                     cond = teammate_abbrev + ' ' + cond_key
+#                     #print('cond: ' + cond)
+#                     multi_conds[cond_key] = re.sub(init_teammmate_abbrev, teammate_abbrev, multi_conds[cond_key])
+                
+#                 #if teammate != player_name: # exclude cur player of interest? no bc what if only cond matching cur cond?
+#                 # teammate_teams = all_players_teams[teammate]
+#                 # teammate_season_logs = all_players_season_logs[teammate]
+#                 # teammate_gp_cur_team = determiner.determine_gp_cur_team(teammate_teams, teammate_season_logs, cur_yr)
+#                 # teammate_cur_season_log = teammate_season_logs[cur_yr]
+
+#                 # get cond weight from teammate avg playtime 
+#                 # cond weight = weighted avg playtime over yrs of interest
+#                 # no, bc minutes drastically change yr to yr 
+#                 # so makes more sense to take cur season avg running from game 1 of season
+#                 # yes we can use season avg to get weight but then why not use it to get player minutes
+#                 # bc avg minutes does not predict cur game minutes so we cant use for weight either?
+#                 # we can bc it is relative to each teammate 
+#                 # whereas player scaled minutes is absolute value
+#                 # get teammate avg playtime from their season log all cond
+#                 # cond weight = avg playtime on cur team
+#                 if teammate in all_players_cur_avg_playtimes.keys():
+
+#                     teammate_pos = all_players_positions[teammate]
+
+#                     # get all multicond weights bc used to get playtime with accurate lineups
+#                     # adjust weights based on sample size??? probably
+#                     # adjust based on position group
+#                     # if same group then multiply by factor
+#                     # if same exact pos then even more
+#                     pos_weight = 1
+#                     # keep player base weight low bc other factors cause variation
+#                     if teammate != player_name:
+#                         if teammate_pos == player_position:
+#                             pos_weight = 3
+#                         elif teammate_pos in player_position_group:
+#                             pos_weight = 2
+#                     teammate_weight = all_players_cur_avg_playtimes[teammate] * pos_weight #generate_gp_cond_weight(teammate_cur_season_log, teammate_gp_cur_team, cond)
+                        
+#                     # add teammate weights bc then multiplied by sample size to get total weight
+#                     # add weight even if no samples directly bc used to get weight of teammates at position
+#                     multi_cond_weights[cond_key] += teammate_weight # OR cond_weight???
+
+#                     if teammate == player_name or cond_key == 'out':
+
+                        
+#                         # need to get only samples from cur team
+#                         # only get last 30 games bc minutes can change drastically over course of season
+#                         # see vince williams jr for same tiap but diff playtime
+#                         # max 30 samples bc after 30 games playtime is inaccurate
+#                         sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+#                         cond_weight = 0
+#                         cond_playtime = None
+#                         # consider requiring >2 bc noticed anomalies can happen twice although rare
+#                         # so maybe allow 2 samples but give less weight
+#                         # what if sample size = 1???
+#                         # if postseason, then just take the 1 sample for the player starting position
+#                         # OR could take avg of regseason last 30? and 1 sample from postseason
+#                         if sample_size > 1 or (read_season_part == 'postseason' and sample_size > 0):
+#                             # sample weight negligible compared to teammate weight
+#                             # bc teammate may have many samples but not effect and vice versa
+#                             #sample_weight = math.log10(sample_size)
+#                             cond_weight = teammate_weight #round_half_up(teammate_weight * sample_weight, 2)
+                        
+                            
+
+#                             # get weighted avg bt all season yrs, like gen all conds weights?
+#                             # no just get this yr bc minutes change drastically each yr
+#                             cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team, read_season_part, player_avg_minutes)
+                            
+#                             # if cond playtime none bc only 1 sample is outlier from injury
+#                             # take avg minutes instead
+#                             # if cond_playtime is None and read_season_part == 'postseason' and sample_size == 1:
+#                             #     # take from last postseason if same team
+
+#                             if cond_playtime is not None:
+
+#                                 all_cond_playtimes[cond] = cond_playtime
+#                                 #all_cond_playtimes.append(cond_playtime)
+
+#                                 all_cond_weights[cond] = cond_weight
+#                                 #all_cond_weights.append(cond_weight)
+                            
+                        
+
+#                         if prints_on:
+#                             print('\ncond: ' + str(cond))
+#                             print('cond_playtime: ' + str(cond_playtime))
+#                             print('sample_size: ' + str(sample_size))
+#                             print('teammate_weight: ' + str(teammate_weight))
+#                             print('cond_weight: ' + str(cond_weight))
+#                 else:
+#                     print('Warning: Teammate not in playtimes dict! ' + init_teammmate_abbrev + ', ' + teammate + ', ' + player_team)
+
+#             # get tiap cond once at beginning instead of each encounter of low samples
+#             # bc almost always 1 multicond has low samples and usually multiple
+#             cur_conds = {'condition':player_cur_tiap, 'year':read_yr, 'part':read_season_part}
+#             tiap_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+#             # may not consider sample size
+#             # OR only scale for 2-5 and above that is same
+#             tiap_cond_playtime = 0
+#             if tiap_sample_size > 1:
+#                 #tiap_sample_weight = math.log10(tiap_sample_size) / 3 # 1/3 bc 3 groups out, start, bench OR 1/2 bc sample loss in quality bc of position not specific player
+                        
+#                 # get weighted avg bt all season yrs, like gen all conds weights?
+#                 # no just get this yr bc minutes change drastically each yr
+#                 # for tiap specifically but also other conds
+#                 # only get last 30 games bc minutes can change drastically over course of season
+#                 # see vince williams jr for same tiap but diff playtime
+#                 tiap_cond_playtime = generate_condition_mean_minutes(player_cur_tiap, player_cur_part_stat_dict, gp_cur_team, read_season_part, player_avg_minutes)
+                        
+
+#             for cond_key, cond in multi_conds.items():
+#                 if prints_on:
+#                     print('\nmulti cond: ' + str(cond))
+#                     print('cond_key: ' + cond_key)
+
+#                 #cond_weight = generate_multi_cond_weight(teammate_cur_season_log, teammate_gp_cur_team)
+#                 teammates_weight = multi_cond_weights[cond_key]
+                
+
+#                 cur_conds = {'condition':cond, 'year':read_yr, 'part':read_season_part}
+#                 # do not need to pass gp cur team for multiconds bc always same team? 
+#                 # not always but rare for 2 players to get traded and be only players out but not impossible
+#                 # so pass gp cur team just in case
+#                 sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player_name, prints_on=prints_on, gp_cur_team=gp_cur_team, max_samples=30)
+#                 #sample_weight = 0
+#                 cond_weight = 0
+#                 cond_playtime = None
+#                 if sample_size > 1:
+#                     #sample_weight = math.log10(sample_size)
+#                     #cond_weight = teammates_weight #round_half_up(teammates_weight * sample_weight, 2)
+#                     # 1/3 bc 3 groups out, start, bench
+#                     cond_weight = round_half_up(teammates_weight / 3, 2)
+
+#                     # get weighted avg bt all season yrs, like gen all conds weights?
+#                     # no just get this yr bc minutes change drastically each yr
+#                     cond_playtime = generate_condition_mean_minutes(cond, player_cur_part_stat_dict, gp_cur_team, read_season_part, player_avg_minutes)
+                    
+#                     if cond_playtime is not None:
+
+#                         all_cond_playtimes[cond] = cond_playtime
+#                         #all_cond_playtimes.append(cond_playtime)
+#                         all_cond_weights[cond] = cond_weight
+#                         #all_cond_weights.append(cond_weight)
+
+#                 # if low samples then use teammate positions
+#                 else:
+#                     if prints_on:
+#                         print('\nLow Samples: ' + cond + ': ' + str(sample_size))
+#                         print('player_cur_tiap: ' + player_cur_tiap)
+
+#                     #cond = player_cur_tiap
+                    
+#                     if tiap_sample_size > 1:
+#                         #sample_weight = math.log(tiap_sample_size) / 3 # 1/3 bc 3 groups out, start, bench OR 1/2 bc sample loss in quality bc of position not specific player
+#                         # consider reducing weight further bc only position of players, not specific players so not as quality data
+#                         cond_weight = round_half_up(teammates_weight / 3, 2) #round_half_up(teammates_weight * tiap_sample_weight, 2)
+                        
+#                         # get weighted avg bt all season yrs, like gen all conds weights?
+#                         # no just get this yr bc minutes change drastically each yr
+#                         #cond_playtime = generate_condition_mean_minutes(player_cur_tiap, player_cur_part_stat_dict)
+                        
+#                         if tiap_cond_playtime is not None:
+#                             all_cond_playtimes[cond] = tiap_cond_playtime
+#                             all_cond_weights[cond] = cond_weight
+
+#                     # if tiap has low samples too then check for offset tiap or toap
+
+#                     # if prints_on:
+#                     #     print('sample_weight: ' + str(sample_weight))
+
+#                         # print('sample_size: ' + str(sample_size))
+#                         # print('teammates_weight: ' + str(teammates_weight))
+#                         # print('cond_weight: ' + str(cond_weight))
+#                         # print('cond_playtime: ' + str(cond_playtime))
+
+
+
+#                 if prints_on:
+#                     print('teammates_weight: ' + str(teammates_weight))
+#                     print('sample_size: ' + str(sample_size))
+#                     print('tiap_sample_size: ' + str(tiap_sample_size))
+#                     #print('sample_weight: ' + str(sample_weight))
+#                     #print('tiap_sample_weight: ' + str(tiap_sample_weight))
+#                     print('cond_weight: ' + str(cond_weight))
+#                     print('cond_playtime: ' + str(cond_playtime))
+#                     print('tiap_cond_playtime: ' + str(tiap_cond_playtime))
+
+
+#             # minutes are also affected if back to back game
+                    
+            
+            
+
+
+#             weighted_minutes = generate_weighted_stats(all_cond_playtimes, all_cond_weights, prints_on=True)
+
+#             all_cond_weights_list = []
+#             # for cond, weight in all_cond_weights.items():
+#             #     if cond in all_cond_playtimes.keys():
+#             #         all_cond_weights_list.append(weight)
+#             for cond in all_cond_playtimes.keys():
+#                 weight = all_cond_weights[cond]
+#                 all_cond_weights_list.append(weight)
+
+#             sum_weights = sum(all_cond_weights_list)
+#             #print('sum_weights: ' + str(sum_weights))
+
+#             if sum_weights > 0:
+#                 playtime = round_half_up(sum(weighted_minutes) / sum_weights,2)
+#                 #print('playtime = sum(weighted_minutes) / sum_weights = ' + str(sum(weighted_minutes)) + '/' + str(sum_weights) + ' = ' + str(playtime))
+#             # else:
+#             #     print('Warning: denom = sum_weights = 0 bc no samples for condition!')
+
+#         else: # not given player conds so just use most recent games to get idea of minutes if all teammates happen to be the same
+#             print('No Lineup Given')
+#             #player_season_logs = all_players_season_logs[player_name]
+#             # get current season mean minutes to compare to prev seasons
+#             # we use mean of last 3 games bc most accurate considering ups and downs of rotation
+#             # BUT must remove outliers
+#             #cur_yr = list(player_season_logs.keys())[0]
+#             #print('cur_yr: ' + cur_yr)
+#             #reg_season_logs = generate_reg_season_logs(player_season_logs)
+#             season_part_logs = generate_season_part_logs(player_season_logs, season_part)
+#             cur_season_log = season_part_logs[cur_yr]#list(player_season_logs.values())[0]
+#             print('cur_season_log: ' + str(cur_season_log))
+#             #cur_mean_minutes = 0
+#             # season_log = {stat name: {game idx: stat val, ...
+#             if 'MIN' in cur_season_log.keys():
+#                 cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
+#                 #print('cur_minutes_log: ' + str(cur_minutes_log))
+#                 playtime = round_half_up(np.mean(np.array(cur_minutes_log)), 2)
+
+
+#         # if first week back from injury, limit to 24min
+#         #player_cur_season_log = all_players_season_logs[player_name][cur_yr]
+#         #if determiner.determine_week_after_injury(player_cur_season_log, player_name):
+#         if player_name in after_injury_players: 
+#             max_playtime = 24
+#             playtime = min(playtime, max_playtime)
+#             #after_injury_players.append(player_name)
+
+#     print('playtime: ' + str(playtime))
+#     return playtime
+
+
 
 def generate_player_unit_stat_dict(player_name, player_team, cur_mean_minutes, player_gp_conds, player_stat_dict, player_season_logs, all_players_season_logs, all_players_teams, all_players_abbrevs, all_players_cur_avg_playtimes, cur_yr, season_part, stats_of_interest):
     print('\n===Generate Player Unit Stat Dict: ' + player_name.title() + '===\n')
@@ -9898,7 +10775,11 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
             # only need to get new stat dict if different than saved data
             season_parts = ['regular']
             if cur_season_part == 'postseason':
-                season_parts.extend(['postseason', 'full'])
+                # we should not need full stat dict separately
+                # bc we already have pieces from both parts of season
+                # so make full season probs weighted avg of both parts in stat dict
+                #season_parts.extend(['postseason', 'full'])
+                season_parts.append(cur_season_part)
 
             
             
@@ -10168,7 +11049,12 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                                     #print('found bench')
                                                     final_bench[player_abbrev] = play_time
                                                 else:
-                                                    if player_mean_minutes > 11.5:
+                                                    # dalen terry chi is perfect example of player with 11.5 mean minutes for whole season
+                                                    # BUT much higher in last 30 games, and last 30 games is more accurate 
+                                                    # bc he raised from dnp to bench due to recent injuries
+                                                    # so CHANGE to get mean minutes from log last 30 games
+                                                    # BUT the KEY is last 30 games before this game this loop, NOT cur game day code runs
+                                                    if player_mean_minutes >= 11.5:
                                                         #print('found bench')
                                                         final_bench[player_abbrev] = play_time
                                                     else:
@@ -10188,7 +11074,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
 
                                                 # check if player was on roster at the time of this game
                                                 # bc if not on roster then not considered out
-                                                if player_mean_minutes > 11.5:
+                                                if player_mean_minutes >= 11.5:
                                                     #print('found out')
                                                     out[player_abbrev] = 0
                                                 else:
@@ -10586,6 +11472,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
 
     # now that we have avg minutes, remove ofs players below dnp limit
     # bc not considered out in box scores, instead dnp bc no effect
+    print('\n===Generate Final OFS Players===\n')
+    print('init ofs players: ' + str(ofs_players))
     final_ofs_players = {}
     for team, team_ofs_players in ofs_players.items():
         for ofs_player in team_ofs_players:
@@ -10595,6 +11483,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
                     final_ofs_players[team] = []
                 final_ofs_players[team].append(ofs_player)
     ofs_players = final_ofs_players
+    print('final ofs players: ' + str(ofs_players))
 
     # if we gave player lines, then format them in dict
     # projected_lines_dict = {}
@@ -10849,6 +11738,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     all_cur_conds_dicts = {}
     all_game_player_cur_conds = {}
     all_prev_vals = {}
+    all_last_vals = {}
     if len(game_teams) > 0:
         init_game_ids_dict = reader.extract_dict_from_data(data_type)
         all_current_conditions = generate_all_current_conditions(players_names, game_teams, all_players_teams, teams_current_rosters, all_players_season_logs, init_game_ids_dict, find_players, current_year_str, all_teams_players, ofs_players, all_players_positions, all_players_median_tiaps, all_players_median_oiaps, prints_on)#, init_all_lineups)#, read_lineups) #determiner.determine_current_conditions() # [all, regular, home, ...]
@@ -10861,8 +11751,8 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         all_game_player_cur_conds = all_cur_conds_data[1]
 
         #player_prev_vals = reader.read_player_prev_stat_vals(player_game_log)
-        all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_year)
-        all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_year)
+        all_prev_vals = reader.read_all_prev_stat_vals(all_players_season_logs, stats_of_interest, season_part)
+        all_last_vals = reader.read_all_last_stat_vals(all_players_season_logs, stats_of_interest, season_part)
 
         all_counts = generate_all_counts(all_players_season_logs, current_year_str, season_part, todays_date, stats_of_interest, prints_on)
 

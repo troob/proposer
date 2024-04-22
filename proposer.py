@@ -135,7 +135,7 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = True
+test = False
 
 # run dist probs with prints/comments
 prints_on = False
@@ -164,7 +164,7 @@ read_new_game_ids = True
 # but are now out for the rest of season
 # 'cha':['kyle lowry'], 
 # need fcn to check for news of ofs players bc not listed in lineup
-ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', 'lamelo ball'], 'chi':['zach lavine', 'patrick williams'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
+ofs_players = {'bkn':['ben simmons', 'dariq whitehead'], 'cha':['cody martin', 'lamelo ball'], 'chi':['zach lavine', 'patrick williams', 'onuralp bitim'], 'hou':['tari eason'], 'ind':['bennedict mathurin'], 'mem':['ja morant'], 'mia':['josh richardson'], 'nyk':['julius randle'], 'phi':['robert covington'], 'por':['robert williams iii'], 'wsh':['isaiah livers']}
 # dont waste time read from internet if not needed
 if not test:
     # problem error forbidden reading page at 330am-5am???
@@ -224,7 +224,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('mia', 'chi')]
+    game_teams = [('nop', 'okc')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)
@@ -238,7 +238,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['jimmy butler'] # 'jacob gilyard', use for testing
+    players_names = ['brandon ingram'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
