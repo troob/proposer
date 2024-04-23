@@ -3351,7 +3351,12 @@ def determine_cond_yr_part_sample_size(player_stat_dict, condition, year, part, 
     print('cond_part_sample_size: ' + str(cond_part_sample_size))
     return cond_part_sample_size
 
-def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition):
+def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition, prints_on=False):
+    if prints_on:
+        print('\n===Determine Cond Part Sample Size===\n')
+        print('Season Part = ' + part)
+        print('Stat Name = ' + stat_name)
+        print('Condition = ' + condition)
 
     cond_part_sample_size = 0
 
@@ -3374,6 +3379,8 @@ def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition
                 #print('stat_dict: ' + str(stat_dict))
                 cond_part_sample_size += len(stat_dict.keys())
 
+    if prints_on:
+        print('cond_part_sample_size = ' + str(cond_part_sample_size))
     return cond_part_sample_size
 
 # all yrs for single condition
@@ -3381,12 +3388,13 @@ def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition
 # this fcn is passed a single condition and gets its sample size 
 # so we need outer fcn to call this fcn for all conds in list
 # accepts part= regular|postseason|full
-def determine_condition_sample_size(player_stat_dict, condition, part, stat_name=''):
-    # print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    # print('\nOutput: sample_size = x\n')
+def determine_condition_sample_size(player_stat_dict, condition, part, stat_name='', prints_on=False):
+    if prints_on:
+        print('\n===Determine Condition Sample Size: ' + str(condition) + ', ' + part + '===\n')
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+        print('\nOutput: condition_sample_size = x\n')
 
-    sample_size = 0
+    condition_sample_size = 0
 
     # for part=full, we say 80/20 split bt post/reg
     # so take 80% of post samples and 20% of reg samples 
@@ -3399,31 +3407,35 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
         season_part = 'postseason'
         post_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition)
 
-        sample_size = converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size)
+        condition_sample_size = converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size)
 
+        # for national cond, since all post is national
+        # do we ignore cond???
+        # bc regseason national games not necessarily more relevant?
     else:
-        sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition)
+        condition_sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition)
 
             
 
 
     
+    if prints_on:
+        print('condition_sample_size: ' + str(condition_sample_size))
+    return condition_sample_size
 
-    #print('sample_size: ' + str(sample_size))
-    return sample_size
+def determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints_on):
+    if prints_on:
+        print('\n===Determine Cond Part Sample Indexes: ' + condition + ', ' + part + '===\n')
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+        print('\nOutput: sample_indexes = {year:[game idx,...],...\n')
 
-# get game idxs for each condition to see overlap
-def determine_condition_sample_indexes(player_stat_dict, condition, part):
-    # print('\n===Determine Condition Sample Indexes: ' + condition + ', ' + part + '===\n')
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    # print('\nOutput: sample_indexes = {year:[game idx,...],...\n')
-
-    sample_indexes = {}
+    cond_part_sample_idxs = {}
 
     for year, year_stat_dicts in player_stat_dict.items():
         #print('\nyear: ' + year)
         # sample_indexes[year] = []
         # year_sample_idxs = sample_indexes[year]
+
         if part in year_stat_dicts.keys():
             # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
             full_stat_dict = list(year_stat_dicts[part].values())[0]
@@ -3432,9 +3444,47 @@ def determine_condition_sample_indexes(player_stat_dict, condition, part):
                 #print('found condition ' + condition)
                 stat_dict = full_stat_dict[condition]
                 #print('stat_dict: ' + str(stat_dict))
-                sample_indexes[year] = list(stat_dict.keys())
+                cond_part_sample_idxs[year] = list(stat_dict.keys())
 
-    #print('sample_indexes: ' + str(sample_indexes))
+    if prints_on:
+        print('cond_part_sample_idxs: ' + str(cond_part_sample_idxs))
+    return cond_part_sample_idxs
+
+# get game idxs for each condition to see overlap
+def determine_condition_sample_indexes(player_stat_dict, condition, part, prints_on=False):
+    if prints_on:
+        print('\n===Determine Condition Sample Indexes: ' + condition + ', ' + part + '===\n')
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+        print('\nOutput: sample_indexes = {year:[game idx,...],...\n')
+
+    sample_indexes = {}
+
+    # if part=full, simply get all idxs
+    # no need to sep reg/post bc we simply want unique idxs
+    if part == 'full':
+        part = 'regular'
+        reg_sample_indexes = determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints_on)
+        part = 'postseason'
+        post_sample_indexes = determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints_on)
+        # post first bc recent to distant
+        # except for playin but order shouldnt matter here?
+        # playin games will be in order but idx is not in order
+        
+        for year, indexes in post_sample_indexes.items():
+            sample_indexes[year] = indexes
+        for year, indexes in reg_sample_indexes.items():
+            if year not in sample_indexes.keys():
+                sample_indexes[year] = indexes
+            else:
+                sample_indexes[year].extend(indexes)
+        
+    else:
+        sample_indexes = determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints_on)
+
+        
+
+    if prints_on:
+        print('sample_indexes: ' + str(sample_indexes))
     return sample_indexes
 
 # given a list of conds, sum their sample sizes
@@ -3444,18 +3494,19 @@ def determine_condition_sample_indexes(player_stat_dict, condition, part):
 # for exmple if none of the current game teammates were in any of the given players games
 # is that possible? i think not bc at least 1 player? no bc if new team then no matching conds
 # many cases all samples will have at least 1 player from cur conds, if played on team 2 seasons
-def determine_combined_conditions_sample_size(player_stat_dict, conditions, season_part):
-    # print('\n===Determine Combined Conditions Sample Size===\n')
-    # print('Setting: Season Part = ' + season_part)
-    # print('\nInput: Conditions = {condition: cond type, ... = ' + str(conditions))
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
-    # print('\nOutput: combined_sample_size = x\n')
+def determine_combined_conditions_sample_size(player_stat_dict, conditions, season_part, prints_on=False):
+    if prints_on:
+        print('\n===Determine Combined Conditions Sample Size===\n')
+        print('Setting: Season Part = ' + season_part)
+        print('\nInput: Conditions = {condition: cond type, ... = ' + str(conditions))
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {2023: {regular: {pts: {all: {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')# = ' + str(player_stat_dict))
+        print('\nOutput: combined_sample_size = x\n')
 
     combined_sample_size = 0
     all_unique_sample_idxs = {}
     
     for condition in conditions:
-        cond_sample_idxs = determine_condition_sample_indexes(player_stat_dict, condition, season_part)
+        cond_sample_idxs = determine_condition_sample_indexes(player_stat_dict, condition, season_part, prints_on)
         for year, year_sample_idxs in cond_sample_idxs.items():
             if year not in all_unique_sample_idxs.keys():
                 all_unique_sample_idxs[year] = []
@@ -3468,7 +3519,8 @@ def determine_combined_conditions_sample_size(player_stat_dict, conditions, seas
 
     #print('all_unique_sample_idxs: ' + str(all_unique_sample_idxs))
 
-    #print('combined_sample_size: ' + str(combined_sample_size))
+    if prints_on:
+        print('combined_sample_size: ' + str(combined_sample_size))
     return combined_sample_size
 
 def determine_team_timezone(team):

@@ -135,7 +135,7 @@ read_new_rosters = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
-test = False
+test = True
 
 # run dist probs with prints/comments
 prints_on = False
@@ -224,7 +224,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('nop', 'okc')]
+    game_teams = [('lal', 'den')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)
@@ -238,7 +238,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['brandon ingram'] # 'jacob gilyard', use for testing
+    players_names = ['lebron james'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters
