@@ -17,6 +17,7 @@ import numpy as np # mean, median
 
 import generator # gen prob stat reached to determine prob from records
 import converter # convert names to abbrevs while determining conditions order
+#from converter import round_half_up
 
 # if streak resembles pattern we have seen consistently such as 3/3,3/4,4/5,5/6,6/7,6/9,7/10
 def determine_consistent_streak(stat_counts, stat_name=''):
@@ -2811,7 +2812,7 @@ def determine_teammates_in_at_position(player_team_lineup, all_players_positions
 
 
 # given todays date find next game date
-def determine_next_game_num(schedule_date_dict, cur_yr):
+def determine_next_game_num(schedule_date_dict, cur_yr):#, season_part):
     # print('\n===Determine Next Game Num===\n')
     # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
     # print('\nOutput: next_game_num = x\n')
@@ -2823,7 +2824,9 @@ def determine_next_game_num(schedule_date_dict, cur_yr):
     # game_date = Tue, Oct 24 -> 10/24/2023
     for game_num, game_date_str in schedule_date_dict.items():
         # skip first idx always field title
-        if game_date_str == 'DATE':
+        # and postseason skip conf round title
+        #if game_date_str == 'DATE':
+        if re.search('DATE|Round', game_date_str):
             continue
 
         #print('\ngame_date_str: ' + str(game_date_str))
@@ -2860,15 +2863,15 @@ def determine_next_game_num(schedule_date_dict, cur_yr):
     return next_game_num
 
 # given todays date find next game date
-def determine_next_game_date(schedule_date_dict, cur_yr):
+def determine_next_game_date(schedule_date_dict, cur_yr):#, season_part):
     # print('\n===Determine Next Game Date===\n')
-    # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...')
+    # print('Input: schedule_date_dict = {\'0\':field name, game num:field val, ... = {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ... = ' + str(schedule_date_dict))
     # print('\nOutput: next_game_date = mm/dd/yyyy\n')
 
     # if last game of season then no next game or first game of next season
     next_game_date = '10/01/' + cur_yr
 
-    next_game_num = determine_next_game_num(schedule_date_dict, cur_yr)
+    next_game_num = determine_next_game_num(schedule_date_dict, cur_yr)#, season_part)
     
     # mm/dd
     if next_game_num in schedule_date_dict.keys():
@@ -3362,8 +3365,10 @@ def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition
 
     for year, year_stat_dicts in player_stat_dict.items():
         #print('\nyear: ' + year)
-        if part in year_stat_dicts.keys():
+        # stat dict will show part title as key with empy dict if no samples
+        if part in year_stat_dicts.keys() and len(year_stat_dicts[part].keys()) > 0:
             part_stat_dict = year_stat_dicts[part]
+            #print('part_stat_dict: ' + str(part_stat_dict))
             # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
             # BUT we need to know stat to get prev val!!!
             full_stat_dict = {}
@@ -3403,17 +3408,18 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
     
     if part == 'full':
         season_part = 'regular'
-        reg_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition)
+        reg_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition, prints_on)
         season_part = 'postseason'
-        post_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition)
+        post_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition, prints_on)
 
-        condition_sample_size = converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size)
+        # know we have at least 1
+        condition_sample_size = max(converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size), 1)
 
         # for national cond, since all post is national
         # do we ignore cond???
         # bc regseason national games not necessarily more relevant?
     else:
-        condition_sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition)
+        condition_sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition, prints_on)
 
             
 
@@ -3432,11 +3438,12 @@ def determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints
     cond_part_sample_idxs = {}
 
     for year, year_stat_dicts in player_stat_dict.items():
-        #print('\nyear: ' + year)
+        print('\nyear: ' + year)
         # sample_indexes[year] = []
         # year_sample_idxs = sample_indexes[year]
 
-        if part in year_stat_dicts.keys():
+        # stat dict will show part title as key with empy dict if no samples
+        if part in year_stat_dicts.keys() and len(year_stat_dicts[part].keys()) > 0:
             # we take idx 0 for first stat bc all stats sampled for all games so same no. samples for all stats
             full_stat_dict = list(year_stat_dicts[part].values())[0]
             #print('full_stat_dict: ' + str(full_stat_dict))

@@ -34,8 +34,8 @@ import matplotlib.pyplot as plt
 #import infrastructure as di
 
 import reader # read stat dict data
-#import converter # round
-from converter import round_half_up
+import converter # round
+#from converter import round_half_up
 
 # === SETTINGS ===
 player = 'jordan clarkson' # bam adebayo
@@ -217,7 +217,7 @@ def generate_prob_from_distrib(val, loc, dist):
     # if normal, use pdf
     #prob = dist.pmf(val, loc)
     # if poisson, use pmf
-    prob = round_half_up(dist.pmf(val, loc), 4)
+    prob = converter.round_half_up(dist.pmf(val, loc), 4)
     #print('prob: ' + str(prob))
 
     if prob > 0.99:
@@ -225,7 +225,7 @@ def generate_prob_from_distrib(val, loc, dist):
     elif prob < 0.01:
         prob = 0.01
     else:
-        prob = round_half_up(prob, 2)
+        prob = converter.round_half_up(prob, 2)
 
     #print('prob: ' + str(prob))
     return prob
@@ -352,22 +352,22 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     if shape_key in sample_fit_dict.keys():
         sample_shape = sample_fit_dict[shape_key]
 
-        prob_less_or_equal = round_half_up(dist.cdf(val, sample_shape, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape, sample_loc, sample_scale), 5)
     elif shape_3_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
         sample_shape_3 = sample_fit_dict[shape_3_key]
 
-        prob_less_or_equal = round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_shape_3, sample_loc, sample_scale), 5)
     elif shape_1_key in sample_fit_dict.keys():
         sample_shape_1 = sample_fit_dict[shape_1_key]
         sample_shape_2 = sample_fit_dict[shape_2_key]
 
-        prob_less_or_equal = round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_shape_1, sample_shape_2, sample_loc, sample_scale), 5)
     else:
         #sample_mean = sample_fit_dict[mean_key] ???
 
-        prob_less_or_equal = round_half_up(dist.cdf(val, sample_loc, sample_scale), 5)
+        prob_less_or_equal = converter.round_half_up(dist.cdf(val, sample_loc, sample_scale), 5)
 
 
     # see if P(1+)= P(1) + P(2+) = 1 - P(<0.5)?
@@ -392,10 +392,10 @@ def generate_prob_over_from_distrib(val, dist, sample_fit_dict):
     elif prob_less_or_equal < 0.001:
         prob_less_or_equal = 0.001
     else:
-        prob_less_or_equal = round_half_up(prob_less_or_equal, 3)
+        prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 3)
 
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
-    prob_over = round_half_up(1 - prob_less_or_equal, 3) # P(>val+1)
+    prob_over = converter.round_half_up(1 - prob_less_or_equal, 3) # P(>val+1)
     #prob_over_or_equal_next_val = prob_strict_over
 
     #print('prob_over: ' + str(prob_over))
@@ -517,7 +517,7 @@ def _parse_args_stats(self, %(shape_arg_str)s %(locscale_in)s, moments='mv'):
 #     # elif prob_less_or_equal < 0.001:
 #     #     prob_less_or_equal = 0.001
 #     # else:
-#     #     prob_less_or_equal = round_half_up(prob_less_or_equal, 3)
+#     #     prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 3)
 
 #     prob_less_or_equal[prob_less_or_equal > 0.999] = 0.999
 #     prob_less_or_equal[prob_less_or_equal < 0.001] = 0.001
@@ -929,6 +929,7 @@ def generate_cdf_over(vals, dist, sample_fit_params, model_name):
     prob_less_or_equal[prob_less_or_equal < 0.001] = 0.001
     #print('prob_less_or_equal: ' + str(prob_less_or_equal))
     
+    # CANNOT round here bc output is array
     cdf_over = 1 - prob_less_or_equal
 
     #print('cdf_over: ' + str(cdf_over))
@@ -951,7 +952,7 @@ def generate_cdf_over(vals, dist, sample_fit_params, model_name):
 
 
 
-def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
+def distribute_all_probs(cond_data, player_stat_model, prints_on, player='', stat='', condition=''): # if normal dist, avg_scale, dist_name='normal'):
     # print('\n===Test Distribute All Probs===\n')
     # print('cond_data: ' + str(cond_data))
     # print('player: ' + str(player))
@@ -976,7 +977,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
         # round 2-6?
         sample_data = sim_all_data * (cond_avg / all_avg)
-        #round_half_up(, 2)
+        #converter.round_half_up(, 2)
 
         #sample_avg = np.mean(sample_data)
         #print('sample_avg: ' + str(sample_avg))
@@ -1033,7 +1034,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
         # NEED highest val from all data
         # loop thru all vals, even those not directly hit but surpassed
-        highest_val = round_half_up(player_stat_model['max']) #sim_all_data.max #data[-1] # bc sorted
+        highest_val = converter.round_half_up(player_stat_model['max']) #sim_all_data.max #data[-1] # bc sorted
         #print('highest_val: ' + str(highest_val))
         # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
         # include highest val
@@ -1045,7 +1046,7 @@ def distribute_all_probs(cond_data, player_stat_model, player='', stat='', condi
 
         vals = np.linspace(0, highest_val-1, highest_val, dtype=int)
         #print('vals: ' + str(vals))
-        # probs_less_or_equal = round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
+        # probs_less_or_equal = converter.round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
         # probs = 1 - probs_less_or_equal
 
         # time before gen cdf over
@@ -1168,7 +1169,7 @@ def test_generate_cdf_over(vals, dist, sample_fit_params, model_name):
     # elif prob_less_or_equal < 0.001:
     #     prob_less_or_equal = 0.001
     # else:
-    #     prob_less_or_equal = round_half_up(prob_less_or_equal, 3)
+    #     prob_less_or_equal = converter.round_half_up(prob_less_or_equal, 3)
 
     prob_less_or_equal[prob_less_or_equal > 0.999] = 0.999
     prob_less_or_equal[prob_less_or_equal < 0.001] = 0.001
@@ -1208,7 +1209,7 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
 
         # round 2-6?
         sample_data = sim_all_data * (cond_avg / all_avg)
-        #round_half_up(, 2)
+        #converter.round_half_up(, 2)
 
         #sample_avg = np.mean(sample_data)
         #print('sample_avg: ' + str(sample_avg))
@@ -1342,7 +1343,7 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
 
         # NEED highest val from all data
         # loop thru all vals, even those not directly hit but surpassed
-        highest_val = round_half_up(player_stat_model['max']) #sim_all_data.max #data[-1] # bc sorted
+        highest_val = converter.round_half_up(player_stat_model['max']) #sim_all_data.max #data[-1] # bc sorted
         #print('highest_val: ' + str(highest_val))
         # start at 1 but P(1 or more) = 100 - P(0), where P(0) = P(<0.5)
         # include highest val
@@ -1354,7 +1355,7 @@ def test_distribute_all_probs(cond_data, player_stat_model, player='', stat='', 
 
         vals = np.linspace(0, highest_val-1, highest_val, dtype=int)
         #print('vals: ' + str(vals))
-        # probs_less_or_equal = round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
+        # probs_less_or_equal = converter.round_half_up(dist.cdf(vals, sample_loc, sample_scale), 5)
         # probs = 1 - probs_less_or_equal
 
         probs = test_generate_cdf_over(vals, dist, final_sample_fit_params, model_name).tolist()

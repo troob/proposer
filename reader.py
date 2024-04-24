@@ -33,6 +33,7 @@ from urllib.request import Request, urlopen # request website, open webpage give
 
 # === Local Internal Libraries ===
 import converter # convert year span to current season
+#from converter import round_half_up
 import determiner # determine played season before reading webpage to avoid exception/error
 import isolator # isolate_player_game_data to read data from file
 import writer # write to file so we can check if data exists in local file so we can read from file
@@ -302,8 +303,10 @@ def read_cur_and_prev_json(cur_file,prev_file,current_year_str=''):
 
 
 # https://www.espn.com/nba/team/schedule/_/name/cha/charlotte-hornets
-def read_team_schedule_from_internet(team_abbrev):
+def read_team_schedule_from_internet(team_abbrev, season_part):
 	print('\n===Read Team Schedule from Internet: ' + team_abbrev + '===\n')
+	print('Settings: Season Part = ' + season_part)
+	print('\nOutput: team_schedule = {}\n')
 
 	team_schedule = {}
 
@@ -325,24 +328,28 @@ def read_team_schedule_from_internet(team_abbrev):
 	print('team_schedule: ' + str(team_schedule))
 	return team_schedule
 
-def read_team_schedule(team, init_all_teams_schedules):
+def read_team_schedule(team, init_all_teams_schedules, season_part):
 	# print('\n===Read Team Schedule: ' + team + '===\n')
 	# print('\nOutput: team_schedule = {field idx:{\'0\':field name, game num:field val, ... = {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
 
 	team_schedule = {}
 
+	# if first game of postseason, read new postseason schedule
+
 	if team in init_all_teams_schedules.keys():
 		team_schedule = init_all_teams_schedules[team]
 
 	else:
-		team_schedule = read_team_schedule_from_internet(team)
+		team_schedule = read_team_schedule_from_internet(team, season_part)
 
 
 	#print('team_schedule: ' + str(team_schedule))
 	return team_schedule
 
-def read_all_teams_schedules(game_teams):
+def read_all_teams_schedules(game_teams, season_part):
 	print('\n===Read All Teams Schedules===\n')
+	print('Settings: Season Part = ' + season_part)
+	print('\nInput: game_teams = ' + str(game_teams))
 	print('\nOutput: all_teams_schedules = {team: {field idx:{\'0\':field name, game num:field val, ... = {"phx": {"0": {"0": "DATE", "1": "Tue, Oct 24", "2": "Thu, Oct 26", ...\n')
 
 	all_teams_schedules_file = 'data/all teams schedules.json'
@@ -352,7 +359,7 @@ def read_all_teams_schedules(game_teams):
 
 	for game in game_teams:
 		for team in game:
-			team_schedule = read_team_schedule(team, all_teams_schedules)
+			team_schedule = read_team_schedule(team, all_teams_schedules, season_part)
 			all_teams_schedules[team] = team_schedule
 
 	if not init_all_teams_schedules == all_teams_schedules:
