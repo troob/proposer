@@ -4441,21 +4441,21 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
         # bc they are same condition in order by year going from recent to distant
         for year_idx in range(len(season_years)):
             year = season_years[year_idx]
-            print('\nYear: ' + str(year))
+            #print('\nYear: ' + str(year))
 
             # if postseason, get both parts of season weighted avg
             # see notes to range from 50/50 to 80/20 bt 1 and 10 samples postseason
             if part == 'postseason':
-                print('Found Postseason')
+                #print('Found Postseason')
                 cur_cond_dict = {'condition':condition, 'year':year, 'part':part}
                 post_cur_conds = condition + ' ' + str(year) + ' ' + part + ' prob'
                 reg_cur_conds = condition + ' ' + str(year) + ' regular prob'
-                print('post_cur_conds: ' + str(post_cur_conds))
-                print('reg_cur_conds: ' + str(reg_cur_conds))
+               # print('post_cur_conds: ' + str(post_cur_conds))
+                #print('reg_cur_conds: ' + str(reg_cur_conds))
 
                 # cur conds should not be in val probs dict if only 1 sample for cond
                 if post_cur_conds in val_probs_dict.keys() or reg_cur_conds in val_probs_dict.keys():
-                    print('Found samples for cond: ' + condition)
+                    #print('Found samples for cond: ' + condition)
 
                     # here we need num post samples for all yrs???
                     # NO bc 1 loop per yr
@@ -4465,14 +4465,14 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                     # get both part probs and get weighted avg full prob
                     # round to 6 decimals when intermediate calculation still to be used to find another result
                     if post_cur_conds in val_probs_dict.keys() and reg_cur_conds in val_probs_dict.keys():
-                        print('Found samples in both parts')
+                        #print('Found samples in both parts')
                         
                         # when both parts have samples, get weighted avg
 
                         post_prob = converter.round_half_up(val_probs_dict[post_cur_conds], 6)
                         reg_prob = converter.round_half_up(val_probs_dict[reg_cur_conds], 6)
-                        print('post_prob: ' + str(post_prob))
-                        print('reg_prob: ' + str(reg_prob))
+                        # print('post_prob: ' + str(post_prob))
+                        # print('reg_prob: ' + str(reg_prob))
 
 
                         # base 50/50 if 1 postseason sample
@@ -4497,8 +4497,8 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                             post_sample_weight = reg_post_ratio * (num_post_samples - 1)
                         condition_post_weight = 50 + post_sample_weight
                         condition_reg_weight = 100 - condition_post_weight
-                        print('condition_post_weight: ' + str(condition_post_weight))
-                        print('condition_reg_weight: ' + str(condition_reg_weight))
+                        # print('condition_post_weight: ' + str(condition_post_weight))
+                        # print('condition_reg_weight: ' + str(condition_reg_weight))
             
 
                         all_part_probs = {'regular':reg_prob, 'postseason':post_prob}
@@ -4517,14 +4517,14 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
 
                         if sum_weights > 0:
                             full_prob = round_half_up(sum(weighted_probs) / sum_weights, 6)
-                        print('full_prob: ' + str(full_prob))
+                        #print('full_prob: ' + str(full_prob))
 
                     # if only 1 part has samples, simply just take direct from part
                     elif post_cur_conds in val_probs_dict.keys():
-                        print('Found samples in postseason')
+                        #print('Found samples in postseason')
                         full_prob = round_half_up(val_probs_dict[post_cur_conds], 6)
                     elif reg_cur_conds in val_probs_dict.keys():
-                        print('Found samples in regseason')
+                        #print('Found samples in regseason')
                         full_prob = round_half_up(val_probs_dict[reg_cur_conds], 6)
 
 
@@ -4555,21 +4555,21 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                 # else:
                 #     print('Warning: Current Conditions not in val probs dict! ' + str(current_conditions))
 
-        print('probs: ' + str(probs))
-        print('all_cur_cond_dicts: ' + str(all_cur_cond_dicts))
+        # print('probs: ' + str(probs))
+        # print('all_cur_cond_dicts: ' + str(all_cur_cond_dicts))
 
         # if no probs or cur conds then no need to find weights
         # which means unable to find cur conds in val probs dict so prob unknown
         # default condition mean prob to 0 for now but eventually can use other similar players mean prob but that would need to be separate bc it is not measured for this player
         # but if default to 0 then we must differentiate those without samples and those with samples who have reached line 0 times
         if len(probs) > 0:
-            print('\nFound Probs')
+            #print('\nFound Probs')
 
             # use sample size in weight so past year gets a bit more weight when a lot more samples than cur yr
             sample_sizes = []
             # for postseason, get fullseason samples from both all parts
             if part == 'postseason':
-                print('Found Postseason')
+                #print('Found Postseason')
                 # get reg sample size
                 # and then add post sample size
                 for p_idx in range(len(probs)):
@@ -4588,16 +4588,16 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                     s_n = max(round_half_up(0.8 * post_sn + 0.2 * reg_sn), 1)
                     sample_sizes.append(s_n)
 
-                    print('\ncur_conds: ' + str(cur_conds))
-                    print('post_sn: ' + str(post_sn))
-                    print('reg_sn: ' + str(reg_sn))
-                    print('s_n: ' + str(s_n))
+                    # print('\ncur_conds: ' + str(cur_conds))
+                    # print('post_sn: ' + str(post_sn))
+                    # print('reg_sn: ' + str(reg_sn))
+                    # print('s_n: ' + str(s_n))
             else:
                 for p_idx in range(len(probs)):
                     cur_conds = all_cur_cond_dicts[p_idx]
                     s_n = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on) # for a given yr
                     sample_sizes.append(s_n)
-            print('sample_sizes: ' + str(sample_sizes))
+            #print('sample_sizes: ' + str(sample_sizes))
 
             # if total sample sizes is 1 then weight = 0 bc log(1)=0
             # so for game player conds use similar samples based on piap
@@ -6318,7 +6318,7 @@ def generate_player_current_conditions(player, game_teams, player_teams, all_lin
     #print('date_header: ' + str(date_header))
     if date_key == date_header:
         
-        next_game_date = determiner.determine_next_game_date(schedule_date_dict, cur_yr, season_part)
+        next_game_date = determiner.determine_next_game_date(schedule_date_dict, cur_yr)
         next_game_date_obj = datetime.strptime(next_game_date, '%m/%d/%Y')
         
         # print('next_game_date_obj: ' + str(next_game_date_obj))
@@ -7712,7 +7712,7 @@ def generate_post_stat_dict(player_stat_dict, cur_yr, season_part):
         if 'min' in player_cur_post_stat_dict.keys():
             cur_post_minutes_dict = player_cur_post_stat_dict['min']['all']
             if '0' not in cur_post_minutes_dict.keys():
-                print('found postseason this yr')
+                #print('found postseason this yr')
                 #found_post = True
                 post_stat_dict = player_cur_post_stat_dict
             
@@ -7724,7 +7724,7 @@ def generate_post_stat_dict(player_stat_dict, cur_yr, season_part):
         # if played last season, get from last postseason if available
         # AND if same team as last postseason? not needed for main players
         prev_yr = str(int(cur_yr) - 1)
-        print('prev_yr: ' + str(prev_yr))
+        #print('prev_yr: ' + str(prev_yr))
         if prev_yr in player_stat_dict.keys():
             prev_yr_stat_dict = player_stat_dict[prev_yr]
             #year_stat_dicts = list(player_stat_dict.values())
@@ -7746,9 +7746,9 @@ def generate_post_stat_dict(player_stat_dict, cur_yr, season_part):
                     if '0' in prev_post_minutes_dict.keys():
                         # if no postseason, then return None and mean minutes will return regseason minutes
                         prev_post_playtime = prev_post_minutes_dict['0']
-                        print('prev_post_playtime: ' + str(prev_post_playtime))
+                        #print('prev_post_playtime: ' + str(prev_post_playtime))
                         regseason_playtime = player_regseason_stat_dict['min']['all']['0']
-                        print('regseason_playtime: ' + str(regseason_playtime))
+                        #print('regseason_playtime: ' + str(regseason_playtime))
                         # TEST/TUNE: cutoff time and fraction
                         if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
                             # use regseason
@@ -7791,7 +7791,7 @@ def generate_cur_part_stat_dict(player_stat_dict, cur_yr, season_part):
         if 'min' in player_cur_post_stat_dict.keys():
             cur_post_minutes_dict = player_cur_post_stat_dict['min']['all']
             if '0' not in cur_post_minutes_dict.keys():
-                print('found postseason this yr')
+                #print('found postseason this yr')
                 #found_post = True
                 player_cur_part_stat_dict = player_cur_post_stat_dict
     
@@ -7802,7 +7802,7 @@ def generate_cur_part_stat_dict(player_stat_dict, cur_yr, season_part):
         # if played last season, get from last postseason if available
         # AND if same team as last postseason? not needed for main players
         prev_yr = str(int(cur_yr) - 1)
-        print('prev_yr: ' + str(prev_yr))
+        #print('prev_yr: ' + str(prev_yr))
         if prev_yr in player_stat_dict.keys():
             prev_yr_stat_dict = player_stat_dict[prev_yr]
             #year_stat_dicts = list(player_stat_dict.values())
@@ -7822,39 +7822,39 @@ def generate_cur_part_stat_dict(player_stat_dict, cur_yr, season_part):
                 if 'min' in player_prev_post_stat_dict.keys():
                     prev_post_minutes_dict = player_prev_post_stat_dict['min']['all']
                     if '0' not in prev_post_minutes_dict.keys():
-                        print('no postseason last yr')
+                        #print('no postseason last yr')
                         read_season_part = 'regular'
                         player_cur_part_stat_dict = player_regseason_stat_dict
                     else:
                         prev_post_playtime = prev_post_minutes_dict['0']
-                        print('prev_post_playtime: ' + str(prev_post_playtime))
+                        #print('prev_post_playtime: ' + str(prev_post_playtime))
                         regseason_playtime = player_regseason_stat_dict['min']['all']['0']
-                        print('regseason_playtime: ' + str(regseason_playtime))
+                        #print('regseason_playtime: ' + str(regseason_playtime))
                         # TEST/TUNE: cutoff time and fraction
                         if prev_post_playtime < 12 and prev_post_playtime < regseason_playtime / 2:
                             # use regseason
-                            print('invalid postseason last yr')
+                            #print('invalid postseason last yr')
                             read_season_part = 'regular'
                             player_cur_part_stat_dict = player_regseason_stat_dict
                         elif prev_post_playtime >= 12 and prev_post_playtime > regseason_playtime * 1.5:
                             # use regseason
-                            print('invalid postseason last yr')
+                            #print('invalid postseason last yr')
                             read_season_part = 'regular'
                             player_cur_part_stat_dict = player_regseason_stat_dict
                         else:
-                            print('found postseason last yr')
+                            #print('found postseason last yr')
                             player_cur_part_stat_dict = player_prev_post_stat_dict
                             read_yr = prev_yr
                 else:
-                    print('no postseason last yr')
+                    #print('no postseason last yr')
                     read_season_part = 'regular'
                     player_cur_part_stat_dict = player_regseason_stat_dict
             else:
-                print('no postseason last yr') # so read cur reg season as approx
+                #print('no postseason last yr') # so read cur reg season as approx
                 read_season_part = 'regular'
                 player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
         else:
-            print('did not play last yr')
+            #print('did not play last yr')
             read_season_part = 'regular'
             player_cur_part_stat_dict = player_stat_dict[cur_yr][read_season_part]
 

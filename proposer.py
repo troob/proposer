@@ -216,7 +216,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # so make setting, test performance
 # [('min','chi')]#
 #[('lal','nop')] #
-game_teams = [('dal', 'lac')] #('nop','lal')
+game_teams = [] #('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams
