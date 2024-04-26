@@ -132,6 +132,10 @@ read_new_teams = False
 read_new_rosters = False
 
 
+# === MOBILE ===
+# run on phone handheld
+# changes webdriver options
+mobile = False
 
 # === TEST ===
 # set single team and player w/o having to erase and rewrite
@@ -203,7 +207,8 @@ settings = {'find matchups': find_matchups,
             'prints on': prints_on, 
             'single conds': single_conds,
             'seasons start days': all_seasons_start_days,
-            'max props': max_props}
+            'max props': max_props,
+            'mobile': mobile}
 
 all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'den','min', 'okc','por', 'uta','gsw', 'lac','lal', 'phx','sac', 'atl','cha', 'mia','orl', 'wsh','dal', 'hou','mem', 'nop','sas']
 # gen list of player names given teams so we dont have to type all names
@@ -214,8 +219,6 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-# [('min','chi')]#
-#[('lal','nop')] #
 game_teams = [] #('nop','lal')
 
 if test:
@@ -224,7 +227,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('dal', 'lac')]
+    game_teams = [('nyk', 'phi')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)
@@ -238,7 +241,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['russell westbrook'] # 'jacob gilyard', use for testing
+    players_names = ['buddy hield'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

@@ -2862,6 +2862,7 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
 
     # test strategy with only >100 odds to ensure double bet if win to cover loss
     # based on 1 day, works better bc ensures bets return more at same prob
+    # -lower limit of odds to <400 bc noticed risk too high to get ev diversely
     ddp_prop_dicts = isolator.isolate_props_in_range(udp_prop_dicts, fields=['odds'], init_low=100)
     # separate ddp prop dicts with rare prevs in opposite direction for review
     rp_prop_data = isolator.separate_rare_prev_props(ddp_prop_dicts)
@@ -2926,6 +2927,21 @@ def generate_prop_table_data(prop_dicts, multi_prop_dicts, desired_order=[], joi
     udp_prop_dicts = fn_prop_data[0]
     threes_prop_data = isolator.separate_threes_props(udp_prop_dicts, all_players_season_logs)
     udp_prop_dicts = threes_prop_data[0]
+
+    
+    # -if player low playtime, on bench, and 0 bench players samples, then remove
+    low_playtime_data = isolator.separate_low_playtime_props(udp_prop_dicts)
+    udp_prop_dicts = low_playtime_data[0]
+    low_playtime_props = low_playtime_data[1]
+
+    # low playtime low sample size
+    sort_keys = ['game', 'stat order']
+    low_playtime_props = generate_stat_order(low_playtime_props)
+    low_playtime_props = sorter.sort_dicts_by_keys(low_playtime_props, sort_keys, reverse=False)
+    low_playtime_props = remover.remove_stat_order(low_playtime_props)
+    prop_tables.append(low_playtime_props)
+    sheet_names.append('DDP LP')
+
     sort_keys = ['game', 'stat order']
     dpcev_prop_dicts = generate_stat_order(udp_prop_dicts)
     dpcev_prop_dicts = sorter.sort_dicts_by_keys(dpcev_prop_dicts, sort_keys, reverse=False)
@@ -3392,7 +3408,7 @@ def generate_all_bet_spreads(available_prop_dicts):
 
 # NEED to return separate available as single picks vs multi picks which must be combined
 # stat_dict: {'player name': 'Trevelin Queen', 'stat name': 'ast', 'prob val': 0, 'prob': 100...
-def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, stats_of_interest):
+def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, stats_of_interest, mobile):
     print('\n===Generate Available Prop Dicts===\n')
     print('Input: stat_dicts = [{...}, ...]')
     print('\nOutput: available_prop_dicts = [{...}, ...]\n')
@@ -3432,11 +3448,11 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # try oddschecker tmw to see if alt odds in table
     # BUT if not then FAIL bc no way to get alt odds for fd!!!
     # instead try to get fd odds from oddstrader.com
-    #all_odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
+    #all_odds_ratios = reader.read_odds_ratios_website(stats_of_interest, mobile)
 
     # read solo first, then click sgp btn, then read sgp/multi
     # bc much faster than loading twice separately!
-    all_players_solo_odds = reader.read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest)
+    all_players_solo_odds = reader.read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest, mobile)
     #all_players_solo_odds = all_players_odds[0]
     #all_players_multi_odds = all_players_odds[1]
 
@@ -3717,10 +3733,11 @@ def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, 
 
     return stat_val_probs_dict
 
-def generate_rare_prev_cond(rare_prev_val_players, stat_name, player):
-    # print('\n===Generate Rare Prev Val Cond: ' + stat_name.upper() + ', ' + player.title() + '===\n')
-    # print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...} = ' + str(rare_prev_val_players))
-    # print('\nOutput: rare_prev_cond = rare cat or No')
+def generate_rare_prev_cond(rare_prev_val_players, stat_name, player, prints_on=False):
+    if prints_on:
+        print('\n===Generate Rare Prev Val Cond: ' + stat_name.upper() + ', ' + player.title() + '===\n')
+        print('Input: rare_prev_val_players = {rare cat:[(p1,...,t1), ...], ...} = ' + str(rare_prev_val_players))
+        print('\nOutput: rare_prev_cond = rare cat or No')
 
     # add most rare
     rare_prev_cond = 'No'
@@ -3738,16 +3755,18 @@ def generate_rare_prev_cond(rare_prev_val_players, stat_name, player):
         if rare_prev_cond != 'No':
             break
 
-    #print('rare_prev_cond: ' + rare_prev_cond)
+    if prints_on:
+        print('rare_prev_cond: ' + rare_prev_cond)
     return rare_prev_cond
 
 # get low sample sizes for this player cur conds
 # format string: 'cond:size,...'
 def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_players_abbrevs, player_team, opp_team, season_years, season_part, single_conds, prints_on, player=''):
-    # print('\n===Generate Low Sample Sizes: ' + player.title() + '===\n')
-    # print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
-    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
-    # print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
+    if prints_on:
+        print('\n===Generate Low Sample Sizes: ' + player.title() + '===\n')
+        print('Input: player_cur_conds_list = [home, 10:30, ... = ' + str(player_cur_conds_list))
+        print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+        print('\nOutput: low_sample_sizes = \'cond:size | ...\'\n')
 
     cond_low_sample_sizes = piap_low_sample_sizes = gp_low_sample_sizes = opp_low_sample_sizes = ''
 
@@ -3813,10 +3832,11 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 
                     low_cond_idx += 1
 
-    # print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
-    # print('piap_low_sample_sizes: ' + str(piap_low_sample_sizes))
-    # print('gp_low_sample_sizes: ' + str(gp_low_sample_sizes))
-    # print('opp_low_sample_sizes: ' + str(opp_low_sample_sizes))
+    if prints_on:
+        print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+        print('piap_low_sample_sizes: ' + str(piap_low_sample_sizes))
+        print('gp_low_sample_sizes: ' + str(gp_low_sample_sizes))
+        print('opp_low_sample_sizes: ' + str(opp_low_sample_sizes))
     return cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes
 
 # flatten nested dicts into one level and list them
@@ -3825,7 +3845,7 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 # conditions prob = b biyombo c starter 2023 regular prob
 # need all_player_stat_dicts to get prev val
 # all_players_teams = {player:year:team:gp}
-def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_counts={}, all_player_stat_dicts={}, all_players_abbrevs={}, game_teams=[], rosters={}, rare_prev_val_players={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[], prints_on=False):
+def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_counts={}, all_player_stat_dicts={}, all_players_abbrevs={}, game_teams=[], rosters={}, rare_prev_val_players={}, all_players_last_vals={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[], prints_on=False):
     print('\n===Generate All True Prob Dicts===\n')
     print('Setting: Current Year to get current team = ' + cur_yr)
     print('\nInput: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
@@ -3883,6 +3903,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
         player_stat_dict = all_player_stat_dicts[player]
         #print('player_stat_dict: ' + str(player_stat_dict))
 
+        player_prev_vals = all_players_last_vals[player]
+
         # get low sample sizes for this player cur conds
         # format string: 'cond:size,...'
         # all except prev val bc depends on stat, so add in stat loop
@@ -3909,20 +3931,23 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
             
             if stat_name in stats_of_interest:
                 #print('\n===Stat: ' + str(stat_name) + '===\n')
-                condition = 'all' # all conds match all
-                part = 'regular' # get current part from time of year mth
+                #condition = 'all' # all conds match all
+                #part = 'regular' # get current part from time of year mth
                 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
-                prev_val = 0
-                if cur_yr in player_stat_dict.keys():
-                    condition_dict = player_stat_dict[cur_yr][part][stat_name][condition]
-                    if '0' in condition_dict.keys():
-                        prev_val = condition_dict['0']
-                    else:
-                        print('Warning: no games in stat dict!\n' + player + ':\n' + str(player_stat_dict))
+                # NEW: get prev val from genned list
+                prev_val = player_prev_vals[stat_name]
+                # OLD VERSION
+                # prev_val = 0
+                # if cur_yr in player_stat_dict.keys():
+                #     condition_dict = player_stat_dict[cur_yr][season_part][stat_name][condition]
+                #     if '0' in condition_dict.keys():
+                #         prev_val = condition_dict['0']
+                #     else:
+                #         print('Warning: no games in stat dict!\n' + player + ':\n' + str(player_stat_dict))
                     #print('prev_val: ' + str(prev_val))
                     # is it useful to get prev val under current conditions? possibly but could be misleading unless looking at larger sample
                 
-                confidence = determiner.determine_player_stat_confidence(player, stat_name, player_stat_dict)#all_players_confidences[player] # based on sample size
+                confidence = determiner.determine_player_stat_confidence(player, stat_name, player_stat_dict, season_part)#all_players_confidences[player] # based on sample size
 
                 # add to existing string with conds that dont depend on stat
                 # only if low sample size
@@ -3936,10 +3961,15 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
 
                 
                 # display in row with name of stat
-                cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':part}
-                #print('cur_conds: ' + str(cur_conds))
-                prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
+                # add for all yrs bc accounts for all yrs
+                # cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':season_part}
+                # #print('cur_conds: ' + str(cur_conds))
+                # prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
                 #if prev_stat_low_sample_size != '':
+                
+                prev_stat_sample_size = determiner.determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, prev_val_cond, prints_on)
+                
+                
                 if prev_stat_sample_size < 5:
                     #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
                     cond_low_sample_sizes += '\n' + prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
@@ -3950,7 +3980,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 # although technically could just take all prob and see if rare compared to that
                 # but getting true prob first with all other is more accurate
                 # default: no, options: rare to ultra rare over/under
-                rare_prev = generate_rare_prev_cond(rare_prev_val_players, stat_name, player)
+                rare_prev = generate_rare_prev_cond(rare_prev_val_players, stat_name, player, prints_on)
 
                 player_stat_cnt = all_counts[player][stat_name]
 
@@ -4495,7 +4525,8 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                         
                         if num_post_samples > 1:
                             post_sample_weight = reg_post_ratio * (num_post_samples - 1)
-                        condition_post_weight = 50 + post_sample_weight
+                        # max 100, bc after 10 samples negligible diff
+                        condition_post_weight = min(50 + post_sample_weight, 100)
                         condition_reg_weight = 100 - condition_post_weight
                         # print('condition_post_weight: ' + str(condition_post_weight))
                         # print('condition_reg_weight: ' + str(condition_reg_weight))
@@ -4505,7 +4536,7 @@ def generate_condition_mean_prob(condition, val_probs_dict, player_stat_dict, se
                         all_part_weights = {'regular':condition_reg_weight, 'postseason':condition_post_weight}
 
                         # combine weight avg both parts same cond
-                        weighted_probs = generate_weighted_stats(all_part_probs, all_part_weights, prints_on=True)
+                        weighted_probs = generate_weighted_stats(all_part_probs, all_part_weights, prints_on)
 
                         all_cond_weights_list = []
                         for cond in all_part_probs.keys():
@@ -4933,76 +4964,90 @@ def generate_game_players_cond_sample_weight(cond_key, lineup_team, team_conditi
     if cond_key not in team_conds:
         # get subset of conds matching key
         combined_conditions = {}
+        # if not out players then combined conds will be empty
+        # so we can skip and keep weight as none
+        # rather than add another factor for approx piap
         for gp_cond, cond_type in team_gp_cur_conds.items():
             if cond_type == cond_key:
                 combined_conditions[gp_cond] = cond_type # direct transfer if passes filter
     #print('combined_conditions: ' + str(combined_conditions))
 
-    # special condition sample size with all separate player conds inside combo player cond
-    #conditions = generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player)
-    combined_sample_size = determiner.determine_combined_conditions_sample_size(player_stat_dict, combined_conditions, part, prints_on) # for all yrs
-    
-    # bc weight based on size, log(1)=0
-    # BUT 1 sample could have some weight
-    # BUT it is often more misleading than helpful
-    # SO try if 1 sample, then weight = 0
-    # BUT if 0 samples, then weight would also be 0
-    # BUT we want to sub tiap/piap samples if no weight to direct lineup samples
-    if combined_sample_size > 1:
+    # if not out players then combined conds will be empty
+    # so we can skip and keep weight as none
+    # rather than add another factor for approx piap
+    # if empty dict then should return None, not 0
+    if len(combined_conditions.keys()) > 0:
+
+        # special condition sample size with all separate player conds inside combo player cond
+        #conditions = generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, player)
+        combined_sample_size = determiner.determine_combined_conditions_sample_size(player_stat_dict, combined_conditions, part, prints_on) # for all yrs
         #print('combined_sample_size: ' + str(combined_sample_size))
 
-        combined_sample_weight = round_half_up(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
-        #print('combined_sample_weight = log(combined_sample_size) = ' + str(combined_sample_weight))
+        # bc weight based on size, log(1)=0
+        # BUT 1 sample could have some weight
+        # BUT it is often more misleading than helpful
+        # SO try if 1 sample, then weight = 0
+        # BUT if 0 samples, then weight would also be 0
+        # BUT we want to sub tiap/piap samples if no weight to direct lineup samples
+        if combined_sample_size > 1:
+            #print('combined_sample_size: ' + str(combined_sample_size))
 
-        cond_weight = cond_weights[cond_key]
-        #print('cond_weight: ' + str(cond_weight))
-
-        game_players_cond_weight = round_half_up(float(cond_weight) * combined_sample_weight, 2)
-
-        # for team_part, team_part_players in lineup.items():
-        #     # get dict of each cond weight:sample weight pair
-        #     # eg player out, players out
-        #     gp_cond_sample_weight = generate_condition_sample_weight(player_stat_dict, team_part, team_part_players, part, player, player_cond_weights)
-        #     #gp_cond_weights[team_part] = gp_cond_sample_weight
-
-        #     # increase weight for multiplayer
-        #     # if re.search(',',cond_val):
-        #     #     num_players = cond_val.count(',') + 1
-        #     #     cond_weight += num_players
-
-        #     # get a weighted prob only accounting for player conds
-        #     game_players_true_prob = generate_true_prob() # player_conds_true_prob
-
-            # sum(weight*samples) / sum(samples)
-    else: # low sample size
-        print('\nLow Sample Size: ' + cond_key)
-        # use tiap/piap samples
-        # teammates cond will only run for players on new team who have not played much yet
-        # bc only req is at least 1 game with 1 other player on team bc uses single conds to count sample size
-        # should we take samples for all yrs or just past 30 games like for playtime?
-        # in this case playtime is scaled to cur game so it should be better to get more samples from prev yrs 
-        # BUT only if properly normalized
-        # SO is scaling to playtime normalized enough?
-        # No, we must also check for enough difference to discard data
-        # AND look for other ways to compare data over yrs under diff circumstances
-        piap_sample_size = 0
-        if team_condition == 'teammates':
-            piap_sample_size = determiner.determine_condition_sample_size(player_stat_dict, player_cur_tiap, part, prints_on=prints_on) #determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player, prints_on=prints_on)
-        else: # opps
-            piap_sample_size = determiner.determine_condition_sample_size(player_stat_dict, player_cur_diff_piap, part, prints_on=prints_on) #determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player, prints_on=prints_on)
-
-        # divide weight by 2 bc approximate samples half as good as direct samples
-        if piap_sample_size > 1:
-            #print('piap_sample_size: ' + str(piap_sample_size))
-
-            combined_sample_weight = round_half_up(math.log10(piap_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+            combined_sample_weight = round_half_up(math.log10(combined_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
             #print('combined_sample_weight = log(combined_sample_size) = ' + str(combined_sample_weight))
 
-            # divide weight by 2 bc approximate samples half as good as direct samples
-            cond_weight = round_half_up(cond_weights[cond_key] / 2, 2)
+            cond_weight = cond_weights[cond_key]
             #print('cond_weight: ' + str(cond_weight))
 
             game_players_cond_weight = round_half_up(float(cond_weight) * combined_sample_weight, 2)
+
+            # for team_part, team_part_players in lineup.items():
+            #     # get dict of each cond weight:sample weight pair
+            #     # eg player out, players out
+            #     gp_cond_sample_weight = generate_condition_sample_weight(player_stat_dict, team_part, team_part_players, part, player, player_cond_weights)
+            #     #gp_cond_weights[team_part] = gp_cond_sample_weight
+
+            #     # increase weight for multiplayer
+            #     # if re.search(',',cond_val):
+            #     #     num_players = cond_val.count(',') + 1
+            #     #     cond_weight += num_players
+
+            #     # get a weighted prob only accounting for player conds
+            #     game_players_true_prob = generate_true_prob() # player_conds_true_prob
+
+                # sum(weight*samples) / sum(samples)
+        else: # low sample size
+            # notify for now always bc not sure if fixed
+            #if prints_on:
+            print('\nLow Sample Size: ' + cond_key)
+            print('combined_sample_size: ' + str(combined_sample_size))
+            print('combined_conditions: ' + str(combined_conditions))
+            # use tiap/piap samples
+            # teammates cond will only run for players on new team who have not played much yet
+            # bc only req is at least 1 game with 1 other player on team bc uses single conds to count sample size
+            # should we take samples for all yrs or just past 30 games like for playtime?
+            # in this case playtime is scaled to cur game so it should be better to get more samples from prev yrs 
+            # BUT only if properly normalized
+            # SO is scaling to playtime normalized enough?
+            # No, we must also check for enough difference to discard data
+            # AND look for other ways to compare data over yrs under diff circumstances
+            piap_sample_size = 0
+            if team_condition == 'teammates':
+                piap_sample_size = determiner.determine_condition_sample_size(player_stat_dict, player_cur_tiap, part, prints_on=prints_on) #determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player, prints_on=prints_on)
+            else: # opps
+                piap_sample_size = determiner.determine_condition_sample_size(player_stat_dict, player_cur_diff_piap, part, prints_on=prints_on) #determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, player=player, prints_on=prints_on)
+
+            # divide weight by 2 bc approximate samples half as good as direct samples
+            if piap_sample_size > 1:
+                #print('piap_sample_size: ' + str(piap_sample_size))
+
+                combined_sample_weight = round_half_up(math.log10(piap_sample_size),6) # or ln? need to test both by predicting yrs that already happened so we can give supervised feedback
+                #print('combined_sample_weight = log(combined_sample_size) = ' + str(combined_sample_weight))
+
+                # divide weight by 2 bc approximate samples half as good as direct samples
+                cond_weight = round_half_up(cond_weights[cond_key] / 2, 2)
+                #print('cond_weight: ' + str(cond_weight))
+
+                game_players_cond_weight = round_half_up(float(cond_weight) * combined_sample_weight, 2)
 
 
     if prints_on:
@@ -5145,8 +5190,8 @@ def generate_condition_sample_weight(player_stat_dict, cond_key, cond_val, singl
     return condition_sample_weight
 
 def generate_prev_val_weight(prev_val, player_stat_dict, part, player, stat, single_conds, prints_on):
-    print('\n===Generate Prev Val Weight===\n')
-    print('Input: prev_val = ' + str(prev_val))
+    # print('\n===Generate Prev Val Weight===\n')
+    # print('Input: prev_val = ' + str(prev_val))
 
     if part == 'postseason':
         part = 'full'
@@ -11555,6 +11600,10 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     if 'prints on' in settings.keys():
         prints_on = settings['prints on']
 
+    mobile = False
+    if 'mobile' in settings.keys():
+        mobile = settings['mobile']
+
     # enable no inputs needed, default to all games
     if len(players_names) == 0 and len(teams_current_rosters.keys()) == 0:
         # read all games today
@@ -11840,7 +11889,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         #     # get matchup data for streaks to see if likely to continue streak
         #     matchup_data_sources = [fantasy_pros_url, hashtag_bball_url, swish_analytics_url] #, hashtag_bball_url, swish_analytics_url, betting_pros_url, draft_edge_url] # go thru each source so we can compare conflicts
         #     # first read all matchup data from internet and then loop through tables
-        #     all_matchup_data = reader.read_all_matchup_data(matchup_data_sources) # all_matchup_data=[matchup_data1,..], where matchup_data = [pg_matchup_df, sg_matchup_df, sf_matchup_df, pf_matchup_df, c_matchup_df]
+        #     all_matchup_data = reader.read_all_matchup_data(matchup_data_sources, mobile) # all_matchup_data=[matchup_data1,..], where matchup_data = [pg_matchup_df, sg_matchup_df, sf_matchup_df, pf_matchup_df, c_matchup_df]
 
 
 
@@ -12226,7 +12275,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # all_stat_prob_dicts = [{player:player, stat:stat, val:val, conditions prob:prob,...},...]
     # add warnings to row in table
     # add counts to available props
-    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_counts, all_player_stat_dicts, all_players_abbrevs, game_teams, teams_current_rosters, rare_prev_val_players, current_year_str, season_years, season_part, single_conds, stats_of_interest, prints_on)
+    all_true_prob_dicts = generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams, all_players_playtimes, all_cur_conds_dicts, all_game_player_cur_conds, all_cur_conds_lists, all_counts, all_player_stat_dicts, all_players_abbrevs, game_teams, teams_current_rosters, rare_prev_val_players, all_last_vals, current_year_str, season_years, season_part, single_conds, stats_of_interest, prints_on)
     desired_order = ['player', 'game', 'team', 'stat','val']
     #writer.list_dicts(all_stat_prob_dicts, desired_order)
 
@@ -12245,9 +12294,9 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     read_odds = True
     if 'read odds' in settings.keys():
         read_odds = settings['read odds']
-    #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
+    #odds_ratios = reader.read_odds_ratios_website(stats_of_interest, mobile)
     if read_odds:
-        available_prop_dicts = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest)
+        available_prop_dicts = generate_available_prop_dicts(all_true_prob_dicts, game_teams, all_players_teams, current_year_str, stats_of_interest, mobile)
         # available_prop_dicts = available_prop_data[0]
         # available_multi_prop_dicts = available_prop_data[1]
         # add bet spread to available prop dicts, 

@@ -734,9 +734,23 @@ def read_all_players_current_teams(all_players_espn_ids, read_new_teams=True, cu
 def read_all_current_teams_rosters():
 	print("\n===Read All Current Teams Rosters===\n")
 
+# For mobile with google colab
+def web_driver():
+  
+  options = webdriver.ChromeOptions()
+  options.add_argument("--verbose")
+  options.add_argument("--no-sandbox")
+  options.add_argument("--headless")
+  options.add_argument("--disable-guru")
+  options.add_argument("--window-size=1920, 1200")
+  options.add_argument("--disable-dev-shm-usage")
+  driver = webdriver.Chrome(options=options)
+
+  return driver
+
 # show matchup data against each position so we can see which position has easiest matchup
 # matchup_data = [pg_matchup_df, sg_matchup_df, sf_matchup_df, pf_matchup_df, c_matchup_df]
-def read_matchup_data(source_url):
+def read_matchup_data(source_url, mobile=False):
 	#print("\n===Read Matchup Data===\n")
 
 	matchup_data = [] # matchup_data = [pg_matchup_df, sg_matchup_df, sf_matchup_df, pf_matchup_df, c_matchup_df]
@@ -752,7 +766,11 @@ def read_matchup_data(source_url):
 		#chop.add_extension('adblock_5_4_1_0.crx')
 		#driver = webdriver.Chrome(chrome_options = chop)
 
-		driver = webdriver.Chrome(ChromeDriverManager().install())
+		driver = None
+		if mobile:
+			driver = web_driver()
+		else:
+			driver = webdriver.Chrome(ChromeDriverManager().install())
 		driver.implicitly_wait(3)
 
 		driver.get(source_url) # Open the URL on a google chrome window
@@ -952,14 +970,14 @@ def read_matchup_data(source_url):
 
 # sources disagree so we need to find consensus or just be aware of the risk of inaccurate data
 # show all 5 sources so we can see the conflicts and therefore risk of inaccurate data
-def read_all_matchup_data(matchup_data_sources):
+def read_all_matchup_data(matchup_data_sources, mobile=False):
 	print("\n===Read All Matchup Data===\n")
 
 	all_matchup_data = []
 
 	for source in matchup_data_sources:
 		
-		source_matchup_data = read_matchup_data(source)
+		source_matchup_data = read_matchup_data(source, mobile)
 		all_matchup_data.append(source_matchup_data)
 
 	return all_matchup_data
@@ -1992,13 +2010,17 @@ def read_all_teammates(player_name, all_box_scores, player_teams={}, player_game
 	#print('all_teammates: ' + str(all_teammates))
 	return all_teammates
 
-def read_react_web_data(url):
+def read_react_web_data(url, mobile=False):
 	# print('\n===Read React Web Data===\n')
 	# print('url: ' + url)
 
 	web_data = [] # web_data = [dataframe1,...]
 
-	driver = webdriver.Chrome(ChromeDriverManager().install())
+	driver = None
+	if mobile:
+		driver = web_driver()
+	else:
+		driver = webdriver.Chrome(ChromeDriverManager().install())
 	driver.implicitly_wait(3)
 
 	driver.get(url) # Open the URL on a google chrome window
@@ -2490,7 +2512,7 @@ def read_dk_sgp(driver, stats_of_interest):
 # .ElementClickInterceptedException: Message: element click intercepted: Element <button role="tab" class="rj-market__group" aria-selected="false" data-testid="button-market-group">...</button> is not clickable at point (763, 135). Other element would receive the click: 
 # return {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 # https://sportsbook.draftkings.com/teams/basketball/nba/memphis-grizzlies--odds?sgpmode=true
-def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retries=3, game=()):
+def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retries=3, game=(), mobile=False):
 	print('\n===Read React Website===\n')
 	#print('url: ' + url)
 
@@ -2514,7 +2536,11 @@ def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retrie
 			# Turn-off userAutomationExtension 
 			options.add_experimental_option("useAutomationExtension", False) 
 			# Setting the driver path and requesting a page 
-			driver = webdriver.Chrome(options=options) 
+			driver = None
+			if mobile:
+				driver = web_driver()
+			else:
+				driver = webdriver.Chrome(options=options) 
 			driver.implicitly_wait(3)
 			# Changing the property of the navigator value for webdriver to undefined 
 			driver.execute_script("Object.defineProperty(navigator, 'webdriver', {get: () => undefined})") 
@@ -2775,7 +2801,7 @@ def read_react_website(url, team_name, stats_of_interest, timeout=10, max_retrie
 # single bets can also be combined with parlay bets 
 # but the diff is parlay bets must be combined
 # multi odds are those which must be combined to be used
-def read_all_players_solo_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[]):
+def read_all_players_solo_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[], mobile=False):
 	print('\n===Read All Players Solo Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
@@ -2820,7 +2846,7 @@ def read_all_players_solo_odds(game_teams, player_teams, cur_yr, stats_of_intere
 		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
 		# need to use react reader bc dynamic btn pages
 		# fcn reads url to tell what page so it can click correct btns and read correct classes
-		game_players_odds_dict = read_react_website(game_odds_url, team_name, stats_of_interest)
+		game_players_odds_dict = read_react_website(game_odds_url, team_name, stats_of_interest, mobile=mobile)
 
 		# first get dict for all players in game page
 		# which is mix of teams
@@ -2880,7 +2906,7 @@ def read_all_players_solo_odds(game_teams, player_teams, cur_yr, stats_of_intere
 # single bets can also be combined with parlay bets 
 # but the diff is parlay bets must be combined
 # multi odds are those which must be combined to be used
-def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[]):
+def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_interest, players=[], mobile=False):
 	print('\n===Read All Players Multi Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
@@ -2920,7 +2946,7 @@ def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_inter
 
 		# return dictionary results for a url
 		# {'pts': {'bam adebayo': {'18+': '-650','17-': 'x',...
-		game_players_odds_dict = read_react_website(game_odds_url, team_name)
+		game_players_odds_dict = read_react_website(game_odds_url, team_name, mobile=mobile)
 
 		if game_players_odds_dict is not None:
 			#print('game_players_odds_dict:\n' + str(game_players_odds_dict))
@@ -2979,7 +3005,7 @@ def read_all_players_multi_odds(game_teams, player_teams, cur_yr, stats_of_inter
 # {player:{stat:ratio,...}, ...}
 # like read_react_website(url, team_name, stats_of_interest)
 # but specific to compare odds site
-def read_odds_ratios_website(stats_of_interest):
+def read_odds_ratios_website(stats_of_interest, mobile=False):
 	print('\n===Read Odds Ratios===\n')
 	print('\nOutput: odds_ratios = {player:{stat:(over fd/dk ratio, under fd/dk ratio), ...}, ... = {\'pts\': {\'luka doncic\': (1.09, 1.0), ...\n')
 
@@ -3002,7 +3028,11 @@ def read_odds_ratios_website(stats_of_interest):
 	options.add_experimental_option("useAutomationExtension", False) 
 	
 	# Setting the driver path and requesting a page 
-	driver = webdriver.Chrome(options=options) 
+	driver = None
+	if mobile:
+		driver = web_driver()
+	else:
+		driver = webdriver.Chrome(options=options) 
 
 	# try raising from 3 to 5 
 	# bc often fails to load so btn click goes to wrong page???
@@ -3224,7 +3254,7 @@ def read_fd_odds(stats_of_interest):
 
 
 
-def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
+def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest, mobile=False):
 	print('\n===Read All Players Odds===\n')
 	print('Setting: Current Year = ' + cur_yr)
 	print('\nInput: game_teams = ' + str(game_teams))
@@ -3314,7 +3344,7 @@ def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 			#game_players_odds_data = None
 			gp_solo_odds = None #= gp_multi_odds = None
 			while gp_solo_odds is None and retries < max_retries:
-				gp_solo_odds = read_react_website(game_odds_url, team_name, stats_of_interest, game=game)
+				gp_solo_odds = read_react_website(game_odds_url, team_name, stats_of_interest, game=game, mobile=mobile)
 				# if glitch returns none, try again bc seems to work second try
 				if gp_solo_odds is None:
 					retries += 1
@@ -3401,7 +3431,7 @@ def read_all_players_odds(game_teams, player_teams, cur_yr, stats_of_interest):
 
 # stat_dict: {'player name': 'Trevelin Queen', 'stat name': 'ast', 'prob val': 0, 'prob': 100
 # all_players_odds = {team:{stat:{player:odds...}
-def read_stat_odds(stat_dict, all_players_odds={}):
+def read_stat_odds(stat_dict, all_players_odds={}, mobile=False):
 	#print('\n===Read Stat Odds===\n')
 	odds = '?' # if we dont see name then they might be added later so determine if it is worth waiting
 
@@ -3420,7 +3450,7 @@ def read_stat_odds(stat_dict, all_players_odds={}):
 	game_odds_url = 'https://sportsbook.draftkings.com/teams/basketball/nba/' + team_name + '--odds?sgpmode=true'
 	#print('game_odds_url: ' + game_odds_url)
 
-	web_data = read_react_web_data(game_odds_url)
+	web_data = read_react_web_data(game_odds_url, mobile)
 
 	if web_data is not None:
 		print('web_data:\n' + str(web_data))

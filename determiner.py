@@ -1811,21 +1811,24 @@ def determine_total_sample_size(player_stat_dict, season_part='full'):
     # all yrs
     for year_stat_dict in player_stat_dict.values():
         # all stats have same samplesize
-        stat_dict = list(year_stat_dict[season_part].values())[0]['all']
-        #print('stat_dict: ' + str(stat_dict))
-        sample_size += len(stat_dict.keys())
-        #print('sample_size: ' + str(sample_size))
+        part_stat_list = list(year_stat_dict[season_part].values())
+        if len(part_stat_list) > 0:
+            stat_dict = part_stat_list[0]['all']
+            #print('stat_dict: ' + str(stat_dict))
+            sample_size += len(stat_dict.keys())
+            #print('sample_size: ' + str(sample_size))
         
     #print('sample_size: ' + str(sample_size))
     return sample_size
 
 # based on sample size and variance
-def determine_player_stat_confidence(player, stat_name, player_stat_dict):
+def determine_player_stat_confidence(player, stat_name, player_stat_dict, season_part):
     # print('\n===Determine Player Stat Confidence: ' + player.title() + ', ' + stat_name.upper() + '===\n')
     # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
 
     # CHANGE to include variance of samples
-    sample_size = determine_total_sample_size(player_stat_dict, season_part='regular')
+    # if postseason, get scaled sample size
+    sample_size = determine_total_sample_size(player_stat_dict, season_part)
 
     #print('sample_size: ' + str(sample_size))
     return sample_size
@@ -3354,6 +3357,7 @@ def determine_cond_yr_part_sample_size(player_stat_dict, condition, year, part, 
     print('cond_part_sample_size: ' + str(cond_part_sample_size))
     return cond_part_sample_size
 
+# for all yrs
 def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition, prints_on=False):
     if prints_on:
         print('\n===Determine Cond Part Sample Size===\n')
@@ -3438,7 +3442,7 @@ def determine_cond_part_sample_indexes(player_stat_dict, condition, part, prints
     cond_part_sample_idxs = {}
 
     for year, year_stat_dicts in player_stat_dict.items():
-        print('\nyear: ' + year)
+        #print('\nyear: ' + year)
         # sample_indexes[year] = []
         # year_sample_idxs = sample_indexes[year]
 

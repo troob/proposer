@@ -163,6 +163,45 @@ def isolate_high_prob_props(prop_dicts):
     return high_prob_props
 
 
+# -if player low playtime, on bench, and 0 bench players samples, then remove
+def separate_low_playtime_props(prop_dicts):
+    print('\n===Separate Low Playtime Props===\n')
+
+    common_props = []
+    low_playtime_props = []
+
+    for prop_dict in prop_dicts:
+
+        player = prop_dict['player']
+        playtime = prop_dict['playtime']
+        gp_warn = prop_dict['gp warn']
+
+        print('player: ' + str(player))
+        print('playtime: ' + str(playtime))
+        print('gp_warn: ' + str(gp_warn))
+        # G Vincent PG bench: 3
+        # G Vincent PG, J Hayes C, M Christie G, S Dinwiddie PG, T Prince PF bench: 0
+        # separate each line
+        # if >5 samples then will not be in warning cell
+        num_bench_samples = 5
+        gp_warnings = re.split('\n', gp_warn)
+        multi_bench_cond = ''
+        for warning in gp_warnings:
+            # find multi bench cond
+            if re.search('bench', warning) and re.search(',', warning):
+                multi_bench_cond = warning
+                print('multi_bench_cond: ' + str(multi_bench_cond))
+                num_bench_samples = int(multi_bench_cond.split(': ')[1])
+        print('num_bench_samples: ' + str(num_bench_samples))
+
+        if playtime < 24 and num_bench_samples == 0:
+            low_playtime_props.append(prop_dict)
+        else: 
+            common_props.append(prop_dict)
+
+    return common_props, low_playtime_props
+
+
 def separate_threes_props(prop_dicts, all_players_season_logs):
     print('\n===Separate 3s Props===\n')
     print('Input: all_players_season_logs = {player:{year:{stat name:{game idx:stat val, ... = {\'jalen brunson\': {\'2024\': {\'Player\': {\'0\': \'jalen brunson\', ...')
@@ -380,7 +419,7 @@ def isolate_props_in_all_ranges(prop_dicts, fields, init_low=None, init_high=Non
                     low = 15
             if init_high == None:
                 if field == 'odds':
-                    high = 500
+                    high = 300
                 elif field == 'ev':
                     high = 0.3
                 elif field == 'dp':
@@ -449,10 +488,10 @@ def isolate_props_in_range(prop_dicts, fields, init_low=None, init_high=None):
                 elif field == 'true prob':
                     low = 25
                 elif field == 'ap':
-                    low = 15
+                    low = 15 # <15 so 14 bc noticed consistent miss below 15 but hits at 15
             if init_high == None:
                 if field == 'odds':
-                    high = 500
+                    high = 300 # 399 or 500? prefer 500 but for now try <300 if more change makes diff
                 elif field == 'ev':
                     high = 0.3
                 elif field == 'dp':
