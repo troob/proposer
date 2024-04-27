@@ -370,9 +370,9 @@ def read_all_teams_schedules(game_teams, season_part):
 
 
 def read_player_prev_stat_vals(reg_season_log, post_season_log, stats_of_interest, player):
-	print('\n===Read Player Prev Stat Vals: ' + player.title() + '===\n')
-	print('reg_season_log: ' + str(reg_season_log))
-	print('post_season_log: ' + str(post_season_log))
+	# print('\n===Read Player Prev Stat Vals: ' + player.title() + '===\n')
+	# print('reg_season_log: ' + str(reg_season_log))
+	# print('post_season_log: ' + str(post_season_log))
 
 	player_prev_stat_vals = {}
 	
@@ -434,15 +434,15 @@ def read_player_prev_stat_vals(reg_season_log, post_season_log, stats_of_interes
 	
 		player_prev_stat_vals[stat_name] = prev_stat_vals
 
-	print('player_prev_stat_vals: ' + str(player_prev_stat_vals))
+	#print('player_prev_stat_vals: ' + str(player_prev_stat_vals))
 	return player_prev_stat_vals
 
 # if postseason, check if playin games at end of log
 # given gp regseason and game log
 # playin = game log - gp reg
 def read_player_last_stat_vals(season_log_of_interest, stats_of_interest, player=''):
-	print('\n===Read Player Last Stat Vals: ' + player.title() + '===\n')
-	print('season_log_of_interest: ' + str(season_log_of_interest))
+	# print('\n===Read Player Last Stat Vals: ' + player.title() + '===\n')
+	# print('season_log_of_interest: ' + str(season_log_of_interest))
 
 	last_stat_vals = {}
 	
@@ -474,7 +474,7 @@ def read_player_last_stat_vals(season_log_of_interest, stats_of_interest, player
 		
 		last_stat_vals[stat_name] = prev_stat_val
 
-	print('last_stat_vals: ' + str(last_stat_vals))
+	#print('last_stat_vals: ' + str(last_stat_vals))
 	return last_stat_vals
 
 # read along with current conditions

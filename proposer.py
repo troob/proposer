@@ -231,7 +231,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('lac', 'dal')]
+    game_teams = [('cle', 'orl')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)
@@ -245,7 +245,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['kawhi leonard'] # 'jacob gilyard', use for testing
+    players_names = ['paolo banchero'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

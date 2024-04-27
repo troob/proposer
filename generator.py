@@ -3345,7 +3345,7 @@ def generate_bet_spread(prop_dict):
 
     # noticed if odds <-300, much more consistent, so raise bet?
     # combo of +ev with low risk = value/advantage?
-    odds = prop_dict['odds'] # eg -300
+    odds = int(prop_dict['odds']) # eg -300
     if odds <= -300:
         bet_spread = odds / -1000 # eg 0.3
 
@@ -3804,17 +3804,22 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
             continue
 
 
+        # Version 2
         # get total samples over all yrs
         # if postseason, get full season 
         # bc almost all post conds are low samples 
         # so cannot diff bad options
         if season_part == 'postseason':
             season_part = 'full'
-        cur_conds = {'condition':condition, 'part':season_part}
-        cond_sample_size = 0
-        for year in season_years:
-            cur_conds['year'] = str(year)
-            cond_sample_size += determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, prints_on=prints_on, player=player)
+        cond_sample_size = determiner.determine_cond_full_sample_size(condition, season_part, season_years, prints_on, player_stat_dict, all_players_abbrevs, player_team, opp_team, player)
+
+        # Version 1
+        # changed bc want full season sample size for postseason
+        # cur_conds = {'condition':condition, 'part':season_part}
+        # cond_sample_size = 0
+        # for year in season_years:
+        #     cur_conds['year'] = str(year)
+        #     cond_sample_size += determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, prints_on=prints_on, player=player)
 
         
 
@@ -4015,8 +4020,10 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 # need more samples
                 if season_part == 'postseason':
                     season_part = 'full'
-                prev_stat_sample_size = determiner.determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, prev_val_cond, prints_on)
-                
+                # condition sample size fcn adjusts full size to weighted scale
+                # so use full cond sample size fcn to get actual full sample size
+                #prev_stat_sample_size = determiner.determine_condition_sample_size(player_stat_dict, prev_val_cond, season_part, stat_name, prints_on)
+                prev_stat_sample_size = determiner.determine_cond_full_sample_size(prev_val_cond, season_part, season_years, prints_on, player_stat_dict, all_players_abbrevs, player_team, opp_team, player, stat_name)
                 
                 if prev_stat_sample_size < 5:
                     #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
@@ -11051,9 +11058,10 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
 
 # -first take dnp players (avg <10min) off current conditions bench
 # -then take dnp players off games they played <10min (keep in games they  played >10min bc bench wont match anyway!)
-def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, all_players_season_logs, all_players_gp_cur_teams, cur_yr, todays_date, read_x_seasons, all_players_espn_ids, all_seasons_start_days):
+def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_current_rosters, all_players_teams, all_players_abbrevs, all_players_season_logs, all_players_gp_cur_teams, cur_yr, todays_date, read_x_seasons, all_players_espn_ids, all_seasons_start_days, season_part='regular'):
     print('\n===Generate All Box Scores===\n')
-    print('Input: Current Year to get current teams')
+    print('Setting: Season Part = ' + season_part)
+    print('\nInput: Current Year to get current teams')
     print('Input: init_all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...}},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
     print('Input: all_teams_players = {year:{team:[players], ... = {\'2024\': {\'wsh\': [\'kyle kuzma\', ...')# = ' + str(all_teams_players))
     print('Input: teams_current_rosters = {team:roster, ... = {\'nyk\': [jalen brunson, ...], ...')
@@ -11073,6 +11081,12 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
     gen_all_box_scores = copy.deepcopy(init_gen_box_scores)
 
     init_all_players_teams = copy.deepcopy(all_players_teams)
+
+
+    dnp_playtime = 12
+    if season_part == 'postseason':
+        dnp_playtime = 14
+
 
     # if player avg min > 12 or 10 and they did not play game, then consider them out
     # if player avg min < 13 or 11 and they did not play game, then consider them bench
@@ -11303,7 +11317,8 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                                     # bc he raised from dnp to bench due to recent injuries
                                                     # so CHANGE to get mean minutes from log last 30 games
                                                     # BUT the KEY is last 30 games before this game this loop, NOT cur game day code runs
-                                                    if player_mean_minutes >= 11.5:
+                                                    # 14 if postseason, 12 if regular? or 11.5?
+                                                    if player_mean_minutes >= 14:
                                                         #print('found bench')
                                                         final_bench[player_abbrev] = play_time
                                                     else:
@@ -11323,7 +11338,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
 
                                                 # check if player was on roster at the time of this game
                                                 # bc if not on roster then not considered out
-                                                if player_mean_minutes >= 11.5:
+                                                if player_mean_minutes >= dnp_playtime:
                                                     #print('found out')
                                                     out[player_abbrev] = 0
                                                 else:
@@ -11888,7 +11903,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # now that we have all teams players and abbrevs, 
         # we can see which practice players were on the bench in games they did not play
         # vs active players who were out
-        all_box_scores = generate_all_box_scores(all_box_scores, all_teams_players, all_teams_current_rosters, all_players_teams, all_players_abbrevs, all_players_season_logs, all_players_gp_cur_teams, current_year_str, todays_date, read_x_seasons, all_players_espn_ids, all_seasons_start_days)
+        all_box_scores = generate_all_box_scores(all_box_scores, all_teams_players, all_teams_current_rosters, all_players_teams, all_players_abbrevs, all_players_season_logs, all_players_gp_cur_teams, current_year_str, todays_date, read_x_seasons, all_players_espn_ids, all_seasons_start_days, season_part)
         # all teams players gets updated if new box score
         #all_teams_players = {}
         # for each team, practice players avg <10min per game
@@ -12027,7 +12042,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # AND true prob
     all_players_cur_avg_playtimes = determiner.determine_all_players_cur_avg_playtimes(all_players_season_logs, all_players_teams, current_year_str)
 
-    after_injury_players = determiner.determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, current_year_str)
+    after_injury_players = determiner.determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, current_year_str, season_part)
     
 
     #all_player_consistent_stats = {} # we want to display all player consistent stats together for viewing convenience and analysis comparison

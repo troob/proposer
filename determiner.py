@@ -1497,6 +1497,34 @@ def determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, play
         print('sample_size: ' + str(sample_size))
     return sample_size
 
+# all years
+# NEED to combine with determine cond sample size
+# SO combine determine sample size with determine cond part sample size
+def determine_cond_full_sample_size(condition, season_part, season_years, prints_on, player_stat_dict, all_players_abbrevs, player_team, opp_team, player, stat_name=''):
+
+    cond_full_sample_size = 0
+
+    cur_conds = {'condition':condition, 'part':season_part}
+
+    for year in season_years:
+        # simply add all samples with equal weight for both parts of season
+        cur_conds['year'] = str(year)
+
+        if season_part == 'full':
+            #season_part = 'regular'
+            #cur_conds = {'condition':condition, 'part':season_part, 'year': str(year)}
+            cur_conds['part'] = 'regular'
+            cond_full_sample_size += determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on=prints_on, player=player)
+            #cur_conds = {'condition':condition, 'part':season_part, 'year': str(year)}
+            cur_conds['part'] = 'postseason'
+            cond_full_sample_size += determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on=prints_on, player=player)
+        else:
+            #cur_conds = {'condition':condition, 'part':season_part, 'year': str(year)}
+            cond_full_sample_size += determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on=prints_on, player=player)
+
+    return cond_full_sample_size
+
+
 def determine_probs_sample_size(player_stat_probs_dict, cur_conds):
     sample_size = 0
     
@@ -1598,14 +1626,14 @@ def determine_week_after_injury(player_cur_season_log, player, todays_games_date
     #print('after_injury: ' + str(after_injury))
     return after_injury
 
-def determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr):
+def determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr, season_part):
     #print('\n===Determine Valid Player===\n')
 
     valid = True
 
     if len(player_season_logs.keys()) == 0:
         valid = False
-    elif determine_dnp_player(player_teams, cur_yr, player):
+    elif determine_dnp_player(player_teams, cur_yr, player, season_part):
         valid = False
     elif determine_out_player(player, player_gp_cur_conds):
         valid = False
@@ -1613,7 +1641,7 @@ def determine_valid_player(player, player_season_logs, player_teams, player_gp_c
     return valid
 
 # double check playtime in news reports
-def determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, cur_yr):
+def determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, cur_yr, season_part):
     print('\n===All After Injury Players===\n')
     print('\nOutput: after_injury_players = [p1,...]\n')
     print('Warning: Double check playtime in lineups reports details!')
@@ -1625,7 +1653,7 @@ def determine_all_after_injury_players(all_players_season_logs, all_players_team
         player_teams = all_players_teams[player]
         if player in all_game_player_cur_conds.keys():
             player_gp_cur_conds = all_game_player_cur_conds[player]
-            if determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr):
+            if determine_valid_player(player, player_season_logs, player_teams, player_gp_cur_conds, cur_yr, season_part):
                 if cur_yr in player_season_logs.keys():
                     player_cur_season_log = player_season_logs[cur_yr]
                     if determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
@@ -1808,7 +1836,7 @@ def determine_all_current_conditions(all_cur_conds_dicts):
 
 
 
-def determine_total_sample_size(player_stat_dict, season_part='full'):
+def determine_part_total_sample_size(player_stat_dict, season_part='full'):
     # print('\n===Determine Total Sample Size===\n')
     # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
     sample_size = 0
@@ -1821,6 +1849,22 @@ def determine_total_sample_size(player_stat_dict, season_part='full'):
             #print('stat_dict: ' + str(stat_dict))
             sample_size += len(stat_dict.keys())
             #print('sample_size: ' + str(sample_size))
+        
+    #print('sample_size: ' + str(sample_size))
+    return sample_size
+
+def determine_total_sample_size(player_stat_dict, season_part='full'):
+    # print('\n===Determine Total Sample Size===\n')
+    # print('Input: player_stat_dict = {year: {season part: {stat name: {condition: {game idx: stat val, ... = {\'2023\': {\'regular\': {\'pts\': {\'all\': {\'0\': 33, ... }, \'B Beal SG, D Gafford C, K Kuzma SF, K Porzingis C, M Morris PG starters\': {\'1\': 7, ...')
+    sample_size = 0
+   
+    if season_part == 'full':
+        season_part = 'regular'
+        sample_size = determine_part_total_sample_size(player_stat_dict, season_part)
+        season_part = 'postseason'
+        sample_size += determine_part_total_sample_size(player_stat_dict, season_part)
+    else:
+        sample_size = determine_part_total_sample_size(player_stat_dict, season_part)
         
     #print('sample_size: ' + str(sample_size))
     return sample_size
@@ -2112,8 +2156,10 @@ def determine_cur_avg_playtime(player_cur_season_log, player_gp_cur_team, player
     for game_idx in range(num_games):
         game_minutes = cur_season_minutes[str(game_idx)]
         # remove outliers
-        # need prev minutes none in case player starts with multiple 0 minute games
+        # need prev minutes none in case player starts with multiple 0 minute games???
+        # if prev minutes none then first game
         if prev_minutes is None or game_minutes > prev_minutes / 4:
+            # remove outliers for players who normally play 5 minutes but played > 20min
             cur_team_minutes.append(game_minutes)
 
         prev_minutes = game_minutes
@@ -2620,8 +2666,9 @@ def determine_out_player(player_name, player_gp_cur_conds):
     #print('out: ' + str(out))
     return out
 
-
-def determine_dnp_player(player_teams, cur_yr, player_name):
+# better to get mean minutes from game log with outliers removed
+# bc dnp players sometimes play a lot of minutes which could raise avg too much if very few games total
+def determine_dnp_player(player_teams, cur_yr, player_name, season_part='regular'):
     # print('\n===Determine DNP Player: ' + player_name.title() + '===\n')
     # print('Input: player_teams = {year:{team:{GP:gp, MIN:min},... = {\'2018\': {\'mia\': {\'GP\':69, \'MIN\':30.2}, ... = ' + str(player_teams))
 
@@ -2646,7 +2693,14 @@ def determine_dnp_player(player_teams, cur_yr, player_name):
                 break
 
     #print('player_mean_minutes: ' + str(player_mean_minutes))
-    if player_mean_minutes < 11.5:
+    # should be 11.5 with outliers removed?
+    # but noticed trevelin queen clearly dnp player
+    # who played only 14 games with team whole season but avg 11.8minutes
+    # noticed matt ryan dnp player in postseason played 13.9 minutes over 28 games
+    dnp_playtime = 12
+    if season_part == 'postseason':
+        dnp_playtime = 14
+    if player_mean_minutes < dnp_playtime:
         dnp = True
 
     #print('dnp: ' + str(dnp))
@@ -3362,7 +3416,7 @@ def determine_cond_yr_part_sample_size(player_stat_dict, condition, year, part, 
     return cond_part_sample_size
 
 # for all yrs
-def determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition, prints_on=False):
+def determine_cond_part_sample_size(player_stat_dict, condition, part, stat_name, prints_on=False):
     if prints_on:
         print('\n===Determine Cond Part Sample Size===\n')
         print('Season Part = ' + part)
@@ -3416,9 +3470,9 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
     
     if part == 'full':
         season_part = 'regular'
-        reg_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition, prints_on)
+        reg_sample_size = determine_cond_part_sample_size(player_stat_dict, condition, season_part, stat_name, prints_on)
         season_part = 'postseason'
-        post_sample_size = determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, condition, prints_on)
+        post_sample_size = determine_cond_part_sample_size(player_stat_dict, condition, season_part, stat_name, prints_on)
 
         # know we have at least 1
         condition_sample_size = max(converter.round_half_up(0.8 * post_sample_size + 0.2 * reg_sample_size), 1)
@@ -3427,7 +3481,7 @@ def determine_condition_sample_size(player_stat_dict, condition, part, stat_name
         # do we ignore cond???
         # bc regseason national games not necessarily more relevant?
     else:
-        condition_sample_size = determine_cond_part_sample_size(player_stat_dict, part, stat_name, condition, prints_on)
+        condition_sample_size = determine_cond_part_sample_size(player_stat_dict, condition, part, stat_name, prints_on)
 
             
 
