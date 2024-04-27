@@ -11308,7 +11308,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                                 # irregular case
                                                 if play_time == '-':
                                                     play_time = '0'
-                                                if int(play_time) > 11:
+                                                if int(play_time) > 11: # TUNE arbitrary time
                                                     #print('found bench')
                                                     final_bench[player_abbrev] = play_time
                                                 else:
@@ -11318,12 +11318,12 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
                                                     # so CHANGE to get mean minutes from log last 30 games
                                                     # BUT the KEY is last 30 games before this game this loop, NOT cur game day code runs
                                                     # 14 if postseason, 12 if regular? or 11.5?
-                                                    if player_mean_minutes >= 14:
-                                                        #print('found bench')
-                                                        final_bench[player_abbrev] = play_time
-                                                    else:
+                                                    if player_mean_minutes < dnp_playtime:
                                                         #print('found dnp')
                                                         dnp[player_abbrev] = play_time
+                                                    else:
+                                                        #print('found bench')
+                                                        final_bench[player_abbrev] = play_time
 
                                             else: # player abbrev == '' blank bc not in bench nor starters
                                                 # abbrev saved but not in box score so which version of abbrev to use?
@@ -11338,12 +11338,12 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
 
                                                 # check if player was on roster at the time of this game
                                                 # bc if not on roster then not considered out
-                                                if player_mean_minutes >= dnp_playtime:
-                                                    #print('found out')
-                                                    out[player_abbrev] = 0
-                                                else:
+                                                if player_mean_minutes < dnp_playtime:
                                                     #print('found dnp')
                                                     dnp[player_abbrev] = 0
+                                                else:
+                                                    #print('found out')
+                                                    out[player_abbrev] = 0
                                         
 
                                     else: # irregular abbrev not found
