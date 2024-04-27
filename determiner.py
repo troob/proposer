@@ -197,7 +197,9 @@ def determine_stat_range(val, stat):
     #print("\n===Determine Stat Range: " + str(val) + " " + stat + "===\n")
 
     set_range = 5
-    if stat == 'pts':
+    #if stat == 'pts':
+    # include combos with pts
+    if re.search('pts', stat):
         set_range = 10
 
     min_val = 0
@@ -1613,6 +1615,7 @@ def determine_valid_player(player, player_season_logs, player_teams, player_gp_c
 # double check playtime in news reports
 def determine_all_after_injury_players(all_players_season_logs, all_players_teams, all_game_player_cur_conds, todays_games_date_obj, cur_yr):
     print('\n===All After Injury Players===\n')
+    print('\nOutput: after_injury_players = [p1,...]\n')
     print('Warning: Double check playtime in lineups reports details!')
 
     after_injury_players = []
@@ -1626,9 +1629,10 @@ def determine_all_after_injury_players(all_players_season_logs, all_players_team
                 if cur_yr in player_season_logs.keys():
                     player_cur_season_log = player_season_logs[cur_yr]
                     if determine_week_after_injury(player_cur_season_log, player, todays_games_date_obj, cur_yr):
-                        after_injury_players.append([player])
+                        after_injury_players.append(player)
                         print(player.title())
 
+    print('after_injury_players: ' + str(after_injury_players))
     print('\n==============================\n')
 
     return after_injury_players

@@ -176,9 +176,9 @@ def separate_low_playtime_props(prop_dicts):
         playtime = prop_dict['playtime']
         gp_warn = prop_dict['gp warn']
 
-        print('player: ' + str(player))
-        print('playtime: ' + str(playtime))
-        print('gp_warn: ' + str(gp_warn))
+        # print('\nplayer: ' + str(player))
+        # print('playtime: ' + str(playtime))
+        # print('gp_warn:\n' + str(gp_warn))
         # G Vincent PG bench: 3
         # G Vincent PG, J Hayes C, M Christie G, S Dinwiddie PG, T Prince PF bench: 0
         # separate each line
@@ -190,9 +190,9 @@ def separate_low_playtime_props(prop_dicts):
             # find multi bench cond
             if re.search('bench', warning) and re.search(',', warning):
                 multi_bench_cond = warning
-                print('multi_bench_cond: ' + str(multi_bench_cond))
+                #print('multi_bench_cond: ' + str(multi_bench_cond))
                 num_bench_samples = int(multi_bench_cond.split(': ')[1])
-        print('num_bench_samples: ' + str(num_bench_samples))
+        #print('num_bench_samples: ' + str(num_bench_samples))
 
         if playtime < 24 and num_bench_samples == 0:
             low_playtime_props.append(prop_dict)

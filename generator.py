@@ -2420,9 +2420,9 @@ def generate_season_part_logs(player_season_logs, season_part='regular'):
     return season_part_logs
 
 def generate_part_season_logs(player_season_logs, part):
-    print('\n===Generate Part Season Logs===\n')
-    print('Setting: Season Part = ' + part)
-    print('\nOutput: part_season_logs =  {\'2024\': {\'Player\': {}, \'Season\': {}, \'Type\': {}, ...\n')
+    # print('\n===Generate Part Season Logs===\n')
+    # print('Setting: Season Part = ' + part)
+    # print('\nOutput: part_season_logs =  {\'2024\': {\'Player\': {}, \'Season\': {}, \'Type\': {}, ...\n')
 
     part_season_logs = {}
 
@@ -3339,6 +3339,23 @@ def generate_conditions_order(all_cur_conds_dicts, all_game_player_cur_conds, al
 def generate_bet_spread(prop_dict):
     #print('\n===Generate Bet Spread===\n')
 
+
+    # === Version 3 ===
+    bet_spread = 0.1
+
+    # noticed if odds <-300, much more consistent, so raise bet?
+    # combo of +ev with low risk = value/advantage?
+    odds = prop_dict['odds'] # eg -300
+    if odds <= -300:
+        bet_spread = odds / -1000 # eg 0.3
+
+
+
+
+
+
+    # === Version 2 ===
+
     # bet_spread = 0.1 # min bet
     # # shift in range based on min allowed prob
     # # accepted range 15-100% ap
@@ -3349,7 +3366,7 @@ def generate_bet_spread(prop_dict):
     # if prob < 0:
     #     prob = 0
 
-    # === Version 2 ===
+    
     # scale to true prob and count
     # divide by 3 makes too many bets below min limit at current investment scale
     # SO try divide by 2
@@ -3361,7 +3378,7 @@ def generate_bet_spread(prop_dict):
     #min_prob = 20
     # flat bet until further notice 
     # bc all props in group have similar probs once accounting for other sources comparisons
-    bet_spread = 0.1 #prob / min_prob #/2
+    #bet_spread = 0.1 #prob / min_prob #/2
     # for every 2 count, 
     # multiply by 2 OR add another bet???
     # only need to assume cnt direction bc bet=0 if cnt in opp direc
@@ -3390,6 +3407,12 @@ def generate_bet_spread(prop_dict):
     #     max_bet = 20
     #     # divide by 100 bc small scale tests in cents input as decimal dollars
     #     bet_spread = (10 + round_half_up(max_bet * ratio)) / 100
+
+
+
+
+
+    
 
     #print('bet_spread: ' + str(bet_spread))
     return bet_spread
@@ -3705,13 +3728,14 @@ def generate_available_prop_dicts(stat_dicts, game_teams, player_teams, cur_yr, 
     # print('available_multi_prop_dicts: ' + str(available_multi_prop_dicts))
     return available_prop_dicts#, available_multi_prop_dicts
 
-def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt):
+def generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, prev_low_sample_sizes, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt):
     # add more fields for ref
     stat_val_probs_dict['game'] = game_num
     stat_val_probs_dict['prev'] = prev_val
     stat_val_probs_dict['rare prev'] = rare_prev
     stat_val_probs_dict['playtime'] = playtime
     stat_val_probs_dict['confidence'] = confidence
+    stat_val_probs_dict['prev warn'] = prev_low_sample_sizes
     stat_val_probs_dict['cond warn'] = cond_low_sample_sizes # 't herro pg out: 2, ...'
     stat_val_probs_dict['piap warn'] = piap_low_sample_sizes
     stat_val_probs_dict['gp warn'] = gp_low_sample_sizes
@@ -3781,6 +3805,11 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 
 
         # get total samples over all yrs
+        # if postseason, get full season 
+        # bc almost all post conds are low samples 
+        # so cannot diff bad options
+        if season_part == 'postseason':
+            season_part = 'full'
         cur_conds = {'condition':condition, 'part':season_part}
         cond_sample_size = 0
         for year in season_years:
@@ -3810,6 +3839,14 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
                     gp_low_sample_sizes += '\n' + condition + ': ' + str(cond_sample_size)
 
                 gp_low_cond_idx += 1
+            # remove bc prev depends on stat unlike all other conds
+            # elif re.search('prev', condition):
+            #     if gp_low_cond_idx == 0:
+            #         prev_low_sample_sizes = condition + ': ' + str(cond_sample_size)
+            #     else:
+            #         prev_low_sample_sizes += '\n' + condition + ': ' + str(cond_sample_size)
+                
+            #     prev_low_cond_idx += 1
             else:
                 piap_conds = ['tiap', 'toap', 'off', 'oiap', 'oo', 'diff']
                 piap_cond = False
@@ -3848,6 +3885,7 @@ def generate_low_sample_sizes(player_cur_conds_list, player_stat_dict, all_playe
 def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_players_playtimes={}, all_cur_conds_dicts={}, all_gp_cur_conds={}, all_cur_conds_lists={}, all_counts={}, all_player_stat_dicts={}, all_players_abbrevs={}, game_teams=[], rosters={}, rare_prev_val_players={}, all_players_last_vals={}, cur_yr='', season_years=[], season_part='', single_conds=[], stats_of_interest=[], prints_on=False):
     print('\n===Generate All True Prob Dicts===\n')
     print('Setting: Current Year to get current team = ' + cur_yr)
+    print('Setting: Season Part = ' + season_part)
     print('\nInput: all_cur_conds_dicts = {p1: {loc: home, tod: 10:30, ...')# = ' + str(all_cur_conds_dicts))
     print('Input: all_gp_cur_conds = {p1: {teammates: {starters:[],...}, opp: {...}}, ...')# = ' + str(all_gp_cur_conds))
     print('Input: all_true_probs_dict = {player: {stat: {val: {conditions: {prob, ... = {\'nikola jokic\': {\'pts\': {0: {\'all 2024 regular prob\': 0.0, ..., \'A Gordon PF, J Murray PG,... starters 2024 regular prob\': 0.0, ...')
@@ -3877,7 +3915,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
     #ap_key = 'ap'
 
     for player, player_stat_probs_dict in all_true_probs_dict.items():
-        #print('\n===Player: ' + player.title() + '===\n')
+        if prints_on:
+            print('\n===Player: ' + player.title() + '===\n')
         #stat_val_probs_dict = {'player': player}
         # player_teams = {year:{team:gp,...},...
         player_teams = all_players_teams[player]
@@ -3913,10 +3952,13 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
         piap_low_sample_sizes = low_sample_size_data[1]
         gp_low_sample_sizes = low_sample_size_data[2]
         opp_low_sample_sizes = low_sample_size_data[3]
+        #prev_low_sample_sizes = low_sample_size_data[4]
 
 
         #player_last_vals = all_last_vals[player]
         
+        prev_low_sample_sizes = ''
+        prev_low_cond_idx = 0
         
         #stat_probs_dict: {1: {'all 2023 regular prob': 1.0, 'all 2023 full prob': 1.0,...},...
         for stat_name, stat_probs_dict in player_stat_probs_dict.items():
@@ -3930,7 +3972,8 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
             #                 consistent_stat_dict[key] = val
             
             if stat_name in stats_of_interest:
-                #print('\n===Stat: ' + str(stat_name) + '===\n')
+                if prints_on:
+                    print('\n===Stat: ' + str(stat_name) + '===\n')
                 #condition = 'all' # all conds match all
                 #part = 'regular' # get current part from time of year mth
                 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
@@ -3947,6 +3990,9 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     #print('prev_val: ' + str(prev_val))
                     # is it useful to get prev val under current conditions? possibly but could be misleading unless looking at larger sample
                 
+                # confidence shows specific part of season sample size
+                # bc shows diff bt players with playoff experience 
+                # so samples probs are more accurate
                 confidence = determiner.determine_player_stat_confidence(player, stat_name, player_stat_dict, season_part)#all_players_confidences[player] # based on sample size
 
                 # add to existing string with conds that dont depend on stat
@@ -3966,14 +4012,23 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                 # #print('cur_conds: ' + str(cur_conds))
                 # prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat_name, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
                 #if prev_stat_low_sample_size != '':
-                
+                # need more samples
+                if season_part == 'postseason':
+                    season_part = 'full'
                 prev_stat_sample_size = determiner.determine_cond_part_sample_size(player_stat_dict, season_part, stat_name, prev_val_cond, prints_on)
                 
                 
                 if prev_stat_sample_size < 5:
                     #prev_stat_low_sample_size = prev_val_cond + ': ' + str(prev_stat_sample_size)
-                    cond_low_sample_sizes += '\n' + prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
-                #print('cond_low_sample_sizes: ' + str(cond_low_sample_sizes))
+                    #cond_low_sample_sizes += '\n' + prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
+                
+                    if prev_low_cond_idx == 0:
+                        prev_low_sample_sizes = prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
+                    else:
+                        prev_low_sample_sizes += '\n' + prev_val_cond + ' ' + stat_name + ': ' + str(prev_stat_sample_size)
+                    prev_low_cond_idx += 1
+                if prints_on:
+                    print('prev_low_sample_sizes: ' + str(prev_low_sample_sizes))
 
 
                 # add cond if rare prev which can only be added after true prob done for all other conds
@@ -4065,7 +4120,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                     # # for game in game_teams:
                     # #     if player_team
                     # stat_val_probs_dict['game'] = game_num
-                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
+                    stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, prev_low_sample_sizes, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
 
                     # we want per unit probs next to corresponding yr for comparison in table
                     # so add key above when looping thru conditions
@@ -4131,7 +4186,7 @@ def generate_all_true_prob_dicts(all_true_probs_dict, all_players_teams={}, all_
                         #             team_part_cond_key = team_part # eg. 'starters'
                         #         stat_val_probs_dict[team_part_cond_key] = team_part_players
                         # stat_val_probs_dict['game'] = game_num
-                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
+                        stat_val_probs_dict = generate_stat_val_probs_cond_refs(game_num, prev_val, playtime, confidence, player_current_conditions, player_gp_conds, stat_val_probs_dict, prev_low_sample_sizes, cond_low_sample_sizes, piap_low_sample_sizes, gp_low_sample_sizes, opp_low_sample_sizes, rare_prev, player_stat_cnt)
 
                         # one row for each val which has all conditions
                         #print('stat_val_probs_dict: ' + str(stat_val_probs_dict))
@@ -5018,7 +5073,7 @@ def generate_game_players_cond_sample_weight(cond_key, lineup_team, team_conditi
         else: # low sample size
             # notify for now always bc not sure if fixed
             #if prints_on:
-            print('\nLow Sample Size: ' + cond_key)
+            print('\nLow Sample Size: ' + player.title())
             print('combined_sample_size: ' + str(combined_sample_size))
             print('combined_conditions: ' + str(combined_conditions))
             # use tiap/piap samples
@@ -8229,6 +8284,7 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
     print('Input: all_players_abbrevs = {year:{player abbrev-team abbrev:player, ... = {\'2024\': {\'J Jackson Jr PF-mem\': \'jaren jackson jr\',...')# = ' + str(all_players_abbrevs))
     print('Input: all_players_cur_avg_playtimes = {player:playtime, ....')
     print('Input: irreg_play_times = {player:playtime,... = ' + str(irreg_play_times))
+    print('Input: after_injury_players = [p1,...] = ' + str(after_injury_players))
     print('\nOutput: playtime = x\n')
 
     playtime = 0
@@ -12323,7 +12379,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # desired_order.append('playtime')
     # desired_order.append('prev')
     # 'tiap', 'toap', 
-    ref_conds = ['confidence', 'cond warn', 'piap warn', 'gp warn', 'opp warn', 'playtime', 'off', 'tiap', 'toap', 'oiap', 'off oiap', 'diff', 'rare prev', 'prev']
+    ref_conds = ['confidence', 'prev warn', 'cond warn', 'piap warn', 'gp warn', 'opp warn', 'playtime', 'off', 'tiap', 'toap', 'oiap', 'off oiap', 'diff', 'rare prev', 'prev']
     desired_order.extend(ref_conds)
 
     # show the current conditions so we know which probs are used bc all probs are shown in table of all players

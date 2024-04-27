@@ -947,7 +947,11 @@ def display_game_info(after_injury_players, rare_prev_val_players):
     title = 'after injury players'
     print('\n===' + title.title() + '===\n')
 
-    print(tabulate(after_injury_players, headers=['Player'])) # game, days after, injury type, restricted playtime
+    after_injury_players_table = []
+    for player in after_injury_players:
+        after_injury_players_table.append([player])
+
+    print(tabulate(after_injury_players_table, headers=['Player'])) # game, days after, injury type, restricted playtime
 
     for rare_cat, rare_cat_players in rare_prev_val_players.items():
         title = rare_cat
