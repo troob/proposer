@@ -223,7 +223,7 @@ all_teams = ['bos','bkn', 'nyk','phi', 'tor','chi', 'cle','det', 'ind','mil', 'd
 # game key of interest we want to eval how program would perform?
 # more likely to see on full set of yr, including this yr
 # so make setting, test performance
-game_teams = [] #('nop','lal')
+game_teams = []#('lal', 'den')] #('nop','lal')
 
 if test:
     # when we run with empty game teams, it will run for all teams
@@ -231,7 +231,7 @@ if test:
     # no actually it will fill if we set read new teams
     # but to automate that instead of manual set
     # simply check for new players if new box score
-    game_teams = [('cle', 'orl')]
+    game_teams = [('lal', 'den')]
 
 if len(game_teams) == 0:
     game_teams = reader.read_current_game_teams(cutoff_time)
@@ -245,7 +245,7 @@ teams_current_rosters = reader.read_teams_current_rosters(game_teams, read_new_t
 players_names = reader.read_players_from_rosters(teams_current_rosters, game_teams)# generate is wrong term bc we are not computing anything only reading players on each team
 
 if test:
-    players_names = ['paolo banchero'] # 'jacob gilyard', use for testing
+    players_names = ['lebron james'] # 'jacob gilyard', use for testing
 
 
 # if we get rosters instead of player names then read all players on rosters

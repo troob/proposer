@@ -2678,7 +2678,8 @@ def determine_dnp_player(player_teams, cur_yr, player_name, season_part='regular
     if cur_yr in player_teams.keys():
         # player may have been recently traded and not played yet (eg theo maledon)
         # ordered from distant to recent
-        cur_yr_teams_dicts = reversed(player_teams[cur_yr].values()) # {team:{min:m, gp:gp}, ...}
+        # random error if not list sometimes works or not???
+        cur_yr_teams_dicts = list(reversed(player_teams[cur_yr].values())) # {team:{min:m, gp:gp}, ...}
         #print('cur_yr_teams_dicts: ' + str(list(cur_yr_teams_dicts)))
         #if team in cur_yr_teams_dict.keys():
         # if played this yr then team dict will not be blank
@@ -3841,6 +3842,7 @@ def determine_regular_season_games(player_game_log):
     #print("final reg_season_games_df:\n" + str(reg_season_games_df) + '\n')
     return reg_season_games_df
 
+# Generate Season Part Game Log
 def determine_season_part_games(player_game_log, season_part='regular', player='player'):
     # print('\n===Determine Season Part Games for ' + player.title() + ', ' + season_part + '===\n')
     # #print('player_game_log:\n' + str(player_game_log))

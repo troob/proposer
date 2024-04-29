@@ -14,6 +14,8 @@ import numpy as np # mean, median to display over time
 import os
 import re # see if string contains stat and player of interest to display
 
+import string # to format workbook column wrap
+
 from tabulate import tabulate # display output, eg consistent stat vals
 
 
@@ -815,11 +817,20 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
     # book name = prop tables
     book_name = 'data/prop tables - ' + todays_date + '.xlsx'
     print('book_name: ' + str(book_name))
-    writer = pd.ExcelWriter(book_name)
+    writer = pd.ExcelWriter(book_name)#, font_size=20)
+
+    # Set the wrap text format for all cells in the workbook.
+    #writer.book.formats[0].set_text_wrap(True)
+    workbook = writer.book
+    wrap_format = workbook.add_format({'text_wrap': True, 'font_size':14})
+    #font_format = workbook.add_format({'font_name': 'Arial', 'font_size': 14})
+    #dictionary for map position of selected columns to excel headers
+    #d = dict(zip(range(26), list(string.ascii_uppercase)))
+    #print('d: ' + str(d))
 
     init_desired_order = desired_order
     for table_idx in range(len(prop_dicts)):
-        dict = prop_dicts[table_idx]
+        table_dicts = prop_dicts[table_idx]
 
         sheet_name = sheet_names[table_idx]
 
@@ -831,18 +842,62 @@ def write_prop_tables(prop_dicts, sheet_names, desired_order, joint_sheet_name='
             desired_order = init_desired_order
 
         #desired_order = [x.title() for x in desired_order]
-        table_df = pd.DataFrame(dict, columns=desired_order)
+        table_df = pd.DataFrame(table_dicts, columns=desired_order)
+        #print('table_dicts: ' + str(table_dicts))
+        #print('table_df: ' + str(table_df))
         table_df.columns = [x.title() for x in table_df.columns]
-        if 'Player' in table_df.keys():
-            #player_str = str(table_df['Player'])
-            #print('table_df[Player]: ' + str(table_df['Player']))
-            player_val = table_df['Player']
-            if isinstance(player_val, str):
-                table_df['Player'] = player_val.str.title() 
+        table_df = table_df.applymap(lambda x: str(x).title())
+        # title player names
+        # if len(table_dicts) > 0 and 'player' in table_dicts[0].keys():
+        #     #player_str = str(table_df['Player'])
+        #     #print('table_df[Player]: ' + str(table_df['Player']))
+        #     player_val = table_df.player
+        #     if isinstance(player_val, str):
+        #         table_df[0] = player_val.str.title() 
             # else:
             #     print('Warning: player val not string! ' + str(player_val))
 
-        table_df.to_excel(writer,sheet_name)
+        
+        table_df.to_excel(writer,sheet_name, index=False)#, format=font_format)#, font={'name': 'Arial', 'size': 12})
+
+        worksheet = writer.sheets[sheet_name]
+
+        #worksheet.set_column('A:AZ', None, wrap_format)
+
+
+        # for column in table_df.columns.get_indexer(desired_order):
+        #     print('column: ' + str(column))
+        #     excel_header = d[column] + ':' + d[column]
+        #     print('excel_header: ' + str(excel_header))
+        #     worksheet.set_column(excel_header, None, wrap_format) #, cell_format=writer.book.add_format({'text_wrap': True})) #wrap_text=True)
+
+        #worksheet.set_font(14)
+        
+        # set column width
+        # some columns are small so fit to data
+        # large columns get max width!
+        # worksheet = writer.sheets[sheet_name]
+        for idx, col in enumerate(table_df):
+            series = table_df[col]
+            # default font is 11 but ideal font is 14 so adjust
+            max_len = max((series.astype(str).map(len).max() + 5, # len of largest item
+                           len(str(series.name)) # len of column name/header
+                           )) + 1 # adding a little extra space
+            # limit width for readability
+            # cannot see former team col full screen at 50
+            max_len = min(max_len, 45)
+            
+            #worksheet.set_column(idx, idx, max_len)
+            worksheet.set_column(idx, idx, max_len, wrap_format)
+
+        # needs another library
+        # table_df = table_df.style.set_properties(**{
+        #     'font-size': '20pt',
+        # })
+
+        worksheet.freeze_panes(1, 5)
+        # set zoom does not work in google sheets
+        #worksheet.set_zoom(115)
 
 
     writer.close()

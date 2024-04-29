@@ -3539,7 +3539,7 @@ def read_players_from_rosters(rosters, game_teams=[]):
 # 2. combine name status into unique strings
 # 3. get combos of all players statuses
 # 4. reformat into lineup with list of starters, bench, out
-def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):#, init_all_lineups):
+def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, season_part):#, init_all_lineups):
 	print('\n===Read All Likely Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_likely_lineups = {\'cle\': [{\'starters\': [\'donovan mitchell\', ...],...}, ...], ...\n')
@@ -3644,7 +3644,7 @@ def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_playe
 						if player_name in all_players_teams.keys():
 							player_teams = all_players_teams[player_name]
 
-							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name):
+							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name, season_part):
 								
 								# list all likely health statuses based on current status tag
 								player_statuses = []
@@ -3698,7 +3698,7 @@ def read_all_likely_lineups(players, all_players_teams, rosters, all_teams_playe
 # all lineups has random combo of full names and abbrevs so check both
 # all_lineups = {team:{starters:[Klay Thompson, D. Green,...],out:[],bench:[],unknown:[]},...}
 # all_teams_players = {year:{team:[players],...},...}
-def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr):#, init_all_lineups):
+def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, season_part):#, init_all_lineups):
 	print('\n===Read All Lineups===\n')
 	print('Input: all_players_teams = {player:{year:{team:{GP:gp, MIN:min},... = {\'bam adebayo\': {\'2018\': {\'mia\': {GP:69, MIN:30.1}, ...')
 	print('\nOutput: all_lineups = {\'cle\': {\'starters\': [\'donovan mitchell\', ...\n')
@@ -3812,7 +3812,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 								if player_name in all_players_teams.keys():
 									player_teams = all_players_teams[player_name]
 
-									if not determiner.determine_dnp_player(player_teams, cur_yr, player_name):
+									if not determiner.determine_dnp_player(player_teams, cur_yr, player_name, season_part):
 										
 										
 
@@ -3936,7 +3936,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 			dnp = []#lineup[dnp_key]
 			for player in team_roster:
 				player_teams = all_players_teams[player]
-				if determiner.determine_dnp_player(player_teams, cur_yr, player):
+				if determiner.determine_dnp_player(player_teams, cur_yr, player, season_part):
 					dnp.append(player)
 
 				# avg_play_time = 0
@@ -4018,7 +4018,7 @@ def read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs
 	return all_lineups
 
 
-def read_new_team_players(all_teams_players, year, game_key, game_box_scores, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={}):
+def read_new_team_players(all_teams_players, year, game_key, game_box_scores, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={}, season_part='regular'):
 	print('\n===Read New Team Players===\n')
 	print('Input: box_score = {away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
 	print('Input: year_players_abbrevs = {player abbrev-team abbrev:player, ... = {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')# = ' + str(year_players_abbrevs))
@@ -4109,7 +4109,7 @@ def read_new_team_players(all_teams_players, year, game_key, game_box_scores, al
 				if player_name in all_players_teams.keys():
 					player_teams = all_players_teams[player_name]
 					# added dnp check so make sure it is ok to exclude dnp players here
-					if not determiner.determine_dnp_player(player_teams, cur_yr, player_name) and player_name not in team_players and player_name != '': # blank if player gone and never read
+					if not determiner.determine_dnp_player(player_teams, cur_yr, player_name, season_part) and player_name not in team_players and player_name != '': # blank if player gone and never read
 						team_players.append(player_name)
 						#print('team_players: ' + str(team_players))
 				
@@ -4126,7 +4126,7 @@ def read_new_team_players(all_teams_players, year, game_key, game_box_scores, al
 # bc we get abbrev in box score players in games
 # and we want to compare to lineups with full names
 # all_players_abbrevs = {jaylen brown: j brown sg, ...}
-def read_team_players(team, year_box_scores, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={}):
+def read_team_players(team, year_box_scores, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={}, season_part=''):
 	print('\n===Read Team Players for ' + team.upper() + '===\n')
 	print('Input: year_box_scores = {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
 	print('Input: year_players_abbrevs = {player abbrev-team abbrev:player, ... = {\'J Jackson Jr PF-MEM\': \'jaren jackson jr\',...')# = ' + str(year_players_abbrevs))
@@ -4204,7 +4204,7 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 						if player_name in all_players_teams.keys():
 							player_teams = all_players_teams[player_name]
 							# added dnp check so make sure it is ok to exclude dnp players here
-							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name) and player_name not in team_players and player_name != '': # blank if player gone and never read
+							if not determiner.determine_dnp_player(player_teams, cur_yr, player_name, season_part) and player_name not in team_players and player_name != '': # blank if player gone and never read
 								team_players.append(player_name)
 								#print('team_players: ' + str(team_players))
 						
@@ -4219,7 +4219,7 @@ def read_team_players(team, year_box_scores, all_players_teams, year_players_abb
 # all_teams_players = {year:{team:[players],...},...}
 # season_teams_players = {team:[players],...}
 # year_players_in_games_dict = {game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
-def read_season_teams_players(year, teams, year_box_scores, init_all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams=True, cur_yr='', rosters={}):
+def read_season_teams_players(year, teams, year_box_scores, init_all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams=True, cur_yr='', rosters={}, season_part=''):
 	print('\n===Read Season Teams Players: ' + str(year) + '===\n')
 	print('Input: teams = [teams] = ' + str(teams))
 	print('Input: year_box_scores = {game key:{away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
@@ -4264,7 +4264,7 @@ def read_season_teams_players(year, teams, year_box_scores, init_all_teams_playe
 	for team in teams:
 		if team not in season_teams_players.keys() or len(season_teams_players[team]) == 0:
 			
-			team_players = read_team_players(team, year_box_scores, all_players_teams, year_players_abbrevs, cur_yr, rosters)
+			team_players = read_team_players(team, year_box_scores, all_players_teams, year_players_abbrevs, cur_yr, rosters, season_part)
 			season_teams_players[team] = team_players
 		
 		# elif team in season_teams_players.keys() and len(season_teams_players[team]) == 0:
@@ -4291,7 +4291,7 @@ def read_season_teams_players(year, teams, year_box_scores, init_all_teams_playe
 # players they played with at any point in the season, each season
 # all_teams_players = {year:{team:[players],...},...}
 # all_box_scores = {year:{game:{away:{starters:[],bench:[]},home:starters:[],bench:[]}}
-def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_players_abbrevs, cur_yr, teams=[], read_new_teams=True):
+def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_players_abbrevs, cur_yr, teams=[], read_new_teams=True, season_part=''):
 	print('\n===Read All Teams Players===\n')
 	print('Input: all_box_scores = {year:{game key:{away:{starters:{player:play time,...},bench:{...}},home:{...},... = {\'2024\': {\'mem okc 12/18/2023\': {\'away\': {\'starters\': {\'J Jackson Jr PF\':30, ...}, \'bench\': {...}}, \'home\': ...')
 	print('Input: all_teams_rosters = {team:[players],... = {\'nyk\':[\'jalen brunson\',...],...')
@@ -4314,7 +4314,7 @@ def read_all_teams_players(all_box_scores, rosters, all_players_teams, all_playe
 	for year, year_box_scores in all_box_scores.items():
 		# player_teammates = {year:[teammates],...}
 		# prev seasons are set but cur season updates each game
-		season_teams_players = read_season_teams_players(year, teams, year_box_scores, all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams, cur_yr, rosters)
+		season_teams_players = read_season_teams_players(year, teams, year_box_scores, all_teams_players, all_players_teams, all_players_abbrevs, read_new_teams, cur_yr, rosters, season_part)
 
 		all_teams_players[year] = season_teams_players
 
@@ -5944,7 +5944,7 @@ def read_player_season_logs(player_name, current_year_str, todays_date, player_e
 	#print('player_season_logs: ' + str(player_season_logs))
 	return player_season_logs#player_game_logs
 
-def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024, game_teams=[], rosters={}, all_seasons_start_days={}):
+def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players_espn_ids={}, all_players_teams={}, read_x_seasons=1, season_year=2024, game_teams=[], rosters={}, all_seasons_start_days={}, season_part=''):
 	print('\n===Read All Players Season Logs===\n')
 	print('Settings: read x seasons prev, init year of interest')
 	print('\nInput: players_names = [p1, ...] = [\'jalen brunson\', ...]')# + str(players_names))
@@ -5992,7 +5992,7 @@ def read_all_players_season_logs(players_names, cur_yr, todays_date, all_players
 		# {player:season:log}
 		if player_name in all_players_teams.keys():
 			player_teams = all_players_teams[player_name]
-			if not determiner.determine_dnp_player(player_teams, cur_yr, player_name):
+			if not determiner.determine_dnp_player(player_teams, cur_yr, player_name, season_part):
 				player_espn_id = all_players_espn_ids[player_name]
 				players_season_logs = read_player_season_logs(player_name, cur_yr, todays_date, player_espn_id, read_x_seasons, all_players_espn_ids, season_year, all_players_season_logs, player_teams, all_seasons_start_days)
 				

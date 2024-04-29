@@ -2388,13 +2388,28 @@ def generate_ev(prob, odds):
 
 
 
+def generate_season_part_log(player_season_log, season_part='regular'):
+    # print('\n===Generate Season Part Logs===\n')
+    # print('season_part = ' + str(season_part))
+    # print('player_season_logs = ' + str(player_season_logs))
+    
+    season_part_log = {}
 
+    player_season_log_df = pd.DataFrame(player_season_log)
+    player_season_log_df.index = player_season_log_df.index.map(str)
+    #print('player_season_log_df: ' + str(player_season_log_df))
+
+    season_part_log_df = determiner.determine_season_part_games(player_season_log_df, season_part)
+    season_part_log = season_part_log_df.to_dict()
+
+    #print('season_part_log: ' + str(season_part_log))
+    return season_part_log
 
 # make logs dicts sorted by yr
 def generate_season_part_logs(player_season_logs, season_part='regular'):
-    print('\n===Generate Season Part Logs===\n')
-    print('season_part = ' + str(season_part))
-    print('player_season_logs = ' + str(player_season_logs))
+    # print('\n===Generate Season Part Logs===\n')
+    # print('season_part = ' + str(season_part))
+    # print('player_season_logs = ' + str(player_season_logs))
     
     season_part_logs = {}
 
@@ -2416,7 +2431,7 @@ def generate_season_part_logs(player_season_logs, season_part='regular'):
         reg_season_log = reg_season_log_df.to_dict()
         season_part_logs[year] = reg_season_log
 
-    print('season_part_logs: ' + str(season_part_logs))
+    #print('season_part_logs: ' + str(season_part_logs))
     return season_part_logs
 
 def generate_part_season_logs(player_season_logs, part):
@@ -3350,7 +3365,8 @@ def generate_bet_spread(prop_dict):
         bet_spread = odds / -1000 # eg 0.3
 
 
-
+    scale = 2
+    bet_spread *= scale
 
 
 
@@ -6576,7 +6592,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     #all_lineups = {confirmed:{team:{starters:[],out:[],bench:[],unknown:[]},...}, expected:{team:{starters:[],bench:[],out:[]},...}}
     all_lineups = {}
     if find_players:# and read_lineups:
-        all_lineups = reader.read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr)#, init_all_lineups)
+        all_lineups = reader.read_all_lineups(players, all_players_teams, rosters, all_teams_players, ofs_players, cur_yr, season_part)#, init_all_lineups)
     # if questionable then it is very hard to say how teammates will perform so can only go with safest options
     # we could figure out how likely it is for player to play based on injury reports
     # and adjust teammates true probs accordingly
@@ -6586,6 +6602,15 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
     # first try to use rotowire uncertainty rating on lineups page if available
     # basically, if gtd then uncertain unless injury report says they are likely to play bc they have been playing well and usually have gtd tag just in case
     # so once we know uncertain players, we will have to see which teammates they affect to know which players to avoid
+
+
+    # if any questionable players in lineups
+    # then warn user
+    # BUT should it proceed with all prob calcs???
+    # NO, it should skip game, but still do games with set lineups
+    # AND at the end show list of questionable lineups not set
+
+
 
     # need team schedules to get time before next game
     all_teams_schedules = reader.read_all_teams_schedules(game_teams, season_part)
@@ -6598,7 +6623,7 @@ def generate_all_current_conditions(players, game_teams, all_players_teams, rost
             player_teams = all_players_teams[player]
             # player_team = 
             # player_lineup = all_lineups[player_team]
-            if not determiner.determine_dnp_player(player_teams, cur_yr, player):# and not determiner.determine_out_player(player, lineup=player_lineup):
+            if not determiner.determine_dnp_player(player_teams, cur_yr, player, season_part):# and not determiner.determine_out_player(player, lineup=player_lineup):
                 player_teams = all_players_teams[player]
                 player_season_logs = all_players_season_logs[player]
                 player_cur_season_log = {}
@@ -8716,6 +8741,10 @@ def generate_player_playtime(player_name, player_team, player_position, all_play
             #cur_mean_minutes = 0
             # season_log = {stat name: {game idx: stat val, ...
             if 'MIN' in cur_season_log.keys():
+                # if player played regseason but coach decides not to play them postseason, 
+                # still use regseason avg in case they play due to teammate injury
+                if season_part == 'postseason' and len(cur_season_log['MIN'].keys()) == 0:
+                    cur_season_log = generate_season_part_log(player_season_logs[cur_yr])
                 cur_minutes_log = list(cur_season_log['MIN'].values())[:3] # last 3 games
                 #print('cur_minutes_log: ' + str(cur_minutes_log))
                 playtime = round_half_up(np.mean(np.array(cur_minutes_log)), 2)
@@ -9721,7 +9750,7 @@ def generate_player_abbrev(player_name, player_position='', num_letters=1):
 # run separately for each part of each season
 # need cur_yr for teammates out only care about them if cur teammate
 # but also need to look thru past seasons and not count cur teammates as out last season
-def generate_player_all_stats_dicts(player_name, player_game_log, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiaps, player_median_oiaps, cur_yr='', gp_cur_team='', season_years=[], stats_of_interest=[]):
+def generate_player_all_stats_dicts(player_name, player_game_log, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiaps, player_median_oiaps, cur_yr='', gp_cur_team='', season_years=[], stats_of_interest=[], prints_on=False):
     print('\n===Generate Player All Stats Dicts: ' + player_name.title() + ', ' + str(season_year) + ', ' + season_part + '===\n')
     # print('season_year: ' + str(season_year))
     # print('season_part: ' + str(season_part))
@@ -9926,14 +9955,23 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
             weekends = ['sat','sun'] # separate cond bc anomalies, especially top players stepping down and lower players stepping up
             weekend_key = 'weekend'
 
+            # remove preseason games from full log
+            # which we need to get 
+
+            cur_idx = 0
+            prev_idx = cur_idx + 1
+
 
             #prev_stat_vals = []
             prev_playtime = 0
             for game_idx, row in season_part_game_log.iterrows():
-                # print('\ngame_idx: ' + game_idx)
-                # print('\n===Game ' + str(int(game_idx)+1) + '===')
-                # print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
-                # print('row:\n' + str(row))
+                if prints_on:
+                    print('\ngame_idx: ' + game_idx)
+                    print('\n===Game ' + str(int(game_idx)+1) + '===')
+                    print('cur_idx: ' + str(cur_idx))
+                    print('prev_idx: ' + str(prev_idx))
+                    print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
+                    print('row:\n' + str(row))
 
 
                 # make list to loop through so we can add all stats to dicts with 1 fcn
@@ -10257,22 +10295,82 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     stat_dict[days_before_next_game][game_idx] = stat
 
                     init_prev_game_date_string = ''
+                    # if first game of playin, or playoff no playin, prev game is last game of reg season
+                    # if first game of playoff, after playin, prev game is last game of playin
+                    # prev_game_idx = None
+                    # if len(player_game_log.index) > prev_game_idx:
+                    #     prev_game_idx = int(game_idx) + 1
+                    # elif season_part == 'postseason':
+
+
+                    # === PREV GAME ===
+                    # determine which season part and game idx 
+                    # in special cases at beginning of season parts
+
+                    # if played all star or in season tournament then prev game idx not next idx
+                    # so get next row
                     prev_game_idx = int(game_idx) + 1
+                    if prints_on:
+                        print('prev_game_idx: ' + str(prev_game_idx))
+                        print('len full log: ' + str(len(player_game_log.index)))
+                        print('prev_idx: ' + str(prev_idx))
+                        print('len season part log: ' + str(len(season_part_game_log.index)))
+                    # DO NOT include preseason games bc not considered valid
+                    # but still need whole valid season bc idx relative to full log without preseason
+                    # for start of regseason, no prev val (prev val = None) could be a separate condition
+                    # if not special case first game of playin or game after playin
+                    # then just get prev idx
+                    # instead of length of log to get last index
+                    # just get idx of last row
+                    # bc idx does not match length when playin game bc out of chrono order
+                    # if regseason, get idx of last row of regseason part log
+                    # last_reg_idx = current_reg_season_log.iloc[-1].name #['Name']
+                    # print('last_reg_idx: ' + str(last_reg_idx))
+                    # if season_part == 'postseason':
+                    #     # if last post idx > last reg idx, then we know playin games
+                    #     # if normal playoffs, no playin
+                    #     last_post_idx = season_part_game_log.iloc[-1].name #['Name']
+                    #     print('last_post_idx: ' + str(last_post_idx))
+                    
+
+                    #if len(player_game_log.index) > prev_game_idx: # or int(game_idx) - next_game_idx != 1:
+                    #if prev_game:
+
+                    # for last game in season part log, get diff prev idx
+                    # prev_idx = cur_idx + 1
+                    # if len(season_part_game_log.index) == prev_idx:
+
+                    #     # if first game of reg season, no prev game
+                    #     # if first game of postseason, check if playin or playoff?
+                    #     # No, we are at the end of the postseason log which has both
+                    #     if season_part == 'postseason':
+                    #         # get last (most recent) game of regseason
+                    #         # which is first in log bc recent to distant
+                    #         recent_reg_idx = current_reg_season_log.iloc[0].name #['Name']
+                    #         print('recent_reg_idx: ' + str(recent_reg_idx))
+
+
+
+                    # else get prev game idx
+                    #else:
                     if len(player_game_log.index) > prev_game_idx:
                         init_prev_game_date_string = player_game_log.loc[str(prev_game_idx), 'Date'].lower().split()[1]
-                    
+                        print("init_prev_game_date_string 1: " + str(init_prev_game_date_string))
+                        # init_prev_game_date_string = player_game_log.iloc[prev_idx]['Date'].lower().split()[1]
+                        # print("init_prev_game_date_string 2: " + str(init_prev_game_date_string))
+
                         prev_game_mth = init_prev_game_date_string.split('/')[0]
                         final_season_year = season_year
                         if int(prev_game_mth) > 9:
                             final_season_year = str(int(season_year) - 1)
                         prev_game_date_string = init_prev_game_date_string + "/" + final_season_year
-                        #print("prev_game_date_string: " + str(prev_game_date_string))
+                        print("prev_game_date_string: " + str(prev_game_date_string))
                         prev_game_date_obj = datetime.strptime(prev_game_date_string, '%m/%d/%Y')
                         #print("prev_game_date_obj: " + str(prev_game_date_obj))
 
                         days_after_prev_game_int = (game_date_obj - prev_game_date_obj).days
                         days_after_prev_game = str(days_after_prev_game_int) + ' after'
-                        #print("days_after_prev_game: " + days_after_prev_game)
+                        print("days_after_prev_game: " + days_after_prev_game)
 
                         
                         if not days_after_prev_game in stat_dict.keys():
@@ -10312,12 +10410,73 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                             
                             prev_val_range = determiner.determine_stat_range(prev_stat_val, stat_name)
                             prev_stat_val_key = prev_val_range + ' prev' # 0-4 or 0-9 inclusive, every 10 for pts, and 5 for ast/reb
-                            #print('prev_stat_val_key: ' + str(prev_stat_val_key))
+                            if prints_on:
+                                print('prev_stat_val_key: ' + str(prev_stat_val_key))
                             if not prev_stat_val_key in stat_dict.keys():
                                 stat_dict[prev_stat_val_key] = {}
                             stat_dict[prev_stat_val_key][game_idx] = stat
 
                             # determine if more/less than val of interest
+                    
+                    #second playin game has high idx bc at end of log
+
+
+                    # first game of postseason
+                    # elif season_part == 'postseason':
+                    #     print('First Game of Postseason')
+
+                    #     init_prev_game_date_string = current_reg_season_log.loc[0, 'Date'].lower().split()[1]
+                    #     print("init_prev_game_date_string: " + str(init_prev_game_date_string))
+
+                    #     prev_game_mth = init_prev_game_date_string.split('/')[0]
+                    #     final_season_year = season_year
+                    #     if int(prev_game_mth) > 9:
+                    #         final_season_year = str(int(season_year) - 1)
+                    #     prev_game_date_string = init_prev_game_date_string + "/" + final_season_year
+                        
+                    #     prev_game_date_obj = datetime.strptime(prev_game_date_string, '%m/%d/%Y')
+                        
+
+                    #     days_after_prev_game_int = (game_date_obj - prev_game_date_obj).days
+                    #     days_after_prev_game = str(days_after_prev_game_int) + ' after'
+                        
+                    #     if prints_on:
+                    #         print("prev_game_date_string: " + str(prev_game_date_string))
+                    #         print("prev_game_date_obj: " + str(prev_game_date_obj))
+                    #         print("days_after_prev_game: " + days_after_prev_game)
+
+                        
+                        # if not days_after_prev_game in stat_dict.keys():
+                        #     stat_dict[days_after_prev_game] = {}
+                        # stat_dict[days_after_prev_game][game_idx] = stat
+
+                
+                        # # condition: prev val
+                        # # make range bc not enough samples of exact val
+                        # # dont need prev playtime
+                        # if stat_name in stats_of_interest or re.search('\\+', stat_name):
+                        #     #print('\n===Condition: Prev Val===\n')
+                        #     log_stat_name = stat_name
+                        #     # only 3pt made has diff format bc both 3pt made and attempted shown
+                        #     if stat_name == '3pm':
+                        #         log_stat_name = '3PT_SA'
+                        #     # if stat combo then add substats
+                        #     prev_stat_val = None
+                        #     if re.search('\\+', stat_name):
+                        #         prev_stat_val = 0
+                        #         stat_names = stat_name.split('+')
+                        #         for sn in stat_names:
+                        #             prev_stat_val += int(current_reg_season_log.loc[0, sn.upper()])
+                        #     else:
+                        #         prev_stat_val = int(current_reg_season_log.loc[0, log_stat_name.upper()])
+                            
+                        #     prev_val_range = determiner.determine_stat_range(prev_stat_val, stat_name)
+                        #     prev_stat_val_key = prev_val_range + ' prev' # 0-4 or 0-9 inclusive, every 10 for pts, and 5 for ast/reb
+                        #     #print('prev_stat_val_key: ' + str(prev_stat_val_key))
+                        #     if not prev_stat_val_key in stat_dict.keys():
+                        #         stat_dict[prev_stat_val_key] = {}
+                        #     stat_dict[prev_stat_val_key][game_idx] = stat
+
 
                     # ===GP conds
                     #====Players in Game stats
@@ -10332,9 +10491,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     # get current players from roster minus inactive players
                     # we get current players when we know about the current game 
                     
-                    current_players = { 'away': [], 'home': [] } # we get current players from team rosters
-                    #print('current_players: ' + str(current_players))
-                    current_teammates = [] # if blank then show all possible combos/lineups
+                    # current_players = { 'away': [], 'home': [] } # we get current players from team rosters
+                    # #print('current_players: ' + str(current_players))
+                    # current_teammates = [] # if blank then show all possible combos/lineups
                     #print('current_teammates: ' + str(current_teammates))
 
                     
@@ -10830,6 +10989,14 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                 # after all keys are set, set next game as current game for next loop
                 next_game_date_obj = game_date_obj # next game bc we loop from most to least recent
 
+                # always 1 apart
+                # increase 1 each loop to track universal id bc not same as game id
+                # could CHANGE to reset indexes after removing unused games like all star game
+                # BUT technically we still want to keep in season tourney game
+                # so only game to remove midseason is allstar
+                prev_idx += 1
+                cur_idx += 1
+
     else:
         # if getting data from file, may not have game log from internet source
         # data_type = "Game Log"
@@ -10861,7 +11028,7 @@ def generate_full_season_stat_dict(player_stat_dict):
 # player_teams = {'2018': {'mia': 69}, '2019...
 # game_teams: [('mem', 'okc'), ('dal', 'den')...
 # player_stat_dict: {'2023': {'regular': {'pts': {'all': {0: 18, 1: 19...
-def generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores={}, all_games_info={}, player_teams={}, current_year_str='', game_teams=[], init_player_stat_dict={}, find_players=False, player_position='', player_median_tiaps={}, player_median_oiaps={}, player_teammates={}, rosters={}, cur_season_part='', season_years=[], stats_of_interest=[], gp_cur_team=0):
+def generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores={}, all_games_info={}, player_teams={}, current_year_str='', game_teams=[], init_player_stat_dict={}, find_players=False, player_position='', player_median_tiaps={}, player_median_oiaps={}, player_teammates={}, rosters={}, cur_season_part='', season_years=[], stats_of_interest=[], gp_cur_team=0, prints_on=False):
     print('\n===Generate Player Stat Dict: ' + player_name.title() + '===\n')
     print('Settings: find players, todays date to get day conditions, current year to get changing stat dicts file')
     print('Setting: Season Part = ' + cur_season_part)
@@ -11041,7 +11208,7 @@ def generate_player_stat_dict(player_name, player_season_logs, todays_games_date
             
 
             for season_part in season_parts:
-                player_stat_dict[season_year][season_part] = generate_player_all_stats_dicts(player_name, player_game_log_df, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiaps, player_median_oiaps, current_year_str, gp_cur_team, season_years, stats_of_interest) #generate_full_season_stat_dict(player_stat_dict)
+                player_stat_dict[season_year][season_part] = generate_player_all_stats_dicts(player_name, player_game_log_df, opponent, player_teams, season_year, todays_games_date_obj, all_box_scores, year_games_info, player_teammates, all_seasons_stats_dicts, season_part, player_position, player_median_tiaps, player_median_oiaps, current_year_str, gp_cur_team, season_years, stats_of_interest, prints_on) #generate_full_season_stat_dict(player_stat_dict)
 
 
         #season_year -= 1
@@ -11083,6 +11250,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
     init_all_players_teams = copy.deepcopy(all_players_teams)
 
 
+    # MUST be same when getting all current lineups in gen cur conds
     dnp_playtime = 12
     if season_part == 'postseason':
         dnp_playtime = 14
@@ -11112,7 +11280,7 @@ def generate_all_box_scores(init_all_box_scores, all_teams_players, teams_curren
             # we must add new players as we encounter new box scores
             # or else we would need to get new team players with all box scores every run!!!
             # new_team_players
-            #all_teams_players = reader.read_new_team_players(all_teams_players, year, game_key, game_players, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={})
+            #all_teams_players = reader.read_new_team_players(all_teams_players, year, game_key, game_players, all_players_teams, year_players_abbrevs={}, cur_yr='', rosters={}, season_part)
 
             # need game date to see if player was on roster at this time
             game_date = datetime.strptime(game_key.split()[-1], '%m/%d/%Y')
@@ -11746,7 +11914,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     for team, team_ofs_players in ofs_players.items():
         for ofs_player in team_ofs_players:
             player_teams = all_players_teams[ofs_player]
-            if not determiner.determine_dnp_player(player_teams, current_year_str, ofs_player):
+            if not determiner.determine_dnp_player(player_teams, current_year_str, ofs_player, season_part):
                 if team not in final_ofs_players.keys():
                     final_ofs_players[team] = []
                 final_ofs_players[team].append(ofs_player)
@@ -11774,7 +11942,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
     # OLD: all_player_season_logs_dict
     # if read new teams, then we need all players logs to get all teams players
     # returns dict form of game log with part of season type in each row postseason/regular
-    all_players_season_logs = reader.read_all_players_season_logs(players_names, current_year_str, todays_date, all_players_espn_ids, all_players_teams, model_x_seasons, season_year, game_teams, teams_current_rosters, all_seasons_start_days)
+    all_players_season_logs = reader.read_all_players_season_logs(players_names, current_year_str, todays_date, all_players_espn_ids, all_players_teams, model_x_seasons, season_year, game_teams, teams_current_rosters, all_seasons_start_days, season_part)
     
     # need season yrs to get per unit time stats
     # and prev vals in stat dict to see sequence/trend
@@ -12091,7 +12259,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # we dont really need to get player team from internet here bc we already got all player teams in separate batch loop
         player_teams = all_players_teams[player_name]
 
-        if determiner.determine_dnp_player(player_teams, current_year_str, player_name):
+        if determiner.determine_dnp_player(player_teams, current_year_str, player_name, season_part):
             continue
 
         player_gp_cur_conds = all_game_player_cur_conds[player_name]
@@ -12144,7 +12312,7 @@ def generate_all_players_props(settings={}, players_names=[], game_teams=[], tea
         # dont need player abbrevs bc simply subtract 1 from team players for cur player to get teammates
         #player_abbrevs = converter.convert_player_name_to_abbrevs(player_name, all_players_abbrevs, player_teams=player_teams)
         # need all players positions to get teammates in/out at position bc affects playtime (also used to get playtime so double factored)
-        player_stat_dict = generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores, all_games_info, player_teams, current_year_str, game_teams, init_player_stat_dict, find_players, player_position, player_median_tiaps, player_median_oiaps, player_teammates, teams_current_rosters, season_part, season_years, stats_of_interest, gp_cur_team)
+        player_stat_dict = generate_player_stat_dict(player_name, player_season_logs, todays_games_date_obj, todays_date, all_box_scores, all_games_info, player_teams, current_year_str, game_teams, init_player_stat_dict, find_players, player_position, player_median_tiaps, player_median_oiaps, player_teammates, teams_current_rosters, season_part, season_years, stats_of_interest, gp_cur_team, prints_on)
         all_player_stat_dicts[player_name] = player_stat_dict # save for later outside loop
 
         # same week number for each year, over all years
