@@ -3788,7 +3788,8 @@ def generate_rare_prev_cond(rare_prev_val_players, stat_name, player, prints_on=
             rare_stat = rare_player_data[2].lower()
             # print('rare_player: ' + rare_player)
             # print('player: ' + player)
-            if rare_player == player and rare_stat == stat_name:
+            # include substats in combo stats
+            if rare_player == player and re.search(rare_stat, stat_name): #rare_stat == stat_name:
                 rare_prev_cond = rare_cat
                 break
 
@@ -5604,6 +5605,160 @@ def generate_game_players_conditions(lineup, lineup_team, all_players_abbrevs, p
     #print('game_players_conditions: ' + str(game_players_conditions))
     return game_players_conditions
 
+# def generate_player_rare_prev_vals(player, player_true_probs_dict, all_prev_vals, all_players_teams, rosters, game_teams, rare_cats, rare_probs, cur_yr):
+#     print('\n===Generate Player Rare Prev Vals: ' + player.title() + '===\n')
+#     print('\nOutput: player_rare_prev_vals = {}\n')
+
+#     player_rare_prev_vals = {}
+
+#     player_abbrev = generate_player_abbrev(player, num_letters=2)
+
+
+#     player_prev_vals = all_prev_vals[player]
+#     #print('player_prev_vals: ' + str(player_prev_vals))
+
+#     player_teams = all_players_teams[player]
+#     player_team = determiner.determine_player_current_team(player, player_teams, cur_yr, rosters)
+#     #opp_team = determiner.determine_opponent_team(player, player_team, game_teams)
+#     game_num = determiner.determine_game_num(game_teams, player_team)
+
+#     # if combo stat, check for each substat rare prev
+#     for stat, stat_true_probs_dict in player_true_probs_dict.items():
+#         #print('\nstat: ' + stat.upper())
+
+#         # skip combos bc shown by single stats???
+#         # No actually gives clearer picture to know if other stat combos rare 
+#         # bc not always all single stats rare but combo rare
+        
+#         # if prev val < likely val, then rare prev val
+#         prev_stat_vals = player_prev_vals[stat]
+#         prev_stat_val = prev_stat_vals[0]
+
+#         for cat_idx in range(len(rare_cats)):
+#             rare_cat = rare_cats[cat_idx]
+
+#             under_key = rare_cat + ' under'
+#             over_key = rare_cat + ' over'
+            
+
+#             rare_prob = rare_probs[cat_idx]
+
+#             # get likely vals for each category
+#             # find lowest val above 80% true prob
+#             # see if prev val less than 80% val
+#             # and if more than 20% val
+#             # player went under where usual over
+#             #print('\n' + rare_cat.title() + ' Under')
+#             likely_val = 0
+#             prev_prob = 0
+#             for val, val_true_probs_dict in stat_true_probs_dict.items():
+#                 #print('val: ' + str(val))
+#                 true_prob = val_true_probs_dict['true prob']
+#                 #print('true_prob: ' + str(true_prob))
+#                 if true_prob is None:
+#                     continue
+
+#                 if true_prob < rare_prob:
+#                     #likely_val = lower_val
+#                     #rare_cat = ultra_rare_over_key
+#                     #print('prev_stat_val: ' + str(prev_stat_val))
+#                     #if prev_stat_val < likely_val:
+#                     num_rare = determiner.determine_rare_under(prev_stat_vals, likely_val)
+
+#                     # only consider effect of 1 prev game if ultra rare
+#                     rare = False
+#                     if rare_cat == 'ultra rare' and num_rare > 0:
+#                         rare = True
+#                     elif num_rare > 1:
+#                         rare = True
+
+#                     # if no simple streak of rare games, see if pattern
+#                     # ultra is already considered rare even if 1 game but still good to see pattern
+#                     if not rare:
+#                         # will return 3/4 if true
+#                         num_rare = determiner.determine_rare_under_pattern(prev_stat_vals, likely_val)
+#                         if num_rare != '':
+#                             rare = True
+
+#                     if rare:
+#                         # print('prev_prob: ' + str(prev_prob))
+#                         # print('num_rare: ' + str(num_rare))
+#                         total_prob = prev_prob
+#                         if num_rare != '3/4':
+#                             # need to get actual prob but for now take prob of 1 prev game
+#                             total_prob = total_prob ** num_rare
+#                         total_prob = round_half_up(total_prob * 100, 2)
+#                         prev_prob *= 100
+#                         rare_prev_val = (game_num, player_abbrev, stat.upper(), likely_val, prev_stat_val, num_rare, prev_prob, total_prob, player) #player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
+#                         # if under_key not in rare_prev_val_players.keys():
+#                         #     rare_prev_val_players[under_key] = []
+#                         rare_prev_val_players[under_key].append(rare_prev_val)
+#                         #print('Found under, ' + rare_cat + ': ' + str(rare_prev_val))
+                    
+#                     break
+#                 likely_val = val # val from prev loop
+#                 prev_prob = 1 - true_prob
+#             #print('likely_val: ' + str(likely_val))
+
+#             # repeat for over
+#             #print('\n' + rare_cat.title() + ' Over')
+#             likely_under = 0
+#             for val, val_true_probs_dict in stat_true_probs_dict.items():
+#                 #print('val: ' + str(val))
+#                 true_prob = val_true_probs_dict['true prob']
+#                 #print('true_prob: ' + str(true_prob))
+#                 # if true prob is none then no cur conds data reached this value
+#                 # so take as likely under
+#                 if true_prob is None or true_prob < 1 - rare_prob:
+#                     likely_under = val
+#                     #rare_cat = ultra_rare_over_key
+#                     #print('prev_stat_val: ' + str(prev_stat_val))
+#                     #if prev_stat_val < likely_val:
+#                     num_rare = determiner.determine_rare_over(prev_stat_vals, likely_under)
+
+#                     # only consider effect of 1 prev game if ultra rare
+#                     rare = False
+#                     if rare_cat == 'ultra rare' and num_rare > 0:
+#                         rare = True
+#                     elif num_rare > 1:
+#                         rare = True
+
+#                     # if no simple streak of rare games, see if pattern
+#                     # ultra is already considered rare even if 1 game but still good to see pattern
+#                     if not rare:
+#                         # will return 3/4 if true
+#                         num_rare = determiner.determine_rare_over_pattern(prev_stat_vals, likely_under)
+#                         if num_rare != '':
+#                             rare = True
+
+#                     if rare:
+#                         total_prob = 0
+#                         if true_prob is not None:
+#                             if num_rare != '3/4':
+#                                 total_prob = total_prob ** num_rare
+#                             total_prob = round_half_up(total_prob * 100, 2)
+#                             true_prob *= 100
+#                         rare_prev_val = (game_num, player_abbrev, stat.upper(), likely_under, prev_stat_val, num_rare, true_prob, total_prob, player) #player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
+#                         # if over_key not in rare_prev_val_players.keys():
+#                         #     rare_prev_val_players[over_key] = []
+#                         rare_prev_val_players[over_key].append(rare_prev_val)
+#                         #print('Found over, ' + rare_cat + ': ' + str(rare_prev_val))
+                    
+#                     break
+#             #print('likely_under: ' + str(likely_under))
+
+
+#         # if stat not considered rare by prob
+#         # check if rare by low sample size
+#         # add to base rare cond level bc ~ that level?
+#         # to tell if o/u check if prev val > than val before that
+#         # 99% right but sometimes multiple rares in a row so could be lower than prev but still rare over
+#         # better to check compare to avg
+#         # could get avg from probs dict vals already passed here as param
+        
+#     return player_rare_prev_vals
+
+
 # cats of rare prev vals:
 # rare over
 # rare under
@@ -5643,6 +5798,12 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
     for player, player_true_probs_dict in all_true_probs_dict.items():
         #print('\nplayer: ' + player.title())
         # print('player_true_probs_dict: ' + str(player_true_probs_dict))
+
+        # could get for each player separate and then bring together sort by rare cat
+        # but simpler to loop thru each player and sorting into rare cats as it goes
+        #player_rare_prev_vals = generate_player_rare_prev_vals(player, player_true_probs_dict, all_prev_vals, all_players_teams, rosters, game_teams, rare_cats, rare_probs, rare_prev_val_players, cur_yr)
+
+
         player_abbrev = generate_player_abbrev(player, num_letters=2)
 
 
@@ -5651,20 +5812,17 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
 
         player_teams = all_players_teams[player]
         player_team = determiner.determine_player_current_team(player, player_teams, cur_yr, rosters)
-        opp_team = determiner.determine_opponent_team(player, player_team, game_teams)
+        #opp_team = determiner.determine_opponent_team(player, player_team, game_teams)
         game_num = determiner.determine_game_num(game_teams, player_team)
 
+        # if combo stat, check for each substat rare prev
         for stat, stat_true_probs_dict in player_true_probs_dict.items():
             #print('\nstat: ' + stat.upper())
 
             # skip combos bc shown by single stats???
             # No actually gives clearer picture to know if other stat combos rare 
             # bc not always all single stats rare but combo rare
-            # if re.search('\\+', stat):
-            #     continue
-
             
-
             # if prev val < likely val, then rare prev val
             prev_stat_vals = player_prev_vals[stat]
             prev_stat_val = prev_stat_vals[0]
@@ -5790,115 +5948,17 @@ def generate_rare_prev_val_players(all_true_probs_dict, all_prev_vals, game_team
             # 99% right but sometimes multiple rares in a row so could be lower than prev but still rare over
             # better to check compare to avg
             # could get avg from probs dict vals already passed here as param
-            # prev_val_range = determiner.determine_stat_range(prev_stat_val, stat)
-            # prev_val_cond = prev_val_range + ' prev'
-            # cur_conds = {'condition':prev_val_cond, 'year':cur_yr, 'part':season_part}
-            # #print('cur_conds: ' + str(cur_conds))
-            # player_stat_dict = all_players_stat_dicts[player]
-            # prev_stat_sample_size = determiner.determine_sample_size(player_stat_dict, cur_conds, all_players_abbrevs, player_team, opp_team, stat, prints_on) #generate_prev_stat_low_sample_size(prev_val_cond, player_stat_dict, stat_name)
-            # #if prev_stat_low_sample_size != '':
-            # if prev_stat_sample_size < 5:
-            #     stat_avg = round_half_up(len(stat_true_probs_dict.keys()) / 2)
-            #     val_true_probs_dict = stat_true_probs_dict[stat_avg]
-            #     true_prob = val_true_probs_dict['true prob']
-            #     total_prob = true_prob
-            #     # if num_rare != '3/4':
-            #     #     total_prob = total_prob ** num_rare
-            #     total_prob = round_half_up(total_prob * 100, 2)
-            #     true_prob *= 100
-            #     if prev_stat_val > stat_avg:
-            #         rare_prev_val = (game_num, player_abbrev, stat.upper(), stat_avg, prev_stat_val, num_rare, true_prob, total_prob, player)
-            #         rare_prev_val_players['rare over'].append(rare_prev_val)
-            #     else: # under
-            #         rare_prev_val = (game_num, player_abbrev, stat.upper(), stat_avg, prev_stat_val, num_rare, true_prob, total_prob, player)
-            #         rare_prev_val_players['rare under'].append(rare_prev_val)
-
-
             
-            # if prev val < likely val, then rare prev val
-            #
-                
-            # print('\n2+ Rare Under')
-            # likely_val = 0
-            # for val, val_true_probs_dict in stat_true_probs_dict.items():
-            #     #print('val: ' + str(val))
-            #     true_prob = val_true_probs_dict['true prob']
-            #     #print('true_prob: ' + str(true_prob))
-            #     if true_prob < likely_prob:
-            #         #likely_val = lower_val
-            #         #rare_cat = ultra_rare_over_key
-            #         print('prev_stat_vals: ' + str(prev_stat_vals))
-            #         # if >1 prev games < likely val
-            #         #if prev_stat_val < likely_val:
-            #         num_rare = determiner.determine_rare_under(prev_stat_vals, likely_val)
-            #         if num_rare > 1:
-            #             rare_prev_val = (game_num, player.title(), stat.upper(), likely_val, prev_stat_val, num_rare) #player + ', ' + stat + ', ' + str(likely_val) + ', ' + str(prev_stat_val)
-            #             rare_prev_val_players[rare_under_key].append(rare_prev_val)
-            #             print('Found rare under: ' + str(rare_prev_val))
-            #         else:
-            #             rare_pattern = determiner.determine_rare_under_pattern(prev_stat_vals, likely_val)
-            #             if rare_pattern != '':
-            #                 rare_prev_val = (game_num, player.title(), stat.upper(), likely_val, prev_stat_val, rare_pattern) #player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
-            #                 rare_prev_val_players[rare_over_key].append(rare_prev_val)
-            #                 print('Found rare over: ' + str(rare_prev_val))
-
-            #         break
-            #     likely_val = val # val from prev loop
-            # print('likely_val: ' + str(likely_val))
 
 
-            # # repeat for unders
-            # # find highest val below 20% true prob
-            # # player went over where usual under
-            # print('\nUltra Rare Over')
-            # likely_under = 0
-            # for val, val_true_probs_dict in stat_true_probs_dict.items():
-            #     #print('val: ' + str(val))
-            #     true_prob = val_true_probs_dict['true prob']
-            #     #print('true_prob: ' + str(true_prob))
-            #     if true_prob < 1 - ultra_likely_prob:
-            #         likely_under = val
-            #         #rare_cat = ultra_rare_under_key
-            #         print('prev_stat_val: ' + str(prev_stat_val))
-            #         #if prev_stat_val > likely_under:
-            #         num_rare = determiner.determine_rare_over(prev_stat_vals, likely_under)
-            #         if num_rare > 0:
-            #             rare_prev_val = (game_num, player.title(), stat.upper(), likely_under, prev_stat_val, num_rare) #player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
-            #             rare_prev_val_players[ultra_rare_over_key].append(rare_prev_val)
-            #             print('Found ultra rare over: ' + str(rare_prev_val))
+        # now that we have all exact stats rare prevs (including overall combos)
+        # get combo conds substats rare prevs bc still need to avoid
+        # No need to do this here bc simply see if rare stat in combo stat name when setting rare prev cond
+        # if re.search('+', stat):
+        #     sub_stats = stat.split('+')
+        #     for sub_stat in sub_stats:     
 
-            #         break
-            # print('ultra likely_under: ' + str(likely_under))
 
-            # # if prev val > likely under, then rare prev val
-            # #
-
-            # print('\n2+ Rare Over')
-            # likely_under = 0
-            # for val, val_true_probs_dict in stat_true_probs_dict.items():
-            #     #print('val: ' + str(val))
-            #     true_prob = val_true_probs_dict['true prob']
-            #     #print('true_prob: ' + str(true_prob))
-            #     if true_prob < 1 - likely_prob:
-            #         likely_under = val
-            #         #rare_cat = ultra_rare_under_key
-            #         print('prev_stat_val: ' + str(prev_stat_val))
-            #         #if prev_stat_val > likely_under:
-            #         num_rare = determiner.determine_rare_over(prev_stat_vals, likely_under)
-            #         if num_rare > 1:
-            #             rare_prev_val = (game_num, player.title(), stat.upper(), likely_under, prev_stat_val, num_rare) #player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
-            #             rare_prev_val_players[rare_over_key].append(rare_prev_val)
-            #             print('Found rare over: ' + str(rare_prev_val))
-            #         else:
-            #             rare_pattern = determiner.determine_rare_over_pattern(prev_stat_vals, likely_under)
-            #             if rare_pattern != '':
-            #                 rare_prev_val = (game_num, player.title(), stat.upper(), likely_under, prev_stat_val, rare_pattern) #player + ', ' + stat + ', ' + str(likely_under) + ', ' + str(prev_stat_val)
-            #                 rare_prev_val_players[rare_over_key].append(rare_prev_val)
-            #                 print('Found rare over: ' + str(rare_prev_val))
-
-            #         break
-            # print('likely_under: ' + str(likely_under))
-                    
     
     # sort by prob, rarity, low to high bc prob of rare event
     rare_prev_val_players = sorter.sort_rare_prev_val_players(rare_prev_val_players)

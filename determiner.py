@@ -199,7 +199,10 @@ def determine_stat_range(val, stat):
     set_range = 5
     #if stat == 'pts':
     # include combos with pts
-    if re.search('pts', stat):
+    # 0-4 and 5-9 pts are separate bc low vals have diff meanings 
+    # bc higher portion so small change has more effect
+    # 0-4 is rare low but 5-9 is common low
+    if re.search('pts', stat) and val > 9:
         set_range = 10
 
     min_val = 0
