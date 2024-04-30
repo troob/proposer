@@ -225,6 +225,8 @@ def separate_threes_props(prop_dicts, all_players_season_logs):
         # if recommends under but against former team on national tv 
         # expect more effort so higher stats so avoid under in this case
         if stat_name == '3pm' and avg_three_attempts < 2:
+        # noticed 3s lose over long term so remove all?
+        # no need bc just remove from stats of interest
             threes_props.append(prop_dict)
         else:
             common_props.append(prop_dict)

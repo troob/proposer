@@ -70,7 +70,7 @@ all_seasons_start_days = {'2024':24, '2023':18, '2022':19}
 # === STATS OF INTEREST === 
 # put stats in order of website nav for faster nav without scrolling
 # stl/blk defense stats too volatile to use like offense stats
-stats_of_interest = ['pts','3pm','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast']#,'stl','blk','stl+blk']#, '3pm']
+stats_of_interest = ['pts','pts+reb','reb','ast','pts+ast','reb+ast','pts+reb+ast']#,'stl','blk','stl+blk']#, '3pm']
 
 #odds_ratios = reader.read_odds_ratios_website(stats_of_interest)
 
@@ -189,7 +189,7 @@ if not test:
 # need to save in file BUT cant tell if props in run actually used
 # ~1/3 props are flagged by FD to avoid so add 10 to end with ~30 props
 max_props = 40
-cutoff_time = '11:59 pm' # default 11:59 pm bc latest games??? better to default blank for no cutoff or just make 1159pm???
+cutoff_time = '11:30 pm' # default 11:59 pm bc latest games??? better to default blank for no cutoff or just make 1159pm???
 
 settings = {'find matchups': find_matchups, 
             'find players': find_players, 

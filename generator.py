@@ -3365,8 +3365,8 @@ def generate_bet_spread(prop_dict):
         bet_spread = odds / -1000 # eg 0.3
 
 
-    scale = 2
-    bet_spread *= scale
+    scale = 3
+    bet_spread = round_half_up(bet_spread * scale, 2)
 
 
 
@@ -6953,7 +6953,7 @@ def generate_player_distrib_probs(player_stat_dict, current_conditions, player_p
         # could be 1 or 0.5 depending on uncertainty in playtime estimation?
         # the bigger it is the more time we save bc we dont have to remake probs
         # if fails, then consider lowering to be more precise
-        if len(player_distrib_probs.keys()) == 0 or abs(init_player_playtime - player_playtime) > 1:
+        if len(player_distrib_probs.keys()) == 0 or abs(init_player_playtime - player_playtime) > 0.5:
 
             # read new player_distrib_probs
 
@@ -7476,7 +7476,9 @@ def generate_player_distrib_models(player_stat_dict, stats_of_interest, player_n
     print('init_player_playtime: ' + str(init_player_playtime))
     print('player_playtime: ' + str(player_playtime))
 
-    if len(init_player_models.keys()) > 0 and abs(init_player_playtime - player_playtime) <= 1:
+    # make limit 0.5 to increase accuracy in postseason when fewer games need to process
+    # especially for multi hp props which need to process all games
+    if len(init_player_models.keys()) > 0 and abs(init_player_playtime - player_playtime) <= 0.5:
         player_distrib_models = init_player_models
     
     else:
@@ -9971,7 +9973,7 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     print('cur_idx: ' + str(cur_idx))
                     print('prev_idx: ' + str(prev_idx))
                     print('teams_reg_and_playoff_games_played: ' + str(teams_reg_and_playoff_games_played))
-                    print('row:\n' + str(row))
+                    print('row:\n' + str(row))# + '\n')
 
 
                 # make list to loop through so we can add all stats to dicts with 1 fcn
@@ -10085,6 +10087,9 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     # include stat combos
                     if stat_name not in stats_of_interest and stat_name != 'min' and not re.search('\\+',stat_name):
                         continue
+
+                    if prints_on:
+                        print('\nStat Name: ' + stat_name)
 
                     stat_dict = list(all_stats_dicts.values())[stat_idx]
                     
@@ -10311,10 +10316,14 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     # so get next row
                     prev_game_idx = int(game_idx) + 1
                     if prints_on:
+                        # already printed above which shows in frame so no need to repeat
+                        # print('cur_idx: ' + str(cur_idx))
+                        # print('prev_idx: ' + str(prev_idx))
                         print('prev_game_idx: ' + str(prev_game_idx))
                         print('len full log: ' + str(len(player_game_log.index)))
-                        print('prev_idx: ' + str(prev_idx))
                         print('len season part log: ' + str(len(season_part_game_log.index)))
+                        
+                        
                     # DO NOT include preseason games bc not considered valid
                     # but still need whole valid season bc idx relative to full log without preseason
                     # for start of regseason, no prev val (prev val = None) could be a separate condition
@@ -10337,47 +10346,59 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                     #if prev_game:
 
                     # for last game in season part log, get diff prev idx
-                    # prev_idx = cur_idx + 1
-                    # if len(season_part_game_log.index) == prev_idx:
+                    prev_idx = cur_idx + 1
+                    init_prev_game_date_string = prev_stat_val = None
+                    if len(season_part_game_log.index) == prev_idx:
+                        if prints_on:
+                            print('Found Last Game of Season Part')
 
-                    #     # if first game of reg season, no prev game
-                    #     # if first game of postseason, check if playin or playoff?
-                    #     # No, we are at the end of the postseason log which has both
-                    #     if season_part == 'postseason':
-                    #         # get last (most recent) game of regseason
-                    #         # which is first in log bc recent to distant
-                    #         recent_reg_idx = current_reg_season_log.iloc[0].name #['Name']
-                    #         print('recent_reg_idx: ' + str(recent_reg_idx))
+                        # if first game of reg season, no prev game
+                        # if first game of postseason, check if playin or playoff?
+                        # No, we are at the end of the postseason log which has both
+                        if season_part == 'postseason':
+                            
+                            # get last (most recent) game of regseason
+                            # which is first in log bc recent to distant
+                            # recent_reg_idx = current_reg_season_log.iloc[0].name #['Name']
+                            # print('recent_reg_idx: ' + str(recent_reg_idx))
+
+                            init_prev_game_date_string = current_reg_season_log.iloc[0]['Date'].lower().split()[1]
+                            if prints_on:
+                                print('Found Last Game of Postseason')
+                                print("init_prev_game_date_string: " + str(init_prev_game_date_string))
 
 
+                            if stat_name in stats_of_interest or re.search('\\+', stat_name):
+                                #print('\n===Condition: Prev Val===\n')
+                                log_stat_name = stat_name
+                                # only 3pt made has diff format bc both 3pt made and attempted shown
+                                if stat_name == '3pm':
+                                    log_stat_name = '3PT_SA'
+                                # if stat combo then add substats
+                                prev_stat_val = None
+                                if re.search('\\+', stat_name):
+                                    prev_stat_val = 0
+                                    stat_names = stat_name.split('+')
+                                    for sn in stat_names:
+                                        prev_stat_val += int(current_reg_season_log.iloc[0][sn.upper()])
+                                        #print("prev_stat_val 2: " + str(prev_stat_val))
+                                else:
+                                    prev_stat_val = int(current_reg_season_log.iloc[0][log_stat_name.upper()])
+                                    if prints_on:
+                                        print("prev_stat_val 2: " + str(prev_stat_val))
 
                     # else get prev game idx
-                    #else:
-                    if len(player_game_log.index) > prev_game_idx:
-                        init_prev_game_date_string = player_game_log.loc[str(prev_game_idx), 'Date'].lower().split()[1]
-                        print("init_prev_game_date_string 1: " + str(init_prev_game_date_string))
-                        # init_prev_game_date_string = player_game_log.iloc[prev_idx]['Date'].lower().split()[1]
-                        # print("init_prev_game_date_string 2: " + str(init_prev_game_date_string))
+                    else:
+                    #V1
+                    #if len(player_game_log.index) > prev_game_idx:
+                        # V1
+                        # init_prev_game_date_string = player_game_log.loc[str(prev_game_idx), 'Date'].lower().split()[1]
+                        # print("init_prev_game_date_string 1: " + str(init_prev_game_date_string))
+                        # V2
+                        init_prev_game_date_string = season_part_game_log.iloc[prev_idx]['Date'].lower().split()[1]
+                        if prints_on:
+                            print("init_prev_game_date_string 2: " + str(init_prev_game_date_string))
 
-                        prev_game_mth = init_prev_game_date_string.split('/')[0]
-                        final_season_year = season_year
-                        if int(prev_game_mth) > 9:
-                            final_season_year = str(int(season_year) - 1)
-                        prev_game_date_string = init_prev_game_date_string + "/" + final_season_year
-                        print("prev_game_date_string: " + str(prev_game_date_string))
-                        prev_game_date_obj = datetime.strptime(prev_game_date_string, '%m/%d/%Y')
-                        #print("prev_game_date_obj: " + str(prev_game_date_obj))
-
-                        days_after_prev_game_int = (game_date_obj - prev_game_date_obj).days
-                        days_after_prev_game = str(days_after_prev_game_int) + ' after'
-                        print("days_after_prev_game: " + days_after_prev_game)
-
-                        
-                        if not days_after_prev_game in stat_dict.keys():
-                            stat_dict[days_after_prev_game] = {}
-                        stat_dict[days_after_prev_game][game_idx] = stat
-
-                
                         # condition: prev val
                         # make range bc not enough samples of exact val
                         # dont need prev playtime
@@ -10399,25 +10420,64 @@ def generate_player_all_stats_dicts(player_name, player_game_log, opponent, play
                                 prev_stat_val = 0
                                 stat_names = stat_name.split('+')
                                 for sn in stat_names:
-                                    prev_stat_val += int(player_game_log.loc[str(prev_game_idx), sn.upper()])
+                                    # V1
+                                    #prev_stat_val += int(player_game_log.loc[str(prev_game_idx), sn.upper()])
+                                    #print("prev_stat_val 1: " + str(prev_stat_val))
+                                    # V2
+                                    prev_stat_val += int(season_part_game_log.iloc[prev_idx][sn.upper()])
+                                    #print("prev_stat_val 2: " + str(prev_stat_val))
                             else:
-                                prev_stat_val = int(player_game_log.loc[str(prev_game_idx), log_stat_name.upper()])
-                            
+                                # V1
+                                # prev_stat_val = int(player_game_log.loc[str(prev_game_idx), log_stat_name.upper()])
+                                # print("prev_stat_val 1: " + str(prev_stat_val))
+                                # V2
+                                prev_stat_val = int(season_part_game_log.iloc[prev_idx][log_stat_name.upper()])
+                                if prints_on:
+                                    print("prev_stat_val 2: " + str(prev_stat_val))
+
+
                             # if prev_game_idx in stat_dict['all'].keys():
                             #     print('found prev game')
                             #prev_stat_val = stat_dict['all'][prev_game_idx] #prev_stat_vals[stat_idx]
                             
                             
-                            prev_val_range = determiner.determine_stat_range(prev_stat_val, stat_name)
-                            prev_stat_val_key = prev_val_range + ' prev' # 0-4 or 0-9 inclusive, every 10 for pts, and 5 for ast/reb
-                            if prints_on:
-                                print('prev_stat_val_key: ' + str(prev_stat_val_key))
-                            if not prev_stat_val_key in stat_dict.keys():
-                                stat_dict[prev_stat_val_key] = {}
-                            stat_dict[prev_stat_val_key][game_idx] = stat
+                            
 
                             # determine if more/less than val of interest
                     
+                    if prev_stat_val is not None:
+                        # Condition: Time After
+                        prev_game_mth = init_prev_game_date_string.split('/')[0]
+                        final_season_year = season_year
+                        if int(prev_game_mth) > 9:
+                            final_season_year = str(int(season_year) - 1)
+                        prev_game_date_string = init_prev_game_date_string + "/" + final_season_year
+                        if prints_on:
+                            print("prev_game_date_string: " + str(prev_game_date_string))
+                        prev_game_date_obj = datetime.strptime(prev_game_date_string, '%m/%d/%Y')
+                        #print("prev_game_date_obj: " + str(prev_game_date_obj))
+
+                        days_after_prev_game_int = (game_date_obj - prev_game_date_obj).days
+                        days_after_prev_game = str(days_after_prev_game_int) + ' after'
+                        if prints_on:
+                            print("days_after_prev_game: " + days_after_prev_game)
+
+                        
+                        if not days_after_prev_game in stat_dict.keys():
+                            stat_dict[days_after_prev_game] = {}
+                        stat_dict[days_after_prev_game][game_idx] = stat
+
+
+                        # Condition: Prev Val Range
+                        prev_val_range = determiner.determine_stat_range(prev_stat_val, stat_name)
+                        prev_stat_val_key = prev_val_range + ' prev' # 0-4 or 0-9 inclusive, every 10 for pts, and 5 for ast/reb
+                        if prints_on:
+                            print('prev_stat_val_key: ' + str(prev_stat_val_key))
+                        if not prev_stat_val_key in stat_dict.keys():
+                            stat_dict[prev_stat_val_key] = {}
+                        stat_dict[prev_stat_val_key][game_idx] = stat
+                    
+
                     #second playin game has high idx bc at end of log
 
 
